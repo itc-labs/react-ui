@@ -11,16 +11,16 @@ import { useUILocale } from '../../i18n/provider';
 import { filterNavByAccess, resolveActiveNav } from '../navigation';
 import { HeaderEntries } from './entries';
 import { headerNodes } from './model';
-import type { AppHeaderProps } from './types';
+import type { NavbarProps } from './types';
 export type {
-  AppHeaderProps,
-  AppHeaderItem,
-  AppHeaderLink,
-  AppHeaderSection,
-  AppHeaderClassNames,
+  NavbarProps,
+  NavbarItem,
+  NavbarLink,
+  NavbarSection,
+  NavbarClassNames,
 } from './types';
 
-export function AppHeader<TAccess = unknown>({
+export function Navbar<TAccess = unknown>({
   brand,
   brandHref,
   items,
@@ -38,7 +38,7 @@ export function AppHeader<TAccess = unknown>({
   classNames,
   'data-testid': testId,
   ...props
-}: AppHeaderProps<TAccess>) {
+}: NavbarProps<TAccess>) {
   const { t } = useUILocale();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -110,7 +110,7 @@ export function AppHeader<TAccess = unknown>({
             </div>
           ))}
         <NavigationMenu.Root
-          aria-label={navigationLabel ?? t('appHeader.navigation')}
+          aria-label={navigationLabel ?? t('navbar.navigation')}
           data-testid={partTestId(testId, 'nav')}
           className={cn('relative hidden min-w-0 lg:block', classNames?.nav)}
         >
@@ -133,7 +133,7 @@ export function AppHeader<TAccess = unknown>({
         <Drawer
           open={mobileOpen}
           onOpenChange={setMobileOpen}
-          title={drawerTitle ?? t('appHeader.navigation')}
+          title={drawerTitle ?? t('navbar.navigation')}
           side="left"
           {...(testId ? { 'data-testid': partTestId(testId, 'drawer')! } : {})}
           className={classNames?.drawer ?? ''}
@@ -141,14 +141,14 @@ export function AppHeader<TAccess = unknown>({
             <IconButton
               icon={MenuIcon}
               variant="ghost"
-              label={mobileTriggerLabel ?? t('appHeader.openMenu')}
+              label={mobileTriggerLabel ?? t('navbar.openMenu')}
               data-testid={partTestId(testId, 'mobileTrigger')}
               className={cn('lg:hidden', classNames?.mobileTrigger)}
             />
           }
         >
           <nav
-            aria-label={navigationLabel ?? t('appHeader.navigation')}
+            aria-label={navigationLabel ?? t('navbar.navigation')}
             data-testid={partTestId(testId, 'drawerNav')}
             className={cn('grid gap-1', classNames?.nav)}
           >

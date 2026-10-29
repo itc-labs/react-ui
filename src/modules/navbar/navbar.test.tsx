@@ -8,12 +8,12 @@ import {
   type UiLinkProps,
 } from '../../components/link-image-provider';
 import { UILocaleProvider } from '../../i18n/provider';
-import { AppHeader, type AppHeaderItem } from './index';
+import { Navbar, type NavbarItem } from './index';
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 let host: HTMLDivElement;
 let root: Root;
-const items: AppHeaderItem<string>[] = [
+const items: NavbarItem<string>[] = [
   { id: 'home', label: 'Home', href: '/', exact: true },
   {
     id: 'settings',
@@ -65,7 +65,7 @@ afterEach(() => {
 });
 
 function byId(id: string) {
-  return document.querySelector<HTMLElement>(`[data-testid="header-${id}"]`)!;
+  return document.querySelector<HTMLElement>(`[data-testid="navbar-${id}"]`)!;
 }
 
 async function openDrawer() {
@@ -77,11 +77,11 @@ it('forwards the header ref and native props, highlights the winning branch and 
 
   const render = (currentPath: string) =>
     root.render(
-      <AppHeader
+      <Navbar
         ref={ref}
         items={items}
         currentPath={currentPath}
-        data-testid="header"
+        data-testid="navbar"
         title="Navigation"
         classNames={{ trigger: 'custom-trigger' }}
       />,
@@ -105,11 +105,11 @@ it('forwards the header ref and native props, highlights the winning branch and 
 it('prunes denied links, empty sections and empty groups on permission changes', async () => {
   const render = (allowed: boolean) =>
     root.render(
-      <AppHeader
+      <Navbar
         items={items}
         canAccess={() => allowed}
         currentPath="/admin"
-        data-testid="header"
+        data-testid="navbar"
       />,
     );
 
@@ -121,7 +121,7 @@ it('prunes denied links, empty sections and empty groups on permission changes',
   expect(document.body.textContent).toContain('Help');
   await act(async () =>
     root.render(
-      <AppHeader
+      <Navbar
         items={[
           {
             id: 'denied',
@@ -134,7 +134,7 @@ it('prunes denied links, empty sections and empty groups on permission changes',
           { id: 'empty', type: 'mega', label: 'Empty', sections: [] },
         ]}
         canAccess={() => false}
-        data-testid="header"
+        data-testid="navbar"
       />,
     ),
   );
@@ -143,7 +143,7 @@ it('prunes denied links, empty sections and empty groups on permission changes',
 });
 
 it('opens a desktop dropdown with Enter and closes with Escape', async () => {
-  await act(async () => root.render(<AppHeader items={items} data-testid="header" />));
+  await act(async () => root.render(<Navbar items={items} data-testid="navbar" />));
   const trigger = byId('item-settings-trigger');
   await act(async () => {
     trigger.focus();
@@ -177,7 +177,7 @@ it('uses localized labels, toggles the drawer and closes after following an adap
     root.render(
       <UILocaleProvider locale="en-US">
         <LinkImageProvider Link={Link}>
-          <AppHeader brand="Brand" brandHref="/" items={items} data-testid="header" />
+          <Navbar brand="Brand" brandHref="/" items={items} data-testid="navbar" />
         </LinkImageProvider>
       </UILocaleProvider>,
     ),
@@ -199,14 +199,14 @@ it('uses localized labels, toggles the drawer and closes after following an adap
 it('honors explicit active precedence and host matching', async () => {
   await act(async () =>
     root.render(
-      <AppHeader
+      <Navbar
         items={[
           { id: 'off', href: '/off', label: 'Off', active: false },
           { id: 'on', href: '/on', label: 'On' },
         ]}
         isActive={() => true}
         currentPath="/alias"
-        data-testid="header"
+        data-testid="navbar"
       />,
     ),
   );
@@ -216,7 +216,7 @@ it('honors explicit active precedence and host matching', async () => {
 
 it('adds scroll elevation without changing the header structure', async () => {
   await act(async () =>
-    root.render(<AppHeader items={[]} elevateOnScroll data-testid="header" />),
+    root.render(<Navbar items={[]} elevateOnScroll data-testid="navbar" />),
   );
   const header = host.querySelector('header')!;
   expect(header.classList.contains('sticky')).toBe(true);
@@ -230,7 +230,7 @@ it('adds scroll elevation without changing the header structure', async () => {
 
 it('highlights mega descendants and preserves encoded section and link identities', async () => {
   await act(async () =>
-    root.render(<AppHeader items={items} currentPath="/help" data-testid="header" />),
+    root.render(<Navbar items={items} currentPath="/help" data-testid="navbar" />),
   );
   expect(byId('item-resources-trigger').dataset.active).toBe('true');
   await openDrawer();
@@ -251,7 +251,7 @@ it('highlights mega descendants and preserves encoded section and link identitie
 it('emits no implicit selectors and respects explicit text overrides', async () => {
   await act(async () =>
     root.render(
-      <AppHeader
+      <Navbar
         items={items}
         navigationLabel="Primary"
         mobileTriggerLabel="Open primary"

@@ -1,0 +1,428 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Overview/Navigation" />
+
+# Navigation
+
+Host quản lý router, đường dẫn hiện tại và quyền truy cập. Kit nhận dữ liệu qua props;
+không đọc session hay import framework. Các đoạn dưới đây chỉ đặt trong ứng dụng host.
+Xem [Modules/Navbar](?path=/docs/modules-navbar--docs),
+[Modules/Sidebar](?path=/docs/modules-sidebar--docs) và
+[Components/TopLoader](?path=/docs/components-toploader--docs) để thử từng API.
+
+## Một menu dùng chung
+
+Khai báo menu một lần trong `navigation.ts`. Mở rộng `NavItem` bằng nhãn và kiểu nhóm
+của host, rồi chuyển sang `NavbarItem` và `SidebarEntry`. Giữ nguyên `id`, `href`,
+`exact` và `access` khi chuyển; không dùng nhãn dịch hoặc vị trí làm ID.
+
+```tsx
+// navigation.ts — host-owned data, no framework imports.
+import type { NavItem, NavbarItem, SidebarEntry } from '@itclabs/react-ui';
+
+type Permission = 'profile:read' | 'team:read';
+type MenuBase = Omit<NavItem<Permission>, 'items' | 'children'>;
+type MenuLink = MenuBase & {
+  kind: 'link';
+  label: string;
+  href: string;
+};
+type MenuSection = {
+  id: string;
+  title: string;
+  items: readonly MenuLink[];
+};
+type MenuItem =
+  | MenuLink
+  | (MenuBase & {
+      kind: 'group';
+      label: string;
+      items: readonly MenuLink[];
+    })
+  | (MenuBase & {
+      kind: 'mega';
+      label: string;
+      sections: readonly MenuSection[];
+    });
+
+export const menu: readonly MenuItem[] = [
+  { kind: 'link', id: 'home', label: 'Home', href: '/', exact: true },
+  {
+    kind: 'group',
+    id: 'settings',
+    label: 'Settings',
+    items: [
+      {
+        kind: 'link',
+        id: 'profile',
+        label: 'Profile',
+        href: '/settings/profile',
+        access: 'profile:read',
+      },
+      {
+        kind: 'link',
+        id: 'team',
+        label: 'Team',
+        href: '/settings/team',
+        access: 'team:read',
+      },
+    ],
+  },
+  {
+    kind: 'mega',
+    id: 'resources',
+    label: 'Resources',
+    sections: [
+      {
+        id: 'guides',
+        title: 'Guides',
+        items: [
+          {
+            kind: 'link',
+            id: 'start',
+            label: 'Getting started',
+            href: '/guides/start',
+          },
+        ],
+      },
+      {
+        id: 'support',
+        title: 'Support',
+        items: [{ kind: 'link', id: 'help', label: 'Help', href: '/help' }],
+      },
+    ],
+  },
+];
+
+export const navbarItems: NavbarItem<Permission>[] = menu.map((item) => {
+  switch (item.kind) {
+    case 'group':
+      return { ...item, type: 'dropdown', children: item.items };
+    case 'mega':
+      return { ...item, type: 'mega' };
+    case 'link':
+      return { ...item, type: 'link' };
+  }
+});
+
+export const sidebarItems: SidebarEntry<Permission>[] = menu.map((item) => {
+  switch (item.kind) {
+    case 'group':
+      return { ...item, type: 'group' };
+    case 'mega':
+      return {
+        ...item,
+        type: 'submenu',
+        items: item.sections.map((section) => ({
+          id: section.id,
+          type: 'group',
+          label: section.title,
+          items: section.items,
+        })),
+      };
+    case 'link':
+      return { ...item, type: 'item' };
+  }
+});
+```
+
+Navbar chuyển nhóm thành dropdown và giữ các section của mega menu. Sidebar dùng
+nhóm có nhãn và submenu cho cùng dữ liệu. Cả hai lọc quyền trước khi chọn mục active;
+nhóm và section rỗng được bỏ đi.
+
+## Next.js App Router: client root
+
+Đặt root này trong layout tồn tại qua các lần chuyển route, bên trong `UIProvider`
+của host. Server truyền `permissions` dạng mảng serializable sau khi xác thực session.
+Định nghĩa adapter ngay trong file client để giữ ref và mọi thuộc tính native.
+
+```tsx
+// navigation-root.tsx
+'use client';
+
+import type { ReactNode } from 'react';
+import NextLink from 'next/link';
+import { usePathname } from 'next/navigation';
+import {
+  LinkImageProvider,
+  Navbar,
+  TopLoaderProvider,
+  type UiLinkProps,
+} from '@itclabs/react-ui';
+import { navbarItems } from './navigation';
+
+function AppLink(props: UiLinkProps) {
+  return <NextLink {...props} />;
+}
+
+export function NavigationRoot({
+  children,
+  permissions,
+}: {
+  children: ReactNode;
+  permissions: readonly string[];
+}) {
+  const currentPath = usePathname() ?? '';
+  const canAccess = (access: string) => permissions.includes(access);
+
+  return (
+    <LinkImageProvider Link={AppLink}>
+      <TopLoaderProvider trackLinks currentPath={currentPath}>
+        <Navbar
+          brand="Lorem ipsum"
+          brandHref="/"
+          items={navbarItems}
+          currentPath={currentPath}
+          canAccess={canAccess}
+          data-testid="primary-navbar"
+        />
+        {children}
+      </TopLoaderProvider>
+    </LinkImageProvider>
+  );
+}
+```
+
+Có thể import `Sidebar` và `sidebarItems` từ menu trên rồi thêm
+`<Sidebar items={sidebarItems} currentPath={currentPath} canAccess={canAccess} />`
+trong cùng root. `LinkImageProvider` dùng ảnh native khi không truyền `Image`.
+Xem [usePathname](https://nextjs.org/docs/app/api-reference/functions/use-pathname).
+Nếu cần theo dõi thay đổi query, ghép pathname với `useSearchParams()` và tuân theo
+quy tắc Suspense của host.
+
+## React Router: root tương đương
+
+Mount bên trong router của host, bên ngoài các route element bị unmount. Adapter
+chuyển `href` thành `to`; ref, sự kiện và `data-testid` được truyền tiếp.
+Với URL ngoài ứng dụng, giữ anchor native.
+
+```tsx
+// navigation-root.tsx
+import type { ReactNode } from 'react';
+import { Link as RouterLink, useLocation } from 'react-router';
+import {
+  LinkImageProvider,
+  Navbar,
+  TopLoaderProvider,
+  type UiLinkProps,
+} from '@itclabs/react-ui';
+import { navbarItems } from './navigation';
+
+function AppLink({ href, ...props }: UiLinkProps) {
+  if (!href.startsWith('/') || href.startsWith('//')) {
+    return <a {...props} href={href} />;
+  }
+
+  return <RouterLink {...props} to={href} />;
+}
+
+export function NavigationRoot({
+  children,
+  permissions,
+}: {
+  children: ReactNode;
+  permissions: readonly string[];
+}) {
+  const { pathname, search } = useLocation();
+
+  return (
+    <LinkImageProvider Link={AppLink}>
+      <TopLoaderProvider trackLinks currentPath={pathname + search}>
+        <Navbar
+          brand="Lorem ipsum"
+          brandHref="/"
+          items={navbarItems}
+          currentPath={pathname}
+          canAccess={(access) => permissions.includes(access)}
+          data-testid="primary-navbar"
+        />
+        {children}
+      </TopLoaderProvider>
+    </LinkImageProvider>
+  );
+}
+```
+
+Sidebar dùng `sidebarItems` với cùng `pathname` và callback quyền.
+Tham khảo [React Router Link](https://reactrouter.com/api/components/Link).
+
+## Lọc menu và bảo vệ route
+
+**Hiding a menu item is not security.** Người dùng có thể nhập URL hoặc gọi API
+trực tiếp. `canAccess` chỉ điều khiển hiển thị. Host phải xác thực session và kiểm
+tra quyền ở server khi đọc dữ liệu và thực hiện hành động.
+
+Ví dụ `middleware.ts` cho Next.js 15 bên dưới dùng `verifySession` do host cung cấp;
+hàm này phải xác minh session, không tin giá trị cookie chưa kiểm chứng. Trên
+Next.js 16+, đổi file thành `proxy.ts` và tên hàm thành `proxy` theo
+[tài liệu Proxy](https://nextjs.org/docs/app/api-reference/file-conventions/proxy).
+
+```ts
+// middleware.ts — host application, Next.js 15.
+import { NextResponse, type NextRequest } from 'next/server';
+import { verifySession } from './auth/session';
+
+export async function middleware(request: NextRequest) {
+  const session = await verifySession(request);
+  if (!session) {
+    return NextResponse.redirect(new URL('/login', request.url));
+  }
+  const required = request.nextUrl.pathname.startsWith('/settings/team')
+    ? 'team:read'
+    : 'profile:read';
+  if (!session.permissions.includes(required)) {
+    return NextResponse.redirect(new URL('/forbidden', request.url));
+  }
+
+  return NextResponse.next();
+}
+
+export const config = {
+  matcher: ['/settings/profile/:path*', '/settings/team/:path*'],
+};
+```
+
+Matcher chỉ là ví dụ cho cây route trên. Kiểm tra lại quyền trong Server Component,
+route handler và tầng truy cập dữ liệu; middleware/proxy không thay thế các kiểm tra
+đó. Với React Router, loader có thể redirect trước khi render, nhưng API/server
+vẫn phải tự xác thực và kiểm tra quyền.
+
+## Điều hướng bằng code và tải dữ liệu
+
+`trackLinks` bắt các anchor nội bộ phù hợp và kết thúc khi `currentPath` thay đổi.
+Điều hướng bằng code và back/forward cần gọi `start()` thủ công. Next `router.push()`
+không trả promise hoàn tất route: để provider kết thúc khi đường dẫn đổi, gọi
+`done()` khi lỗi hoặc hủy, kể cả redirect quay về URL cũ. Không gọi `done()` ngay
+sau `push()` thành công.
+
+```tsx
+'use client';
+
+import { usePathname, useRouter } from 'next/navigation';
+import { Button, topLoader } from '@itclabs/react-ui';
+
+export function OpenProfile() {
+  const router = useRouter();
+  const pathname = usePathname();
+
+  function openProfile() {
+    if (pathname === '/settings/profile') return;
+
+    topLoader.start();
+    try {
+      router.push('/settings/profile');
+    } catch (error) {
+      topLoader.done();
+      throw error;
+    }
+  }
+
+  return <Button onClick={openProfile}>Open profile</Button>;
+}
+```
+
+Chỉ gọi facade sau khi provider mount. Bên trong component, `useTopLoader()` cung cấp
+controller của provider gần nhất. Ví dụ dưới đây nhận callback tải dữ liệu từ host,
+bảo đảm kết thúc cả khi fetch thất bại:
+
+```tsx
+'use client';
+
+import { Button, useTopLoader } from '@itclabs/react-ui';
+
+export function Refresh({ loadData }: { loadData: () => Promise<unknown> }) {
+  const loader = useTopLoader();
+
+  async function refresh() {
+    loader.start();
+    try {
+      await loadData(); // Host can pass () => fetch('/api/profile').
+    } finally {
+      loader.done();
+    }
+  }
+
+  return <Button onClick={refresh}>Refresh</Button>;
+}
+```
+
+Các controller dùng chung một hoạt động, không đếm số request. Với nhiều tác vụ
+đồng thời, host chỉ gọi `done()` khi tất cả hoàn tất. Các click bị hủy hoặc lỗi route
+cũng cần `done()`; thanh tiến trình không xác định được chúng từ sự kiện anchor.
+
+## Quy tắc active
+
+<table>
+  <thead>
+    <tr>
+      <th>Quy tắc</th>
+      <th>Kết quả</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Ranh giới segment</td>
+      <td>
+        <code>/admin</code> khớp <code>/admin/users</code>, không khớp{' '}
+        <code>/administrator</code>.
+      </td>
+    </tr>
+    <tr>
+      <td>Longest match wins</td>
+      <td>
+        Href khớp dài nhất thắng; nếu bằng nhau, chọn mục sâu hơn rồi mục đầu tiên.
+      </td>
+    </tr>
+    <tr>
+      <td>Root</td>
+      <td>
+        <code>/</code> chỉ khớp chính nó mặc định; dùng <code>exact: false</code> để
+        đổi.
+      </td>
+    </tr>
+    <tr>
+      <td>Override</td>
+      <td>
+        <code>exact</code> thắng alias <code>end</code>.{' '}
+        <code>isActive(item, currentPath)</code> thay khớp đường dẫn;{' '}
+        <code>active</code> tường minh thắng predicate.
+      </td>
+    </tr>
+    <tr>
+      <td>Chuẩn hóa</td>
+      <td>
+        Bỏ query, hash và slash cuối; phân biệt hoa thường. Không khớp URL ngoài hoặc
+        đường dẫn tương đối.
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+Chỉ liên kết thắng nhận `aria-current="page"`; mục cha được đánh dấu nhánh active.
+Xem đầy đủ tại [docs/UI_NAVIGATION.md](https://github.com/itc-labs/react-ui/blob/main/docs/UI_NAVIGATION.md).
+
+## PageHeader và Navbar
+
+`Navbar` là thanh điều hướng toàn ứng dụng. `PageHeader` giữ tên hiện tại và dùng
+cho tiêu đề từng trang, với breadcrumb do host truyền rõ ràng:
+
+```tsx
+import { Breadcrumb, PageHeader } from '@itclabs/react-ui';
+
+export function ProfileHeading() {
+  return (
+    <PageHeader
+      title="Profile"
+      breadcrumb={
+        <Breadcrumb
+          items={[
+            { key: 'home', title: 'Home', href: '/' },
+            { key: 'settings', title: 'Settings', href: '/settings' },
+            { key: 'current', title: 'Profile' },
+          ]}
+        />
+      }
+    />
+  );
+}
+```

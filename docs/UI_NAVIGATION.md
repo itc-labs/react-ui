@@ -156,16 +156,16 @@ export async function loader({ request }: LoaderFunctionArgs) {
 }
 ```
 
-## AppHeader
+## Navbar
 
-`AppHeader` and its types (`AppHeaderProps<TAccess>`, `AppHeaderItem<TAccess>`,
-`AppHeaderLink<TAccess>`, `AppHeaderSection<TAccess>`, `AppHeaderClassNames`) are
+`Navbar` and its types (`NavbarProps<TAccess>`, `NavbarItem<TAccess>`,
+`NavbarLink<TAccess>`, `NavbarSection<TAccess>`, `NavbarClassNames`) are
 exported from the root and modules barrels.
 
 ```tsx
-import { AppHeader, type AppHeaderItem } from '@itclabs/react-ui';
+import { Navbar, type NavbarItem } from '@itclabs/react-ui';
 
-const items: AppHeaderItem<string>[] = [
+const items: NavbarItem<string>[] = [
   { id: 'home', label: 'Home', href: '/', exact: true },
   {
     id: 'settings',
@@ -197,14 +197,14 @@ const items: AppHeaderItem<string>[] = [
   },
 ];
 
-<AppHeader
+<Navbar
   brand="Lorem ipsum"
   brandHref="/"
   items={items}
   currentPath="/settings/profile"
   canAccess={(access) => access === 'team:read'}
   elevateOnScroll
-  data-testid="primary-header"
+  data-testid="primary-navbar"
 />;
 ```
 
@@ -348,9 +348,9 @@ async function refresh() {
 }
 ```
 
-## PageHeader and AppHeader
+## PageHeader and Navbar
 
-PageHeader is the per-page title block: it renders an h1 with optional eyebrow, description, action and breadcrumb slots. AppHeader is the application-wide navigation bar. Supply breadcrumbs explicitly; PageHeader does not infer routes.
+PageHeader is the per-page title block: it renders an h1 with optional eyebrow, description, action and breadcrumb slots. Navbar is the application-wide navigation bar. Supply breadcrumbs explicitly; PageHeader does not infer routes.
 
 ```tsx
 <PageHeader

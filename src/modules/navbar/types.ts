@@ -12,27 +12,27 @@ type EntryBase<TAccess> = {
   exact?: boolean;
   end?: boolean;
 };
-export type AppHeaderLink<TAccess = unknown> = EntryBase<TAccess> & {
+export type NavbarLink<TAccess = unknown> = EntryBase<TAccess> & {
   type?: 'link';
   href: string;
   description?: ReactNode;
 };
-export type AppHeaderSection<TAccess = unknown> = {
+export type NavbarSection<TAccess = unknown> = {
   id: string;
   title: ReactNode;
-  items: readonly AppHeaderLink<TAccess>[];
+  items: readonly NavbarLink<TAccess>[];
 };
-export type AppHeaderItem<TAccess = unknown> =
-  | AppHeaderLink<TAccess>
+export type NavbarItem<TAccess = unknown> =
+  | NavbarLink<TAccess>
   | (EntryBase<TAccess> & {
       type: 'dropdown';
-      children: readonly AppHeaderLink<TAccess>[];
+      children: readonly NavbarLink<TAccess>[];
     })
   | (EntryBase<TAccess> & {
       type: 'mega';
-      sections: readonly AppHeaderSection<TAccess>[];
+      sections: readonly NavbarSection<TAccess>[];
     });
-export type AppHeaderClassNames = SlotClasses<
+export type NavbarClassNames = SlotClasses<
   | 'root'
   | 'inner'
   | 'brand'
@@ -47,24 +47,24 @@ export type AppHeaderClassNames = SlotClasses<
   | 'drawer'
   | 'secondary'
 >;
-export type AppHeaderProps<TAccess = unknown> = Omit<
+export type NavbarProps<TAccess = unknown> = Omit<
   ComponentProps<'header'>,
   'children'
 > &
   TestIdProps & {
     brand?: ReactNode;
     brandHref?: string;
-    items: readonly AppHeaderItem<TAccess>[];
+    items: readonly NavbarItem<TAccess>[];
     actions?: ReactNode;
     secondary?: ReactNode;
     currentPath?: string;
-    isActive?: (item: AppHeaderItem<TAccess>, currentPath: string) => boolean;
-    canAccess?: (access: TAccess, item: AppHeaderItem<TAccess>) => boolean;
+    isActive?: (item: NavbarItem<TAccess>, currentPath: string) => boolean;
+    canAccess?: (access: TAccess, item: NavbarItem<TAccess>) => boolean;
     navigationLabel?: string;
     mobileTriggerLabel?: string;
     drawerTitle?: string;
     /** Sticky at the top of the window by default. */
     sticky?: boolean;
     elevateOnScroll?: boolean;
-    classNames?: AppHeaderClassNames;
+    classNames?: NavbarClassNames;
   };

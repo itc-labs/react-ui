@@ -120,9 +120,9 @@ Application workflows belong to the consuming application. Storybook documents t
 
 Use Breadcrumb items, Sidebar items and WorkspaceShell sidebar/header/content slots for normal usage. Compound parts remain advanced escape hatches. The app configures scoped UiLink/UiImage adapters instead of importing framework components in shared UI. See UI_COMPOSITION_API.md for the current API, identity, styling and interaction contracts; this supersedes earlier compound-only examples above.
 
-## PageHeader and AppHeader
+## PageHeader and Navbar
 
-PageHeader is the per-page title block: it renders an h1 with optional eyebrow, description, action and breadcrumb slots. AppHeader is the application-wide navigation bar. Supply breadcrumbs explicitly; PageHeader does not infer routes.
+PageHeader is the per-page title block: it renders an h1 with optional eyebrow, description, action and breadcrumb slots. Navbar is the application-wide navigation bar. Supply breadcrumbs explicitly; PageHeader does not infer routes.
 
 ```tsx
 <PageHeader

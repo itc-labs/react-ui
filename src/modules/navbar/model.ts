@@ -1,14 +1,14 @@
 import type { NavItem } from '../navigation';
-import type { AppHeaderItem, AppHeaderSection } from './types';
+import type { NavbarItem, NavbarSection } from './types';
 
 export type HeaderNode<TAccess> = Omit<NavItem<TAccess>, 'items' | 'children'> & {
-  source?: AppHeaderItem<TAccess>;
-  section?: AppHeaderSection<TAccess>;
+  source?: NavbarItem<TAccess>;
+  section?: NavbarSection<TAccess>;
   items?: readonly HeaderNode<TAccess>[];
 };
 
 export function headerNodes<TAccess>(
-  items: readonly AppHeaderItem<TAccess>[],
+  items: readonly NavbarItem<TAccess>[],
 ): HeaderNode<TAccess>[] {
   return items.map((item) => ({
     id: item.id,

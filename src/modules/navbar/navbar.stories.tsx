@@ -5,9 +5,9 @@ import { Badge } from '../../components/badge';
 import { DropdownMenu } from '../../components/dropdown-menu';
 import { IconButton } from '../../components/icon-button';
 import { WorkspaceShell } from '../../templates/workspace-shell';
-import { AppHeader, type AppHeaderItem, type AppHeaderProps } from './index';
+import { Navbar, type NavbarItem, type NavbarProps } from './index';
 
-const items: AppHeaderItem<string>[] = [
+const items: NavbarItem<string>[] = [
   { id: 'home', label: 'Tổng quan', href: '/', exact: true },
   {
     id: 'settings',
@@ -19,7 +19,7 @@ const items: AppHeaderItem<string>[] = [
     ],
   },
 ];
-const megaItems: AppHeaderItem<string>[] = [
+const megaItems: NavbarItem<string>[] = [
   ...items,
   {
     id: 'resources',
@@ -57,8 +57,8 @@ const megaItems: AppHeaderItem<string>[] = [
   },
 ];
 const meta = {
-  title: 'Modules/AppHeader',
-  component: AppHeader,
+  title: 'Modules/Navbar',
+  component: Navbar,
   args: {
     brand: 'Lorem ipsum',
     brandHref: '/',
@@ -66,7 +66,7 @@ const meta = {
     currentPath: '/',
     sticky: true,
     elevateOnScroll: false,
-    'data-testid': 'app-header',
+    'data-testid': 'navbar',
   },
   parameters: {
     layout: 'fullscreen',
@@ -77,7 +77,7 @@ const meta = {
       },
     },
   },
-} satisfies Meta<typeof AppHeader>;
+} satisfies Meta<typeof Navbar>;
 export default meta;
 type Story = StoryObj<typeof meta>;
 export const Playground: Story = { tags: ['usage'] };
@@ -140,7 +140,7 @@ export const Mobile: Story = {
   parameters: { viewport: { defaultViewport: 'mobile' } },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await userEvent.click(canvas.getByTestId('app-header-mobileTrigger'));
+    await userEvent.click(canvas.getByTestId('navbar-mobileTrigger'));
     const page = within(canvasElement.ownerDocument.body);
     await expect(page.getByRole('dialog')).toBeVisible();
     await expect(page.getByRole('link', { name: /Bắt đầu/ })).toHaveAttribute(
@@ -152,10 +152,10 @@ export const Mobile: Story = {
 };
 export const WorkspaceLayout: Story = {
   tags: ['example'],
-  render: (args: AppHeaderProps) => (
+  render: (args: NavbarProps) => (
     <WorkspaceShell
       classNames={{ header: 'block border-0 p-0 sm:p-0 lg:p-0' }}
-      header={<AppHeader {...args} sticky={false} />}
+      header={<Navbar {...args} sticky={false} />}
       content={<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>}
     />
   ),

@@ -140,7 +140,7 @@ Browse every component, prop and state in the [Storybook](https://react-ui-one-r
 | ------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------- |
 | `@itclabs/react-ui`                                    | Everything in the core kit: components, modules, templates, providers and helpers                                                 |
 | `@itclabs/react-ui/components`                         | Controls: Button, IconButton, Input, Select, Tag, Badge, Dialog, Drawer, DropdownMenu, Tabs, Tooltip, Progress (linear/circular)… |
-| `@itclabs/react-ui/modules`                            | Compositions: Form, DataTable, Sidebar, AppHeader, Pagination, EmptyState, PageHeader, ProgressList…                              |
+| `@itclabs/react-ui/modules`                            | Compositions: Form, DataTable, Sidebar, Navbar, Pagination, EmptyState, PageHeader, ProgressList…                                 |
 | `@itclabs/react-ui/templates`                          | Page layouts with slots (WorkspaceShell)                                                                                          |
 | `@itclabs/react-ui/navigation`                         | Router-agnostic `matchPath`, `resolveActiveNav`, `filterNavByAccess` (no React)                                                   |
 | `@itclabs/react-ui/hooks`                              | Shared hooks: click outside, debounced values and callbacks                                                                       |
@@ -205,6 +205,10 @@ import { outlineCatalog, boldCatalog } from '@itclabs/react-ui/icons/catalog';
 Storybook: https://react-ui-one-rose.vercel.app/
 
 See [docs/](docs/) for component contracts, theming, localization, accessibility checks and Storybook conventions.
+
+### Navigation
+
+See [Overview/Navigation](https://react-ui-one-rose.vercel.app/?path=/docs/overview-navigation--docs) for shared Navbar/Sidebar menus, router adapters, permission checks and TopLoader usage.
 
 ## Development
 

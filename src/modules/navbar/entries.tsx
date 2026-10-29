@@ -3,12 +3,12 @@ import { cn, partTestId } from '../../components/common';
 import { Icon } from '../../components/icon';
 import { UiLink } from '../../components/link-image-provider';
 import type { HeaderNode } from './model';
-import type { AppHeaderClassNames, AppHeaderItem } from './types';
+import type { NavbarClassNames, NavbarItem } from './types';
 
 export const rowClass =
   'flex items-center gap-2 rounded-control px-3 py-2 text-ui-sm text-ink hover:bg-hover focus-visible:outline-2 focus-visible:outline-focus data-[active=true]:bg-selected data-[active=true]:text-selected-ink';
 
-export function HeaderLabel<TAccess>({ item }: { item: AppHeaderItem<TAccess> }) {
+export function HeaderLabel<TAccess>({ item }: { item: NavbarItem<TAccess> }) {
   return (
     <>
       {item.icon && <Icon name={item.icon} size={16} />}
@@ -34,7 +34,7 @@ export function HeaderEntries<TAccess>({
   nodes: readonly HeaderNode<TAccess>[];
   activePath: readonly string[];
   testId: string | undefined;
-  classNames: AppHeaderClassNames | undefined;
+  classNames: NavbarClassNames | undefined;
   mobile?: boolean;
   topLevel?: boolean;
   onNavigate?: () => void;

@@ -9,7 +9,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'PageHeader là khối tiêu đề h1 của từng trang, có các slot breadcrumb, eyebrow, description và action. Dùng AppHeader cho thanh điều hướng chung của ứng dụng.',
+          'PageHeader là khối tiêu đề h1 của từng trang, có các slot breadcrumb, eyebrow, description và action. Dùng Navbar cho thanh điều hướng chung của ứng dụng.',
       },
     },
   },

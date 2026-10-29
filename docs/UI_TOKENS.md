@@ -12,7 +12,7 @@ Source of truth: `src/theme/tokens.css`. Existing semantic colors, Be Vietnam Pr
 | Motion duration | control 150ms, fast 120ms, normal 180ms, slow 240ms, exit 140ms, instant-exit 100ms          | Transitions and overlay entry/exit      |
 | Loop duration   | loading 1250ms, spin 1000ms, pulse 2000ms                                                    | Table progress, Spinner, Skeleton       |
 | Easing          | enter, exit, standard, loop                                                                  | Shared motion curves                    |
-| Global layers   | header 100, overlay 300, modal 301, dropdown/popover 400, select 450, tooltip 500, toast 600 | Portalled layers and app header         |
+| Global layers   | header 100, overlay 300, modal 301, dropdown/popover 400, select 450, tooltip 500, toast 600 | Portalled layers and Navbar             |
 
 Default transition duration/easing and animation utilities reference the shared motion tokens. Dropdown uses the popover layer alias. React Select styles reference CSS variables directly, so changing control height/layer does not require editing JavaScript numbers. cn/tailwind-merge recognizes the custom spacing/container tokens for consumer overrides.
 
