@@ -1,0 +1,57 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Overview/Getting started" />
+
+# Getting started
+
+## 1. Import CSS một lần
+
+Ứng dụng dùng Tailwind CSS v4. Cách nhanh nhất là import entry đầy đủ trong file CSS gốc:
+
+```css
+@import '@itclabs/react-ui/theme/styles.css';
+/* Thêm @source cho component của ứng dụng */
+@source '../app';
+```
+
+`styles.css` gồm Tailwind, token, font Be Vietnam Pro, base rule, CSS vendor và motion. Muốn tự chọn font hoặc bỏ phần không dùng, ghép từng entry — xem **Overview/Theming**.
+
+## 2. Bọc provider ở gốc ứng dụng
+
+```tsx
+<UIProvider locale="vi-VN">
+  <LinkImageProvider Link={AppLink} Image={AppImage}>
+    <ToastProvider>
+      <ModalProvider>{children}</ModalProvider>
+    </ToastProvider>
+  </LinkImageProvider>
+</UIProvider>
+```
+
+Provider nào cũng có giá trị mặc định hợp lý; chỉ thêm khi cần. Chi tiết, thứ tự và lưu ý SSR ở **Overview/Providers**.
+
+## 3. Import component theo tầng
+
+```tsx
+import { Button, Input, DropdownMenu, toast } from '@itclabs/react-ui/components';
+import { Form, FormField, useAppForm, DataTable } from '@itclabs/react-ui/modules';
+import { WorkspaceShell } from '@itclabs/react-ui/templates';
+```
+
+Root `@itclabs/react-ui` cũng export toàn bộ. Barrel gốc tương thích Server Component; chỉ entry có hook mới đánh dấu `'use client'`.
+
+## 4. Dùng theo dữ liệu, không ráp primitive
+
+```tsx
+<DropdownMenu
+  trigger={<IconButton icon="more" label="Tác vụ" />}
+  items={[
+    { id: 'edit', label: 'Chỉnh sửa', onSelect: onEdit },
+    { id: 'delete', label: 'Xóa', tone: 'danger', onSelect: onDelete },
+  ]}
+/>
+```
+
+Overlay, menu, tabs, breadcrumb và sidebar nhận `items`/slot. Các compound part vẫn còn cho trường hợp nâng cao.
+
+Icon chỉ kèm các glyph nội bộ của kit. Khi dùng tên khác, import từng glyph qua `@itclabs/react-ui/icons/outline/<name>` hoặc `@itclabs/react-ui/icons/bold/<name>` và truyền `glyph`; để tra cứu đầy đủ, đăng ký `outlineCatalog`/`boldCatalog` từ `@itclabs/react-ui/icons/catalog` trong `UIProvider theme={defineTheme({ icons: { packs: { outline: outlineCatalog, bold: boldCatalog } } })}`. Xem Components/Icon để chọn cách dùng và variant.

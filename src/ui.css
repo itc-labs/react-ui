@@ -1,0 +1,12 @@
+@layer theme, base, toastify, components, utilities;
+@import 'tailwindcss' source(none);
+@import './theme/tokens.css';
+@import './theme/fonts.css';
+@import './theme/base.css';
+@import './theme/vendor.css';
+@import './theme/motion.css';
+@source './components';
+@source './modules';
+@source './templates';
+@source not './**/*.stories.tsx';
+@source not './**/*.test.tsx';

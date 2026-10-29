@@ -1,0 +1,45 @@
+import { Meta, Canvas } from '@storybook/addon-docs/blocks';
+import * as Selects from '../components/select/select.stories';
+import * as Alerts from '../components/alert/alert.stories';
+
+<Meta title="Overview/Controls & Overlays" />
+
+# Controls & Overlays
+
+Các ví dụ dưới đây minh họa cách chọn giá trị, hiển thị phản hồi và ghép control. Ứng dụng cung cấp dữ liệu và callback xử lý hành động.
+
+## Select
+
+React Select cho toàn bộ lựa chọn, kể cả bound fields và page size. Select mặc định không search; bật searchable khi cần tìm kiếm. Hỗ trợ single/multi, clear, disabled/loading, hint/error và option bị khóa. Value là string hoặc string array; không truyền nguyên option object vào domain/form state.
+
+<Canvas of={Selects.Playground} />
+<Canvas of={Selects.Searchable} />
+
+Trong Form dùng SelectField/MultiSelectField. Menu portal ra body ngoài overlay; khi nằm trong Dialog/Drawer, portal giữ trong modal scope. Popover dùng menu inline để giữ đúng vị trí trong lớp nổi được định vị bằng transform.
+
+## Feedback
+
+<Canvas of={Alerts.Playground} />
+
+Alert cho thông báo cần giữ lại; dùng variant="inline" cho kiểu hiển thị gọn. Toast là bổ sung tạm thời, không dùng thay lỗi cần xử lý. Mount ToastProvider một lần tại composition root khi màn hình dùng useToast. Toast dùng React-Toastify cho queue và lifecycle; xem Components/Toast để thử loading, promise, vị trí và hàng chờ.
+
+## Overlay và navigation
+
+- [Dialog](?path=/docs/components-dialog--docs): focus trap, Escape, trả focus cho trigger; luôn có Title/Description.
+- [AlertDialog](?path=/docs/components-alertdialog--docs): xác nhận rõ ràng, có Cancel/Action. Với async action, consumer giữ controlled open và chỉ đóng sau thành công.
+- [Drawer](?path=/docs/components-drawer--docs): cùng semantics Dialog, mở từ cạnh trái/phải, không có gesture giả.
+- [Tooltip](?path=/docs/components-tooltip--docs): thông tin bổ sung qua hover/focus; không chứa nội dung thiết yếu duy nhất.
+- [Popover](?path=/docs/components-popover--docs): nội dung tương tác nhỏ, Escape và focus return.
+- [DropdownMenu](?path=/docs/components-dropdownmenu--docs): menu keyboard, item disabled và checkbox item.
+- [Tabs](?path=/docs/components-tabs--docs): segmented/underline/pills/outline, 3 sizes, horizontal/vertical; arrow navigation, automatic/manual activation. Panel chỉ mount ở lần mở đầu, sau đó được giữ hidden/inert để không mất draft. keepMounted=false để reset; không cam kết ngăn mọi React render.
+- [Toast](?path=/docs/components-toast--docs): React-Toastify quản lý queue và lifecycle; dùng ToastProvider/useToast hoặc facade toast từ @itclabs/react-ui/toast. Hỗ trợ loading/update/promise, duration và dedup theo ID.
+
+## Controls và hierarchy
+
+- [Checkbox](?path=/docs/components-checkbox--docs), [RadioGroup](?path=/docs/components-radiogroup--docs), [Switch](?path=/docs/components-switch--docs): có disabled và controlled state; bound wrappers ở Form.
+- [Icon](?path=/docs/components-icon--docs), [IconButton](?path=/docs/components-iconbutton--docs), [Spinner](?path=/docs/components-spinner--docs): bộ icon tuyển chọn Outline/Bold; Outline mặc định. IconButton bắt buộc label và thay glyph bằng một spinner khi loading.
+- [Tree](?path=/docs/modules-tree--docs): Up/Down/Home/End, Left/Right để thu/mở nhánh, Enter/Space chọn, bỏ qua mục disabled.
+
+## Table
+
+[Advanced table](?path=/story/modules-datatable--advanced) hỗ trợ global filter, chọn dòng trong trang, ẩn cột, sticky header và resize bằng kéo hoặc phím trái/phải. Server mode phát state và giữ nguyên rows từ BE; UI kit không gọi API. Query key của feature chỉ chứa phần state gửi BE (sort/page/filter), không chứa selection/visibility/sizing.

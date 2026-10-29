@@ -1,0 +1,2 @@
+# Preserve downloaded provider contracts as evidence.
+docs/evidence/** -whitespace

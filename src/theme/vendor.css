@@ -1,0 +1,12 @@
+@layer theme, base, toastify, components, utilities;
+@import './crop.css' layer(components);
+@import 'react-toastify/ReactToastify.css' layer(toastify);
+@import '../modules/editor/editor.css';
+
+@layer components {
+  .pod-toast {
+    --toastify-color-info: var(--color-info-700);
+    --toastify-icon-color-info: var(--color-info-700);
+    --toastify-color-progress-info: var(--color-info-700);
+  }
+}

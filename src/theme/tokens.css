@@ -1,0 +1,139 @@
+@source "../components";
+@source "../modules";
+@source "../templates";
+
+@theme static {
+  --color-*: initial;
+  --motion-duration-control: 150ms;
+  --motion-duration-fast: 120ms;
+  --motion-duration-normal: 180ms;
+  --motion-duration-slow: 240ms;
+  --motion-duration-exit: 140ms;
+  --motion-duration-instant-exit: 100ms;
+  --motion-duration-loading: 1250ms;
+  --motion-duration-spin: 1000ms;
+  --motion-duration-pulse: 2000ms;
+  --motion-ease-enter: cubic-bezier(0.16, 1, 0.3, 1);
+  --motion-ease-exit: cubic-bezier(0.4, 0, 1, 1);
+  --motion-ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --motion-ease-loop: ease-in-out;
+  --default-transition-duration: var(--motion-duration-control);
+  --default-transition-timing-function: var(--motion-ease-standard);
+  --animate-accordion-open: accordion-open var(--motion-duration-normal)
+    var(--motion-ease-enter);
+  --animate-accordion-close: accordion-close var(--motion-duration-exit)
+    var(--motion-ease-exit);
+  @keyframes accordion-open {
+    from {
+      height: 0;
+    }
+    to {
+      height: var(--radix-accordion-content-height);
+    }
+  }
+  @keyframes accordion-close {
+    from {
+      height: var(--radix-accordion-content-height);
+    }
+    to {
+      height: 0;
+    }
+  }
+  --animate-spin: spin var(--motion-duration-spin) linear infinite;
+  --animate-pulse: pulse var(--motion-duration-pulse) var(--motion-ease-loop) infinite;
+  --animate-table-loading: table-loading var(--motion-duration-loading)
+    var(--motion-ease-loop) infinite;
+  --spacing-control-sm: 2rem;
+  --spacing-control-md: 2.5rem;
+  --spacing-control-lg: 3rem;
+  --container-sidebar: 13rem;
+  --container-workspace: 100rem;
+  --container-dialog: 32rem;
+  --container-drawer: 32rem;
+  --container-popover: 18rem;
+  @keyframes table-loading {
+    from {
+      transform: translateX(-100%);
+    }
+    to {
+      transform: translateX(400%);
+    }
+  }
+  --font-sans:
+    'Be Vietnam Pro', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --spacing-chart-height: 18rem;
+  --color-chart-1: #365c42;
+  --color-chart-2: #28799a;
+  --color-chart-3: #a66b21;
+  --color-chart-4: #8762a6;
+  --color-chart-5: #b34e61;
+  --color-chart-6: #40877b;
+  --color-canvas: #f5f5ef;
+  --color-surface: #fcfcf8;
+  --color-sidebar: #e9eddf;
+  --color-ink: #203932;
+  --color-muted: #5c6c63;
+  --color-line: #dde2d7;
+  --color-control-border: #7b887f;
+  --color-brand-50: #f1f4eb;
+  --color-brand-100: #e1e9d7;
+  --color-brand-500: #628455;
+  --color-brand-700: #365c42;
+  --color-brand-800: #294a34;
+  --color-on-brand: #ffffff;
+  --color-hover: var(--color-brand-50);
+  --color-hover-strong: var(--color-brand-100);
+  --color-selected: var(--color-brand-100);
+  --color-selected-ink: var(--color-brand-800);
+  --color-focus: var(--color-brand-500);
+  --color-accent: var(--color-brand-700);
+  --color-info-50: #eaf3f8;
+  --color-info-700: #245b79;
+  --color-success-50: #e6f4eb;
+  --color-success-700: #226040;
+  --color-warning-50: #fff2d9;
+  --color-warning-700: #80540c;
+  --color-danger-50: #fce9e7;
+  --color-danger-700: #a3302b;
+  --color-danger-800: #862620;
+  --spacing: 0.25rem;
+  --radius-control: 0.5rem;
+  --radius-panel: 0.875rem;
+  --shadow-floating:
+    0 6px 18px color-mix(in srgb, var(--color-ink) 8%, transparent),
+    0 2px 5px color-mix(in srgb, var(--color-ink) 5%, transparent);
+  --shadow-overlay:
+    0 12px 40px color-mix(in srgb, var(--color-ink) 12%, transparent),
+    0 2px 8px color-mix(in srgb, var(--color-ink) 6%, transparent);
+  --shadow-panel: 0 1px 3px color-mix(in srgb, var(--color-ink) 3%, transparent);
+  --shadow-control-focus: 0 0 0 3px
+    color-mix(in srgb, var(--color-brand-700) 12%, transparent);
+  --shadow-control-error: 0 0 0 3px
+    color-mix(in srgb, var(--color-danger-700) 12%, transparent);
+  --text-heading: 1.5rem;
+  --text-heading--line-height: 1.3333333333;
+  --text-title: 1.875rem;
+  --text-title--line-height: 1.2;
+  --text-section: 1.125rem;
+  --text-section--line-height: 1.4;
+  --text-body: 1rem;
+  --text-body--line-height: 1.65;
+  --text-control: 0.875rem;
+  --text-control--line-height: 1.6;
+  --text-ui-sm: 0.8125rem;
+  --text-ui-sm--line-height: 1.6;
+  --text-eyebrow: 0.6875rem;
+  --text-eyebrow--line-height: 1.4;
+  --text-eyebrow--letter-spacing: 0.12em;
+  --text-display: clamp(2rem, 4.2vw, 3.5rem);
+  --text-display--line-height: 1.2;
+  --text-display--letter-spacing: -0.04em;
+  --z-index-dropdown: var(--z-index-popover);
+  --z-index-header: 100;
+  --z-index-overlay: 300;
+  --z-index-modal: 301;
+  --z-index-popover: 400;
+  --z-index-select: 450;
+  --z-index-tooltip: 500;
+  --z-index-toast: 600;
+}

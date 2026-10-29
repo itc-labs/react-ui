@@ -1,0 +1,59 @@
+import { Meta, Canvas } from '@storybook/addon-docs/blocks';
+import * as Buttons from '../components/button/button.stories';
+import * as Inputs from '../components/input/input.stories';
+import * as Textareas from '../components/textarea/textarea.stories';
+import * as Forms from '../modules/form/form.stories';
+
+<Meta title="Overview/Forms" />
+
+# Forms
+
+Control nhập liệu theo một nhịp kích thước và typography. Form dùng TanStack Form + Valibot, có submit thật, field state và lỗi liên kết với control.
+
+## Button variants
+
+<Canvas of={Buttons.Variants} />
+
+Primary cho hành động chính; secondary cho tác vụ phụ; ghost cho quay lại; danger chỉ cho thao tác có tính phá hủy. Không dùng Button mặc định như submit: cần `type="submit"` hoặc Form.SubmitButton.
+
+## Button sizes
+
+<Canvas of={Buttons.Sizes} />
+
+## Button states
+
+<Canvas of={Buttons.States} />
+
+Loading ngăn gửi lại và có aria-busy. Luôn có chữ mô tả; không dùng spinner đơn độc.
+
+## Input sizes
+
+<Canvas of={Inputs.Sizes} />
+
+## Input states
+
+<Canvas of={Inputs.States} />
+
+Label tồn tại độc lập với placeholder. Hint giải thích cách nhập; error thay hint và nối qua aria-describedby. Lỗi không chỉ dùng màu đỏ.
+
+## Textarea
+
+<Canvas of={Textareas.States} />
+
+## Form theo composition
+
+<Canvas of={Forms.ComposedFields} />
+
+Form nhận schema theo field. FormField bọc control thông thường, tự bind value/checked, blur và lỗi; FormSubmit cho phép tự bố trí nút submit. Giá trị và validation được quản lý bằng TanStack Form + Valibot. Không cần dùng field.TextField nếu muốn viết control trực tiếp. Với custom wrapper, dùng binding hoặc mapValue/mapOnChange.
+
+## Bound fields
+
+<Canvas of={Forms.ValidatedSubmit} />
+
+Bấm Lưu khi field trống để xem validation; nhập giá trị hợp lệ để xem kết quả submit.
+
+Select dùng React Select cho toàn bộ kit. SelectField/MultiSelectField bind value/blur/error trực tiếp vào TanStack Form; CheckboxField/SwitchField/RadioGroupField cũng bind thật. Xem Overview/Controls & Overlays cho các control độc lập. Ứng dụng cung cấp options và xử lý việc tải dữ liệu.
+
+## Toàn bộ bound controls
+
+<Canvas of={Forms.AllBoundControls} />

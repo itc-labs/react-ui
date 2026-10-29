@@ -1,0 +1,41 @@
+import { Meta, Canvas } from '@storybook/addon-docs/blocks';
+import * as Selects from '../components/select/select.stories';
+import * as Tables from '../modules/data-table/data-table.stories';
+import * as Forms from '../modules/form/form.stories';
+import * as Dialogs from '../components/dialog/dialog.stories';
+
+<Meta title="Overview/Custom classes" />
+
+# Custom classes
+
+Custom từng component bằng className hoặc các slot classNames có type, độc lập với token/theme.
+
+Class mặc định và state styles được merge trước; classNames của bạn ghi đè sau, rồi className trên cùng phần tử được ưu tiên cuối. Dùng cn() để loại class Tailwind xung đột. Không cần khai báo theme mới khi chỉ chỉnh một control.
+
+## Select
+
+Select hỗ trợ classNames cho label/control/menu/option và các slot của React Select. Slot của thư viện nhận string hoặc callback có isFocused/isSelected/isDisabled. className hiện tại vẫn chỉnh container của React Select; classNames.root chỉnh field wrapper.
+
+<Canvas of={Selects.CustomClasses} />
+
+## Table
+
+Custom toolbar, header, cell, selected row, empty state và pagination qua classNames. State/handlers giữ nguyên; sizing theo cột vẫn dùng ColumnDef và columnSizing.
+
+<Canvas of={Tables.CustomClasses} />
+
+## Bound Form
+
+Field nhận nguyên styling API của control tương ứng; không cần bỏ TanStack Form để custom giao diện.
+
+<Canvas of={Forms.ComposedCustomClasses} />
+
+## Compound và portal
+
+Tabs, Breadcrumb, Sidebar, Dialog… nhận className trên từng part. DialogContent/DrawerContent có thêm classNames.overlay và close cho phần được render sẵn. Menu/Popover vẫn dùng portal và semantics của Radix.
+
+<Canvas of={Dialogs.CustomClasses} />
+
+Các control khác có story CustomClasses ngay trong nhóm của mình. Component một phần tử như Badge/Icon/Skeleton dùng className; không thêm wrapper hoặc styling prop vào headless root không render DOM.
+
+Consumer phải có CSS cho class truyền vào. Khi dùng Tailwind, đảm bảo source của consumer được scan. defineTheme/UIProvider đã hỗ trợ đăng ký icon packs (Components/Icon). CSS token theme generator và bản npm với CSS build sẵn vẫn là công việc riêng.

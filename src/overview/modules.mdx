@@ -1,0 +1,55 @@
+import { Meta, Canvas } from '@storybook/addon-docs/blocks';
+import * as Headers from '../modules/page-header/page-header.stories';
+import * as Empty from '../modules/empty-state/empty-state.stories';
+import * as Tables from '../modules/data-table/data-table.stories';
+import * as Forms from '../modules/form/form.stories';
+
+<Meta title="Overview/Modules" />
+
+# Modules
+
+Các khối giao diện ghép từ component nhỏ, dùng lại giữa nhiều trang. Ứng dụng cung cấp dữ liệu, điều hướng và callback xử lý hành động.
+
+## PageHeader
+
+<Canvas of={Headers.WithAction} />
+
+Tiêu đề, mô tả và vùng hành động cho một trang. Các phần tự xuống hàng khi chiều rộng hạn chế.
+
+## EmptyState
+
+<Canvas of={Empty.Gallery} />
+
+Chọn trạng thái phù hợp với tình huống và thêm hành động để người dùng tiếp tục.
+
+## DataTable
+
+<Canvas of={Tables.Sortable} />
+
+Bảng hỗ trợ sắp xếp, phân trang, chọn dòng và điều chỉnh cột. Ví dụ dùng dữ liệu cục bộ; ứng dụng quản lý việc tải dữ liệu.
+
+### Phân trang tại client hoặc server
+
+<Canvas of={Tables.ClientPagination} />
+<Canvas of={Tables.ServerPagination} />
+
+Ở chế độ server, ứng dụng truyền rows, rowCount, state và onStateChange. Bảng không tự sắp xếp hoặc cắt lại dữ liệu đã phân trang.
+
+### Trạng thái
+
+<Canvas of={Tables.States} />
+
+Skeleton dành cho lần tải đầu. Khi tải lại, bảng hiển thị các rows do ứng dụng truyền vào và khóa thao tác trong thời gian loading.
+
+### Chọn dòng và tùy chỉnh cột
+
+<Canvas of={Tables.Selection} />
+<Canvas of={Tables.Advanced} />
+
+Selection bám theo row ID ổn định và được giữ khi đổi trang, sắp xếp hoặc lọc. Checkbox tiêu đề chỉ chọn trang hiện tại. Ứng dụng chủ động xóa selection khi đổi tập dữ liệu.
+
+## Form
+
+<Canvas of={Forms.ComposedFields} />
+
+FormField nối control với giá trị và validation. Xem trang Form để so sánh cách ghép field trực tiếp và các bound field từ useAppForm.

@@ -1,0 +1,210 @@
+@layer components {
+  .ui-overlay-motion[data-state='open'] {
+    animation: ui-fade-in var(--motion-duration-normal) var(--motion-ease-enter) both;
+  }
+  .ui-overlay-motion[data-state='closed'] {
+    animation: ui-fade-out var(--motion-duration-normal) var(--motion-ease-exit) both;
+  }
+  .ui-dialog-motion[data-state='open'] {
+    animation: ui-fade-in var(--motion-duration-normal) var(--motion-ease-enter) both;
+  }
+  .ui-dialog-motion[data-state='closed'] {
+    animation: ui-fade-out var(--motion-duration-exit) var(--motion-ease-exit) both;
+  }
+  .ui-drawer-motion {
+    --drawer-distance: min(100vw, var(--container-drawer));
+  }
+  .ui-drawer-motion[data-side='right'][data-state='open'] {
+    animation: ui-drawer-right-in var(--motion-duration-slow) var(--motion-ease-enter)
+      both;
+  }
+  .ui-drawer-motion[data-side='right'][data-state='closed'] {
+    animation: ui-drawer-right-out var(--motion-duration-normal) var(--motion-ease-exit)
+      both;
+  }
+  .ui-drawer-motion[data-side='left'][data-state='open'] {
+    animation: ui-drawer-left-in var(--motion-duration-slow) var(--motion-ease-enter)
+      both;
+  }
+  .ui-drawer-motion[data-side='left'][data-state='closed'] {
+    animation: ui-drawer-left-out var(--motion-duration-normal) var(--motion-ease-exit)
+      both;
+  }
+  .ui-drawer-motion[data-side='top'][data-state='open'] {
+    animation: ui-drawer-top-in var(--motion-duration-slow) var(--motion-ease-enter)
+      both;
+  }
+  .ui-drawer-motion[data-side='top'][data-state='closed'] {
+    animation: ui-drawer-top-out var(--motion-duration-normal) var(--motion-ease-exit)
+      both;
+  }
+  .ui-drawer-motion[data-side='bottom'][data-state='open'] {
+    animation: ui-drawer-bottom-in var(--motion-duration-slow) var(--motion-ease-enter)
+      both;
+  }
+  .ui-drawer-motion[data-side='bottom'][data-state='closed'] {
+    animation: ui-drawer-bottom-out var(--motion-duration-normal)
+      var(--motion-ease-exit) both;
+  }
+  .ui-floating-motion[data-state='open'],
+  .ui-floating-motion[data-state='delayed-open'],
+  .ui-floating-motion[data-state='instant-open'] {
+    animation: ui-fade-in var(--motion-duration-fast) var(--motion-ease-enter) both;
+  }
+  .ui-floating-motion[data-state='closed'] {
+    animation: ui-fade-out var(--motion-duration-instant-exit) var(--motion-ease-exit)
+      both;
+  }
+  /* No forwards fill: parent height returns to auto so nested disclosure can grow. */
+  .ui-submenu-motion[data-state='open'] {
+    animation: ui-submenu-in var(--motion-duration-normal) var(--motion-ease-enter);
+  }
+  .ui-submenu-motion[data-state='closed'] {
+    animation: ui-submenu-out var(--motion-duration-exit) var(--motion-ease-exit);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .ui-overlay-motion,
+    .ui-dialog-motion,
+    .ui-drawer-motion,
+    .ui-floating-motion,
+    .ui-submenu-motion {
+      animation: none !important;
+    }
+  }
+}
+@keyframes ui-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes ui-fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+/* Position animation avoids a transformed ancestor for fixed React Select menus. */
+@keyframes ui-drawer-right-in {
+  from {
+    right: calc(-1 * var(--drawer-distance));
+  }
+  to {
+    right: 0;
+  }
+}
+@keyframes ui-drawer-right-out {
+  from {
+    right: 0;
+  }
+  to {
+    right: calc(-1 * var(--drawer-distance));
+  }
+}
+@keyframes ui-drawer-left-in {
+  from {
+    left: calc(-1 * var(--drawer-distance));
+  }
+  to {
+    left: 0;
+  }
+}
+@keyframes ui-drawer-left-out {
+  from {
+    left: 0;
+  }
+  to {
+    left: calc(-1 * var(--drawer-distance));
+  }
+}
+
+@keyframes ui-submenu-in {
+  from {
+    height: 0;
+    opacity: 0;
+  }
+  to {
+    height: var(--radix-collapsible-content-height);
+    opacity: 1;
+  }
+}
+@keyframes ui-submenu-out {
+  from {
+    height: var(--radix-collapsible-content-height);
+    opacity: 1;
+  }
+  to {
+    height: 0;
+    opacity: 0;
+  }
+}
+
+@layer components {
+  .pod-toast-enter {
+    animation: pod-toast-enter var(--motion-duration-normal) var(--motion-ease-enter)
+      both;
+  }
+  .pod-toast-exit {
+    animation: pod-toast-exit var(--motion-duration-exit) var(--motion-ease-exit) both;
+  }
+  @keyframes pod-toast-enter {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  @keyframes pod-toast-exit {
+    from {
+      opacity: 1;
+    }
+    to {
+      opacity: 0;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .pod-toast-enter,
+    .pod-toast-exit {
+      animation-duration: 1ms;
+      transform: none;
+    }
+  }
+}
+
+@keyframes ui-drawer-top-in {
+  from {
+    top: calc(-1 * var(--drawer-distance));
+  }
+  to {
+    top: 0;
+  }
+}
+@keyframes ui-drawer-top-out {
+  from {
+    top: 0;
+  }
+  to {
+    top: calc(-1 * var(--drawer-distance));
+  }
+}
+@keyframes ui-drawer-bottom-in {
+  from {
+    bottom: calc(-1 * var(--drawer-distance));
+  }
+  to {
+    bottom: 0;
+  }
+}
+@keyframes ui-drawer-bottom-out {
+  from {
+    bottom: 0;
+  }
+  to {
+    bottom: calc(-1 * var(--drawer-distance));
+  }
+}

@@ -1,0 +1,59 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Overview/Introduction" />
+
+# @itclabs/react-ui UI Kit
+
+Thư viện UI dùng lại được cho nhiều ứng dụng React: control nhỏ, khối giao diện ghép và layout có slot. Kit không chứa provider dữ liệu, credentials, route hay nghiệp vụ; ứng dụng truyền dữ liệu và callback vào.
+
+## Ba tầng của kit
+
+<table>
+  <thead>
+    <tr>
+      <th>Tầng</th>
+      <th>Ví dụ</th>
+      <th>Trách nhiệm</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <strong>Components</strong>
+      </td>
+      <td>Button, Input, Select, Dialog, DropdownMenu</td>
+      <td>Control nhỏ, một trách nhiệm, có className/classNames</td>
+    </tr>
+    <tr>
+      <td>
+        <strong>Modules</strong>
+      </td>
+      <td>Form, DataTable, Sidebar, Stepper, EmptyState</td>
+      <td>Ghép control thành khối giao diện, nhận giá trị + callback</td>
+    </tr>
+    <tr>
+      <td>
+        <strong>Templates</strong>
+      </td>
+      <td>WorkspaceShell</td>
+      <td>Bố cục trang bằng slot, không có luồng nghiệp vụ cố định</td>
+    </tr>
+  </tbody>
+</table>
+
+Ứng dụng sử dụng kit chịu trách nhiệm cho màn hình hoàn chỉnh và quy tắc nghiệp vụ.
+
+## Đọc Storybook theo thứ tự
+
+1. **Getting started** → **Providers** → **Theming**: cài đặt kit vào một ứng dụng.
+2. **Localization**, **Custom classes**: đổi ngôn ngữ và tùy chỉnh giao diện.
+3. **Components** → **Forms** → **Controls & Overlays** → **Modules** → **Templates** → **Hooks**: tổng quan theo nhóm, mỗi trang dẫn tới story chi tiết.
+4. Mục **Foundations** chứa bảng token, motion, localization và testing để tra cứu.
+
+## Công cụ trên toolbar
+
+- **Theme**: Default, Ocean (đổi thương hiệu) và Compact (bo góc/font). Dùng để kiểm tra component không hardcode màu, bo góc hay font.
+- **Viewport**: 390 / 768 / 1024 / 1440. Dùng Tab để kiểm tra focus bàn phím.
+- Mỗi canvas có mã nguồn thực tế, Controls để đổi props và nút mở story riêng.
+
+Số liệu trong stories là fixture minh họa; Storybook chỉ sử dụng dữ liệu mẫu cục bộ.

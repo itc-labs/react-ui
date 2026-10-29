@@ -1,0 +1,171 @@
+import { Meta, Canvas } from '@storybook/addon-docs/blocks';
+import * as Board from './foundation-board.stories';
+import * as Tokens from './foundations.stories';
+import * as Motion from './motion-tokens.stories';
+import * as Theme from './theme.stories';
+import customThemeCSS from '../theme/custom-theme.example.css?raw';
+
+<Meta title="Overview/Theming" />
+
+# Theming
+
+Mọi màu, font, bo góc, kích thước control, shadow và motion là biến CSS trong `src/theme/tokens.css`. Component chỉ dùng token, nên ứng dụng đổi giao diện bằng cách ghi đè biến — không sửa component.
+
+## Bảng tổng quan
+
+<Canvas of={Board.ProposalV1} />
+
+## Palette
+
+<Canvas of={Tokens.Palette} />
+
+Chỉ có màu của kit: palette mặc định của Tailwind đã bị reset. `line` chỉ dùng cho đường kẻ trang trí; viền control dùng `control-border`. Feedback luôn có chữ đi kèm màu.
+
+## Màu tương tác
+
+<Canvas of={Theme.InteractionRoles} />
+
+`hover`, `hover-strong`, `selected`, `selected-ink`, `focus` và `accent` trỏ về `brand-*`. Đổi `brand-*` là các trạng thái này đổi theo.
+
+## Typography
+
+<Canvas of={Tokens.Typography} />
+
+Be Vietnam Pro self-hosted, weight 400–700 (800 là entry tùy chọn). Dùng `text-control` cho control, `text-ui-sm` cho metadata, `text-section` / `text-heading` / `text-title` cho các cấp tiêu đề và `text-display` cho tiêu đề lớn.
+
+## Motion, kích thước control và lớp overlay
+
+<Canvas of={Motion.TokenReference} />
+
+Reduced motion tắt animation overlay. Thứ tự z-index: header → overlay → modal → popover/dropdown → select → tooltip → toast.
+
+## Chọn entry CSS
+
+<table>
+  <thead>
+    <tr>
+      <th>Entry</th>
+      <th>Nội dung</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <code>@itclabs/react-ui/theme/styles.css</code>
+      </td>
+      <td>Tất cả bên dưới + Tailwind</td>
+    </tr>
+    <tr>
+      <td>
+        <code>@itclabs/react-ui/theme/tokens.css</code>
+      </td>
+      <td>
+        Chỉ biến theme và <code>@source</code> của kit
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>@itclabs/react-ui/theme/fonts.css</code>
+      </td>
+      <td>Be Vietnam Pro 400–700</td>
+    </tr>
+    <tr>
+      <td>
+        <code>@itclabs/react-ui/theme/fonts-800.css</code>
+      </td>
+      <td>Weight 800 tùy chọn</td>
+    </tr>
+    <tr>
+      <td>
+        <code>@itclabs/react-ui/theme/base.css</code>
+      </td>
+      <td>
+        Style <code>body</code> và con trỏ
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>@itclabs/react-ui/theme/vendor.css</code>
+      </td>
+      <td>CSS của React-Toastify và react-easy-crop</td>
+    </tr>
+    <tr>
+      <td>
+        <code>@itclabs/react-ui/theme/motion.css</code>
+      </td>
+      <td>Animation overlay, disclosure, toast</td>
+    </tr>
+  </tbody>
+</table>
+
+## Đổi font
+
+Bỏ `fonts.css`, tải font của ứng dụng và ghi đè `--font-sans`:
+
+```css
+@layer theme, base, toastify, components, utilities;
+@import 'tailwindcss';
+@import '@itclabs/react-ui/theme/tokens.css';
+@import '@itclabs/react-ui/theme/base.css';
+@import '@itclabs/react-ui/theme/vendor.css';
+@import '@itclabs/react-ui/theme/motion.css';
+
+:root {
+  --font-sans: var(--font-inter), system-ui, sans-serif; /* ví dụ biến của next/font */
+}
+```
+
+Kiểm tra dấu tiếng Việt ở cỡ 12–14px và weight 500–700 trước khi chọn font mới. `--font-sans` cũng nhận được qua `UIProvider theme.tokens`; host vẫn phải tải font. Biến CSS áp dụng cả cho dialog, menu và toast được portal ra `body`.
+
+## Tạo theme cho ứng dụng
+
+```css
+[data-theme='ocean'] {
+  --color-brand-50: #eaf3f8;
+  --color-brand-100: #d3e7f2;
+  --color-brand-500: #3c83a7;
+  --color-brand-700: #245b79;
+  --color-brand-800: #1c4962;
+  --radius-control: 0.375rem;
+}
+```
+
+Đặt `data-theme` (hoặc class) trên thẻ `<html>`, không đặt trên một `div` bên trong: token tương tác được tính ở `:root`, và overlay portal ra ngoài `div` đó. Kiểm tra lại độ tương phản WCAG AA cho palette mới. Thử nhanh bằng menu **Theme** trên toolbar.
+
+## Theme tokens qua UIProvider
+
+Dùng `theme.tokens` khi đổi branding lúc chạy hoặc theo khách hàng. Với thương hiệu cố định, CSS vẫn là lựa chọn mặc định. `defineTheme` kiểm tra và đóng băng cấu hình; `UIProvider` cũng kiểm tra token khi nhận object trực tiếp.
+
+```tsx
+import { defineTheme, UIProvider } from '@itclabs/react-ui';
+
+const theme = defineTheme({
+  tokens: {
+    'color-brand-700': '#1d4ed8',
+    'radius-control': '1rem',
+    'font-sans': 'Georgia, serif',
+  },
+});
+
+<UIProvider theme={theme}>{children}</UIProvider>;
+```
+
+Tên token không có `--`, được kiểm tra bằng `UIThemeTokenName` / `UIThemeTokens`. Giá trị là chuỗi CSS không rỗng; tên lạ và giá trị chứa `;`, `{`, `}`, `<`, `>`, backslash, xuống dòng, `/*` hoặc `!important` bị từ chối. Đây là kiểm tra an toàn, không kiểm tra cú pháp hay độ tương phản của CSS.
+
+Provider ngoài cùng có token render một thẻ `<style>` thường, inline tại vị trí provider, trước children. Rule `:root{...}` có thứ tự xác định, không có cascade layer, `href` hay `precedence`. SSR đã chứa rule, không cần effect; cập nhật token đổi nội dung style và giữ state của children. Gỡ token hoặc unmount provider sẽ gỡ style. Chuỗi token truyền được từ Server Component; icon component vẫn phải khai báo phía client.
+
+Token áp dụng cho toàn trang, gồm portal ra `body`. Provider con kế thừa token đang hoạt động; token riêng của nó bị bỏ qua và cảnh báo một lần cho mỗi provider trong development. Icon và locale vẫn gộp như trước. Nếu cần selector theme, dùng CSS trên `<html>`. `useTheme()` trả thêm `tokens` chỉ đọc; `colors` vẫn là tham chiếu `var()`.
+
+Rule không layer thắng token mặc định trong `@layer theme`. Với CSS host cũng không layer, specificity quyết định trước rồi mới tới thứ tự xuất hiện khi specificity bằng nhau; selector như `html[data-theme]` mạnh hơn `:root`. Nên chọn một nguồn override cho mỗi token, tránh trộn CSS host và UIProvider.
+
+<Canvas of={Theme.ThemeTokens} />
+
+## Custom CSS đầy đủ
+
+File `@itclabs/react-ui/theme/custom-theme.example.css` là tài liệu tham khảo với toàn bộ token public và giá trị mặc định. Sao chép vào ứng dụng, chỉ giữ/đổi phần cần thiết và import sau CSS của kit. Không cần import file mẫu nguyên trạng khi chạy ứng dụng.
+
+Để chuyển theme bằng selector, thay `:root` bằng `[data-theme='name']` trên `<html>`. Cách này bao phủ cả portal và tính lại các role/shadow dẫn xuất. Kiểm tra WCAG AA cho từng cặp chữ/nền và viền control; `line` chỉ dành cho trang trí, `control-border` dành cho control.
+
+<pre>
+  <code className="language-css">{customThemeCSS}</code>
+</pre>

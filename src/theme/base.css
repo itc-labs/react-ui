@@ -1,0 +1,46 @@
+@layer base {
+  body {
+    margin: 0;
+    background: var(--color-canvas);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+  }
+  :where(
+    button,
+    a[href],
+    summary,
+    label[for],
+    [role='button'],
+    [role='tab'],
+    [role='menuitem'],
+    [role='option'],
+    [role='checkbox'],
+    [role='radio'],
+    [role='switch']
+  ) {
+    cursor: pointer;
+  }
+  :where(
+    input:not([type='checkbox']):not([type='radio']):not([type='range']):not(
+        [type='hidden']
+      ):not([type='submit']):not([type='button']),
+    textarea,
+    [contenteditable='true']
+  ) {
+    cursor: text;
+  }
+  :where(button, input, textarea, [role]):is(
+    :disabled,
+    [aria-disabled='true'],
+    [data-disabled]
+  ) {
+    cursor: not-allowed;
+  }
+  :where(button[aria-busy='true']:disabled) {
+    cursor: wait;
+  }
+  :where(button:disabled, button[aria-disabled='true'], input:disabled) + label[for],
+  label[for]:has(+ :disabled) {
+    cursor: not-allowed;
+  }
+}

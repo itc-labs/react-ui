@@ -1,0 +1,260 @@
+{
+  "name": "@itclabs/react-ui",
+  "version": "0.1.0",
+  "description": "Reusable React 19 UI kit: Tailwind v4 tokens, Radix-based components, data-driven overlays, forms, tables and theming.",
+  "license": "MIT",
+  "type": "module",
+  "packageManager": "pnpm@11.22.0",
+  "homepage": "https://github.com/itc-labs/react-ui#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/itc-labs/react-ui.git"
+  },
+  "bugs": {
+    "url": "https://github.com/itc-labs/react-ui/issues"
+  },
+  "keywords": [
+    "react",
+    "ui",
+    "components",
+    "tailwindcss",
+    "radix",
+    "design-system"
+  ],
+  "exports": {
+    ".": "./src/index.ts",
+    "./components": "./src/components/index.ts",
+    "./modules": "./src/modules/index.ts",
+    "./theme/tokens.css": "./src/theme/tokens.css",
+    "./theme/custom-theme.example.css": "./src/theme/custom-theme.example.css",
+    "./templates": "./src/templates/index.ts",
+    "./theme": "./src/theme/index.ts",
+    "./theme/provider": "./src/theme/provider.tsx",
+    "./i18n": "./src/i18n/index.ts",
+    "./i18n/react": "./src/i18n/provider.tsx",
+    "./hooks": "./src/hooks/index.ts",
+    "./icons/custom": "./src/components/icon/custom/index.ts",
+    "./illustrations": "./src/components/illustration/index.tsx",
+    "./illustrations/*": "./src/components/illustration/*.tsx",
+    "./icons/outline": "./src/components/icon/outline/index.ts",
+    "./icons/outline/*": "./src/components/icon/outline/*.tsx",
+    "./icons/bold": "./src/components/icon/bold/index.ts",
+    "./icons/bold/*": "./src/components/icon/bold/*.tsx",
+    "./icons/catalog": "./src/components/icon/catalog.ts",
+    "./modal": "./src/components/modal/client.ts",
+    "./toast": "./src/components/toast/client.ts",
+    "./theme/styles.css": "./src/theme/styles.css",
+    "./theme/fonts.css": "./src/theme/fonts.css",
+    "./theme/base.css": "./src/theme/base.css",
+    "./theme/vendor.css": "./src/theme/vendor.css",
+    "./theme/motion.css": "./src/theme/motion.css",
+    "./theme/fonts-800.css": "./src/theme/fonts-800.css",
+    "./editor": "./src/modules/editor/index.tsx",
+    "./chart": "./src/modules/chart/index.tsx",
+    "./avatar-upload": "./src/modules/avatar-upload/index.tsx",
+    "./ui.css": "./dist/ui.css"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "storybook": "storybook dev -p 6006 --host 127.0.0.1 --no-open --disable-telemetry",
+    "build-storybook": "storybook build --disable-telemetry",
+    "test": "vitest run --fsModuleCachePath ./.cache/vitest",
+    "generate:icons": "node scripts/generate-ui-icons.mjs",
+    "build": "vite build --config vite.build.config.ts && tsc -p tsconfig.build.json && node scripts/build-assets.mjs",
+    "prepack": "pnpm run build",
+    "test:package": "node scripts/verify-package.mjs",
+    "format": "prettier --write . && node scripts/format-function-spacing.mjs --write",
+    "format:check": "prettier --check . && node scripts/format-function-spacing.mjs",
+    "check:contrast": "node scripts/check-ui-contrast.mjs",
+    "chromatic": "chromatic --build-script-name build-storybook --exit-zero-on-changes"
+  },
+  "dependencies": {
+    "class-variance-authority": "0.7.1",
+    "clsx": "2.1.1",
+    "tailwind-merge": "3.7.0",
+    "@tanstack/react-form": "1.33.5",
+    "@tanstack/react-table": "8.21.3",
+    "valibot": "1.5.0",
+    "@fontsource/be-vietnam-pro": "5.3.0",
+    "react-select": "5.10.2",
+    "radix-ui": "1.8.1",
+    "react-day-picker": "9.14.0",
+    "react-toastify": "11.1.0",
+    "input-otp": "1.5.0",
+    "react-number-format": "5.4.5"
+  },
+  "devDependencies": {
+    "@types/react": "19.3.0",
+    "@storybook/react-vite": "10.6.3",
+    "@storybook/addon-docs": "10.6.3",
+    "@tailwindcss/vite": "4.3.3",
+    "@vitejs/plugin-react": "6.1.2",
+    "@types/node": "^24",
+    "@types/react-dom": "^19",
+    "storybook": "10.6.3",
+    "tailwindcss": "4.3.3",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "vite": "8.3.5",
+    "prettier": "3.9.10",
+    "typescript": "5.9.3",
+    "jsdom": "27.4.0",
+    "lucide-react": "1.61.0",
+    "@heroicons/react": "2.2.0",
+    "@tiptap/react": "3.32.0",
+    "@tiptap/pm": "3.32.0",
+    "@tiptap/starter-kit": "3.32.0",
+    "recharts": "3.10.1",
+    "react-easy-crop": "6.2.4",
+    "react-is": "19.3.1",
+    "chromatic": "18.12.1",
+    "vitest": "5.0.5"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "@tiptap/react": "^3.0.0",
+    "@tiptap/pm": "^3.0.0",
+    "@tiptap/starter-kit": "^3.0.0",
+    "recharts": "^3.0.0",
+    "react-easy-crop": "^6.0.0",
+    "react-is": "^19.0.0"
+  },
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "peerDependenciesMeta": {
+    "@tiptap/react": {
+      "optional": true
+    },
+    "@tiptap/pm": {
+      "optional": true
+    },
+    "@tiptap/starter-kit": {
+      "optional": true
+    },
+    "recharts": {
+      "optional": true
+    },
+    "react-easy-crop": {
+      "optional": true
+    },
+    "react-is": {
+      "optional": true
+    }
+  },
+  "publishConfig": {
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "exports": {
+      ".": {
+        "types": "./dist/index.d.ts",
+        "import": "./dist/index.js"
+      },
+      "./components": {
+        "types": "./dist/components/index.d.ts",
+        "import": "./dist/components/index.js"
+      },
+      "./modules": {
+        "types": "./dist/modules/index.d.ts",
+        "import": "./dist/modules/index.js"
+      },
+      "./theme/tokens.css": "./dist/theme/tokens.css",
+      "./theme/custom-theme.example.css": "./dist/theme/custom-theme.example.css",
+      "./templates": {
+        "types": "./dist/templates/index.d.ts",
+        "import": "./dist/templates/index.js"
+      },
+      "./theme": {
+        "types": "./dist/theme/index.d.ts",
+        "import": "./dist/theme/index.js"
+      },
+      "./theme/provider": {
+        "types": "./dist/theme/provider.d.ts",
+        "import": "./dist/theme/provider.js"
+      },
+      "./i18n": {
+        "types": "./dist/i18n/index.d.ts",
+        "import": "./dist/i18n/index.js"
+      },
+      "./i18n/react": {
+        "types": "./dist/i18n/provider.d.ts",
+        "import": "./dist/i18n/provider.js"
+      },
+      "./hooks": {
+        "types": "./dist/hooks/index.d.ts",
+        "import": "./dist/hooks/index.js"
+      },
+      "./icons/custom": {
+        "types": "./dist/components/icon/custom/index.d.ts",
+        "import": "./dist/components/icon/custom/index.js"
+      },
+      "./illustrations": {
+        "types": "./dist/components/illustration/index.d.ts",
+        "import": "./dist/components/illustration/index.js"
+      },
+      "./illustrations/*": {
+        "types": "./dist/components/illustration/*.d.ts",
+        "import": "./dist/components/illustration/*.js"
+      },
+      "./icons/outline": {
+        "types": "./dist/components/icon/outline/index.d.ts",
+        "import": "./dist/components/icon/outline/index.js"
+      },
+      "./icons/outline/*": {
+        "types": "./dist/components/icon/outline/*.d.ts",
+        "import": "./dist/components/icon/outline/*.js"
+      },
+      "./icons/bold": {
+        "types": "./dist/components/icon/bold/index.d.ts",
+        "import": "./dist/components/icon/bold/index.js"
+      },
+      "./icons/bold/*": {
+        "types": "./dist/components/icon/bold/*.d.ts",
+        "import": "./dist/components/icon/bold/*.js"
+      },
+      "./icons/catalog": {
+        "types": "./dist/components/icon/catalog.d.ts",
+        "import": "./dist/components/icon/catalog.js"
+      },
+      "./modal": {
+        "types": "./dist/components/modal/client.d.ts",
+        "import": "./dist/components/modal/client.js"
+      },
+      "./toast": {
+        "types": "./dist/components/toast/client.d.ts",
+        "import": "./dist/components/toast/client.js"
+      },
+      "./theme/styles.css": "./dist/theme/styles.css",
+      "./theme/fonts.css": "./dist/theme/fonts.css",
+      "./theme/base.css": "./dist/theme/base.css",
+      "./theme/vendor.css": "./dist/theme/vendor.css",
+      "./theme/motion.css": "./dist/theme/motion.css",
+      "./theme/fonts-800.css": "./dist/theme/fonts-800.css",
+      "./editor": {
+        "types": "./dist/modules/editor/index.d.ts",
+        "import": "./dist/modules/editor/index.js"
+      },
+      "./chart": {
+        "types": "./dist/modules/chart/index.d.ts",
+        "import": "./dist/modules/chart/index.js"
+      },
+      "./avatar-upload": {
+        "types": "./dist/modules/avatar-upload/index.d.ts",
+        "import": "./dist/modules/avatar-upload/index.js"
+      },
+      "./ui.css": "./dist/ui.css"
+    },
+    "access": "public"
+  },
+  "files": [
+    "dist",
+    "LICENSE",
+    "THIRD_PARTY_NOTICES.md",
+    "README.md",
+    "src/components/icon/licenses"
+  ],
+  "engines": {
+    "node": ">=22.12.0"
+  }
+}

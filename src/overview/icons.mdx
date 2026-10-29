@@ -1,0 +1,61 @@
+import { Meta, Canvas, Source } from '@storybook/addon-docs/blocks';
+import * as Icons from '../components/icon/icon.stories';
+
+<Meta of={Icons} name="Docs" />
+
+# Icon
+
+Một bộ icon chung: **651 tên, hai chế độ Outline và Bold**. Lọc theo 18 nhóm; tìm tên hoặc alias như search, trash, eye; đổi variant rồi bấm icon để copy import trực tiếp. Không cần chọn thư viện nguồn. Catalog hiện 80 ô mỗi lần; bấm Xem thêm để tải tiếp.
+
+<Canvas of={Icons.Playground} />
+
+## Hai variant
+
+<Canvas of={Icons.Variants} />
+
+Mỗi tên có mặt ở cả hai variant. Spinner và ba trạng thái chevron sort là glyph trung tính, giữ nguyên ở cả hai kiểu. 288 tên có cặp thật từ thư viện nguồn. Với 359 tên chỉ có Outline, cả hai chế độ dùng chung glyph Outline và catalog ghi “Chỉ có Outline”; không giả bold bằng cách tăng stroke-width.
+
+## Cách dùng
+
+Icon mặc định chỉ nạp 34 tên dùng trong controls của kit, có cả Outline/Bold. Để tra cứu toàn bộ 651 tên, đăng ký hai catalog trong UIProvider như ví dụ dưới. Nếu chỉ cần vài icon bổ sung, ưu tiên import từng glyph và dùng `glyph={SearchIcon}`; không cần đăng ký catalog. IconName và iconNames vẫn đủ 651 tên. Tên chưa đăng ký báo lỗi kèm hướng dẫn cấu hình. Theme overrides, custom packs/defaultPack và thứ tự ưu tiên glyph/pack/variant vẫn được giữ trong từng provider.
+
+<Source language="tsx" code={`import { Icon, IconButton, UIProvider, defineTheme } from '@itclabs/react-ui';
+import { outlineCatalog, boldCatalog } from '@itclabs/react-ui/icons/catalog';
+
+const theme = defineTheme({ icons: { packs: { outline: outlineCatalog, bold: boldCatalog } } });
+
+export function Example() {
+  return (
+    <UIProvider theme={theme}>
+      <Icon name="search" />
+      <Icon name="search" variant="bold" />
+      <IconButton icon="delete" iconVariant="bold" label="Delete" />
+    </UIProvider>
+  );
+}
+`} />
+
+<Canvas of={Icons.DirectImports} />
+
+<Source language="tsx" code={`import { SearchIcon } from '@itclabs/react-ui/icons/outline/search';
+import { SearchIcon as SearchBoldIcon } from '@itclabs/react-ui/icons/bold/search';
+
+export function Example() {
+  return (
+    <>
+      <SearchIcon size={24} className="text-brand-700" />
+      <SearchBoldIcon size={24} label="Search" />
+    </>
+  );
+}
+`} />
+
+Đặt variant mặc định một lần qua `defineTheme({ icons: { variant: 'bold' } })` trong UIProvider. Props variant/iconVariant ghi đè cho từng chỗ dùng. className và size vẫn tùy chỉnh độc lập. IconButton sở hữu accessible label của nút; icon trang trí mặc định aria-hidden.
+
+<Canvas of={Icons.ThemeSwitch} />
+
+Illustration là bộ artwork riêng ở Components/Illustration, import từ @itclabs/react-ui/illustrations; không thuộc icon packs.
+
+Catalog chỉ báo “Đã copy” khi Clipboard API thành công; nếu bị chặn, code được chọn sẵn để copy thủ công. Tab và Enter/Space dùng được trên từng ô icon.
+
+Nguồn: [Heroicons](https://heroicons.com) (MIT) và [Lucide](https://lucide.dev) (ISC). Bộ tuyển chọn có 651 tên: 288 Heroicons, 360 Lucide và 3 sort glyph cục bộ; 359 tên chỉ có Outline dùng chung nét ở Bold. Nguồn từng file và neutral glyph được ghi trong sources.json; giữ THIRD_PARTY_NOTICES.md khi phân phối.

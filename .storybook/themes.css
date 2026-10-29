@@ -1,0 +1,26 @@
+/*
+ * Storybook-only sample themes that exercise host overrides.
+ * Applied on <html data-theme>: role tokens (hover/selected/focus/accent)
+ * resolve var(--color-brand-*) on :root, and portalled overlays live under body.
+ */
+
+/* Rebrand: blue brand palette and system font. */
+[data-theme='ocean'] {
+  --color-brand-50: #eaf3f8;
+  --color-brand-100: #d3e7f2;
+  --color-brand-500: #3c83a7;
+  --color-brand-700: #245b79;
+  --color-brand-800: #1c4962;
+  --color-sidebar: #e3edf3;
+  --font-sans: system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+
+/* Density/shape: tighter radii, shorter controls and a different typeface. */
+[data-theme='compact'] {
+  --radius-control: 0.25rem;
+  --radius-panel: 0.375rem;
+  --spacing-control-sm: 1.75rem;
+  --spacing-control-md: 2.125rem;
+  --spacing-control-lg: 2.5rem;
+  --font-sans: 'Avenir Next', 'Segoe UI', system-ui, sans-serif;
+}

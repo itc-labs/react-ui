@@ -1,0 +1,35 @@
+import { Meta, Canvas } from '@storybook/addon-docs/blocks';
+import * as Hooks from '../hooks/hooks.stories';
+import * as Selects from '../components/select/select.stories';
+
+<Meta title="Overview/Hooks" />
+
+# Hooks
+
+Import từ `@itclabs/react-ui/hooks`. Hook không gọi API, không lưu dữ liệu và không thay thế interaction/focus handling của Radix.
+
+## Click outside
+
+`useClickOutside(refOrRefs, handler, enabled)` hỗ trợ nhiều vùng, portal, pointerdown capture và shadow composedPath. Đưa cả trigger/portal refs vào danh sách vùng bên trong. Unmount hoặc disabled sẽ gỡ listener.
+
+<Canvas of={Hooks.ClickOutside} />
+
+## Debounce value
+
+`useDebounce(value, delay)` giữ raw input cập nhật ngay và trả giá trị đã debounce cho xử lý tốn chi phí.
+
+<Canvas of={Hooks.DebouncedValue} />
+
+## Debounce callback
+
+`useDebouncedCallback(fn, delay)` có cancel/flush/isPending, dùng callback và arguments mới nhất. Delay đổi/unmount sẽ hủy timer. isPending là hàm đọc trạng thái, không tự kích hoạt render.
+
+<Canvas of={Hooks.DebouncedCallback} />
+
+## Select search
+
+Select có onInputChange tức thời và onSearchChange debounce 300 ms, chỉnh bằng searchDebounceMs. Search local vẫn lọc ngay. Clear/select/close hủy query đang chờ; IME chỉ gửi sau compositionend. Load-more bị chặn khi query mới chưa settle.
+
+<Canvas of={Selects.DebouncedSearch} />
+
+Host cần cancel/ignore request cũ ngay khi raw input đổi; callback debounce không tự hủy HTTP đã gửi. Khi host đã debounce, đặt searchDebounceMs=0 để tránh debounce hai lần. Giá trị đã chọn vẫn được giữ qua search/phân trang.

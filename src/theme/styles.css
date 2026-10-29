@@ -1,0 +1,7 @@
+@layer theme, base, toastify, components, utilities;
+@import 'tailwindcss';
+@import './tokens.css';
+@import './fonts.css';
+@import './base.css';
+@import './vendor.css';
+@import './motion.css';
