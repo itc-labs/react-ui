@@ -15,6 +15,8 @@ Storybook runs at http://127.0.0.1:6006. Use `pnpm install --frozen-lockfile` fo
 
 ## Checks
 
+CI runs in parallel jobs: `checks` (format, typecheck with an incremental `.cache/tsc` build info), `test` (two Vitest shards with a cached `.cache/vitest` module cache), `build` (library, package verification, Storybook) and `commitlint` on pull requests. The `verify` job aggregates them and is the required status check. Superseded pull request runs are cancelled.
+
 ```sh
 pnpm format
 pnpm format:check
