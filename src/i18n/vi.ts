@@ -1,5 +1,8 @@
 import type { UIMessages } from './types';
 export const viMessages = {
+  'tag.remove': 'Xóa {label}',
+  'badge.dot': 'Thông báo mới',
+  'badge.count': { other: '{count} thông báo chưa đọc' },
   'common.loading': 'Đang tải',
   'common.loadingMore': 'Đang tải thêm…',
   'common.required': ' (bắt buộc)',

@@ -9,7 +9,7 @@ import {
   BreadcrumbSeparator,
   BreadcrumbLink,
 } from '../../components/breadcrumb';
-import { Badge } from '../../components/badge';
+import { Tag } from '../../components/tag';
 import { Button } from '../../components/button';
 
 const meta = {
@@ -64,7 +64,7 @@ function ShellExample({ withSidebar = true }: { withSidebar?: boolean }) {
               { key: 'current', title: 'Trang hiện tại' },
             ]}
           />
-          <Badge>Local demo</Badge>
+          <Tag>Local demo</Tag>
         </>
       }
       content={
@@ -114,7 +114,7 @@ export const CustomClasses: Story = {
       header={
         <>
           <span>Lorem ipsum</span>
-          <Badge>Example</Badge>
+          <Tag>Example</Tag>
         </>
       }
       content={<p>Dolor sit amet, consectetur adipiscing elit.</p>}

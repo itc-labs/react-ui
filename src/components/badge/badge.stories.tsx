@@ -1,35 +1,96 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { Avatar } from '../avatar';
+import { IconButton } from '../icon-button';
+import { BellIcon } from '../icon/outline/bell';
 import { Badge } from './index';
+
 const meta = {
+  title: 'Components/Badge',
+  component: Badge,
+  args: { count: 5 },
   parameters: {
     docs: {
       description: {
         component:
-          'Nhãn trạng thái trình bày; không tương tác và không thay thế button. Luôn có chữ giải thích tone.',
+          'Hiển thị số lượng hoặc dấu chấm trên nội dung con, hoặc đứng độc lập. Nhãn dành cho trình đọc màn hình theo ngôn ngữ của UIProvider; label cho phép tùy chỉnh ngữ nghĩa.',
       },
     },
   },
-  title: 'Components/Badge',
-  component: Badge,
-  args: { children: 'Lorem ipsum' },
 } satisfies Meta<typeof Badge>;
 export default meta;
 type Story = StoryObj<typeof meta>;
-
 export const Playground: Story = { tags: ['usage'] };
-
-export const AllTones: Story = {
+export const Counts: Story = {
   tags: ['variants'],
-  name: 'Variants',
   render: () => (
-    <div className="flex flex-wrap gap-3">
-      {(['neutral', 'brand', 'info', 'success', 'warning', 'danger'] as const).map(
+    <div className="flex items-center gap-6">
+      <Badge count={0} />
+      <Badge count={0} showZero />
+      <Badge count={3} size="sm" />
+      <Badge count={120} max={99} />
+    </div>
+  ),
+};
+export const Dot: Story = {
+  tags: ['variants'],
+  args: { dot: true, children: <BellIcon /> },
+};
+export const Tones: Story = {
+  tags: ['variants'],
+  render: () => (
+    <div className="flex gap-6">
+      {(['danger', 'brand', 'info', 'warning', 'success', 'neutral'] as const).map(
         (tone) => (
-          <Badge key={tone} tone={tone}>
-            {tone}
+          <Badge key={tone} tone={tone} count={5} />
+        ),
+      )}
+    </div>
+  ),
+};
+export const Placements: Story = {
+  tags: ['variants'],
+  render: () => (
+    <div className="flex gap-10 p-4">
+      {(['top-end', 'top-start', 'bottom-end', 'bottom-start'] as const).map(
+        (placement) => (
+          <Badge key={placement} placement={placement} count={3}>
+            <Avatar alt="Tài khoản" fallback="AB" />
           </Badge>
         ),
       )}
     </div>
   ),
+};
+export const OnAvatar: Story = {
+  tags: ['example'],
+  args: {
+    dot: true,
+    tone: 'success',
+    offset: [4, 4],
+    children: <Avatar alt="Tài khoản" fallback="AB" />,
+  },
+};
+export const OnIconButton: Story = {
+  tags: ['example'],
+  args: { children: <IconButton icon={BellIcon} label="Thông báo" variant="ghost" /> },
+};
+export const Standalone: Story = {
+  tags: ['example'],
+  render: () => (
+    <span className="inline-flex items-center gap-2">
+      Thông báo <Badge count={5} />
+    </span>
+  ),
+};
+export const CustomClasses: Story = {
+  tags: ['customization'],
+  args: {
+    className: 'mx-4',
+    classNames: {
+      root: 'align-middle',
+      indicator: 'rounded-md ring-canvas',
+      label: 'sr-only',
+    },
+    children: <BellIcon />,
+  },
 };

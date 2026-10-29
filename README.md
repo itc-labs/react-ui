@@ -198,3 +198,7 @@ Icon artwork comes from [Lucide](https://lucide.dev) (ISC) and [Heroicons](https
 ## License
 
 MIT © itclabs. Icon artwork keeps its own Lucide (ISC) and Heroicons (MIT) licenses.
+
+### Tag and Badge migration
+
+Badge (label) is now Tag; Badge is now the count/dot indicator. Rename label-pill imports, JSX and types to Tag/TagProps/TagTone. See [Tag and Badge](docs/UI_TAG_BADGE.md) for the new APIs.

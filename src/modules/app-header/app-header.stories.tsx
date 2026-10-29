@@ -115,12 +115,9 @@ export const WithActions: Story = {
   args: {
     actions: (
       <>
-        <span className="relative">
+        <Badge count={3}>
           <IconButton icon="bell" label="Thông báo" variant="ghost" />
-          <Badge className="absolute -right-1 -top-1" aria-label="3 thông báo">
-            3
-          </Badge>
-        </span>
+        </Badge>
         <DropdownMenu
           trigger={<Avatar alt="Tài khoản" fallback="AB" size="sm" />}
           triggerLabel="Menu tài khoản"

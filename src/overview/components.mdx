@@ -1,5 +1,5 @@
 import { Meta, Canvas } from '@storybook/addon-docs/blocks';
-import * as Badges from '../components/badge/badge.stories';
+import * as Tags from '../components/tag/tag.stories';
 import * as Cards from '../components/card/card.stories';
 import * as Skeletons from '../components/skeleton/skeleton.stories';
 
@@ -9,11 +9,11 @@ import * as Skeletons from '../components/skeleton/skeleton.stories';
 
 Primitive trình bày độc lập nghiệp vụ, hỗ trợ native props và className override qua cn().
 
-## Badge tones
+## Tag tones
 
-<Canvas of={Badges.AllTones} />
+<Canvas of={Tags.AllTones} />
 
-Badge là nhãn, không phải button. Trạng thái thiếu dữ liệu dùng neutral; stale dùng warning; chỉ dùng success khi có kết quả đã xác nhận.
+Tag là nhãn; onClick hoặc selected bật tương tác dạng button. Trạng thái thiếu dữ liệu dùng neutral; stale dùng warning; chỉ dùng success khi có kết quả đã xác nhận.
 
 ## Card slots
 

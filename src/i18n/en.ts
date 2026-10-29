@@ -1,4 +1,10 @@
 export const enMessages = {
+  'tag.remove': 'Remove {label}',
+  'badge.dot': 'New notifications',
+  'badge.count': {
+    one: '{count} unread notification',
+    other: '{count} unread notifications',
+  },
   'common.loading': 'Loading',
   'common.loadingMore': 'Loading more…',
   'common.required': ' (required)',

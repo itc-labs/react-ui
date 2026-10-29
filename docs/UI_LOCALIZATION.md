@@ -79,3 +79,5 @@ Tests cover dictionary/plural/number fallback, provider scoping and text prop pr
 InputPassword and InputOTP use password.show/password.hide/otp.label. Labels may be overridden explicitly; passwords, OTP strings and numeric values are never translated.
 
 NumberInput step actions use number.increase/number.decrease in the typed dictionaries. Formatting convention is explicitly fixed in the wrapper rather than inferred from language or navigator.
+
+Tag and Badge contracts, localization and migration are documented in [Tag and Badge](UI_TAG_BADGE.md).

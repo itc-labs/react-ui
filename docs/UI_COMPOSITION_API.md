@@ -19,7 +19,7 @@ Ordinary usage should express intent through one component and its data/slots. C
 | Accordion                                                                                                          | Existing items + type + variant                                                  | Existing item/trigger/content parts                             |
 | Select, RadioGroup, Tree, Stepper, DataTable, Pagination                                                           | Already data-driven single components                                            | Typed callbacks/render slots as appropriate                     |
 | Input family, Textarea, Button, IconButton, Avatar, UploadField, AvatarUpload, Calendar/date/time controls, Editor | Already direct prop APIs                                                         | Existing class slots and bound Form fields                      |
-| Card, PageHeader, Alert, EmptyState, Badge, Skeleton, Spinner, Icon, Illustration                                  | Already direct presentation/slot APIs                                            | Consumer-owned content                                          |
+| Card, PageHeader, Alert, EmptyState, Tag, Badge, Skeleton, Spinner, Icon, Illustration                             | Already direct presentation/slot APIs                                            | Consumer-owned content                                          |
 | Form                                                                                                               | Schema + FormField around normal controls                                        | Bound fields and explicit mapping retain validation/type safety |
 | Toast                                                                                                              | Existing callable/scoped notification API                                        | Explicit client or hook-only provider scopes                    |
 
@@ -164,3 +164,5 @@ stable part selectors are built in. See [navigation guidance](UI_NAVIGATION.md#a
 for the complete data contract and examples. WorkspaceShell can receive an
 AppHeader through its `header` slot; adjust the shell header wrapper classes
 when the AppHeader supplies its own padding and border.
+
+Tag and Badge contracts, localization and migration are documented in [Tag and Badge](UI_TAG_BADGE.md).

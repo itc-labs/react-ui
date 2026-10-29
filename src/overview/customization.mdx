@@ -36,6 +36,6 @@ Tabs, Breadcrumb, Sidebar, Dialog… nhận className trên từng part. DialogC
 
 <Canvas of={Dialogs.CustomClasses} />
 
-Các control khác có story CustomClasses ngay trong nhóm của mình. Component một phần tử như Badge/Icon/Skeleton dùng className; không thêm wrapper hoặc styling prop vào headless root không render DOM.
+Các control khác có story CustomClasses ngay trong nhóm của mình. Component một phần tử như Icon/Skeleton dùng className; không thêm wrapper hoặc styling prop vào headless root không render DOM.
 
 Consumer phải có CSS cho class truyền vào. Khi dùng Tailwind, đảm bảo source của consumer được scan. defineTheme/UIProvider đã hỗ trợ đăng ký icon packs (Components/Icon). CSS token theme generator và bản npm với CSS build sẵn vẫn là công việc riêng.

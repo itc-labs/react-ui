@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { Badge, Button, Card, Input, Textarea } from '../components';
+import { Tag, Button, Card, Input, Textarea } from '../components';
 
 const meta = {
   title: 'Foundations/Review board',
@@ -13,7 +13,7 @@ export const ProposalV1: Story = {
     <div className="mx-auto grid max-w-6xl gap-8 p-6 sm:p-10">
       <header className="grid gap-4 border-b border-line pb-8">
         <div>
-          <Badge tone="warning">Đề xuất v1 · chưa duyệt</Badge>
+          <Tag tone="warning">Đề xuất v1 · chưa duyệt</Tag>
         </div>
         <p className="text-eyebrow font-semibold uppercase text-muted">
           @itclabs/react-ui / Foundations / 01
@@ -151,11 +151,11 @@ export const ProposalV1: Story = {
           hint="Be Vietnam Pro hỗ trợ tiếng Việt, font được phục vụ từ ứng dụng."
         />
         <div className="flex flex-wrap gap-3">
-          <Badge tone="info">Thông tin bổ sung</Badge>
-          <Badge tone="success">Đã lưu</Badge>
-          <Badge tone="warning">Cần kiểm tra độ mới</Badge>
-          <Badge tone="danger">Chưa kết nối được</Badge>
-          <Badge>Chưa có dữ liệu</Badge>
+          <Tag tone="info">Thông tin bổ sung</Tag>
+          <Tag tone="success">Đã lưu</Tag>
+          <Tag tone="warning">Cần kiểm tra độ mới</Tag>
+          <Tag tone="danger">Chưa kết nối được</Tag>
+          <Tag>Chưa có dữ liệu</Tag>
         </div>
       </section>
     </div>
