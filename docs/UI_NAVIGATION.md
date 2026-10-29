@@ -30,7 +30,7 @@ const activeIds = resolveActiveNav(visible, '/settings/profile?tab=details');
 // ['settings', 'profile']
 ```
 
-`matchPath(href, currentPath, { exact?, end? })` compares absolute local paths case-sensitively. Trailing slashes, query strings and hashes are ignored. Empty paths, relative paths, hash-only targets (`#` included), protocol-relative URLs and URLs with a scheme never match. Prefix matching requires a segment boundary: `/admin` matches `/admin/users`, but not `/administrator`. `/` matches every local path by default; use `exact: true` for a home page. `end` is an alias for `exact`; an explicitly supplied `exact` takes precedence. No pattern, dynamic parameter, locale, base-path, percent-decoding or case conversion is performed; the host can provide normalized paths or a custom predicate.
+`matchPath(href, currentPath, { exact?, end? })` compares absolute local paths case-sensitively. Trailing slashes, query strings and hashes are ignored. Empty paths, relative paths, hash-only targets (`#` included), protocol-relative URLs and URLs with a scheme never match. Prefix matching requires a segment boundary: `/admin` matches `/admin/users`, but not `/administrator`. `/` matches only itself by default so a home link is not active everywhere; pass `exact: false` to opt into prefix matching for the root. `end` is an alias for `exact`; an explicitly supplied `exact` takes precedence. No pattern, dynamic parameter, locale, base-path, percent-decoding or case conversion is performed; the host can provide normalized paths or a custom predicate.
 
 `resolveActiveNav(items, currentPath, isActive?)` returns one ID path from root to the selected entry, or `[]`. It walks both `items` and `children`, so groups, sections and submenus can use either collection. IDs must be stable and unique among siblings. Explicit `active: true` takes priority over inferred matches. Explicit `active: false` excludes that entry from selection while its children remain eligible. Otherwise, the optional predicate `(item, currentPath) => boolean` replaces default path matching for each entry. The longest normalized matching href wins within a priority; equal lengths prefer the deeper entry, then the first in traversal order. Multiple explicit active entries use those same tie rules. No input is mutated.
 
@@ -155,3 +155,83 @@ export async function loader({ request }: LoaderFunctionArgs) {
   return loadProfile(session);
 }
 ```
+
+## AppHeader
+
+`AppHeader` and its types (`AppHeaderProps<TAccess>`, `AppHeaderItem<TAccess>`,
+`AppHeaderLink<TAccess>`, `AppHeaderSection<TAccess>`, `AppHeaderClassNames`) are
+exported from the root and modules barrels.
+
+```tsx
+import { AppHeader, type AppHeaderItem } from '@itclabs/react-ui';
+
+const items: AppHeaderItem<string>[] = [
+  { id: 'home', label: 'Home', href: '/', exact: true },
+  {
+    id: 'settings',
+    type: 'dropdown',
+    label: 'Settings',
+    children: [
+      { id: 'profile', label: 'Profile', href: '/settings/profile' },
+      { id: 'team', label: 'Team', href: '/settings/team', access: 'team:read' },
+    ],
+  },
+  {
+    id: 'resources',
+    type: 'mega',
+    label: 'Resources',
+    sections: [
+      {
+        id: 'guides',
+        title: 'Guides',
+        items: [
+          {
+            id: 'start',
+            label: 'Getting started',
+            href: '/guides/start',
+            icon: 'bookOpen',
+          },
+        ],
+      },
+    ],
+  },
+];
+
+<AppHeader
+  brand="Lorem ipsum"
+  brandHref="/"
+  items={items}
+  currentPath="/settings/profile"
+  canAccess={(access) => access === 'team:read'}
+  elevateOnScroll
+  data-testid="primary-header"
+/>;
+```
+
+Links accept optional `description` and `icon`. Dropdowns use `children`; mega
+menus use titled `sections` containing links. Keep IDs stable and unique among
+siblings, including section IDs. `currentPath`, `isActive` and `canAccess` follow
+Sidebar's callback contracts and the shared helpers' precedence. Predicates
+receive original item data; structural sections are not passed to callbacks.
+Filtering runs before matching and removes empty sections and menus. Only the
+winning link receives `aria-current="page"`; its top-level branch is highlighted.
+Both desktop and mobile use the same filtered tree. As with Sidebar, permission
+filtering only controls presentation; the host protects routes and data.
+
+The `lg` breakpoint switches between Radix NavigationMenu and an IconButton that
+opens the kit Drawer. Desktop supports arrow keys and Escape through Radix;
+mobile groups use native keyboard-accessible disclosures, initially expanded
+for the active branch. Selecting a mobile link or changing `currentPath` closes
+the Drawer. Brand and navigation links use UiLink adapters. `brandHref` turns the
+brand slot into a link; `actions` accepts host controls, and `secondary` adds a row.
+`navigationLabel`, `mobileTriggerLabel` and `drawerTitle` override localized defaults.
+
+`sticky` defaults to true and uses `z-header`; `elevateOnScroll` defaults to false
+and adds a shadow after window scrolling without changing dimensions.
+`className` targets the header; `classNames` exposes root, inner, brand, nav,
+item, trigger, content, section, link, actions, mobileTrigger, drawer and secondary.
+Native header attributes and React 19 `ref` are forwarded. The base test ID targets
+the header; parts derive `-inner`, `-brand`, `-nav`, `-actions`, `-mobileTrigger`,
+`-drawer`, `-drawerNav`, `-secondary` and `-item-{id}` with `-trigger`, `-content`
+or `-link` suffixes. Mega sections add `-section-{id}` before child item IDs;
+mobile entries are scoped under `-drawer`. Drawer also derives its standard parts.

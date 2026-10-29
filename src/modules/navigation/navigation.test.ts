@@ -8,7 +8,7 @@ describe('matchPath', () => {
     ['/admin', '/admin/users?sort=name', true],
     ['/admin', '/administrator', false],
     ['/admin', '/Admin', false],
-    ['/', '/admin', true],
+    ['/', '/admin', false],
     ['/', '/', true],
     ['#', '/admin', false],
     ['#section', '/admin', false],
@@ -29,6 +29,7 @@ describe('matchPath', () => {
     expect(matchPath('/admin', '/admin/users', { exact: true })).toBe(false);
     expect(matchPath('/admin', '/admin/users', { end: true })).toBe(false);
     expect(matchPath('/', '/admin', { end: true })).toBe(false);
+    expect(matchPath('/', '/admin', { exact: false })).toBe(true);
     expect(matchPath('/admin', '/admin/users', { exact: false, end: true })).toBe(true);
   });
 });

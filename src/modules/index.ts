@@ -7,3 +7,4 @@ export * from './sidebar';
 export * from './stepper';
 export * from './pagination';
 export * from './navigation';
+export * from './app-header';

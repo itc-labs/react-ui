@@ -11,7 +11,7 @@ export interface NavItem<TAccess = unknown> {
 }
 
 export interface MatchPathOptions {
-  /** Takes precedence over end when both are supplied. */
+  /** Takes precedence over end when both are supplied. `/` is exact unless this is explicitly false. */
   exact?: boolean;
   /** Alias for exact. Prefix matching is the default. */
   end?: boolean;
@@ -34,10 +34,11 @@ export function matchPath(
   const current = pathname(currentPath);
   if (!target || !current) return false;
 
-  return (
-    current === target ||
-    (!(exact ?? end) && (target === '/' || current.startsWith(`${target}/`)))
-  );
+  if (current === target) return true;
+  // The root only matches itself unless prefix matching is requested explicitly.
+  if (target === '/') return (exact ?? end) === false;
+
+  return !(exact ?? end) && current.startsWith(`${target}/`);
 }
 
 /** Explicit active wins; otherwise longest normalized href wins, then deepest, then first. */

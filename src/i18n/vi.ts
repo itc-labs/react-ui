@@ -18,6 +18,8 @@ export const viMessages = {
   'toast.close': 'Đóng thông báo',
   'toast.viewport': 'Thông báo ({hotkey})',
   'breadcrumb.label': 'Đường dẫn',
+  'appHeader.navigation': 'Điều hướng chính',
+  'appHeader.openMenu': 'Mở menu điều hướng',
   'sidebar.label': 'Điều hướng chính',
   'stepper.label': 'Các bước',
   'stepper.completed': ' — Đã hoàn tất',

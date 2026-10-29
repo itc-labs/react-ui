@@ -17,6 +17,8 @@ export const enMessages = {
   'toast.close': 'Dismiss notification',
   'toast.viewport': 'Notifications ({hotkey})',
   'breadcrumb.label': 'Breadcrumb',
+  'appHeader.navigation': 'Main navigation',
+  'appHeader.openMenu': 'Open navigation menu',
   'sidebar.label': 'Main navigation',
   'stepper.label': 'Steps',
   'stepper.completed': ' — Completed',

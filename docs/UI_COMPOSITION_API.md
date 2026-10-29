@@ -150,3 +150,17 @@ CustomControl must forward native props and its ref to the focusable element. Us
 The table-cell example in Storybook Components/DropdownMenu, TableActions demonstrates row-owned actions with stable selectors and a single actual trigger. Visual triggers do not need to forward events; asChild controls do. Native keyboard behavior, custom callbacks and focus restoration remain owned by the underlying trigger primitives.
 
 ModalProvider/useModal and the browser modal facade provide short confirm/alert/custom flows with FIFO, optional stacking and async error feedback. Prefer declarative Dialog for forms and long content. See [UI_MODAL.md](UI_MODAL.md).
+
+### AppHeader
+
+Use `AppHeader` from the root or modules barrel for horizontal navigation with
+`brand` / `brandHref`, `items`, `actions` and optional `secondary` slots. Link
+items carry `href`, dropdowns carry `children`, and mega items carry titled
+`sections` with links. All links use UiLink; route matching and permission
+pruning share Sidebar's `currentPath`, `isActive` and `canAccess` contracts.
+The desktop Radix NavigationMenu collapses into a kit Drawer below `lg`.
+Localized navigation/open labels, React 19 header refs, typed class slots and
+stable part selectors are built in. See [navigation guidance](UI_NAVIGATION.md#appheader)
+for the complete data contract and examples. WorkspaceShell can receive an
+AppHeader through its `header` slot; adjust the shell header wrapper classes
+when the AppHeader supplies its own padding and border.
