@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.2
+
+### Patch Changes
+
+- [#3](https://github.com/itc-labs/react-ui/pull/3) [`404dce7`](https://github.com/itc-labs/react-ui/commit/404dce7a985916495dd72c5e02b9f4d3a53279f2) Thanks [@vungbt](https://github.com/vungbt)! - Simplify the README usage section into small, independent examples (form controls, data-driven menus/dialogs, toasts and confirmations).
+
 ## 0.1.1
 
 ### Patch Changes
