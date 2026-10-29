@@ -178,7 +178,13 @@ export async function storyExamples(
             (item) =>
               `${clause.isTypeOnly && !item.isTypeOnly ? 'type ' : ''}${print(item)}`,
           );
-        if (path.startsWith('.') && isKitStory)
+        // Single glyphs are not root exports; show their public leaf subpath instead.
+        const glyph = /\/icon\/(outline|bold)\/([a-z0-9-]+)$/.exec(path);
+        if (glyph && isKitStory && selected.length)
+          imports.push(
+            `import { ${selected.join(', ')} } from '@itclabs/react-ui/icons/${glyph[1]}/${glyph[2]}';`,
+          );
+        else if (path.startsWith('.') && isKitStory)
           selected.forEach((item) => uiImports.add(item));
         else if (selected.length) parts.push(`{ ${selected.join(', ')} }`);
       }

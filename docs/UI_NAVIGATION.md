@@ -235,3 +235,115 @@ the header; parts derive `-inner`, `-brand`, `-nav`, `-actions`, `-mobileTrigger
 `-drawer`, `-drawerNav`, `-secondary` and `-item-{id}` with `-trigger`, `-content`
 or `-link` suffixes. Mega sections add `-section-{id}` before child item IDs;
 mobile entries are scoped under `-drawer`. Drawer also derives its standard parts.
+
+## TopLoader
+
+`TopLoaderProvider` renders a fixed decorative progress bar and supplies
+`useTopLoader(): TopLoaderController` with `start()`, `set(fraction)`, `inc(amount?)`
+and `done()`. All APIs and types, including `TopLoader`, `TopLoaderProps`,
+`TopLoaderProviderProps`, `TopLoaderClassNames`, `TopLoaderClient`,
+`createTopLoaderClient` and `topLoader`, are exported from the root and components
+barrels. No router is imported by the kit.
+
+Mount one provider at a persistent application root. The default `topLoader`
+facade attaches after mount; calls before mount or after unmount throw without
+queuing SSR work. For independent apps use `client={createTopLoaderClient()}`
+with a stable client created outside rendering. A client binds to one provider;
+use `client={null}` for independent hook-only scopes. Stale hook controllers are
+inert after unmount. Import the hook-free facade directly from the root or
+components barrel; no separate package subpath is required.
+
+`start()` is idempotent while running. `set(n)` clamps finite fractions to
+0.08–0.994, and `set(1)` completes. Invalid numbers are ignored. `inc()` advances
+by a small diminishing fraction; automatic trickling never completes the bar.
+These methods share one activity, not a reference counter: hosts coordinating
+concurrent work must call `done()` after all work finishes. Starting during
+completion cancels the old fade and begins a fresh activity.
+
+The defaults are `delay={100}`, `minimumDuration={300}` (from becoming visible),
+`fadeDuration={180}`, `trickle={true}`, `trickleInterval={800}` and `peg={true}`.
+Instant work finishes before the delay without showing a bar. Completion fills
+the bar, waits for its minimum display time, then fades and hides it. Refs and
+native div attributes target the visual root, including on the provider.
+`height` and `color` accept CSS values; defaults use `h-1`, `text-brand-500` and
+`z-toast` (above `z-header`). `className` targets the fixed root; `classNames`
+exposes root/bar/peg, with caller classes merged last. The base `data-testid`
+targets the root, with `-bar` and `-peg` parts. `data-state` is idle/loading/fading.
+`TopLoader` renders another view of the nearest provider if a separate styled
+view is needed; normally the provider's built-in view is sufficient.
+
+The estimated `role="progressbar"` is always `aria-hidden`: it does not announce
+invented percentages or repeated route events, and owns no keyboard focus or
+text requiring translation. Hosts should set `aria-busy` on affected content and
+provide a localized status message when needed. Reduced motion displays a static
+quarter-width bar, disables trickling, glow and transitions, and retains display
+timing.
+
+With `trackLinks`, document capture observes same-origin HTTP(S) anchor clicks,
+including UiLink adapters. It ignores non-left clicks, modifiers, downloads,
+non-self targets (including inherited base targets), external links, the current
+URL and hash-only changes. It never prevents navigation. Capture lets host
+routers prevent native navigation in their own click handlers. A host that cancels
+navigation must call `done()`; capture cannot predict cancellation. The bar
+finishes when `currentPath` changes. Include search parameters if query-only
+navigation should complete it. Hash-only changes do not start it. Browser back/
+forward and programmatic navigation require manual `start()`; route errors,
+redirects to the same URL and aborted navigation require explicit `done()`.
+
+### Next.js App Router progress
+
+Keep this wrapper in the host application; mount it in a persistent layout.
+
+```tsx
+'use client';
+import type { ReactNode } from 'react';
+import { usePathname } from 'next/navigation';
+import { TopLoaderProvider } from '@itclabs/react-ui';
+
+export function NavigationProgress({ children }: { children: ReactNode }) {
+  const pathname = usePathname();
+  return (
+    <TopLoaderProvider currentPath={pathname ?? ''} trackLinks>
+      {children}
+    </TopLoaderProvider>
+  );
+}
+```
+
+For query navigation, combine pathname with the host's `useSearchParams()` value
+and follow the host framework's Suspense requirements. Programmatic navigation
+can call `topLoader.start()` before `router.push()`; the changed path completes
+it. Call `topLoader.done()` on failure or cancellation.
+
+### React Router progress
+
+Mount inside the host router and outside route elements that unmount on navigation.
+
+```tsx
+import type { ReactNode } from 'react';
+import { useLocation } from 'react-router';
+import { TopLoaderProvider } from '@itclabs/react-ui';
+
+export function NavigationProgress({ children }: { children: ReactNode }) {
+  const { pathname, search } = useLocation();
+  return (
+    <TopLoaderProvider currentPath={pathname + search} trackLinks>
+      {children}
+    </TopLoaderProvider>
+  );
+}
+```
+
+For data loading, use the same controller independently of any router:
+
+```tsx
+const loader = useTopLoader();
+async function refresh() {
+  loader.start();
+  try {
+    await loadData(); // Host-owned request.
+  } finally {
+    loader.done();
+  }
+}
+```
