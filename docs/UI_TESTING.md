@@ -57,3 +57,5 @@ Chart uses an optional figure base plus viewport/plot/state/retry/legend/table s
 Modal calls accept an optional panel base, deriving existing Dialog/AlertDialog parts and Modal ok/error via partTestId. A provider base optionally derives modal-{encodedId}; explicit per-call selectors win. No IDs appear without a base. Query from document/page and use stable explicit IDs for provider-derived selectors. See [UI_MODAL.md](UI_MODAL.md).
 
 Tag and Badge contracts, localization and migration are documented in [Tag and Badge](UI_TAG_BADGE.md).
+
+PageHeader derives `-breadcrumb`, `-content`, `-eyebrow`, `-title`, `-description` and `-actions` from its optional base ID. Consumer content inside slots may supply its own selectors.

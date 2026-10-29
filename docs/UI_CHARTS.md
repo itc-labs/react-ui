@@ -66,18 +66,13 @@ References: [Recharts sizing](https://recharts.github.io/en-US/api/ResponsiveCon
 
 ## Progress bars and distributions
 
-`Progress` and `ProgressRing` are components; `ProgressList` and `SegmentedProgress` are modules. All four and their prop/slot/data types are available from the root entry. The component and module barrels also export their respective APIs. These progress charts use React, Radix and SVG without optional chart peers.
+`Progress` is a component with linear and circular variants; `ProgressList` and `SegmentedProgress` are modules. All three and their prop/slot/data types are available from the root entry. The component and module barrels also export their respective APIs. These progress charts use React, Radix and SVG without optional chart peers.
 
 ```tsx
-import {
-  Progress,
-  ProgressRing,
-  ProgressList,
-  SegmentedProgress,
-} from '@itclabs/react-ui';
+import { Progress, ProgressList, SegmentedProgress } from '@itclabs/react-ui';
 
 <Progress value={6} max={12} label="Tiến độ" showValue />;
-<ProgressRing value={6} max={12} label="Tiến độ" />;
+<Progress variant="circular" value={6} max={12} label="Tiến độ" />;
 <ProgressList
   sort="descending"
   thresholds={[
@@ -101,9 +96,9 @@ import {
 
 `value` is clamped to `[0, max]`; invalid/nonfinite values become zero. `max` defaults to 100 and falls back to 100 for nonpositive/nonfinite inputs. Percentage is clamped value divided by safe max. `null` or omitted value means indeterminate; `indeterminate` can explicitly select either mode. Zero remains determinate. ARIA values match the normalized value/max; indeterminate progress omits `aria-valuenow`. Both have a localized default accessible name, overridable with `label`, `aria-label` or `aria-labelledby`.
 
-`Progress` uses Radix Progress, supports `sm`/`md`/`lg`, `striped`, and `brand` (default), `info`, `success`, `warning`, `danger` tones. `label` is visible. `showValue` displays the locale-formatted percentage. Supplying `valueLabel` also displays a value: a string or `(state: ProgressValue) => string`, where state includes normalized `value`, `max` and `percent` (0–100). The displayed string also supplies `aria-valuetext`, unless explicitly overridden. Indeterminate progress uses the localized loading string.
+`Progress` defaults to `variant="linear"`, uses Radix Progress, supports `sm`/`md`/`lg`, `striped`, and `brand` (default), `info`, `success`, `warning`, `danger` tones. `label` is visible. `showValue` displays the locale-formatted percentage. Supplying `valueLabel` also displays a value: a string or `(state: ProgressValue) => string`, where state includes normalized `value`, `max` and `percent` (0–100). The displayed string also supplies `aria-valuetext`, unless explicitly overridden. Indeterminate progress uses the localized loading string.
 
-`ProgressRing` uses SVG with a numeric pixel `size` (default 96), pixel `thickness` (default 8) and the same tones. Invalid size/thickness fall back to defaults; thickness is capped at half the diameter. Its center defaults to the locale-formatted percentage; `children` replaces it, and `null` hides it. The indeterminate center is empty. Center content is decorative inside the progressbar: keep actions outside, and supply `aria-valuetext` when custom content changes the value description. `label` names the ring without visible caption text.
+`Progress variant="circular"` uses SVG with a numeric pixel `size` (default 96), pixel `thickness` (default 8) and the same tones. Invalid size/thickness fall back to defaults; thickness is capped at half the diameter. Both variants accept `valueLabel` as a string or formatter. Circular size/thickness/children and linear striped/showValue are checked by a discriminated union. Its center defaults to the formatted value; `children` replaces it, and `null` hides it. The indeterminate center is empty. Center content is decorative inside the progressbar: keep actions outside, and supply `aria-valuetext` when custom content changes the value description. `label` names the ring without visible caption text.
 
 Indeterminate linear and ring animations use the existing loading/spin tokens through `motion-safe` utilities. Reduced motion retains a static indicator. Progressbars are passive indicators with no keyboard actions or tab stops; screen readers can inspect their names and values. Hosts own announcements for meaningful value changes.
 
@@ -117,13 +112,12 @@ Default segment colors use the shared categorical chart palette, assigned by sta
 
 ### Classes and selectors
 
-All four forward React 19 root refs, native root props and optional `data-testid`. Direct `className` wins after `classNames.root`. Typed slots:
+All three forward React 19 root refs, native root props and optional `data-testid`. Direct `className` wins after `classNames.root`. Typed slots:
 
-- Progress: root, header, label, value, track, indicator.
-- ProgressRing: root, svg, track, indicator, center.
+- Progress: root, track, indicator; linear also has header, label, value; circular also has svg, center.
 - ProgressList: root, list, row, secondary, empty; nested bars use `progressClassNames`.
 - SegmentedProgress: root, track, segment, summary, legend, legendItem, swatch, label, value, empty.
 
-The base selector targets the progressbar for Progress/ProgressRing, section for ProgressList, and figure for SegmentedProgress. All parts derive suffixes through `partTestId`, with no selectors emitted without a base. Progress and ring suffixes match their non-root slots. Lists use `-list`, `-row-{id}`, `-progress-{id}`, `-secondary-{id}`, `-empty`; nested Progress parts append their suffix to `-progress-{id}`. SegmentedProgress uses `-track`, `-segment-{id}`, `-summary`, `-legend`, `-legend-{id}`, `-swatch-{id}`, `-label-{id}`, `-value-{id}`, `-empty`. Dynamic IDs are URI-encoded.
+The base selector targets the progressbar for both Progress variants, section for ProgressList, and figure for SegmentedProgress. All parts derive suffixes through `partTestId`, with no selectors emitted without a base. Progress variant suffixes match their non-root slots. Lists use `-list`, `-row-{id}`, `-progress-{id}`, `-secondary-{id}`, `-empty`; nested Progress parts append their suffix to `-progress-{id}`. SegmentedProgress uses `-track`, `-segment-{id}`, `-summary`, `-legend`, `-legend-{id}`, `-swatch-{id}`, `-label-{id}`, `-value-{id}`, `-empty`. Dynamic IDs are URI-encoded.
 
 Colocated stories cover editable Playgrounds, tones, states, sizes, thresholds/rankings, custom center content, narrow layouts/long labels and CustomClasses. Tests cover normalization, percent/segment computations, thresholds, ARIA, locale formatting, sorting, stable colors, refs and customization. Browser layout, reduced-motion playback and assistive technology review remain separate from static/unit checks.

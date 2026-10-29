@@ -119,3 +119,23 @@ Application workflows belong to the consuming application. Storybook documents t
 ## Simplified consumption
 
 Use Breadcrumb items, Sidebar items and WorkspaceShell sidebar/header/content slots for normal usage. Compound parts remain advanced escape hatches. The app configures scoped UiLink/UiImage adapters instead of importing framework components in shared UI. See UI_COMPOSITION_API.md for the current API, identity, styling and interaction contracts; this supersedes earlier compound-only examples above.
+
+## PageHeader and AppHeader
+
+PageHeader is the per-page title block: it renders an h1 with optional eyebrow, description, action and breadcrumb slots. AppHeader is the application-wide navigation bar. Supply breadcrumbs explicitly; PageHeader does not infer routes.
+
+```tsx
+<PageHeader
+  breadcrumb={
+    <Breadcrumb
+      items={[
+        { key: 'home', title: 'Home', href: '/' },
+        { key: 'current', title: 'Current page' },
+      ]}
+    />
+  }
+  title="Lorem ipsum"
+/>
+```
+
+The breadcrumb renders above the eyebrow/title inside the content column. `classNames.breadcrumb` styles its wrapper; a base `data-testid` derives `-breadcrumb`, `-content`, `-eyebrow`, `-title`, `-description` and `-actions`. Breadcrumb retains its own navigation semantics and UiLink adapter support. PageHeader forwards the React 19 ref and native div props to its root.

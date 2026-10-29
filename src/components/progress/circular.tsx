@@ -1,29 +1,15 @@
-'use client';
-import type { ComponentProps } from 'react';
-import { useUILocale } from '../../i18n/provider';
-import { cn, partTestId, type SlotClasses, type TestIdProps } from '../common';
-import type { ProgressTone } from '../progress';
-import { normalizeProgress, ringTones } from '../progress/model';
-export type ProgressRingClassNames = SlotClasses<
-  'root' | 'svg' | 'track' | 'indicator' | 'center'
->;
-export type ProgressRingProps = ComponentProps<'div'> &
-  TestIdProps & {
-    value?: number | null;
-    max?: number;
-    indeterminate?: boolean;
-    /** Diameter and stroke thickness in pixels. */
-    size?: number;
-    thickness?: number;
-    tone?: ProgressTone;
-    label?: string;
-    classNames?: ProgressRingClassNames;
-  };
+import { cn, partTestId } from '../common';
+import type { CircularProgressProps, ProgressPresentation } from './types';
+import { ringTones } from './model';
 
-export function ProgressRing({
-  value,
-  max,
-  indeterminate = value == null,
+export function CircularProgress({
+  state,
+  text,
+  indeterminate,
+  variant: _variant,
+  value: _value,
+  max: _max,
+  valueLabel: _valueLabel,
   size = 96,
   thickness = 8,
   tone = 'brand',
@@ -36,9 +22,7 @@ export function ProgressRing({
   'aria-label': ariaLabel,
   'aria-valuetext': ariaValueText,
   ...props
-}: ProgressRingProps) {
-  const { locale, t } = useUILocale();
-  const state = normalizeProgress(value, max);
+}: CircularProgressProps & ProgressPresentation) {
   const diameter = Number.isFinite(size) && size > 0 ? size : 96;
   const stroke =
     Number.isFinite(thickness) && thickness > 0
@@ -46,18 +30,12 @@ export function ProgressRing({
       : Math.min(8, diameter / 2);
   const radius = (diameter - stroke) / 2;
   const circumference = 2 * Math.PI * radius;
-  const text = indeterminate
-    ? t('common.loading')
-    : new Intl.NumberFormat(locale.code, {
-        style: 'percent',
-        maximumFractionDigits: 0,
-      }).format(state.percent / 100);
 
   return (
     <div
       {...props}
       role="progressbar"
-      aria-label={ariaLabel ?? label ?? t('progress.label')}
+      aria-label={ariaLabel ?? label}
       aria-valuemin={0}
       aria-valuemax={state.max}
       aria-valuenow={indeterminate ? undefined : state.value}

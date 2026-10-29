@@ -3,12 +3,13 @@ import { Progress } from './index';
 const meta = {
   title: 'Components/Progress',
   component: Progress,
-  args: { value: 60, label: 'Tiến độ', showValue: true },
+  args: { variant: 'linear', value: 60, label: 'Tiến độ' },
+  argTypes: { variant: { control: 'select', options: ['linear', 'circular'] } },
   parameters: {
     docs: {
       description: {
         component:
-          'Thanh tiến độ theo value/max, hỗ trợ trạng thái chưa xác định và định dạng giá trị theo ngôn ngữ của UIProvider.',
+          'Thanh hoặc vòng tiến độ theo value/max, hỗ trợ trạng thái chưa xác định và định dạng giá trị theo ngôn ngữ của UIProvider.',
       },
     },
   },
@@ -17,6 +18,7 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 export const Playground: Story = { tags: ['usage'] };
 export const Tones: Story = {
+  name: 'Linear tones',
   tags: ['variants'],
   render: () => (
     <div className="grid gap-4">
@@ -27,6 +29,7 @@ export const Tones: Story = {
   ),
 };
 export const Sizes: Story = {
+  name: 'Linear sizes',
   tags: ['variants'],
   render: () => (
     <div className="grid gap-4">
@@ -37,6 +40,7 @@ export const Sizes: Story = {
   ),
 };
 export const States: Story = {
+  name: 'Linear states',
   tags: ['states'],
   render: () => (
     <div className="grid gap-4">
@@ -49,29 +53,85 @@ export const States: Story = {
 };
 export const FormattedValue: Story = {
   tags: ['example'],
-  args: { value: 6, max: 12, valueLabel: ({ value, max }) => `${value} / ${max}` },
-};
-export const LongLabels: Story = {
-  tags: ['example'],
   render: () => (
-    <div className="w-56 max-w-full">
+    <div className="grid gap-4">
       <Progress
-        label="Lorem ipsum dolor sit amet consectetur adipiscing elit"
-        value={35}
-        showValue
+        value={6}
+        max={12}
+        valueLabel={({ value, max }) => `${value} / ${max}`}
       />
+      <Progress
+        variant="circular"
+        value={6}
+        max={12}
+        valueLabel={({ value, max }) => `${value} / ${max}`}
+      />
+    </div>
+  ),
+};
+export const CircularVariants: Story = {
+  name: 'Circular tones and sizes',
+  tags: ['variants'],
+  render: () => (
+    <div className="grid gap-4">
+      <div className="flex flex-wrap gap-4">
+        {(['brand', 'info', 'success', 'warning', 'danger'] as const).map((tone) => (
+          <Progress key={tone} variant="circular" tone={tone} label={tone} value={60} />
+        ))}
+      </div>
+      <div className="flex flex-wrap items-center gap-4">
+        <Progress variant="circular" size={64} thickness={4} value={0} />
+        <Progress variant="circular" size={96} value={60} />
+        <Progress variant="circular" size={144} thickness={12} value={100} />
+      </div>
+    </div>
+  ),
+};
+export const CenterContent: Story = {
+  tags: ['example'],
+  args: {
+    variant: 'circular',
+    value: 6,
+    max: 12,
+    valueLabel: '6 / 12',
+    children: <span className="font-semibold">6 / 12</span>,
+  },
+};
+export const Indeterminate: Story = {
+  tags: ['states'],
+  render: () => (
+    <div className="grid gap-4">
+      <Progress label="Đang tải" indeterminate showValue />
+      <Progress variant="circular" indeterminate />
     </div>
   ),
 };
 export const CustomClasses: Story = {
   tags: ['customization'],
-  args: {
-    className: 'rounded-panel border border-line p-4',
-    classNames: {
-      label: 'font-semibold',
-      track: 'h-3 rounded-control',
-      indicator: 'bg-info-700',
-      value: 'text-info-700',
-    },
-  },
+  render: () => (
+    <div className="grid gap-4">
+      <Progress
+        value={60}
+        label="Tiến độ"
+        showValue
+        className="rounded-panel border border-line p-4"
+        classNames={{
+          label: 'font-semibold',
+          track: 'h-3 rounded-control',
+          indicator: 'bg-info-700',
+          value: 'text-info-700',
+        }}
+      />
+      <Progress
+        variant="circular"
+        value={60}
+        className="rounded-panel bg-canvas"
+        classNames={{
+          center: 'font-semibold text-info-700',
+          indicator: 'text-info-700',
+          track: 'text-info-50',
+        }}
+      />
+    </div>
+  ),
 };
