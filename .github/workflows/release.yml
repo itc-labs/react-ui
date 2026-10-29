@@ -24,8 +24,8 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: pnpm
-      # Trusted publishing requires npm >= 11.5.1.
-      - run: npm install -g npm@11.16.0
+      # Trusted publishing requires npm >= 11.5.1; Node 24 runners ship a newer npm.
+      - run: npm --version
       - run: pnpm install --frozen-lockfile
       - run: pnpm typecheck
       - run: pnpm test
