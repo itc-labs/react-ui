@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.1
+
+### Patch Changes
+
+- [`29717df`](https://github.com/itc-labs/react-ui/commit/29717df90cd213e766b39682b538b66b6c722268) Thanks [@vungbt](https://github.com/vungbt)! - Link the hosted Storybook from the package homepage and README, and publish releases from CI with npm provenance.
+
 ## 0.1.0
 
 Initial public release of `@itclabs/react-ui` under the MIT license.
