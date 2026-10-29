@@ -135,7 +135,6 @@ function ApplicationExample({ topNavigation = false }: { topNavigation?: boolean
       name="Alex Morgan"
       description="alex@example.com"
       collapseOnMobile={false}
-      className={topNavigation ? '' : 'w-full'}
       classNames={{
         details: 'group-data-[collapsed=true]/sidebar:hidden',
         chevron: 'group-data-[collapsed=true]/sidebar:hidden',

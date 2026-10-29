@@ -81,7 +81,7 @@ export function Navbar<TAccess = unknown>({
       data-testid={testId}
       data-elevated={elevateOnScroll && scrolled}
       className={cn(
-        'relative z-header border-b border-line bg-surface text-ink',
+        'relative z-header w-full min-w-0 flex-1 border-b border-line bg-surface text-ink',
         sticky && 'sticky top-0',
         elevateOnScroll && scrolled && 'shadow-panel',
         classNames?.root,
