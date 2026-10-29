@@ -2,6 +2,7 @@
 @import './crop.css' layer(components);
 @import 'react-toastify/ReactToastify.css' layer(toastify);
 @import '../modules/editor/editor.css';
+@import '../modules/calendar/calendar.css';
 
 @layer components {
   .pod-toast {

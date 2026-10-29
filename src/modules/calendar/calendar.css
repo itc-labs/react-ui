@@ -1,0 +1,5 @@
+@layer components {
+  .ui-event-calendar-chip {
+    border-radius: calc(var(--radius-control) / 2);
+  }
+}

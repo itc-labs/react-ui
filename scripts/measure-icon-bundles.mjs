@@ -13,10 +13,14 @@ const entries = {
   Select: 'components/select/index.tsx',
   DataTable: 'modules/data-table/index.tsx',
   Root: 'index.ts',
+  Calendar: 'modules/calendar/index.tsx',
 };
 const sizes = {};
 for (const [name, file] of Object.entries(entries)) {
-  if (process.argv.includes('--budget-only') && !['Icon', 'Button'].includes(name))
+  if (
+    process.argv.includes('--budget-only') &&
+    !['Icon', 'Button', 'Calendar'].includes(name)
+  )
     continue;
   const { outputFiles, metafile } = await build({
     stdin: {
@@ -35,6 +39,15 @@ for (const [name, file] of Object.entries(entries)) {
     metafile: true,
     logLevel: 'silent',
   });
+  if (name === 'Calendar') {
+    const forbidden = Object.keys(metafile.inputs).filter((input) =>
+      /(?:modules\/(?:editor|chart|avatar-upload)\/|node_modules\/.*(?:tiptap|recharts|react-easy-crop))/.test(
+        input,
+      ),
+    );
+    if (forbidden.length)
+      throw new Error(`Calendar imports optional features: ${forbidden}`);
+  }
   const bytes = outputFiles[0].contents;
   sizes[name] = { minified: bytes.length, gzip: gzipSync(bytes).length };
   // Ordinary kit imports must never reach either full runtime catalog.
@@ -45,7 +58,11 @@ for (const [name, file] of Object.entries(entries)) {
     throw new Error(`${name} imports full icon packs: ${fullPacks}`);
 }
 console.log(JSON.stringify(sizes, null, 2));
-for (const [name, limit] of Object.entries({ Icon: 20_000, Button: 30_000 })) {
+for (const [name, limit] of Object.entries({
+  Icon: 20_000,
+  Button: 30_000,
+  Calendar: 130_000,
+})) {
   if (sizes[name].gzip >= limit) {
     throw new Error(`${name}: ${sizes[name].gzip} gzip bytes exceeds ${limit}`);
   }

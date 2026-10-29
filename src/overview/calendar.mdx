@@ -1,0 +1,466 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Overview/Calendar" />
+
+# Calendar
+
+Lịch sự kiện có bốn view: Month, Week, Day và List. Host giữ dữ liệu, tải theo
+khoảng hiển thị, kiểm tra quyền và lưu thay đổi. Xem
+[Modules/Calendar](?path=/docs/modules-calendar--docs) và
+[Templates/CalendarPage](?path=/story/templates-calendarpage--playground) để thử
+lịch trong WorkspaceShell với Sidebar, PageHeader, Dialog và Drawer.
+Phase 1 dùng giờ địa phương; recurrence, cấu hình múi giờ và resource timeline
+thuộc các phase sau.
+
+## Import và dữ liệu
+
+`Calendar` tại subpath là lịch sự kiện; tại root/modules dùng tên `EventCalendar`.
+`Calendar` tại root vẫn là control chọn ngày. Import styles một lần ở host theo
+Overview/Getting started. Không cần provider; mặc định nhãn tiếng Việt.
+Mọi `end` đều **exclusive**: sự kiện kết thúc lúc 00:00 không chiếm ngày kế tiếp.
+Chuỗi ISO chỉ có ngày được đọc ở nửa đêm địa phương. Khi thiếu `end`, sự kiện giờ
+kéo dài một giờ, sự kiện cả ngày kéo dài một ngày. ID phải ổn định và duy nhất.
+
+```tsx
+import { Calendar, type CalendarEvent } from '@itclabs/react-ui/calendar';
+
+const events: CalendarEvent[] = [
+  {
+    id: 'alpha',
+    title: 'Lorem ipsum',
+    start: '2026-10-29T09:00',
+    end: '2026-10-29T10:00',
+    tone: 'info',
+  },
+  {
+    id: 'beta',
+    title: 'Dolor sit amet',
+    start: '2026-10-28',
+    end: '2026-10-30',
+    allDay: true,
+    tone: 'success',
+  },
+];
+
+export function BasicCalendar() {
+  return (
+    <Calendar
+      events={events}
+      defaultDate={new Date(2026, 9, 29)}
+      defaultView="month"
+      dayMaxEvents={3}
+      data-testid="schedule"
+    />
+  );
+}
+```
+
+<table>
+  <thead>
+    <tr>
+      <th>Props</th>
+      <th>Hành vi</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <code>views</code>
+      </td>
+      <td>Danh sách không rỗng; mặc định month, week, day, list.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>weekLayout</code>, <code>weekNumbers</code>
+      </td>
+      <td>Week dùng timeGrid hoặc dayGrid; số tuần ISO là tùy chọn.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>slotDuration</code>, <code>slotMinTime</code>, <code>slotMaxTime</code>
+      </td>
+      <td>
+        Slot tính bằng phút nguyên chia hết 1440; cửa sổ giờ HH:mm hoặc HH:mm:ss, mặc
+        định 00:00–24:00.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>height</code>, <code>scrollTime</code>
+      </td>
+      <td>Giới hạn chiều cao và vị trí cuộn ban đầu của time grid.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>responsiveView</code>
+      </td>
+      <td>
+        Tùy chọn list/day khi container hẹp hơn 640px; khôi phục view đã chọn khi rộng
+        lại.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>businessHours</code>, <code>nowIndicator</code>
+      </td>
+      <td>
+        Tô ngoài giờ làm việc và vạch giờ hiện tại; không thay thế kiểm tra quyền.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>className</code>, <code>classNames</code>
+      </td>
+      <td>Class root và slot có kiểu; xem CustomClasses để tùy chỉnh.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>data-testid</code>, <code>ref</code>
+      </td>
+      <td>Base ID và React 19 ref tới root; part ID chỉ sinh khi có base.</td>
+    </tr>
+  </tbody>
+</table>
+
+## Controlled view và date
+
+Mỗi cặp state có thể controlled riêng. Callback đề xuất giá trị; host phải truyền
+lại props để commit. `onRangeChange` báo khoảng đã commit, gồm cả ngày lân cận ở
+Month và view thực tế khi dùng responsiveView. Mount trong StrictMode có thể gọi
+lại effect; yêu cầu tải dữ liệu cần chịu được việc đó.
+
+```tsx
+'use client';
+import { useState } from 'react';
+import { Calendar, type CalendarView } from '@itclabs/react-ui/calendar';
+
+export function ControlledCalendar() {
+  const [date, setDate] = useState(new Date(2026, 9, 29));
+  const [view, setView] = useState<CalendarView>('week');
+  return (
+    <Calendar
+      date={date}
+      onDateChange={setDate}
+      view={view}
+      onViewChange={setView}
+      views={['month', 'week', 'day', 'list']}
+    />
+  );
+}
+```
+
+## Tải bất đồng bộ theo khoảng
+
+Truyền loader của host, giữ kết quả cũ trong khi `loading`. Hủy request và bỏ kết
+quả cũ khi đổi khoảng hoặc unmount; callback đổi identity đơn thuần không tải lại.
+`loadEvents` nên ổn định (khai báo ngoài component hoặc dùng useCallback).
+
+```tsx
+'use client';
+import { useEffect, useState } from 'react';
+import {
+  Calendar,
+  type CalendarEvent,
+  type CalendarRangeChange,
+} from '@itclabs/react-ui/calendar';
+
+type LoadEvents = (
+  range: CalendarRangeChange,
+  signal: AbortSignal,
+) => Promise<CalendarEvent[]>;
+
+export function RemoteCalendar({ loadEvents }: { loadEvents: LoadEvents }) {
+  const [range, setRange] = useState<CalendarRangeChange | null>(null);
+  const [events, setEvents] = useState<CalendarEvent[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  useEffect(() => {
+    if (!range) return;
+    const controller = new AbortController();
+    setLoading(true);
+    setError('');
+    void (async () => {
+      try {
+        const result = await loadEvents(range, controller.signal);
+        if (!controller.signal.aborted) setEvents(result);
+      } catch {
+        if (!controller.signal.aborted) setError('Unable to load events.');
+      } finally {
+        if (!controller.signal.aborted) setLoading(false);
+      }
+    })();
+    return () => controller.abort();
+  }, [range, loadEvents]);
+  return (
+    <>
+      {error && <p role="alert">{error}</p>}
+      <Calendar events={events} loading={loading} onRangeChange={setRange} />
+    </>
+  );
+}
+```
+
+## Chọn khoảng để tạo sự kiện
+
+`selectable` bật kéo chọn; touch cần giữ 300ms, Escape hủy. Shift+Enter/Space chọn
+ô đang focus. `selectAllow` có thể từ chối khoảng; không tự tạo dữ liệu.
+Host mở Dialog, nhập tiêu đề và thêm event với đúng exclusive end.
+
+```tsx
+'use client';
+import { useState } from 'react';
+import { Button, Dialog, Input } from '@itclabs/react-ui';
+import {
+  Calendar,
+  type CalendarEvent,
+  type CalendarSelect,
+} from '@itclabs/react-ui/calendar';
+
+export function CreateCalendar() {
+  const [events, setEvents] = useState<CalendarEvent[]>([]);
+  const [selection, setSelection] = useState<CalendarSelect | null>(null);
+  const [title, setTitle] = useState('');
+  return (
+    <>
+      <Calendar
+        events={events}
+        selectable
+        onSelect={(range) => {
+          setTitle('');
+          setSelection(range);
+        }}
+      />
+      <Dialog
+        title="New event"
+        description="Enter an event title."
+        open={selection !== null}
+        onOpenChange={(open) => {
+          if (!open) setSelection(null);
+        }}
+      >
+        <form
+          className="space-y-4"
+          onSubmit={(event) => {
+            event.preventDefault();
+            if (!selection || !title.trim()) return;
+            setEvents((current) => [
+              ...current,
+              {
+                id: crypto.randomUUID(),
+                title: title.trim(),
+                start: selection.start,
+                end: selection.end,
+                allDay: selection.allDay,
+              },
+            ]);
+            setSelection(null);
+          }}
+        >
+          <Input
+            label="Event title"
+            value={title}
+            onChange={(event) => setTitle(event.target.value)}
+            required
+          />
+          <Button type="submit">Create event</Button>
+        </form>
+      </Dialog>
+    </>
+  );
+}
+```
+
+## Kéo, resize và optimistic update
+
+`editable` bật move/resize ở Month, Week, Day; List chỉ đọc. Các cờ trên event ưu
+tiên: startEditable/durationEditable → event.editable → calendar.editable.
+`eventAllow` kiểm tra preview và commit. Time grid cho phép kéo giữa hàng cả ngày
+và slot giờ để đổi allDay. Kéo handle cuối event để resize exclusive end.
+
+Calendar giữ proposal trong lúc chờ lưu. Giữ nguyên array `events` đến khi lưu
+thành công; array mới xóa mọi proposal đang chờ. Khi lỗi, gọi `revert()` và báo lỗi.
+Không cập nhật array trước khi gọi revert rồi kỳ vọng revert sửa state của host.
+Ví dụ tuần tự hóa lưu để các proposal không ghi đè nhau; host cần kiểm tra quyền
+lần nữa ở nơi lưu dữ liệu.
+
+```tsx
+'use client';
+import { useRef, useState } from 'react';
+import {
+  Calendar,
+  type CalendarEvent,
+  type NormalizedEvent,
+} from '@itclabs/react-ui/calendar';
+
+type SaveEvent = (event: NormalizedEvent) => Promise<void>;
+
+export function EditableCalendar({
+  initialEvents,
+  saveEvent,
+}: {
+  initialEvents: CalendarEvent[];
+  saveEvent: SaveEvent;
+}) {
+  const [events, setEvents] = useState(initialEvents);
+  const [error, setError] = useState('');
+  const saving = useRef(false);
+  return (
+    <>
+      {error && <p role="alert">{error}</p>}
+      <Calendar
+        events={events}
+        defaultView="week"
+        editable
+        eventAllow={() => !saving.current}
+        onEventChange={async ({ event, revert }) => {
+          saving.current = true;
+          setError('');
+          try {
+            await saveEvent(event);
+            setEvents((current) =>
+              current.map((item) => (item.id === event.id ? event : item)),
+            );
+          } catch {
+            revert();
+            setError('Unable to save changes. Event restored.');
+          } finally {
+            saving.current = false;
+          }
+        }}
+      />
+    </>
+  );
+}
+```
+
+`revert` idempotent; callback cũ không hoàn tác edit mới hoặc array update của host.
+[OptimisticUpdate](?path=/story/modules-calendar--optimistic-update) mô phỏng lỗi
+và toast; [Keyboard](?path=/story/modules-calendar--keyboard) minh họa commit/hủy.
+
+## Render event tùy chỉnh
+
+`renderEvent` nhận event đã normalize, view, timeText, isStart/isEnd. Trả nội dung
+không tương tác vì chip ngoài giữ semantics, focus và edit handles. `data` giữ kiểu
+của host; tone dùng token, color chỉ đổi accent, không thay nền/chữ dễ đọc.
+
+```tsx
+import { Calendar, type CalendarEvent } from '@itclabs/react-ui/calendar';
+
+const events: CalendarEvent<{ note: string }>[] = [
+  {
+    id: 'alpha',
+    title: 'Lorem ipsum',
+    start: '2026-10-29T09:00',
+    data: { note: 'Dolor sit amet.' },
+  },
+];
+
+export function CustomEvents() {
+  return (
+    <Calendar
+      events={events}
+      defaultDate={new Date(2026, 9, 29)}
+      renderEvent={({ event, timeText }) => (
+        <span>
+          <strong>{event.title}</strong> · {timeText}
+          <span className="block text-small">{event.data?.note}</span>
+        </span>
+      )}
+      eventClassName={({ event }) => (event.allDay ? 'font-semibold' : 'border-l-4')}
+      onEventClick={({ event }) => console.log(event.id)}
+    />
+  );
+}
+```
+
+## Locale và ngày bắt đầu tuần
+
+UIProvider đổi nhãn và định dạng Intl; mặc định vi bắt đầu thứ Hai, en bắt đầu Chủ
+nhật. `weekStartsOn` ghi đè rõ ràng (0=Chủ nhật, 6=thứ Bảy). Pure engine mặc định
+thứ Hai; truyền tùy chọn rõ ràng khi tính khoảng ngoài React.
+
+```tsx
+import { UIProvider } from '@itclabs/react-ui';
+import { Calendar } from '@itclabs/react-ui/calendar';
+
+export function EnglishCalendar() {
+  return (
+    <UIProvider locale="en-US">
+      <Calendar weekStartsOn={1} weekNumbers defaultView="week" />
+    </UIProvider>
+  );
+}
+```
+
+## Bàn phím và trạng thái
+
+<table>
+  <thead>
+    <tr>
+      <th>Vị trí</th>
+      <th>Phím</th>
+      <th>Kết quả</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Toolbar</td>
+      <td>Tab, phím mũi tên trong Tabs</td>
+      <td>Điều hướng và đổi view; dưới sm dùng Select.</td>
+    </tr>
+    <tr>
+      <td>Month / dayGrid Week</td>
+      <td>Mũi tên, Home/End, PageUp/PageDown</td>
+      <td>
+        Đổi ngày/tuần, đầu/cuối hàng, tháng trước/sau; host controlled phải commit date
+        để focus đi theo.
+      </td>
+    </tr>
+    <tr>
+      <td>Slot giờ</td>
+      <td>Mũi tên, Home/End</td>
+      <td>Đổi slot/ngày trong khoảng; đầu/cuối cửa sổ giờ.</td>
+    </tr>
+    <tr>
+      <td>Ô ngày hoặc giờ</td>
+      <td>Enter/Space; Shift+Enter/Space</td>
+      <td>onDateClick; chọn một ô nếu selectable.</td>
+    </tr>
+    <tr>
+      <td>Event editable</td>
+      <td>Enter, mũi tên, Shift+mũi tên, Enter</td>
+      <td>
+        Nhấc event, preview move, preview resize, commit một lần. Trái/phải đổi ngày;
+        lên/xuống đổi slot (hoặc ngày ở dayGrid/all-day).
+      </td>
+    </tr>
+    <tr>
+      <td>Đang edit</td>
+      <td>Escape; Tab</td>
+      <td>
+        Hủy; hủy và tiếp tục chuyển focus. Live region đọc range và exclusive end.
+      </td>
+    </tr>
+    <tr>
+      <td>Event / handle</td>
+      <td>Alt+mũi tên</td>
+      <td>Move ngay; focus handle để resize ngay.</td>
+    </tr>
+    <tr>
+      <td>Event clickable</td>
+      <td>Space; Enter khi không editable</td>
+      <td>onEventClick; Enter dành cho edit khi editable.</td>
+    </tr>
+    <tr>
+      <td>Overflow / Dialog / Drawer</td>
+      <td>Escape</td>
+      <td>Đóng overlay và phục hồi focus.</td>
+    </tr>
+  </tbody>
+</table>
+
+`loading` khóa content nhưng vẫn cho đổi khoảng ở toolbar; `disabled` khóa toàn
+lịch. Focus giữ ở event nguồn khi preview, đi theo segment nhìn thấy sau commit;
+nếu event ra ngoài khoảng, focus về region. `onEventClick` có thể mở Drawer như
+CalendarPage. Kiểm tra focus, touch, overlay và kích thước mobile trong browser;
+build Storybook không chạy play functions.

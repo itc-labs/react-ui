@@ -158,6 +158,7 @@ for (const subpath of [
   './components',
   './modules',
   './navigation',
+  './calendar',
   './templates',
   './theme',
   './theme/provider',
@@ -224,3 +225,49 @@ assert.doesNotMatch(
   await readFile(`${root}/dist/modules/navigation/index.js`, 'utf8'),
   /use client|from ['"]react/,
 );
+
+const calendar = await import(
+  pathToFileURL(resolve(root, packed.exports['./calendar'].import)).href
+);
+const calendarStart = new Date(2026, 9, 29, 10);
+const calendarEvent = calendar.normalizeEvent({
+  id: 'event',
+  title: '',
+  start: calendarStart,
+});
+assert.equal(calendar.snapTime(new Date(2026, 9, 29, 10, 15)).getMinutes(), 30);
+assert.equal(calendar.fractionToTime(calendarStart, 0.5).getHours(), 12);
+assert.equal(calendar.moveEvent(calendarEvent, { minutes: 30 }).start.getMinutes(), 30);
+assert.equal(
+  calendar.resizeEvent(calendarEvent, 'end', calendarStart).end.getTime() -
+    calendarStart.getTime(),
+  30 * 60_000,
+);
+assert.equal(
+  calendar.rangeFromSelection(calendarStart, calendarStart).end.getTime() -
+    calendarStart.getTime(),
+  30 * 60_000,
+);
+
+// Every transitive engine module must stay usable without React or a client boundary.
+const calendarVisited = new Set();
+
+async function checkCalendarGraph(path) {
+  if (calendarVisited.has(path)) return;
+  calendarVisited.add(path);
+  const code = await readFile(path, 'utf8');
+  assert.doesNotMatch(code, /['"]use client['"]/);
+  for (const [, specifier] of code.matchAll(/from\s*["']([^"']+)["']/g)) {
+    if (specifier.startsWith('.')) {
+      await checkCalendarGraph(resolve(path, '..', specifier));
+    } else {
+      assert.ok(
+        specifier === 'date-fns' || specifier === '@date-fns/tz',
+        `Unexpected calendar dependency: ${specifier}`,
+      );
+    }
+  }
+}
+
+assert.equal(typeof calendar.Calendar, 'function');
+await checkCalendarGraph(resolve(root, 'dist/modules/calendar/engine/index.js'));

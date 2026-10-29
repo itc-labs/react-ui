@@ -12,3 +12,18 @@ export * from './navbar';
 export * from './progress-list';
 export * from './segmented-progress';
 export * from './user-menu';
+export * from './calendar/engine';
+export { Calendar as EventCalendar } from './calendar';
+export type {
+  CalendarProps as EventCalendarProps,
+  CalendarClassNames as EventCalendarClassNames,
+  CalendarToolbarContext,
+  CalendarRangeChange,
+  CalendarDateClick,
+  CalendarSelect,
+  CalendarEventChange,
+  CalendarEventChangeInfo,
+  CalendarEventClick,
+  CalendarBusinessHours,
+  CalendarEventRenderContext,
+} from './calendar';

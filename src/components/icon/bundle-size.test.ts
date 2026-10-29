@@ -11,4 +11,5 @@ it('keeps ordinary imports free of full catalogs and within gzip budgets', () =>
   ) as Record<string, { minified: number; gzip: number }>;
   expect(sizes.Icon!.gzip).toBeLessThan(20_000);
   expect(sizes.Button!.gzip).toBeLessThan(30_000);
+  expect(sizes.Calendar!.gzip).toBeLessThan(130_000);
 }, 30_000);
