@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Card } from './index';
-import { Badge } from '../badge';
+import { Tag } from '../tag';
 const meta = {
   parameters: {
     docs: {
@@ -26,7 +26,7 @@ export const Playground: Story = { tags: ['usage'] };
 export const WithSlots: Story = {
   tags: ['example'],
   args: {
-    action: <Badge tone="brand">Preview</Badge>,
+    action: <Tag tone="brand">Preview</Tag>,
     footer: 'Ut enim ad minim veniam.',
   },
 };
@@ -45,7 +45,7 @@ export const Composition: Story = {
           dolore magna aliqua.
         </p>
       </Card>
-      <Card title="Duis aute irure" action={<Badge tone="warning">Cần review</Badge>}>
+      <Card title="Duis aute irure" action={<Tag tone="warning">Cần review</Tag>}>
         <p>
           Dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
           pariatur.

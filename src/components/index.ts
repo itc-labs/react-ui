@@ -3,6 +3,7 @@ export * from './button';
 export * from './input';
 export * from './textarea';
 export * from './badge';
+export * from './tag';
 export * from './card';
 export * from './skeleton';
 export * from './icon';
@@ -43,3 +44,6 @@ export * from './accordion';
 export * from './link-image-provider';
 
 export * from './modal';
+
+export * from './progress';
+export * from './top-loader';

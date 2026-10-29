@@ -4,6 +4,9 @@ import * as Empty from '../modules/empty-state/empty-state.stories';
 import * as Tables from '../modules/data-table/data-table.stories';
 import * as Forms from '../modules/form/form.stories';
 
+import * as ProgressLists from '../modules/progress-list/progress-list.stories';
+import * as Segments from '../modules/segmented-progress/segmented-progress.stories';
+
 <Meta title="Overview/Modules" />
 
 # Modules
@@ -53,3 +56,10 @@ Selection bám theo row ID ổn định và được giữ khi đổi trang, s�
 <Canvas of={Forms.ComposedFields} />
 
 FormField nối control với giá trị và validation. Xem trang Form để so sánh cách ghép field trực tiếp và các bound field từ useAppForm.
+
+## Progress charts
+
+ProgressList biểu diễn các mục tiêu bằng thanh ngang; SegmentedProgress hiển thị phân bố theo tổng với chú giải và tóm tắt văn bản.
+
+<Canvas of={ProgressLists.Thresholds} />
+<Canvas of={Segments.Playground} />

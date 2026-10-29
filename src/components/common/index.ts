@@ -5,7 +5,14 @@ const merge = extendTailwindMerge({
   extend: {
     theme: {
       spacing: ['control-sm', 'control-md', 'control-lg'],
-      container: ['dialog', 'drawer', 'popover', 'sidebar', 'workspace'],
+      container: [
+        'dialog',
+        'drawer',
+        'popover',
+        'sidebar',
+        'sidebar-collapsed',
+        'workspace',
+      ],
       text: [
         'heading',
         'title',

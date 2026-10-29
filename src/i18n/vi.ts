@@ -1,5 +1,14 @@
 import type { UIMessages } from './types';
 export const viMessages = {
+  'progress.label': 'Tiến độ',
+  'progress.listLabel': 'Tổng quan tiến độ',
+  'progress.segmentsLabel': 'Phân bố',
+  'progress.empty': 'Chưa có dữ liệu tiến độ.',
+  'progress.total': 'Tổng: {total}',
+
+  'tag.remove': 'Xóa {label}',
+  'badge.dot': 'Thông báo mới',
+  'badge.count': { other: '{count} thông báo chưa đọc' },
   'common.loading': 'Đang tải',
   'common.loadingMore': 'Đang tải thêm…',
   'common.required': ' (bắt buộc)',
@@ -18,6 +27,12 @@ export const viMessages = {
   'toast.close': 'Đóng thông báo',
   'toast.viewport': 'Thông báo ({hotkey})',
   'breadcrumb.label': 'Đường dẫn',
+  'userMenu.open': 'Mở menu tài khoản của {name}',
+  'navbar.navigation': 'Điều hướng chính',
+  'navbar.openMenu': 'Mở menu điều hướng',
+  'sidebar.collapse': 'Thu gọn thanh bên',
+  'sidebar.expand': 'Mở rộng thanh bên',
+  'sidebar.open': 'Mở thanh bên',
   'sidebar.label': 'Điều hướng chính',
   'stepper.label': 'Các bước',
   'stepper.completed': ' — Đã hoàn tất',

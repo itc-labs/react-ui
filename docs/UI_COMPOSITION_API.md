@@ -19,7 +19,7 @@ Ordinary usage should express intent through one component and its data/slots. C
 | Accordion                                                                                                          | Existing items + type + variant                                                  | Existing item/trigger/content parts                             |
 | Select, RadioGroup, Tree, Stepper, DataTable, Pagination                                                           | Already data-driven single components                                            | Typed callbacks/render slots as appropriate                     |
 | Input family, Textarea, Button, IconButton, Avatar, UploadField, AvatarUpload, Calendar/date/time controls, Editor | Already direct prop APIs                                                         | Existing class slots and bound Form fields                      |
-| Card, PageHeader, Alert, EmptyState, Badge, Skeleton, Spinner, Icon, Illustration                                  | Already direct presentation/slot APIs                                            | Consumer-owned content                                          |
+| Card, PageHeader, Alert, EmptyState, Tag, Badge, Skeleton, Spinner, Icon, Illustration                             | Already direct presentation/slot APIs                                            | Consumer-owned content                                          |
 | Form                                                                                                               | Schema + FormField around normal controls                                        | Bound fields and explicit mapping retain validation/type safety |
 | Toast                                                                                                              | Existing callable/scoped notification API                                        | Explicit client or hook-only provider scopes                    |
 
@@ -102,6 +102,8 @@ function AsyncConfirmation({ save }: { save: () => Promise<void> }) {
 
 Menu action items and submenu triggers accept `tone?: 'default' | 'danger'` (default: `default`). Danger uses `text-danger-700` and `data-[highlighted]:bg-danger-50`; existing `classNames.item`, entry `className` and `classNames.submenuTrigger` overrides still merge after tone styles. Tone changes presentation only; confirmation and deletion remain host-owned.
 
+`DropdownMenu` also accepts optional `header` content above the generated items, styled through `classNames.header` and identified by `-header`. `UserMenu` in the modules barrel composes this menu with an Avatar/name trigger; it accepts the same `DropdownMenuEntry[]` items, optional header, compact and responsive modes. See [navigation](UI_NAVIGATION.md).
+
 Menu checkboxes are host-controlled. They close by default; closeOnSelect=false keeps the menu open while updating the value. Entries use stable id; groups/submenus provide nested items. href actions use UiLink. Ordinary action onSelect can prevent default using the primitive's event semantics. No array indexes or translated labels become IDs.
 
 Tabs preserve visited panels by default. Disabled options are skipped when choosing the initial generated tab. Controlled value remains host-owned; schema/data changes do not introduce remount keys. Sidebar's active state stays host-owned, active descendants reveal their branch, and optional submenu open/onOpenChange keeps a branch controlled.
@@ -150,3 +152,19 @@ CustomControl must forward native props and its ref to the focusable element. Us
 The table-cell example in Storybook Components/DropdownMenu, TableActions demonstrates row-owned actions with stable selectors and a single actual trigger. Visual triggers do not need to forward events; asChild controls do. Native keyboard behavior, custom callbacks and focus restoration remain owned by the underlying trigger primitives.
 
 ModalProvider/useModal and the browser modal facade provide short confirm/alert/custom flows with FIFO, optional stacking and async error feedback. Prefer declarative Dialog for forms and long content. See [UI_MODAL.md](UI_MODAL.md).
+
+### Navbar
+
+Use `Navbar` from the root or modules barrel for horizontal navigation with
+`brand` / `brandHref`, `items`, `actions` and optional `secondary` slots. Link
+items carry `href`, dropdowns carry `children`, and mega items carry titled
+`sections` with links. All links use UiLink; route matching and permission
+pruning share Sidebar's `currentPath`, `isActive` and `canAccess` contracts.
+The desktop Radix NavigationMenu collapses into a kit Drawer below `lg`.
+Localized navigation/open labels, React 19 header refs, typed class slots and
+stable part selectors are built in. See [navigation guidance](UI_NAVIGATION.md#navbar)
+for the complete data contract and examples. WorkspaceShell can receive an
+Navbar through its `header` slot; adjust the shell header wrapper classes
+when the Navbar supplies its own padding and border.
+
+Tag and Badge contracts, localization and migration are documented in [Tag and Badge](UI_TAG_BADGE.md).

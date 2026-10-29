@@ -1,3 +1,4 @@
+'use client';
 import { interactiveTrigger } from '../common/interactive-trigger';
 import { Button, type ButtonProps } from '../button';
 import {
@@ -8,6 +9,8 @@ import {
   type IconVariant,
 } from '../icon';
 import { cn } from '../common';
+import { Badge, isBadgeVisible, type BadgeProps } from '../badge';
+import { useUILocale } from '../../i18n/provider';
 
 export function IconButton({
   label,
@@ -19,6 +22,7 @@ export function IconButton({
   iconClassName,
   iconPack,
   iconVariant,
+  badge,
   ...props
 }: Omit<ButtonProps, 'children' | 'aria-label'> & {
   label: string;
@@ -26,14 +30,37 @@ export function IconButton({
   iconPack?: string | IconPack;
   iconVariant?: IconVariant;
   iconClassName?: string | undefined;
+  /** Count or Badge options anchored to the glyph, so it stays close even on ghost buttons. */
+  badge?: number | Omit<BadgeProps, 'children'>;
 }) {
+  const { t } = useUILocale();
+  const badgeProps = typeof badge === 'number' ? { count: badge } : badge;
+  // The button's accessible name carries the badge text; the badge's own sr-only label stays hidden.
+  const badgeText =
+    badgeProps && isBadgeVisible(badgeProps)
+      ? (badgeProps.label ??
+        (badgeProps.dot
+          ? t('badge.dot')
+          : t('badge.count', { count: badgeProps.count! })))
+      : undefined;
+  const glyph = (
+    <Icon
+      {...(iconVariant ? { variant: iconVariant } : {})}
+      className={iconClassName}
+      {...(typeof icon === 'string'
+        ? { name: icon, ...(iconPack ? { pack: iconPack } : {}) }
+        : { glyph: icon })}
+      size={size === 'lg' ? 20 : 16}
+    />
+  );
+
   return (
     <Button
       {...props}
       {...(classNames ? { classNames } : {})}
       loading={loading}
       size={size}
-      aria-label={label}
+      aria-label={badgeText ? `${label}, ${badgeText}` : label}
       className={cn(
         size === 'sm'
           ? 'size-control-sm p-0'
@@ -44,16 +71,21 @@ export function IconButton({
         className,
       )}
     >
-      {!loading && (
-        <Icon
-          {...(iconVariant ? { variant: iconVariant } : {})}
-          className={iconClassName}
-          {...(typeof icon === 'string'
-            ? { name: icon, ...(iconPack ? { pack: iconPack } : {}) }
-            : { glyph: icon })}
-          size={size === 'lg' ? 20 : 16}
-        />
-      )}
+      {!loading &&
+        (badgeProps ? (
+          <Badge
+            size="sm"
+            {...badgeProps}
+            classNames={{
+              ...badgeProps.classNames,
+              label: cn('hidden', badgeProps.classNames?.label),
+            }}
+          >
+            {glyph}
+          </Badge>
+        ) : (
+          glyph
+        ))}
     </Button>
   );
 }

@@ -9,7 +9,7 @@ import {
   BreadcrumbSeparator,
   BreadcrumbLink,
 } from '../../components/breadcrumb';
-import { Badge } from '../../components/badge';
+import { Tag } from '../../components/tag';
 import { Button } from '../../components/button';
 
 const meta = {
@@ -20,7 +20,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'Shell dùng slot sidebar/body/header/main. Không gắn Next, registry hay nội dung Explore. Component không dùng hook; host quyết định navigation và route. Không có collapse/drawer behavior trong phiên bản này.',
+          'Shell dùng slot sidebar/body/header/main. Không gắn Next, registry hay nội dung Explore. Host quyết định navigation và route; lưới desktop tự theo trạng thái thu gọn của Sidebar.',
       },
     },
   },
@@ -64,7 +64,7 @@ function ShellExample({ withSidebar = true }: { withSidebar?: boolean }) {
               { key: 'current', title: 'Trang hiện tại' },
             ]}
           />
-          <Badge>Local demo</Badge>
+          <Tag>Local demo</Tag>
         </>
       }
       content={
@@ -114,7 +114,7 @@ export const CustomClasses: Story = {
       header={
         <>
           <span>Lorem ipsum</span>
-          <Badge>Example</Badge>
+          <Tag>Example</Tag>
         </>
       }
       content={<p>Dolor sit amet, consectetur adipiscing elit.</p>}

@@ -3,6 +3,8 @@ import { useRef, useState } from 'react';
 import { expect, userEvent, waitFor, within } from 'storybook/test';
 import {
   Sidebar,
+  type SidebarProps,
+  type SidebarEntry,
   SidebarGroup,
   SidebarItem,
   SidebarNav,
@@ -12,6 +14,11 @@ import {
   SidebarSubmenuRow,
 } from './index';
 import { Icon } from '../../components/icon';
+import { HomeIcon } from '../../components/icon/outline/home';
+import { FolderIcon } from '../../components/icon/outline/folder';
+import { SettingsIcon } from '../../components/icon/outline/settings';
+import { UserMenu } from '../user-menu';
+import { WorkspaceShell } from '../../templates/workspace-shell';
 import { Button } from '../../components/button';
 import { UiLink } from '../../components/link-image-provider';
 
@@ -22,7 +29,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'Truyền items để dựng nhóm, link và submenu; không cần ghép các wrapper. Ứng dụng cung cấp active và href; link dùng adapter của host. Compound parts dành cho bố cục hoặc ref tùy chỉnh.',
+          'Truyền items để dựng nhóm, link và submenu; không cần ghép các wrapper. Host cung cấp currentPath và canAccess để chọn link và lọc quyền; active ghi đè kết quả và link dùng adapter của host. Compound parts dành cho bố cục hoặc ref tùy chỉnh.',
       },
     },
   },
@@ -291,21 +298,30 @@ export const States: Story = {
 };
 
 export const LongLabel: Story = {
-  tags: ['example'],
+  tags: ['!dev', '!autodocs', 'regression'],
   render: () => <SimpleSidebarExample longLabel />,
 };
 
+async function navigationCanvas(canvasElement: HTMLElement) {
+  if (window.innerWidth >= 1024) return within(canvasElement);
+  await userEvent.click(
+    within(canvasElement).getByRole('button', { name: 'Mở thanh bên' }),
+  );
+
+  return within(within(canvasElement.ownerDocument.body).getByRole('dialog'));
+}
+
 export const LinkComposition: Story = {
-  tags: ['example'],
+  tags: ['!dev', '!autodocs', 'regression'],
   render: () => <SidebarExample asChild />,
   play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement);
+    const canvas = await navigationCanvas(canvasElement);
     const nav = canvas.getByRole('navigation', { name: 'Điều hướng chính' });
     const current = within(nav).getByRole('link', { name: 'Trang hiện tại' });
     await expect(current).toHaveAttribute('aria-current', 'page');
     await expect(current.querySelector('svg')).toBeInTheDocument();
     await expect(nav.querySelectorAll('a')).toHaveLength(2);
-    await userEvent.tab();
+    canvas.getByRole('link', { name: 'Tổng quan' }).focus();
     await userEvent.tab();
     await expect(current).toHaveFocus();
   },
@@ -315,11 +331,11 @@ export const Submenu: Story = {
   tags: ['example'],
   render: () => <SubmenuExample />,
   play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement);
+    const canvas = await navigationCanvas(canvasElement);
     const trigger = canvas.getByRole('button', { name: 'Explore' });
     await expect(trigger).toHaveAttribute('aria-expanded', 'false');
     await expect(canvas.queryByRole('link', { name: 'Item' })).not.toBeInTheDocument();
-    await userEvent.tab();
+    canvas.getByRole('link', { name: 'Tổng quan' }).focus();
     await userEvent.tab();
     await expect(trigger).toHaveFocus();
     await userEvent.keyboard('{Enter}');
@@ -336,10 +352,10 @@ export const Submenu: Story = {
 };
 
 export const NestedSubmenus: Story = {
-  tags: ['example'],
+  tags: ['!dev', '!autodocs', 'regression'],
   render: () => <SubmenuExample active nested />,
   play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement);
+    const canvas = await navigationCanvas(canvasElement);
     const parent = canvas.getByRole('button', { name: 'Explore' });
     const nested = canvas.getByRole('button', { name: 'Category' });
     await expect(parent).toHaveAttribute('aria-expanded', 'true');
@@ -367,7 +383,7 @@ export const NestedSubmenus: Story = {
 };
 
 export const ParentLinkAndToggle: Story = {
-  tags: ['example'],
+  tags: ['!dev', '!autodocs', 'regression'],
   render: () => <ParentLinkExample />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
@@ -381,7 +397,7 @@ export const ParentLinkAndToggle: Story = {
 };
 
 export const ControlledSubmenu: Story = {
-  tags: ['example'],
+  tags: ['!dev', '!autodocs', 'regression'],
   render: () => <ControlledSubmenuExample />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
@@ -410,11 +426,224 @@ export const ControlledSubmenu: Story = {
   },
 };
 
+export const RouteActive: Story = {
+  tags: ['!dev', '!autodocs', 'regression'],
+  args: { currentPath: '/settings/team' },
+  argTypes: { currentPath: { control: 'text' } },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Đổi currentPath trong Controls để chọn link khớp sâu nhất và mở nhánh chứa trang hiện tại.',
+      },
+    },
+  },
+  render: (args: SidebarProps) => (
+    <Sidebar
+      {...args}
+      items={[
+        { id: 'home', label: 'Tổng quan', href: '/', exact: true },
+        {
+          id: 'settings',
+          type: 'submenu',
+          label: 'Cài đặt',
+          href: '/settings',
+          items: [
+            { id: 'team', label: 'Nhóm', href: '/settings/team' },
+            { id: 'profile', label: 'Hồ sơ', href: '/settings/profile' },
+          ],
+        },
+      ]}
+    />
+  ),
+};
+
+export const PermissionFiltered: Story = {
+  tags: ['!dev', '!autodocs', 'regression'],
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'canAccess lọc mục và bỏ nhóm rỗng. Host vẫn phải bảo vệ route và dữ liệu trên server.',
+      },
+    },
+  },
+  render: () => (
+    <Sidebar
+      currentPath="/settings/profile"
+      canAccess={(access) => access === 'profile:read'}
+      items={[
+        { id: 'home', label: 'Tổng quan', href: '/', exact: true },
+        {
+          id: 'profile',
+          label: 'Hồ sơ',
+          href: '/settings/profile',
+          access: 'profile:read',
+        },
+        {
+          id: 'admin',
+          type: 'group',
+          label: 'Quản trị',
+          items: [
+            {
+              id: 'users',
+              label: 'Người dùng',
+              href: '/admin/users',
+              access: 'users:read',
+            },
+          ],
+        },
+      ]}
+    />
+  ),
+};
+
+const railItems: SidebarEntry[] = [
+  {
+    id: 'main',
+    type: 'group',
+    label: 'Main',
+    items: [
+      {
+        id: 'overview',
+        label: 'Overview',
+        href: '#overview',
+        icon: HomeIcon,
+        active: true,
+      },
+      { id: 'files', label: 'Files', href: '#files', icon: FolderIcon, badge: 24 },
+      {
+        id: 'settings',
+        type: 'submenu',
+        label: 'Settings',
+        icon: SettingsIcon,
+        badge: { count: 3, tone: 'info' },
+        items: [
+          { id: 'profile', label: 'Profile', href: '#profile' },
+          { id: 'team', label: 'Team', href: '#team' },
+        ],
+      },
+    ],
+  },
+];
+
+function RailExample({
+  controlled = false,
+  initialCollapsed = false,
+}: {
+  controlled?: boolean;
+  initialCollapsed?: boolean;
+}) {
+  const [collapsed, setCollapsed] = useState(initialCollapsed);
+
+  return (
+    <WorkspaceShell
+      className="min-h-0"
+      sidebar={
+        <Sidebar
+          {...(controlled
+            ? { collapsed, onCollapsedChange: setCollapsed }
+            : { defaultCollapsed: initialCollapsed })}
+          toggleShortcut="mod+b"
+          header={{
+            logo: <HomeIcon />,
+            title: 'Lorem ipsum',
+            subtitle: 'Workspace',
+            href: '#overview',
+          }}
+          footer={
+            <UserMenu
+              name="Alex Morgan"
+              description="alex@example.com"
+              collapseOnMobile={false}
+              className="w-full"
+              classNames={{
+                details: 'group-data-[collapsed=true]/sidebar:hidden',
+                chevron: 'group-data-[collapsed=true]/sidebar:hidden',
+              }}
+              items={[
+                { id: 'profile', label: 'Profile', href: '#profile' },
+                { id: 'logout', label: 'Sign out', onSelect: () => {} },
+              ]}
+            />
+          }
+          items={railItems}
+        />
+      }
+      content={
+        <div className="grid gap-4">
+          <h2 className="text-title font-semibold">Lorem ipsum</h2>
+          <p className="text-muted">Dolor sit amet, consectetur adipiscing elit.</p>
+          <p className="text-ui-sm text-muted">
+            Dùng nút thu gọn hoặc Mod+B. Dưới lg, mở điều hướng bằng nút menu.
+          </p>
+          {controlled && (
+            <Button variant="secondary" onClick={() => setCollapsed(!collapsed)}>
+              Toggle sidebar
+            </Button>
+          )}
+        </div>
+      }
+    />
+  );
+}
+
+export const WithHeaderFooter: Story = {
+  tags: ['example'],
+  render: () => <RailExample />,
+};
+export const IconsAndCounts: Story = {
+  tags: ['variants'],
+  render: () => <Sidebar items={railItems} />,
+};
+export const Collapsible: Story = {
+  tags: ['example'],
+  render: () => <RailExample controlled />,
+};
+export const CollapsedFlyout: Story = {
+  tags: ['example'],
+  render: () => <RailExample initialCollapsed />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    if (window.innerWidth < 1024) return;
+    const trigger = canvas.getByRole('button', { name: /Settings/ });
+    await userEvent.click(trigger);
+    const page = within(canvasElement.ownerDocument.body);
+    await expect(page.getByRole('dialog', { name: 'Settings' })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Profile' })).toHaveFocus();
+    await userEvent.keyboard('{Escape}');
+    await expect(trigger).toHaveFocus();
+  },
+};
+export const Mobile: Story = {
+  tags: ['example'],
+  parameters: {
+    layout: 'fullscreen',
+    docs: {
+      description: {
+        story:
+          'Mở canvas ở chiều rộng dưới lg để thử Drawer, phím Escape và trả focus về nút menu.',
+      },
+    },
+  },
+  render: () => <RailExample />,
+  play: async ({ canvasElement }) => {
+    if (window.innerWidth >= 1024) return;
+    const canvas = within(canvasElement);
+    const trigger = canvas.getByRole('button', { name: 'Mở thanh bên' });
+    await userEvent.click(trigger);
+    const page = within(canvasElement.ownerDocument.body);
+    await expect(page.getByRole('dialog')).toBeVisible();
+    await userEvent.keyboard('{Escape}');
+    await expect(trigger).toHaveFocus();
+  },
+};
+
 export const CustomClasses: Story = {
   tags: ['customization'],
   render: () => (
     <Sidebar
-      className="max-w-xs flex-col items-stretch rounded-panel border"
+      className="flex max-w-xs flex-col items-stretch rounded-panel border"
       header="Lorem ipsum"
       footer="Dolor sit amet."
       classNames={{

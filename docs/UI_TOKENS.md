@@ -12,7 +12,7 @@ Source of truth: `src/theme/tokens.css`. Existing semantic colors, Be Vietnam Pr
 | Motion duration | control 150ms, fast 120ms, normal 180ms, slow 240ms, exit 140ms, instant-exit 100ms          | Transitions and overlay entry/exit      |
 | Loop duration   | loading 1250ms, spin 1000ms, pulse 2000ms                                                    | Table progress, Spinner, Skeleton       |
 | Easing          | enter, exit, standard, loop                                                                  | Shared motion curves                    |
-| Global layers   | header 100, overlay 300, modal 301, dropdown/popover 400, select 450, tooltip 500, toast 600 | Portalled layers and app header         |
+| Global layers   | header 100, overlay 300, modal 301, dropdown/popover 400, select 450, tooltip 500, toast 600 | Portalled layers and Navbar             |
 
 Default transition duration/easing and animation utilities reference the shared motion tokens. Dropdown uses the popover layer alias. React Select styles reference CSS variables directly, so changing control height/layer does not require editing JavaScript numbers. cn/tailwind-merge recognizes the custom spacing/container tokens for consumer overrides.
 
@@ -106,7 +106,7 @@ References: [Radix CSS animation lifecycle](https://www.radix-ui.com/primitives/
 
 ## Shared workspace containers
 
-`--container-sidebar: 13rem` (208px), `--container-workspace: 100rem` (1600px). WorkspaceShell uses these for the desktop grid and maximum width. Override via theme scope; custom container names participate in cn/max-width merging. See UI_LAYOUT.md.
+`--container-sidebar: 13rem` (208px), `--container-sidebar-collapsed: 4rem` (64px), `--container-workspace: 100rem` (1600px). WorkspaceShell uses these for the desktop grid and maximum width. Override via theme scope; custom container names participate in cn/max-width merging. See UI_LAYOUT.md.
 
 Sidebar submenu height/chevron animations reuse motion-duration-normal/exit/control and shared enter/exit easings. The reduced-motion rule disables disclosure animation; nested parents return to auto height after entry so deeper items are not clipped.
 
@@ -172,7 +172,7 @@ Keep `@theme static`, without `inline`. Tailwind emits the entire token set and 
 
 `--color-info-50: #eaf3f8` and `--color-info-700: #245b79` are the informational status pair, available through `themeColors.info` / `useTheme().colors.info` at shades 50 and 700. Contrast: info-700 on info-50 **6.56:1**, info-700 on surface **7.17:1**, and white on info-700 **7.37:1**; all meet WCAG AA for normal text. No additional info shades are defined.
 
-Alert defaults to `tone="info"`: panels use `border-info-700/20 bg-info-50 text-info-700`, and inline feedback uses `text-info-700`. Use `tone="neutral"` to retain the previous notice appearance (`border-line bg-brand-50 text-ink` for panels, `text-muted` inline). Badge adds `tone="info"` alongside its existing neutral/brand/status options. Toast info uses an info-700 icon and border on its existing surface background; loading spinners remain neutral. The scoped `.pod-toast` rule maps `--toastify-color-info`, `--toastify-icon-color-info` and `--toastify-color-progress-info` directly to `--color-info-700`. These aliases are assigned in the toast scope so they do not inherit Toastify's default blue values resolved at :root.
+Alert defaults to `tone="info"`: panels use `border-info-700/20 bg-info-50 text-info-700`, and inline feedback uses `text-info-700`. Use `tone="neutral"` to retain the previous notice appearance (`border-line bg-brand-50 text-ink` for panels, `text-muted` inline). Tag adds `tone="info"` alongside its existing neutral/brand/status options. Toast info uses an info-700 icon and border on its existing surface background; loading spinners remain neutral. The scoped `.pod-toast` rule maps `--toastify-color-info`, `--toastify-icon-color-info` and `--toastify-color-progress-info` directly to `--color-info-700`. These aliases are assigned in the toast scope so they do not inherit Toastify's default blue values resolved at :root.
 
 Upload and Form validation retain their danger-only error feedback; they have no multi-status tone API. Button and menu danger actions are action styling rather than status-tone maps. Foundations palettes and component tone galleries show the new info status independently of brand/neutral notices.
 
@@ -205,3 +205,5 @@ The unlayered rule overrides defaults in `@layer theme`. Against unlayered host 
 `@itclabs/react-ui/theme/custom-theme.example.css` is an exported reference file, not a required runtime import. Copy it, change only what is needed and import the host copy after kit CSS, or replace `:root` with `[data-theme='name']` on `<html>`. It lists every public token and its default, grouped with WCAG AA notes; drift tests check names/defaults against tokens.css. Overview/Theming displays the full file via a Vite `?raw` import, never a duplicated snippet.
 
 Foundations/Theme → ThemeTokens demonstrates brand, radius and font overrides with a portalled Dialog. Docs renders that story in its own iframe. Lifecycle tests switch away from a themed tree and assert that its style disappears, restoring the underlying host/kit rules; browser navigation/visual review is a separate check.
+
+Tag and Badge contracts, localization and migration are documented in [Tag and Badge](UI_TAG_BADGE.md).

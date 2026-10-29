@@ -157,6 +157,7 @@ for (const subpath of [
   '.',
   './components',
   './modules',
+  './navigation',
   './templates',
   './theme',
   './theme/provider',
@@ -206,4 +207,20 @@ assert.ok(
 
 console.log(
   `Package smoke passed: ${checkedTargets} export targets, ${clientModules} client directives, ${visited.size} core modules; ESM imports, CSS assets and licenses verified${tarball ? ' against tarball' : ''}.`,
+);
+
+const navigation = await import(
+  pathToFileURL(resolve(root, packed.exports['./navigation'].import)).href
+);
+assert.equal(navigation.matchPath('/admin', '/admin/users'), true);
+assert.deepEqual(navigation.resolveActiveNav([{ id: 'home', href: '/' }], '/'), [
+  'home',
+]);
+assert.deepEqual(
+  navigation.filterNavByAccess([{ id: 'private', access: 'admin' }], () => false),
+  [],
+);
+assert.doesNotMatch(
+  await readFile(`${root}/dist/modules/navigation/index.js`, 'utf8'),
+  /use client|from ['"]react/,
 );

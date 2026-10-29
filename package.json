@@ -52,7 +52,8 @@
     "./editor": "./src/modules/editor/index.tsx",
     "./chart": "./src/modules/chart/index.tsx",
     "./avatar-upload": "./src/modules/avatar-upload/index.tsx",
-    "./ui.css": "./dist/ui.css"
+    "./ui.css": "./dist/ui.css",
+    "./navigation": "./src/modules/navigation/index.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
@@ -246,7 +247,11 @@
         "types": "./dist/modules/avatar-upload/index.d.ts",
         "import": "./dist/modules/avatar-upload/index.js"
       },
-      "./ui.css": "./dist/ui.css"
+      "./ui.css": "./dist/ui.css",
+      "./navigation": {
+        "types": "./dist/modules/navigation/index.d.ts",
+        "import": "./dist/modules/navigation/index.js"
+      }
     },
     "access": "public"
   },

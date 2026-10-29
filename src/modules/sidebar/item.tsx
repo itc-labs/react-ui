@@ -53,7 +53,8 @@ export function SidebarItem({
       aria-current={active ? 'page' : props['aria-current']}
       className={classes}
     >
-      {content}
+      {icon != null && <span className={cn('shrink-0', iconClassName)}>{icon}</span>}
+      <Slot.Slottable>{children}</Slot.Slottable>
     </Component>
   );
 }

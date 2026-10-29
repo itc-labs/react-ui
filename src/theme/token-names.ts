@@ -65,6 +65,7 @@ export const uiThemeTokenNames = [
   'spacing-control-md',
   'spacing-control-lg',
   'container-sidebar',
+  'container-sidebar-collapsed',
   'container-workspace',
   'container-dialog',
   'container-drawer',

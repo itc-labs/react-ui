@@ -14,7 +14,7 @@ Controls with different interaction contracts remain separate. Use Select for si
 | Tooltip / Popover / DropdownMenu                     | Noninteractive hint, interactive floating content and keyboard action menu.                                                                   |
 | Avatar / AvatarUpload / UploadField                  | Image presentation, avatar-specific edit overlay and general file selection/preview. Composition is intentional.                              |
 | Spinner / Skeleton                                   | Indeterminate progress indicator versus layout placeholder.                                                                                   |
-| Alert / Toast / EmptyState / Badge                   | Persistent feedback, transient notification, absent-content recovery and compact status label.                                                |
+| Alert / Toast / EmptyState / Tag                     | Persistent feedback, transient notification, absent-content recovery and compact status label.                                                |
 | Card / EmptyState                                    | General content slots versus a specific absent-content presentation.                                                                          |
 | Pagination / Stepper / Breadcrumb                    | Dataset page navigation, process progress and location hierarchy.                                                                             |
 | Tree / Sidebar submenu                               | Hierarchical item selection versus application navigation.                                                                                    |

@@ -208,3 +208,14 @@
     bottom: calc(-1 * var(--drawer-distance));
   }
 }
+
+@layer components {
+  .ui-badge-count-motion {
+    animation: ui-fade-in var(--motion-duration-fast) var(--motion-ease-enter);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .ui-badge-count-motion {
+      animation: none;
+    }
+  }
+}

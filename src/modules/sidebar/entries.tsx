@@ -2,7 +2,7 @@
 
 import { useUILocale } from '../../i18n/provider';
 import { cn, partTestId } from '../../components/common';
-import { Icon } from '../../components/icon';
+import { SidebarEntryIcon, SidebarEntryLabel, SidebarRailEntry } from './rail-entry';
 import { SidebarGroup } from './index';
 import { SidebarItem } from './item';
 import {
@@ -14,19 +14,18 @@ import {
 import type { SidebarEntry } from './types';
 import type { SidebarProps } from './index';
 
-function activeEntry(item: SidebarEntry): boolean {
-  return Boolean(
-    ('active' in item && item.active) ||
-    ('items' in item && item.items.some(activeEntry)),
-  );
-}
-
 export function SidebarEntries({
   items,
+  activePath,
   testId,
   classNames,
+  collapsed = false,
+  onNavigate,
 }: {
+  collapsed?: boolean;
+  onNavigate?: (() => void) | undefined;
   items: readonly SidebarEntry[];
+  activePath: readonly string[];
   testId?: string | undefined;
   classNames?: SidebarProps['classNames'] | undefined;
 }) {
@@ -35,6 +34,9 @@ export function SidebarEntries({
   return (
     <>
       {items.map((item) => {
+        const inActivePath = activePath[0] === item.id;
+        const active = inActivePath && activePath.length === 1;
+        const childActivePath = inActivePath ? activePath.slice(1) : [];
         const id = partTestId(testId, item.type ?? 'item', item.id);
         if (item.type === 'group')
           return (
@@ -50,21 +52,43 @@ export function SidebarEntries({
               <div className="grid gap-1">
                 <SidebarEntries
                   items={item.items}
+                  activePath={childActivePath}
                   testId={id}
                   classNames={classNames}
+                  collapsed={collapsed}
+                  onNavigate={onNavigate}
                 />
               </div>
             </SidebarGroup>
           );
+        if (collapsed)
+          return (
+            <SidebarRailEntry
+              key={item.id}
+              item={item}
+              activePath={activePath}
+              testId={id}
+              classNames={classNames}
+            />
+          );
         const icon = item.icon ? (
-          <Icon name={item.icon} className={classNames?.icon} />
+          <SidebarEntryIcon item={item} testId={id} classNames={classNames} />
         ) : undefined;
+        const label = (
+          <SidebarEntryLabel item={item} testId={id} classNames={classNames} />
+        );
+
+        const select = () => {
+          item.onSelect?.();
+          onNavigate?.();
+        };
+
         if (item.type === 'submenu')
           return (
             <SidebarSubmenu
               key={item.id}
               data-testid={id}
-              active={activeEntry(item)}
+              active={inActivePath}
               {...(item.disabled === undefined ? {} : { disabled: item.disabled })}
               {...(item.defaultOpen === undefined
                 ? {}
@@ -77,13 +101,13 @@ export function SidebarEntries({
                 <SidebarSubmenuRow>
                   <SidebarItem
                     {...(!item.disabled ? { href: item.href } : {})}
-                    active={item.active ?? false}
+                    active={active}
                     aria-disabled={item.disabled || undefined}
-                    {...(item.onSelect ? { onClick: item.onSelect } : {})}
+                    {...(item.onSelect || onNavigate ? { onClick: select } : {})}
                     className={classNames?.item}
                     icon={icon}
                   >
-                    {item.label}
+                    {label}
                   </SidebarItem>
                   <SidebarSubmenuTrigger
                     iconOnly
@@ -96,7 +120,7 @@ export function SidebarEntries({
                     className={classNames?.submenuTrigger}
                     classNames={{
                       icon: classNames?.submenuIcon ?? '',
-                      label: classNames?.submenuLabel ?? '',
+                      label: cn('flex-1', classNames?.submenuLabel),
                       chevron: classNames?.submenuChevron ?? '',
                     }}
                   >
@@ -109,11 +133,11 @@ export function SidebarEntries({
                   className={classNames?.submenuTrigger}
                   classNames={{
                     icon: classNames?.submenuIcon ?? '',
-                    label: classNames?.submenuLabel ?? '',
+                    label: cn('flex-1', classNames?.submenuLabel),
                     chevron: classNames?.submenuChevron ?? '',
                   }}
                 >
-                  {item.label}
+                  {label}
                 </SidebarSubmenuTrigger>
               )}
               <SidebarSubmenuContent
@@ -123,8 +147,11 @@ export function SidebarEntries({
               >
                 <SidebarEntries
                   items={item.items}
+                  activePath={childActivePath}
                   testId={id}
                   classNames={classNames}
+                  collapsed={collapsed}
+                  onNavigate={onNavigate}
                 />
               </SidebarSubmenuContent>
             </SidebarSubmenu>
@@ -134,17 +161,17 @@ export function SidebarEntries({
             <SidebarItem
               key={item.id}
               asChild
-              active={item.active ?? false}
+              active={active}
               icon={icon}
               className={cn(classNames?.item, item.className)}
             >
               <button
                 type="button"
                 disabled={item.disabled}
-                onClick={item.onSelect}
+                onClick={select}
                 data-testid={id}
               >
-                {item.label}
+                {label}
               </button>
             </SidebarItem>
           );
@@ -154,10 +181,12 @@ export function SidebarEntries({
             key={item.id}
             {...(!item.disabled && item.href ? { href: item.href } : {})}
             data-testid={id}
-            {...(item.onSelect && !item.disabled ? { onClick: item.onSelect } : {})}
+            {...((item.onSelect || onNavigate) && !item.disabled
+              ? { onClick: select }
+              : {})}
             aria-disabled={item.disabled || undefined}
             {...(item.disabled ? { tabIndex: -1 } : {})}
-            active={item.active ?? false}
+            active={active}
             icon={icon}
             className={cn(
               item.disabled && 'cursor-not-allowed opacity-50',
@@ -165,7 +194,7 @@ export function SidebarEntries({
               item.className,
             )}
           >
-            {item.label}
+            {label}
           </SidebarItem>
         );
       })}

@@ -20,6 +20,7 @@ export function DropdownMenu(props: DropdownMenuProps) {
   const {
     items,
     trigger,
+    header,
     triggerAsChild,
     triggerLabel,
     triggerDisabled,
@@ -44,6 +45,14 @@ export function DropdownMenu(props: DropdownMenuProps) {
         data-testid={contentProps?.['data-testid'] ?? testId}
         className={cn(classNames?.content, className)}
       >
+        {header != null && (
+          <div
+            data-testid={partTestId(testId, 'header')}
+            className={cn('mb-1 border-b border-line px-3 py-2', classNames?.header)}
+          >
+            {header}
+          </div>
+        )}
         <MenuEntries items={items} testId={testId} classNames={classNames} />
       </DropdownMenuContent>
     </Primitive.Root>

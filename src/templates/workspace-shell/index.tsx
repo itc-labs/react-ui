@@ -21,7 +21,7 @@ export function WorkspaceShell({
       className={cn(
         'mx-auto min-h-screen max-w-workspace bg-canvas text-ink',
         sidebar != null &&
-          'lg:grid lg:grid-cols-[var(--container-sidebar)_minmax(0,1fr)]',
+          'lg:grid lg:grid-cols-[var(--container-sidebar)_minmax(0,1fr)] lg:has-[>aside[data-collapsed=true]]:grid-cols-[var(--container-sidebar-collapsed)_minmax(0,1fr)] motion-safe:transition-[grid-template-columns] motion-safe:duration-[var(--motion-duration-normal)]',
         classNames?.root,
         className,
       )}

@@ -41,6 +41,7 @@ export type DropdownMenuEntry =
     });
 
 export type DropdownMenuClassNames = SlotClasses<
+  | 'header'
   | 'content'
   | 'trigger'
   | 'item'
@@ -59,6 +60,7 @@ export type DropdownMenuProps =
   | (RootProps & { items?: never; trigger?: never })
   | (Omit<RootProps, 'children'> & {
       trigger: ReactNode;
+      header?: ReactNode;
       triggerAsChild?: boolean;
       triggerLabel?: string;
       triggerDisabled?: boolean;
