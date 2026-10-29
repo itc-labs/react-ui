@@ -76,6 +76,8 @@ export function UIRoot({ children }: { children: React.ReactNode }) {
 
 Components take plain props and data; no setup beyond the styles is required.
 
+Sidebar accepts host-provided `currentPath`, `isActive` and `canAccess`. See [navigation matching and route protection](docs/UI_NAVIGATION.md) for helpers and router recipes.
+
 ```tsx
 import { Button, Input, Select } from '@itclabs/react-ui';
 

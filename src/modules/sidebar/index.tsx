@@ -1,6 +1,7 @@
 'use client';
 import type { TestIdProps } from '../../components/common/testing';
 
+import { filterNavByAccess, resolveActiveNav } from '../navigation';
 import { SidebarEntries } from './entries';
 import type { SidebarEntry } from './types';
 export type { SidebarEntry } from './types';
@@ -9,10 +10,14 @@ import { useUILocale } from '../../i18n/provider';
 import type { ComponentProps, ReactNode } from 'react';
 import { type SlotClasses, cn } from '../../components/common';
 
-export type SidebarProps = (ComponentProps<'aside'> & {
+export type SidebarProps<TAccess = unknown> = (ComponentProps<'aside'> & {
   header?: ReactNode;
   footer?: ReactNode;
-  items?: readonly SidebarEntry[];
+  items?: readonly SidebarEntry<TAccess>[];
+  /** Absolute host pathname; no router is imported. */
+  currentPath?: string;
+  isActive?: (item: SidebarEntry<TAccess>, currentPath: string) => boolean;
+  canAccess?: (access: TAccess, item: SidebarEntry<TAccess>) => boolean;
   navigationLabel?: string;
   classNames?: SlotClasses<
     | 'root'
@@ -35,17 +40,26 @@ export type SidebarProps = (ComponentProps<'aside'> & {
 }) &
   TestIdProps;
 
-export function Sidebar({
+export function Sidebar<TAccess = unknown>({
   header,
   footer,
   items,
   navigationLabel,
+  currentPath,
+  isActive,
+  canAccess,
   'data-testid': testId,
   children,
   className,
   classNames,
   ...props
-}: SidebarProps) {
+}: SidebarProps<TAccess>) {
+  const visibleItems =
+    items && (canAccess ? filterNavByAccess(items, canAccess) : items);
+  const activePath = visibleItems
+    ? resolveActiveNav(visibleItems, currentPath ?? '', isActive)
+    : [];
+
   return (
     <aside
       {...props}
@@ -66,7 +80,12 @@ export function Sidebar({
             data-testid={partTestId(testId, 'nav')}
             className={cn('gap-4', classNames?.nav)}
           >
-            <SidebarEntries items={items} testId={testId} classNames={classNames} />
+            <SidebarEntries
+              items={visibleItems ?? []}
+              activePath={activePath}
+              testId={testId}
+              classNames={classNames}
+            />
           </SidebarNav>
         ) : (
           children

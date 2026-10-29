@@ -3,6 +3,7 @@ import { useRef, useState } from 'react';
 import { expect, userEvent, waitFor, within } from 'storybook/test';
 import {
   Sidebar,
+  type SidebarProps,
   SidebarGroup,
   SidebarItem,
   SidebarNav,
@@ -22,7 +23,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'Truyền items để dựng nhóm, link và submenu; không cần ghép các wrapper. Ứng dụng cung cấp active và href; link dùng adapter của host. Compound parts dành cho bố cục hoặc ref tùy chỉnh.',
+          'Truyền items để dựng nhóm, link và submenu; không cần ghép các wrapper. Host cung cấp currentPath và canAccess để chọn link và lọc quyền; active ghi đè kết quả và link dùng adapter của host. Compound parts dành cho bố cục hoặc ref tùy chỉnh.',
       },
     },
   },
@@ -291,7 +292,7 @@ export const States: Story = {
 };
 
 export const LongLabel: Story = {
-  tags: ['example'],
+  tags: ['!dev', '!autodocs', 'regression'],
   render: () => <SimpleSidebarExample longLabel />,
 };
 
@@ -336,7 +337,7 @@ export const Submenu: Story = {
 };
 
 export const NestedSubmenus: Story = {
-  tags: ['example'],
+  tags: ['!dev', '!autodocs', 'regression'],
   render: () => <SubmenuExample active nested />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
@@ -408,6 +409,78 @@ export const ControlledSubmenu: Story = {
     ).not.toBeInTheDocument();
     await expect(trigger).toHaveFocus();
   },
+};
+
+export const RouteActive: Story = {
+  tags: ['usage'],
+  args: { currentPath: '/settings/team' },
+  argTypes: { currentPath: { control: 'text' } },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Đổi currentPath trong Controls để chọn link khớp sâu nhất và mở nhánh chứa trang hiện tại.',
+      },
+    },
+  },
+  render: (args: SidebarProps) => (
+    <Sidebar
+      {...args}
+      items={[
+        { id: 'home', label: 'Tổng quan', href: '/', exact: true },
+        {
+          id: 'settings',
+          type: 'submenu',
+          label: 'Cài đặt',
+          href: '/settings',
+          items: [
+            { id: 'team', label: 'Nhóm', href: '/settings/team' },
+            { id: 'profile', label: 'Hồ sơ', href: '/settings/profile' },
+          ],
+        },
+      ]}
+    />
+  ),
+};
+
+export const PermissionFiltered: Story = {
+  tags: ['usage'],
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'canAccess lọc mục và bỏ nhóm rỗng. Host vẫn phải bảo vệ route và dữ liệu trên server.',
+      },
+    },
+  },
+  render: () => (
+    <Sidebar
+      currentPath="/settings/profile"
+      canAccess={(access) => access === 'profile:read'}
+      items={[
+        { id: 'home', label: 'Tổng quan', href: '/', exact: true },
+        {
+          id: 'profile',
+          label: 'Hồ sơ',
+          href: '/settings/profile',
+          access: 'profile:read',
+        },
+        {
+          id: 'admin',
+          type: 'group',
+          label: 'Quản trị',
+          items: [
+            {
+              id: 'users',
+              label: 'Người dùng',
+              href: '/admin/users',
+              access: 'users:read',
+            },
+          ],
+        },
+      ]}
+    />
+  ),
 };
 
 export const CustomClasses: Story = {

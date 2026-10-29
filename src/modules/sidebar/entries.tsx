@@ -14,19 +14,14 @@ import {
 import type { SidebarEntry } from './types';
 import type { SidebarProps } from './index';
 
-function activeEntry(item: SidebarEntry): boolean {
-  return Boolean(
-    ('active' in item && item.active) ||
-    ('items' in item && item.items.some(activeEntry)),
-  );
-}
-
 export function SidebarEntries({
   items,
+  activePath,
   testId,
   classNames,
 }: {
   items: readonly SidebarEntry[];
+  activePath: readonly string[];
   testId?: string | undefined;
   classNames?: SidebarProps['classNames'] | undefined;
 }) {
@@ -35,6 +30,9 @@ export function SidebarEntries({
   return (
     <>
       {items.map((item) => {
+        const inActivePath = activePath[0] === item.id;
+        const active = inActivePath && activePath.length === 1;
+        const childActivePath = inActivePath ? activePath.slice(1) : [];
         const id = partTestId(testId, item.type ?? 'item', item.id);
         if (item.type === 'group')
           return (
@@ -50,6 +48,7 @@ export function SidebarEntries({
               <div className="grid gap-1">
                 <SidebarEntries
                   items={item.items}
+                  activePath={childActivePath}
                   testId={id}
                   classNames={classNames}
                 />
@@ -64,7 +63,7 @@ export function SidebarEntries({
             <SidebarSubmenu
               key={item.id}
               data-testid={id}
-              active={activeEntry(item)}
+              active={inActivePath}
               {...(item.disabled === undefined ? {} : { disabled: item.disabled })}
               {...(item.defaultOpen === undefined
                 ? {}
@@ -77,7 +76,7 @@ export function SidebarEntries({
                 <SidebarSubmenuRow>
                   <SidebarItem
                     {...(!item.disabled ? { href: item.href } : {})}
-                    active={item.active ?? false}
+                    active={active}
                     aria-disabled={item.disabled || undefined}
                     {...(item.onSelect ? { onClick: item.onSelect } : {})}
                     className={classNames?.item}
@@ -123,6 +122,7 @@ export function SidebarEntries({
               >
                 <SidebarEntries
                   items={item.items}
+                  activePath={childActivePath}
                   testId={id}
                   classNames={classNames}
                 />
@@ -134,7 +134,7 @@ export function SidebarEntries({
             <SidebarItem
               key={item.id}
               asChild
-              active={item.active ?? false}
+              active={active}
               icon={icon}
               className={cn(classNames?.item, item.className)}
             >
@@ -157,7 +157,7 @@ export function SidebarEntries({
             {...(item.onSelect && !item.disabled ? { onClick: item.onSelect } : {})}
             aria-disabled={item.disabled || undefined}
             {...(item.disabled ? { tabIndex: -1 } : {})}
-            active={item.active ?? false}
+            active={active}
             icon={icon}
             className={cn(
               item.disabled && 'cursor-not-allowed opacity-50',
