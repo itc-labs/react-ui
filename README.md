@@ -23,12 +23,13 @@ Requires Node.js >= 22.12.
 
 ## Styles
 
-**Tailwind CSS v4 host** — import the theme once and let Tailwind scan the kit:
+**Tailwind CSS v4 host** — import the theme once in your global CSS:
 
 ```css
 @import '@itclabs/react-ui/theme/styles.css';
-@source '../node_modules/@itclabs/react-ui/dist';
 ```
+
+The theme registers the kit's own class sources, so no `@source` pointing into `node_modules` is needed. Add `@source` only for your own folders that Tailwind does not detect automatically.
 
 **Host without Tailwind** — import the precompiled stylesheet once at your entry:
 
@@ -133,7 +134,25 @@ const ok = await modal.confirm({ title: 'Delete this item?', tone: 'danger' });
 
 Browse every component, prop and state in the [Storybook](https://react-ui-one-rose.vercel.app/).
 
-Entry points: `@itclabs/react-ui` (everything core), `/components`, `/modules`, `/templates`, `/hooks`, `/theme`, `/i18n`, `/toast`, `/modal`, `/icons/outline/*`, `/icons/bold/*`, `/icons/catalog`.
+### Entry points
+
+| Import                                                 | Contents                                                                                                        |
+| ------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------- |
+| `@itclabs/react-ui`                                    | Everything in the core kit: components, modules, templates, providers and helpers                               |
+| `@itclabs/react-ui/components`                         | Controls: Button, IconButton, Input, Select, Tag, Badge, Dialog, Drawer, DropdownMenu, Tabs, Tooltip, Progress… |
+| `@itclabs/react-ui/modules`                            | Compositions: Form, DataTable, Sidebar, AppHeader, Pagination, EmptyState, PageHeader, ProgressList…            |
+| `@itclabs/react-ui/templates`                          | Page layouts with slots (WorkspaceShell)                                                                        |
+| `@itclabs/react-ui/navigation`                         | Router-agnostic `matchPath`, `resolveActiveNav`, `filterNavByAccess` (no React)                                 |
+| `@itclabs/react-ui/hooks`                              | Shared hooks: click outside, debounced values and callbacks                                                     |
+| `@itclabs/react-ui/theme`                              | `defineTheme`, theme types and typed colour references                                                          |
+| `@itclabs/react-ui/i18n`                               | Locales, message types and `defineLocale` for custom languages                                                  |
+| `@itclabs/react-ui/toast`                              | Hook-free `toast.success/error/info/warning`                                                                    |
+| `@itclabs/react-ui/modal`                              | Hook-free `modal.confirm/alert/open`                                                                            |
+| `@itclabs/react-ui/icons/outline/*`, `/icons/bold/*`   | Single icon glyphs, e.g. `@itclabs/react-ui/icons/outline/search` (lightest)                                    |
+| `@itclabs/react-ui/icons/catalog`                      | Full icon catalog for `<Icon name="…">` beyond the kit's own icons                                              |
+| `@itclabs/react-ui/editor`, `/chart`, `/avatar-upload` | Optional features with optional peer dependencies                                                               |
+| `@itclabs/react-ui/theme/styles.css`                   | Full theme for Tailwind v4 hosts (`tokens`, `fonts`, `base`, `vendor`, `motion` entries also available)         |
+| `@itclabs/react-ui/ui.css`                             | Precompiled stylesheet for hosts without Tailwind                                                               |
 
 ## Optional features
 

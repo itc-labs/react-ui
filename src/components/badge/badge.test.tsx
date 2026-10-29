@@ -95,8 +95,8 @@ it('forwards native refs, offset, selectors and class overrides; label overrides
     const indicator = host.querySelector<HTMLElement>(
       '[data-testid="badge-indicator"]',
     )!;
-    expect(indicator.style.bottom).toBe('4px');
-    expect(indicator.style.insetInlineStart).toBe('2px');
+    expect(indicator.style.getPropertyValue('--badge-ox')).toBe('2px');
+    expect(indicator.style.getPropertyValue('--badge-oy')).toBe('4px');
     expect(indicator.className).toContain('bg-canvas');
     expect(indicator.className).not.toContain('bg-danger-700');
     expect(host.querySelector('[data-testid="badge-label"]')?.textContent).toBe(
@@ -105,4 +105,23 @@ it('forwards native refs, offset, selectors and class overrides; label overrides
   } finally {
     act(() => root.unmount());
   }
+});
+
+it('anchors on the circle edge for circular children and on the box corner otherwise', () => {
+  const circular = renderToStaticMarkup(
+    <Badge count={3} overlap="circular" data-testid="b">
+      <span />
+    </Badge>,
+  );
+  const square = renderToStaticMarkup(
+    <Badge count={3} placement="bottom-start" data-testid="b">
+      <span />
+    </Badge>,
+  );
+
+  expect(circular).toContain('--badge-edge:14.6%');
+  expect(circular).toContain('data-overlap="circular"');
+  expect(square).toContain('--badge-edge:0%');
+  expect(square).toContain('bottom-[calc(var(--badge-edge)+var(--badge-oy))]');
+  expect(square).toContain('data-overlap="rectangular"');
 });

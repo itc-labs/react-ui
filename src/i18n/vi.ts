@@ -1,5 +1,11 @@
 import type { UIMessages } from './types';
 export const viMessages = {
+  'progress.label': 'Tiến độ',
+  'progress.listLabel': 'Tổng quan tiến độ',
+  'progress.segmentsLabel': 'Phân bố',
+  'progress.empty': 'Chưa có dữ liệu tiến độ.',
+  'progress.total': 'Tổng: {total}',
+
   'tag.remove': 'Xóa {label}',
   'badge.dot': 'Thông báo mới',
   'badge.count': { other: '{count} thông báo chưa đọc' },

@@ -1,4 +1,10 @@
 export const enMessages = {
+  'progress.label': 'Progress',
+  'progress.listLabel': 'Progress overview',
+  'progress.segmentsLabel': 'Distribution',
+  'progress.empty': 'No progress data yet.',
+  'progress.total': 'Total: {total}',
+
   'tag.remove': 'Remove {label}',
   'badge.dot': 'New notifications',
   'badge.count': {

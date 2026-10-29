@@ -50,14 +50,25 @@ export const Tones: Story = {
 export const Placements: Story = {
   tags: ['variants'],
   render: () => (
-    <div className="flex gap-10 p-4">
-      {(['top-end', 'top-start', 'bottom-end', 'bottom-start'] as const).map(
-        (placement) => (
-          <Badge key={placement} placement={placement} count={3}>
-            <Avatar alt="Tài khoản" fallback="AB" />
-          </Badge>
-        ),
-      )}
+    <div className="grid gap-8 p-4">
+      <div className="flex gap-10">
+        {(['top-end', 'top-start', 'bottom-end', 'bottom-start'] as const).map(
+          (placement) => (
+            <Badge key={placement} placement={placement} overlap="circular" count={3}>
+              <Avatar alt="Tài khoản" fallback="AB" />
+            </Badge>
+          ),
+        )}
+      </div>
+      <div className="flex gap-10">
+        {(['top-end', 'top-start', 'bottom-end', 'bottom-start'] as const).map(
+          (placement) => (
+            <Badge key={placement} placement={placement} count={3}>
+              <IconButton icon={BellIcon} label="Thông báo" variant="secondary" />
+            </Badge>
+          ),
+        )}
+      </div>
     </div>
   ),
 };
@@ -66,13 +77,25 @@ export const OnAvatar: Story = {
   args: {
     dot: true,
     tone: 'success',
-    offset: [4, 4],
+    overlap: 'circular',
     children: <Avatar alt="Tài khoản" fallback="AB" />,
   },
 };
 export const OnIconButton: Story = {
   tags: ['example'],
-  args: { children: <IconButton icon={BellIcon} label="Thông báo" variant="ghost" /> },
+  render: () => (
+    <div className="flex items-center gap-6 p-4">
+      <IconButton icon={BellIcon} label="Thông báo" variant="ghost" badge={5} />
+      <IconButton icon={BellIcon} label="Thông báo" variant="ghost" badge={128} />
+      <IconButton
+        icon={BellIcon}
+        label="Thông báo"
+        variant="ghost"
+        badge={{ dot: true }}
+      />
+      <IconButton icon={BellIcon} label="Thông báo" variant="secondary" badge={3} />
+    </div>
+  ),
 };
 export const Standalone: Story = {
   tags: ['example'],
@@ -91,6 +114,6 @@ export const CustomClasses: Story = {
       indicator: 'rounded-md ring-canvas',
       label: 'sr-only',
     },
-    children: <BellIcon />,
+    children: <IconButton icon={BellIcon} label="Thông báo" variant="secondary" />,
   },
 };

@@ -152,7 +152,8 @@ export function Tag({
           aria-label={label}
           data-testid={partTestId(testId, 'remove')}
           className={cn(
-            'inline-flex shrink-0 items-center justify-center rounded-sm p-0.5 hover:bg-hover disabled:cursor-not-allowed',
+            // Tint from the tag's own text colour so hover reads on every tone.
+            'inline-flex shrink-0 items-center justify-center rounded-full p-0.5 opacity-70 transition-[background-color,opacity] hover:bg-current/15 hover:opacity-100 active:bg-current/25 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent',
             focus,
             classNames?.remove,
           )}

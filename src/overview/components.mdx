@@ -3,6 +3,9 @@ import * as Tags from '../components/tag/tag.stories';
 import * as Cards from '../components/card/card.stories';
 import * as Skeletons from '../components/skeleton/skeleton.stories';
 
+import * as ProgressBars from '../components/progress/progress.stories';
+import * as ProgressRings from '../components/progress-ring/progress-ring.stories';
+
 <Meta title="Overview/Components" />
 
 # Components
@@ -30,3 +33,10 @@ Title, description, action, content, footer là các vùng riêng. Card dùng se
 <Canvas of={Skeletons.LoadingCard} />
 
 Skeleton là decorative aria-hidden. Container cung cấp role=status và text dành cho screen reader; motion-safe tôn trọng reduced motion. Không dùng dữ liệu giả thay cho trạng thái loading.
+
+## Progress
+
+Thanh và vòng tiến độ hiển thị value/max hoặc trạng thái chưa xác định. Nhãn và giá trị hỗ trợ ngôn ngữ của UIProvider.
+
+<Canvas of={ProgressBars.Playground} />
+<Canvas of={ProgressRings.Playground} />
