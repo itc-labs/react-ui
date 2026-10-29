@@ -8,10 +8,27 @@ import type { NavbarClassNames, NavbarItem } from './types';
 export const rowClass =
   'flex items-center gap-2 rounded-control px-3 py-2 text-ui-sm text-ink hover:bg-hover focus-visible:outline-2 focus-visible:outline-focus data-[active=true]:bg-selected data-[active=true]:text-selected-ink';
 
-export function HeaderLabel<TAccess>({ item }: { item: NavbarItem<TAccess> }) {
+export function HeaderLabel<TAccess>({
+  item,
+  className,
+  testId,
+}: {
+  item: NavbarItem<TAccess>;
+  className?: string | undefined;
+  testId?: string | undefined;
+}) {
   return (
     <>
-      {item.icon && <Icon name={item.icon} size={16} />}
+      {item.icon && (
+        <Icon
+          {...(typeof item.icon === 'string'
+            ? { name: item.icon }
+            : { glyph: item.icon })}
+          size={16}
+          className={cn('shrink-0', className)}
+          data-testid={partTestId(testId, 'icon')}
+        />
+      )}
       <span className="min-w-0">
         {item.label}
         {'description' in item && item.description != null && (
@@ -30,11 +47,13 @@ export function HeaderEntries<TAccess>({
   mobile = false,
   topLevel = false,
   onNavigate,
+  activeIndicator = 'underline',
 }: {
   nodes: readonly HeaderNode<TAccess>[];
   activePath: readonly string[];
   testId: string | undefined;
   classNames: NavbarClassNames | undefined;
+  activeIndicator?: 'underline' | 'pill';
   mobile?: boolean;
   topLevel?: boolean;
   onNavigate?: () => void;
@@ -66,6 +85,21 @@ export function HeaderEntries<TAccess>({
             </section>
           );
         const item = node.source!;
+        const underline = topLevel && !mobile && activeIndicator === 'underline';
+        const itemRowClass = underline
+          ? 'relative flex h-full min-h-16 items-center gap-2 px-3 py-2 text-ui-sm font-medium text-ink hover:text-accent focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-focus data-[active=true]:text-accent'
+          : rowClass;
+        const indicator =
+          underline && active ? (
+            <span
+              aria-hidden="true"
+              data-testid={partTestId(id, 'activeIndicator')}
+              className={cn(
+                'pointer-events-none absolute inset-x-0 -bottom-px h-0.5 bg-accent',
+                classNames?.activeIndicator,
+              )}
+            />
+          ) : null;
         if ('href' in item) {
           const link = (
             <UiLink
@@ -74,9 +108,10 @@ export function HeaderEntries<TAccess>({
               data-active={active}
               aria-current={active ? 'page' : undefined}
               onClick={onNavigate}
-              className={cn(rowClass, classNames?.link, item.className)}
+              className={cn(itemRowClass, classNames?.link, item.className)}
             >
-              <HeaderLabel item={item} />
+              <HeaderLabel item={item} className={classNames?.icon} testId={id} />
+              {indicator}
             </UiLink>
           );
           const linked = mobile ? (
@@ -91,7 +126,7 @@ export function HeaderEntries<TAccess>({
             <NavigationMenu.Item
               key={node.id}
               data-testid={id}
-              className={classNames?.item}
+              className={cn('relative flex items-center', classNames?.item)}
             >
               {linked}
             </NavigationMenu.Item>
@@ -124,7 +159,7 @@ export function HeaderEntries<TAccess>({
                 data-active={active}
                 className={cn(rowClass, 'cursor-pointer', classNames?.trigger)}
               >
-                <HeaderLabel item={item} />
+                <HeaderLabel item={item} className={classNames?.icon} testId={id} />
                 <Icon name="chevronDown" size={16} />
               </summary>
               <div
@@ -141,19 +176,24 @@ export function HeaderEntries<TAccess>({
             key={node.id}
             value={node.id}
             data-testid={id}
-            className={cn('relative', classNames?.item, item.className)}
+            className={cn(
+              'relative flex items-center',
+              classNames?.item,
+              item.className,
+            )}
           >
             <NavigationMenu.Trigger
               data-testid={partTestId(id, 'trigger')}
               data-active={active}
-              className={cn(rowClass, 'group', classNames?.trigger)}
+              className={cn(itemRowClass, 'group', classNames?.trigger)}
             >
-              <HeaderLabel item={item} />
+              <HeaderLabel item={item} className={classNames?.icon} testId={id} />
               <Icon
                 name="chevronDown"
                 size={16}
                 className="group-data-[state=open]:rotate-180"
               />
+              {indicator}
             </NavigationMenu.Trigger>
             <NavigationMenu.Content
               data-testid={partTestId(id, 'content')}

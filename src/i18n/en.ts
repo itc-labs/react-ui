@@ -29,6 +29,7 @@ export const enMessages = {
   'toast.close': 'Dismiss notification',
   'toast.viewport': 'Notifications ({hotkey})',
   'breadcrumb.label': 'Breadcrumb',
+  'userMenu.open': 'Open user menu for {name}',
   'navbar.navigation': 'Main navigation',
   'navbar.openMenu': 'Open navigation menu',
   'sidebar.label': 'Main navigation',

@@ -1,11 +1,11 @@
 import type { ComponentProps, ReactNode } from 'react';
 import type { SlotClasses, TestIdProps } from '../../components/common';
-import type { IconName } from '../../components/icon';
+import type { IconName, IconGlyph } from '../../components/icon';
 
 type EntryBase<TAccess> = {
   id: string;
   label: ReactNode;
-  icon?: IconName;
+  icon?: IconName | IconGlyph;
   className?: string;
   access?: TAccess;
   active?: boolean;
@@ -36,6 +36,12 @@ export type NavbarClassNames = SlotClasses<
   | 'root'
   | 'inner'
   | 'brand'
+  | 'brandLogo'
+  | 'brandTitle'
+  | 'brandSubtitle'
+  | 'switcher'
+  | 'icon'
+  | 'activeIndicator'
   | 'nav'
   | 'item'
   | 'trigger'
@@ -47,12 +53,21 @@ export type NavbarClassNames = SlotClasses<
   | 'drawer'
   | 'secondary'
 >;
+export type NavbarBrand = {
+  logo?: ReactNode;
+  title: ReactNode;
+  subtitle?: ReactNode;
+  href?: string;
+};
+
 export type NavbarProps<TAccess = unknown> = Omit<
   ComponentProps<'header'>,
   'children'
 > &
   TestIdProps & {
-    brand?: ReactNode;
+    brand?: ReactNode | NavbarBrand;
+    switcher?: ReactNode;
+    activeIndicator?: 'underline' | 'pill';
     brandHref?: string;
     items: readonly NavbarItem<TAccess>[];
     actions?: ReactNode;

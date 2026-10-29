@@ -7,6 +7,8 @@ import {
   LinkImageProvider,
   type UiLinkProps,
 } from '../../components/link-image-provider';
+import { Icon } from '../../components/icon';
+import { HomeIcon } from '../../components/icon/outline/home';
 import { UILocaleProvider } from '../../i18n/provider';
 import { Navbar, type NavbarItem } from './index';
 
@@ -267,4 +269,72 @@ it('emits no implicit selectors and respects explicit text overrides', async () 
   await act(async () => trigger.click());
   expect(document.querySelector('[role="dialog"]')?.textContent).toContain('Pages');
   expect(document.querySelector('[data-testid]')).toBeNull();
+});
+
+it('renders a structured linked brand with slots and repeats brand and switcher in the drawer', async () => {
+  await act(async () =>
+    root.render(
+      <Navbar
+        items={items}
+        brand={{
+          logo: <Icon glyph={HomeIcon} />,
+          title: 'Brand',
+          subtitle: 'Subtitle',
+          href: '/brand',
+        }}
+        switcher={<button>Switch context</button>}
+        classNames={{ brandLogo: 'custom-logo', brandTitle: 'custom-title' }}
+        data-testid="navbar"
+      />,
+    ),
+  );
+  expect(byId('brand').getAttribute('href')).toBe('/brand');
+  expect(byId('brandTitle').textContent).toBe('Brand');
+  expect(byId('brandSubtitle').textContent).toBe('Subtitle');
+  expect(byId('brandLogo').classList.contains('custom-logo')).toBe(true);
+  expect(byId('switcher').textContent).toBe('Switch context');
+  await openDrawer();
+  expect(byId('drawer-brandTitle').textContent).toBe('Brand');
+  expect(byId('drawerSwitcher').textContent).toBe('Switch context');
+});
+
+it('renders named and direct glyph icons for links, dropdowns and mega items on desktop and mobile', async () => {
+  const decorated = items.map((item) => ({
+    ...item,
+    icon: item.id === 'home' ? HomeIcon : ('settings' as const),
+  }));
+  await act(async () =>
+    root.render(<Navbar items={decorated} currentPath="/help" data-testid="navbar" />),
+  );
+  for (const item of decorated)
+    expect(byId(`item-${item.id}-icon`).tagName.toLowerCase()).toBe('svg');
+  await openDrawer();
+  for (const item of decorated)
+    expect(byId(`drawer-item-${item.id}-icon`).tagName.toLowerCase()).toBe('svg');
+});
+
+it('shows exactly one underline for the active top-level branch and supports pill styling', async () => {
+  const render = (currentPath: string, activeIndicator?: 'underline' | 'pill') =>
+    root.render(
+      <Navbar
+        items={items}
+        currentPath={currentPath}
+        {...(activeIndicator ? { activeIndicator } : {})}
+        data-testid="navbar"
+      />,
+    );
+
+  await act(async () => render('/help'));
+  expect(host.querySelectorAll('[data-testid$="-activeIndicator"]')).toHaveLength(1);
+  expect(
+    byId('item-resources-trigger').contains(byId('item-resources-activeIndicator')),
+  ).toBe(true);
+  await act(async () => render('/'));
+  expect(byId('item-home-link').contains(byId('item-home-activeIndicator'))).toBe(true);
+  expect(byId('item-resources-activeIndicator')).toBeNull();
+  await act(async () => render('/', 'pill'));
+  expect(host.querySelectorAll('[data-testid$="-activeIndicator"]')).toHaveLength(0);
+  expect(byId('item-home-link').className).toContain('data-[active=true]:bg-selected');
+  await act(async () => render('/unmatched'));
+  expect(host.querySelectorAll('[data-testid$="-activeIndicator"]')).toHaveLength(0);
 });

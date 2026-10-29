@@ -159,7 +159,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 ## Navbar
 
 `Navbar` and its types (`NavbarProps<TAccess>`, `NavbarItem<TAccess>`,
-`NavbarLink<TAccess>`, `NavbarSection<TAccess>`, `NavbarClassNames`) are
+`NavbarLink<TAccess>`, `NavbarSection<TAccess>`, `NavbarBrand`, `NavbarClassNames`) are
 exported from the root and modules barrels.
 
 ```tsx
@@ -208,7 +208,7 @@ const items: NavbarItem<string>[] = [
 />;
 ```
 
-Links accept optional `description` and `icon`. Dropdowns use `children`; mega
+Links accept optional `description`. Links, dropdowns and mega items accept `icon` as a kit icon name (registered in the host theme) or a direct tree-shakeable glyph. Dropdowns use `children`; mega
 menus use titled `sections` containing links. Keep IDs stable and unique among
 siblings, including section IDs. `currentPath`, `isActive` and `canAccess` follow
 Sidebar's callback contracts and the shared helpers' precedence. Predicates
@@ -235,6 +235,83 @@ the header; parts derive `-inner`, `-brand`, `-nav`, `-actions`, `-mobileTrigger
 `-drawer`, `-drawerNav`, `-secondary` and `-item-{id}` with `-trigger`, `-content`
 or `-link` suffixes. Mega sections add `-section-{id}` before child item IDs;
 mobile entries are scoped under `-drawer`. Drawer also derives its standard parts.
+
+### Brand, switcher and active indicator
+
+The surface bar is at least 64px tall with a bottom border. `brand` accepts a
+ReactNode or `{ logo?, title, subtitle?, href? }`. Structured brands render a
+rounded accent logo tile, bold title and muted uppercase subtitle. Supply an
+`Icon` glyph or image node as `logo`; override `classNames.brandLogo` for image
+backgrounds. `href` uses UiLink and takes precedence over legacy `brandHref`.
+`switcher` appears immediately after the brand on desktop and inside the mobile
+Drawer alongside the brand. Use the kit segmented Tabs (with TabsList/TabsTrigger)
+or Select; the host owns its selected context. Avoid fixed DOM IDs inside a slot
+rendered in both desktop and drawer scopes.
+
+`activeIndicator="underline"` is the default: the active top-level item has accent
+text and a 2px accent bar flush with the bottom border. The bar is absolutely
+positioned and has no animation or layout shift. `activeIndicator="pill"` retains
+the selected background style. Mobile entries retain their selected background.
+Additional class slots are `brandLogo`, `brandTitle`, `brandSubtitle`, `switcher`,
+`icon` and `activeIndicator`. Corresponding selectors derive `-brandLogo`,
+`-brandTitle`, `-brandSubtitle`, `-switcher`, `-drawerSwitcher`,
+`-item-{id}-icon` and `-item-{id}-activeIndicator` (active desktop item only).
+Drawer brand parts are scoped under `-drawer`.
+
+### UserMenu and actions
+
+`UserMenu`, `UserMenuProps` and `UserMenuClassNames` are exported from the modules
+and root barrels. `name` supplies visible text, avatar initials and the localized
+trigger name. Optional `description` is shown below it. `avatar` accepts Avatar
+options such as `src`, `fallback`, `shape` and `classNames`; images use UiImage.
+`compact` shows only the avatar. By default, `collapseOnMobile` hides details and
+chevron below `sm`; set it to false to keep the full chip at all widths.
+
+`items` uses `readonly DropdownMenuEntry[]`: actions, links, separators, labels,
+checkboxes, groups and submenus share DropdownMenu behavior. `header` accepts
+optional name/email content above the entries. DropdownMenu itself also supports
+this optional `header` and a `classNames.header` slot. `open`, `defaultOpen`,
+`onOpenChange` and `contentProps` configure the menu. Enter/Space/ArrowDown open
+it; Radix manages menu navigation, Escape and focus restoration. Hosts own item
+callbacks, including sign-out. `label` or native `aria-label` overrides the localized
+trigger name. Native button attributes and React 19 `ref` target the trigger.
+
+```tsx
+import { Icon, IconButton, Navbar, UserMenu } from '@itclabs/react-ui';
+import { HomeIcon } from '@itclabs/react-ui/icons/outline/home';
+import { BellIcon } from '@itclabs/react-ui/icons/outline/bell';
+
+<Navbar
+  brand={{
+    logo: <Icon glyph={HomeIcon} />,
+    title: 'Lorem ipsum',
+    subtitle: 'Dolor sit amet',
+    href: '/',
+  }}
+  items={[{ id: 'home', href: '/', label: 'Home', icon: HomeIcon }]}
+  currentPath="/"
+  activeIndicator="underline"
+  actions={
+    <>
+      <IconButton icon={BellIcon} label="Notifications" variant="secondary" badge={3} />
+      <UserMenu
+        name="Lorem Ipsum"
+        description="Dolor sit amet"
+        header={<span>user@example.com</span>}
+        items={[{ id: 'profile', label: 'Profile', href: '/profile' }]}
+      />
+    </>
+  }
+/>;
+```
+
+`className`, `classNames.root` and `classNames.trigger` target the chip (direct
+className wins). Other slots include `avatar`, `details`, `name`, `description`,
+`chevron` and DropdownMenu's typed slots such as `content`, `header` and `item`.
+The optional test ID is a scope: `-trigger` identifies the button, with `-avatar`,
+`-details`, `-name`, `-description`, `-chevron`, `-content`, `-header` and standard
+DropdownMenu entry IDs such as `-item-profile`. Menus are portalled; query them
+from document/page. No selectors are emitted without an explicit base ID.
 
 ## TopLoader
 

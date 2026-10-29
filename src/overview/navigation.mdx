@@ -401,6 +401,62 @@ cũng cần `done()`; thanh tiến trình không xác định được chúng t�
 Chỉ liên kết thắng nhận `aria-current="page"`; mục cha được đánh dấu nhánh active.
 Xem đầy đủ tại [docs/UI_NAVIGATION.md](https://github.com/itc-labs/react-ui/blob/main/docs/UI_NAVIGATION.md).
 
+## Brand, switcher và UserMenu
+
+Navbar có nền surface, viền dưới và chiều cao tối thiểu 64px. `brand` nhận ReactNode
+hoặc `{ logo, title, subtitle, href }`; `switcher` nhận Tabs segmented hoặc Select
+và xuất hiện cùng brand trong Drawer. `activeIndicator` mặc định là `underline`;
+dùng `pill` để chọn nền active. Host truyền `currentPath` và callback quyền.
+
+```tsx
+import {
+  Icon,
+  IconButton,
+  Navbar,
+  Tabs,
+  TabsList,
+  TabsTrigger,
+  UserMenu,
+} from '@itclabs/react-ui';
+import { HomeIcon } from '@itclabs/react-ui/icons/outline/home';
+import { BellIcon } from '@itclabs/react-ui/icons/outline/bell';
+
+<Navbar
+  brand={{
+    logo: <Icon glyph={HomeIcon} />,
+    title: 'Lorem ipsum',
+    subtitle: 'Dolor sit amet',
+    href: '/',
+  }}
+  switcher={
+    <Tabs defaultValue="personal" variant="segmented" size="sm">
+      <TabsList aria-label="Workspace">
+        <TabsTrigger value="personal">Personal</TabsTrigger>
+        <TabsTrigger value="team">Team</TabsTrigger>
+      </TabsList>
+    </Tabs>
+  }
+  items={[{ id: 'home', label: 'Home', href: '/', icon: HomeIcon }]}
+  currentPath="/"
+  actions={
+    <>
+      <IconButton icon={BellIcon} label="Notifications" variant="secondary" badge={3} />
+      <UserMenu
+        name="Lorem Ipsum"
+        description="Dolor sit amet"
+        header={<span>user@example.com</span>}
+        items={[{ id: 'profile', label: 'Profile', href: '/profile' }]}
+      />
+    </>
+  }
+/>;
+```
+
+UserMenu tự thu gọn thành avatar dưới breakpoint sm; `compact` luôn thu gọn,
+`collapseOnMobile={false}` giữ tên ở mọi kích thước. `items` dùng DropdownMenuEntry,
+`header` nhận nội dung tên/email. Xem [Navbar](?path=/docs/modules-navbar--docs) và
+[UserMenu](?path=/docs/modules-usermenu--docs) để thử các trạng thái và classNames.
+
 ## PageHeader và Navbar
 
 `Navbar` là thanh điều hướng toàn ứng dụng. `PageHeader` giữ tên hiện tại và dùng

@@ -102,6 +102,8 @@ function AsyncConfirmation({ save }: { save: () => Promise<void> }) {
 
 Menu action items and submenu triggers accept `tone?: 'default' | 'danger'` (default: `default`). Danger uses `text-danger-700` and `data-[highlighted]:bg-danger-50`; existing `classNames.item`, entry `className` and `classNames.submenuTrigger` overrides still merge after tone styles. Tone changes presentation only; confirmation and deletion remain host-owned.
 
+`DropdownMenu` also accepts optional `header` content above the generated items, styled through `classNames.header` and identified by `-header`. `UserMenu` in the modules barrel composes this menu with an Avatar/name trigger; it accepts the same `DropdownMenuEntry[]` items, optional header, compact and responsive modes. See [navigation](UI_NAVIGATION.md).
+
 Menu checkboxes are host-controlled. They close by default; closeOnSelect=false keeps the menu open while updating the value. Entries use stable id; groups/submenus provide nested items. href actions use UiLink. Ordinary action onSelect can prevent default using the primitive's event semantics. No array indexes or translated labels become IDs.
 
 Tabs preserve visited panels by default. Disabled options are skipped when choosing the initial generated tab. Controlled value remains host-owned; schema/data changes do not introduce remount keys. Sidebar's active state stays host-owned, active descendants reveal their branch, and optional submenu open/onOpenChange keeps a branch controlled.

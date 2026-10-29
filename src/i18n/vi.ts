@@ -27,6 +27,7 @@ export const viMessages = {
   'toast.close': 'Đóng thông báo',
   'toast.viewport': 'Thông báo ({hotkey})',
   'breadcrumb.label': 'Đường dẫn',
+  'userMenu.open': 'Mở menu tài khoản của {name}',
   'navbar.navigation': 'Điều hướng chính',
   'navbar.openMenu': 'Mở menu điều hướng',
   'sidebar.label': 'Điều hướng chính',

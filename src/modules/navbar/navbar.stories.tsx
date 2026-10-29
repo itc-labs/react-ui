@@ -1,18 +1,19 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, userEvent, within } from 'storybook/test';
-import { Avatar } from '../../components/avatar';
-import { Badge } from '../../components/badge';
-import { DropdownMenu } from '../../components/dropdown-menu';
+import { Icon } from '../../components/icon';
+import { Tabs, TabsList, TabsTrigger } from '../../components/tabs';
+import { UserMenu } from '../user-menu';
 import { IconButton } from '../../components/icon-button';
 import { WorkspaceShell } from '../../templates/workspace-shell';
 import { Navbar, type NavbarItem, type NavbarProps } from './index';
 
 const items: NavbarItem<string>[] = [
-  { id: 'home', label: 'Tổng quan', href: '/', exact: true },
+  { id: 'home', label: 'Tổng quan', icon: 'home', href: '/', exact: true },
   {
     id: 'settings',
     type: 'dropdown',
     label: 'Cài đặt',
+    icon: 'settings',
     children: [
       { id: 'profile', label: 'Hồ sơ', href: '/settings/profile', icon: 'user' },
       { id: 'team', label: 'Nhóm', href: '/settings/team', access: 'team:read' },
@@ -25,6 +26,7 @@ const megaItems: NavbarItem<string>[] = [
     id: 'resources',
     type: 'mega',
     label: 'Tài nguyên',
+    icon: 'bookOpen',
     sections: [
       {
         id: 'guides',
@@ -60,7 +62,12 @@ const meta = {
   title: 'Modules/Navbar',
   component: Navbar,
   args: {
-    brand: 'Lorem ipsum',
+    brand: {
+      logo: <Icon name="home" />,
+      title: 'Lorem ipsum',
+      subtitle: 'Dolor sit amet',
+      href: '/',
+    },
     brandHref: '/',
     items,
     currentPath: '/',
@@ -95,8 +102,15 @@ export const RouteActive: Story = {
   },
 };
 export const PermissionFiltered: Story = {
-  tags: ['usage'],
+  tags: ['!dev', '!autodocs', 'regression'],
   args: { canAccess: (access) => access !== 'team:read' },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(canvas.getByTestId('navbar-item-settings-trigger'));
+    await expect(canvas.queryByRole('link', { name: 'Nhóm' })).not.toBeInTheDocument();
+    await expect(canvas.getByRole('link', { name: 'Hồ sơ' })).toBeVisible();
+    await userEvent.keyboard('{Escape}');
+  },
   parameters: {
     docs: {
       description: {
@@ -115,12 +129,10 @@ export const WithActions: Story = {
   args: {
     actions: (
       <>
-        <Badge count={3}>
-          <IconButton icon="bell" label="Thông báo" variant="ghost" />
-        </Badge>
-        <DropdownMenu
-          trigger={<Avatar alt="Tài khoản" fallback="AB" size="sm" />}
-          triggerLabel="Menu tài khoản"
+        <IconButton icon="bell" label="Thông báo" variant="secondary" badge={3} />
+        <UserMenu
+          name="Lorem Ipsum"
+          description="Dolor sit amet"
           items={[
             { id: 'profile', label: 'Hồ sơ', href: '/settings/profile' },
             { id: 'sign-out', label: 'Đăng xuất' },
@@ -151,13 +163,53 @@ export const Mobile: Story = {
   },
 };
 export const WorkspaceLayout: Story = {
-  tags: ['example'],
+  tags: ['!dev', '!autodocs', 'regression'],
   render: (args: NavbarProps) => (
     <WorkspaceShell
       classNames={{ header: 'block border-0 p-0 sm:p-0 lg:p-0' }}
       header={<Navbar {...args} sticky={false} />}
       content={<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>}
     />
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getByRole('main')).toBeVisible();
+    await expect(canvas.getByTestId('navbar')).toBeVisible();
+    await expect(canvas.getByTestId('navbar-item-home-link')).toHaveAttribute(
+      'aria-current',
+      'page',
+    );
+  },
+};
+export const Brand: Story = {
+  tags: ['variants'],
+  render: (args: NavbarProps) => (
+    <div className="grid gap-6">
+      <Navbar {...args} brand="Lorem ipsum" data-testid="brand-slot" />
+      <Navbar {...args} data-testid="brand-object" />
+    </div>
+  ),
+};
+export const Switcher: Story = {
+  tags: ['usage'],
+  args: {
+    switcher: (
+      <Tabs defaultValue="personal" variant="segmented" size="sm">
+        <TabsList aria-label="Không gian">
+          <TabsTrigger value="personal">Cá nhân</TabsTrigger>
+          <TabsTrigger value="team">Nhóm</TabsTrigger>
+        </TabsList>
+      </Tabs>
+    ),
+  },
+};
+export const ActiveIndicator: Story = {
+  tags: ['variants'],
+  render: (args: NavbarProps) => (
+    <div className="grid gap-6">
+      <Navbar {...args} activeIndicator="underline" data-testid="underline" />
+      <Navbar {...args} activeIndicator="pill" data-testid="pill" />
+    </div>
   ),
 };
 export const CustomClasses: Story = {
@@ -168,6 +220,12 @@ export const CustomClasses: Story = {
     classNames: {
       inner: 'gap-6 bg-hover',
       brand: 'text-accent',
+      brandLogo: 'bg-hover text-accent',
+      brandTitle: 'tracking-wide',
+      brandSubtitle: 'normal-case',
+      switcher: 'rounded-panel',
+      icon: 'text-accent',
+      activeIndicator: 'h-0.5',
       nav: 'font-medium',
       item: 'rounded-panel',
       trigger: 'rounded-full',

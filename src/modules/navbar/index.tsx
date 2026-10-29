@@ -6,7 +6,7 @@ import { cn, partTestId } from '../../components/common';
 import { Drawer } from '../../components/drawer';
 import { MenuIcon } from '../../components/icon/outline/menu';
 import { IconButton } from '../../components/icon-button';
-import { UiLink } from '../../components/link-image-provider';
+import { NavbarBrandBlock } from './brand';
 import { useUILocale } from '../../i18n/provider';
 import { filterNavByAccess, resolveActiveNav } from '../navigation';
 import { HeaderEntries } from './entries';
@@ -14,6 +14,7 @@ import { headerNodes } from './model';
 import type { NavbarProps } from './types';
 export type {
   NavbarProps,
+  NavbarBrand,
   NavbarItem,
   NavbarLink,
   NavbarSection,
@@ -23,6 +24,8 @@ export type {
 export function Navbar<TAccess = unknown>({
   brand,
   brandHref,
+  switcher,
+  activeIndicator = 'underline',
   items,
   actions,
   secondary,
@@ -92,34 +95,35 @@ export function Navbar<TAccess = unknown>({
           classNames?.inner,
         )}
       >
-        {brand != null &&
-          (brandHref ? (
-            <UiLink
-              href={brandHref}
-              data-testid={partTestId(testId, 'brand')}
-              className={cn('shrink-0 font-semibold', classNames?.brand)}
-            >
-              {brand}
-            </UiLink>
-          ) : (
-            <div
-              data-testid={partTestId(testId, 'brand')}
-              className={cn('shrink-0 font-semibold', classNames?.brand)}
-            >
-              {brand}
-            </div>
-          ))}
+        <NavbarBrandBlock
+          brand={brand}
+          {...(brandHref ? { brandHref } : {})}
+          {...(classNames ? { classNames } : {})}
+          data-testid={testId}
+        />
+        {switcher != null && (
+          <div
+            data-testid={partTestId(testId, 'switcher')}
+            className={cn('hidden shrink-0 lg:block', classNames?.switcher)}
+          >
+            {switcher}
+          </div>
+        )}
         <NavigationMenu.Root
           aria-label={navigationLabel ?? t('navbar.navigation')}
           data-testid={partTestId(testId, 'nav')}
-          className={cn('relative hidden min-w-0 lg:block', classNames?.nav)}
+          className={cn(
+            'relative hidden min-w-0 self-stretch lg:flex lg:items-stretch [&>div]:flex',
+            classNames?.nav,
+          )}
         >
-          <NavigationMenu.List className="flex items-center gap-1">
+          <NavigationMenu.List className="flex h-full items-stretch gap-1">
             <HeaderEntries
               nodes={visible}
               activePath={activePath}
               testId={testId}
               classNames={classNames}
+              activeIndicator={activeIndicator}
               topLevel
             />
           </NavigationMenu.List>
@@ -147,6 +151,22 @@ export function Navbar<TAccess = unknown>({
             />
           }
         >
+          <div className="mb-4 grid gap-4">
+            <NavbarBrandBlock
+              brand={brand}
+              {...(brandHref ? { brandHref } : {})}
+              {...(classNames ? { classNames } : {})}
+              data-testid={partTestId(testId, 'drawer')}
+            />
+            {switcher != null && (
+              <div
+                data-testid={partTestId(testId, 'drawerSwitcher')}
+                className={classNames?.switcher}
+              >
+                {switcher}
+              </div>
+            )}
+          </div>
           <nav
             aria-label={navigationLabel ?? t('navbar.navigation')}
             data-testid={partTestId(testId, 'drawerNav')}
