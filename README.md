@@ -74,27 +74,62 @@ export function UIRoot({ children }: { children: React.ReactNode }) {
 
 ## Usage
 
+Components take plain props and data; no setup beyond the styles is required.
+
 ```tsx
-import { Button, DropdownMenu, IconButton, Input } from '@itclabs/react-ui';
-import { modal } from '@itclabs/react-ui/modal';
-import { toast } from '@itclabs/react-ui/toast';
+import { Button, Input, Select } from '@itclabs/react-ui';
+
+export function ProfileForm() {
+  return (
+    <form>
+      <Input label="Name" placeholder="Jane Doe" />
+      <Select
+        label="Role"
+        options={[
+          { value: 'admin', label: 'Admin' },
+          { value: 'member', label: 'Member' },
+        ]}
+      />
+      <Button type="submit">Save</Button>
+    </form>
+  );
+}
+```
+
+### Menus and dialogs
+
+Menus, dialogs and tabs are data-driven: pass a trigger and `items` instead of composing primitives.
+
+```tsx
+import { Dialog, DropdownMenu, IconButton } from '@itclabs/react-ui';
 
 <DropdownMenu
   trigger={<IconButton icon="more" label="Actions" />}
   items={[
     { id: 'edit', label: 'Edit', onSelect: onEdit },
-    {
-      id: 'delete',
-      label: 'Delete',
-      tone: 'danger',
-      onSelect: async () => {
-        if (await modal.confirm({ title: 'Delete item?', tone: 'danger' }))
-          toast.success('Deleted');
-      },
-    },
+    { id: 'delete', label: 'Delete', tone: 'danger', onSelect: onDelete },
   ]}
 />;
+
+<Dialog title="Settings" trigger="Open settings">
+  Dialog content
+</Dialog>;
 ```
+
+### Toasts and confirmations
+
+With `ToastProvider` / `ModalProvider` mounted, call them from anywhere:
+
+```tsx
+import { toast } from '@itclabs/react-ui/toast';
+import { modal } from '@itclabs/react-ui/modal';
+
+toast.success('Saved');
+
+const ok = await modal.confirm({ title: 'Delete this item?', tone: 'danger' });
+```
+
+Browse every component, prop and state in the [Storybook](https://react-ui-one-rose.vercel.app/).
 
 Entry points: `@itclabs/react-ui` (everything core), `/components`, `/modules`, `/templates`, `/hooks`, `/theme`, `/i18n`, `/toast`, `/modal`, `/icons/outline/*`, `/icons/bold/*`, `/icons/catalog`.
 
