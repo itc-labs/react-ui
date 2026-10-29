@@ -65,8 +65,7 @@
     "test:package": "node scripts/verify-package.mjs",
     "format": "prettier --write . && node scripts/format-function-spacing.mjs --write",
     "format:check": "prettier --check . && node scripts/format-function-spacing.mjs",
-    "check:contrast": "node scripts/check-ui-contrast.mjs",
-    "chromatic": "chromatic --build-script-name build-storybook --exit-zero-on-changes"
+    "check:contrast": "node scripts/check-ui-contrast.mjs"
   },
   "dependencies": {
     "class-variance-authority": "0.7.1",
@@ -107,7 +106,6 @@
     "recharts": "3.10.1",
     "react-easy-crop": "6.2.4",
     "react-is": "19.3.1",
-    "chromatic": "18.12.1",
     "vitest": "5.0.5"
   },
   "peerDependencies": {

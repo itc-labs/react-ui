@@ -6,7 +6,7 @@ Use local Storybook fixtures to review presentation and interactions. Examples d
 
 The CI workflow runs on pushes to main and pull requests. It uses the Node version in `.nvmrc`, the pnpm version in `package.json` and a frozen lockfile. It runs format checks, typecheck, unit tests, library build, package verification and Storybook build. Run `pnpm check:contrast` locally for opaque token contrast pairs.
 
-The separate Chromatic workflow builds and uploads Storybook using `CHROMATIC_PROJECT_TOKEN`. It requires repository/project configuration. No lint command is configured.
+Storybook is deployed by the Vercel GitHub integration (`vercel.json`); pull requests get preview deployments for visual review. No lint command is configured.
 
 The source-builder tests parse and typecheck generated usage recipes. Selector and component tests cover class merging, validation associations, controlled state and lifecycle contracts. Static builds and jsdom tests do not execute browser play functions or prove visual layout.
 

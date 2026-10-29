@@ -142,7 +142,7 @@ import { outlineCatalog, boldCatalog } from '@itclabs/react-ui/icons/catalog';
 
 ## Documentation
 
-Storybook: https://main--<chromatic-app-id>.chromatic.com — link added after the first Chromatic build
+Storybook: deployed on Vercel — the public link is added after the first deployment
 
 See [docs/](docs/) for component contracts, theming, localization, accessibility checks and Storybook conventions.
 

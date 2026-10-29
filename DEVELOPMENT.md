@@ -66,12 +66,6 @@ node scripts/verify-package.mjs /tmp/react-ui-review.tgz
 
 `prepack` rebuilds the library. Review the archive and changelog before publication.
 
-## Chromatic
+## Storybook deployment
 
-Set `CHROMATIC_PROJECT_TOKEN` for your Chromatic project, then run:
-
-```sh
-pnpm chromatic
-```
-
-This runs `build-storybook` and uploads snapshots. The GitHub workflow reads the same token from repository Actions secrets. Add the resulting public Storybook URL to README after the first build. Snapshot changes require visual review even when the command exits successfully.
+Storybook is deployed by Vercel's GitHub integration using `vercel.json`: `pnpm install --frozen-lockfile`, `pnpm build-storybook`, output `storybook-static`. Pushes to `main` update the production site; pull requests get preview URLs. No deployment token lives in this repository.
