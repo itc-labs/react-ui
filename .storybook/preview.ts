@@ -66,6 +66,7 @@ const preview: Preview = {
             'Getting started',
             'Providers',
             'Navigation',
+            'Calendar',
             'Theming',
             'Localization',
             'Custom classes',

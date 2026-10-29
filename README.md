@@ -119,6 +119,46 @@ import { Dialog, DropdownMenu, IconButton } from '@itclabs/react-ui';
 </Dialog>;
 ```
 
+### Event calendar
+
+Use `Calendar` from the calendar subpath (`EventCalendar` from the root/modules).
+The root `Calendar` remains the date-selection control. Event ends are exclusive;
+ISO date-only strings use local midnight.
+
+```tsx
+import { Calendar, type CalendarEvent } from '@itclabs/react-ui/calendar';
+
+const events: CalendarEvent[] = [
+  {
+    id: 'alpha',
+    title: 'Lorem ipsum',
+    start: '2026-10-29T09:00',
+    end: '2026-10-29T10:00',
+    tone: 'info',
+  },
+];
+
+export function Schedule() {
+  return (
+    <Calendar
+      events={events}
+      defaultDate={new Date(2026, 9, 29)}
+      defaultView="week"
+      responsiveView="list"
+      height={600}
+      data-testid="schedule"
+    />
+  );
+}
+```
+
+See [calendar API and host recipes](docs/UI_CALENDAR.md) and Storybook
+**Overview/Calendar** for controlled navigation, range loading, select-to-create,
+optimistic editing, custom rendering, localization and keyboard interaction.
+**Templates/CalendarPage** composes WorkspaceShell, Sidebar, PageHeader and event
+details in a Drawer. Recurrence, time-zone configuration and resource timelines
+are outside phase 1.
+
 ### Toasts and confirmations
 
 With `ToastProvider` / `ModalProvider` mounted, call them from anywhere:
@@ -143,6 +183,7 @@ Browse every component, prop and state in the [Storybook](https://react-ui-one-r
 | `@itclabs/react-ui/modules`                            | Compositions: Form, DataTable, Sidebar, Navbar, Pagination, EmptyState, PageHeader, ProgressList…                                 |
 | `@itclabs/react-ui/templates`                          | Page layouts with slots (WorkspaceShell)                                                                                          |
 | `@itclabs/react-ui/navigation`                         | Router-agnostic `matchPath`, `resolveActiveNav`, `filterNavByAccess` (no React)                                                   |
+| `@itclabs/react-ui/calendar`                           | Event Calendar shell plus pure date, layout, filtering and interaction helpers                                                    |
 | `@itclabs/react-ui/hooks`                              | Shared hooks: click outside, debounced values and callbacks                                                                       |
 | `@itclabs/react-ui/theme`                              | `defineTheme`, theme types and typed colour references                                                                            |
 | `@itclabs/react-ui/i18n`                               | Locales, message types and `defineLocale` for custom languages                                                                    |

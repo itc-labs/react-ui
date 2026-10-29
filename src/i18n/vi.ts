@@ -93,6 +93,41 @@ export const viMessages = {
   'date.clear': 'Xóa lựa chọn ngày',
   'date.invalid': 'Ngày không hợp lệ.',
   'date.outOfBounds': 'Ngày nằm ngoài phạm vi cho phép.',
+  'calendar.prev': 'Khoảng trước',
+  'calendar.nextPeriod': 'Khoảng sau',
+  'calendar.todayButton': 'Hôm nay',
+  'calendar.weekNumber': 'T{week}',
+  'calendar.views': 'Chế độ xem lịch',
+  'calendar.views.month': 'Tháng',
+  'calendar.views.week': 'Tuần',
+  'calendar.views.day': 'Ngày',
+  'calendar.views.list': 'Danh sách',
+  'calendar.listDayLabel': '{weekday}, {day}/{numericMonth}',
+  'calendar.allDay': 'Cả ngày',
+  'calendar.now': 'Giờ hiện tại: {time}',
+  'calendar.more': '{count} mục nữa',
+  'calendar.noEvents': 'Chưa có sự kiện.',
+  'calendar.selectHint':
+    'Kéo để chọn hoặc nhấn Shift+Enter để chọn ô hiện tại. Trên màn hình cảm ứng, nhấn giữ để chọn. Escape để hủy.',
+  'calendar.selection': 'Đã chọn: {start} – {end} (không bao gồm thời điểm kết thúc).',
+  'calendar.editHint':
+    'Enter để bắt đầu; phím mũi tên để di chuyển, Shift + phím mũi tên để đổi độ dài, Enter để xác nhận, Escape để hủy. Space kích hoạt sự kiện. Alt + phím mũi tên cũng chỉnh sửa ngay.',
+  'calendar.editPickedUp':
+    'Bắt đầu chỉnh sửa {title}: {start} – {end} (không bao gồm thời điểm kết thúc).',
+  'calendar.editMoved':
+    'Đã di chuyển {title}: {start} – {end} (không bao gồm thời điểm kết thúc).',
+  'calendar.editResized':
+    'Đã đổi độ dài {title}: {start} – {end} (không bao gồm thời điểm kết thúc).',
+  'calendar.editCommitted':
+    'Đã xác nhận {title}: {start} – {end} (không bao gồm thời điểm kết thúc).',
+  'calendar.editCancelled':
+    'Đã hủy chỉnh sửa {title}: {start} – {end} (không bao gồm thời điểm kết thúc).',
+  'calendar.editRejected':
+    'Không thể thay đổi. {title}: {start} – {end} (không bao gồm thời điểm kết thúc).',
+  'calendar.resizeEvent': 'Đổi độ dài {title}',
+  'calendar.eventLabel': '{title}, {start} – {end}',
+  'calendar.label': 'Lịch',
+  'calendar.placeholder': 'Nội dung lịch',
   'calendar.previous': 'Tháng trước',
   'calendar.next': 'Tháng sau',
   'calendar.month': 'Tháng',

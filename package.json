@@ -53,7 +53,8 @@
     "./chart": "./src/modules/chart/index.tsx",
     "./avatar-upload": "./src/modules/avatar-upload/index.tsx",
     "./ui.css": "./dist/ui.css",
-    "./navigation": "./src/modules/navigation/index.ts"
+    "./navigation": "./src/modules/navigation/index.ts",
+    "./calendar": "./src/modules/calendar/index.tsx"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
@@ -86,7 +87,9 @@
     "react-day-picker": "9.14.0",
     "react-toastify": "11.1.0",
     "input-otp": "1.5.0",
-    "react-number-format": "5.4.5"
+    "react-number-format": "5.4.5",
+    "date-fns": "4.4.0",
+    "@date-fns/tz": "1.5.0"
   },
   "devDependencies": {
     "@types/react": "19.3.0",
@@ -256,6 +259,10 @@
       "./navigation": {
         "types": "./dist/modules/navigation/index.d.ts",
         "import": "./dist/modules/navigation/index.js"
+      },
+      "./calendar": {
+        "types": "./dist/modules/calendar/index.d.ts",
+        "import": "./dist/modules/calendar/index.js"
       }
     },
     "access": "public"
