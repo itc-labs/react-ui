@@ -13,7 +13,9 @@
     "jsx": "react-jsx",
     "noUncheckedIndexedAccess": true,
     "exactOptionalPropertyTypes": true,
-    "allowImportingTsExtensions": true
+    "allowImportingTsExtensions": true,
+    "incremental": true,
+    "tsBuildInfoFile": "./.cache/tsc/tsconfig.tsbuildinfo"
   },
   "include": [
     "src/**/*.ts",

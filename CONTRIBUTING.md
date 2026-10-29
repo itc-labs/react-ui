@@ -4,7 +4,7 @@ See [DEVELOPMENT.md](DEVELOPMENT.md) for setup, source structure and verificatio
 
 Use a branch named `<type>/<short-kebab-case-description>` with one of these prefixes: `feat/`, `fix/`, `chore/`, `docs/`, `refactor/`, `test/`, `perf/`, `ci/`.
 
-Use [Conventional Commits](https://www.conventionalcommits.org/), for example `fix(select): preserve focus after dismissal`. Mark breaking changes with `!` and explain the migration.
+Use [Conventional Commits](https://www.conventionalcommits.org/), for example `fix(select): preserve focus after dismissal`. Mark breaking changes with `!` and explain the migration. `pnpm install` installs Git hooks (husky): `commit-msg` runs commitlint, and `pre-push` lints the commits being pushed and runs `format:check` and `typecheck`. CI also lints every pull request commit and the pull request title, because squash merges use the title as the commit message on `main`.
 
 Before opening a pull request, run formatting, format checks, typecheck, tests, build, package verification, Storybook build and contrast checks as listed in the contributor guide. Describe the problem, resulting behavior and verification. Include browser interaction or visual evidence when relevant, and state any checks you could not run. Keep changes focused and preserve public API, behavior, styling targets and test selectors.
 

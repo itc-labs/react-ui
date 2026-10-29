@@ -1,0 +1,5 @@
+# Lint the commits being pushed, then run the fast checks CI also runs.
+base=$(git rev-parse --abbrev-ref --symbolic-full-name '@{upstream}' 2>/dev/null || echo origin/main)
+pnpm exec commitlint --from "$base" --to HEAD
+pnpm format:check
+pnpm typecheck

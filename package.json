@@ -69,7 +69,9 @@
     "check:contrast": "node scripts/check-ui-contrast.mjs",
     "changeset": "changeset",
     "version-packages": "changeset version && prettier --write CHANGELOG.md",
-    "release": "node scripts/release.mjs"
+    "release": "node scripts/release.mjs",
+    "prepare": "husky",
+    "commitlint": "commitlint"
   },
   "dependencies": {
     "class-variance-authority": "0.7.1",
@@ -112,7 +114,10 @@
     "react-is": "19.3.1",
     "vitest": "5.0.5",
     "@changesets/cli": "3.0.3",
-    "@changesets/changelog-github": "1.0.1"
+    "@changesets/changelog-github": "1.0.1",
+    "@commitlint/cli": "21.2.3",
+    "@commitlint/config-conventional": "21.2.3",
+    "husky": "9.1.7"
   },
   "peerDependencies": {
     "react": "^19.0.0",
