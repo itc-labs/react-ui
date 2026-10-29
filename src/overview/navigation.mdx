@@ -10,6 +10,23 @@ Xem [Modules/Navbar](?path=/docs/modules-navbar--docs),
 [Modules/Sidebar](?path=/docs/modules-sidebar--docs) và
 [Components/TopLoader](?path=/docs/components-toploader--docs) để thử từng API.
 
+## Sidebar và bố cục ứng dụng
+
+Sidebar nhận `header` dạng `{ logo, title, subtitle, href }` hoặc slot switcher;
+`footer` có thể là UserMenu. `badge` dùng số hoặc Badge props, chuyển thành chấm khi
+thu gọn. Dùng `collapsed/onCollapsedChange` hoặc `defaultCollapsed`; shortcut
+`toggleShortcut="mod+b"` chỉ bật khi host yêu cầu. Rail giữ tooltip và mở submenu
+bên cạnh; dưới `lg`, nút menu mở Drawer với cùng cây quyền và trang hiện tại.
+WorkspaceShell tự đổi cột theo `data-collapsed` của Sidebar.
+
+Thử [Collapsible](?path=/story/modules-sidebar--collapsible),
+[CollapsedFlyout](?path=/story/modules-sidebar--collapsed-flyout) và
+[Mobile](?path=/story/modules-sidebar--mobile) ở chiều rộng dưới `lg`.
+[ApplicationLayout](?path=/story/templates-applicationlayout--playground) là demo
+ứng dụng có thể bấm; [TopNavigationLayout](?path=/story/templates-applicationlayout--top-navigation-layout)
+dùng Navbar mega menu, underline và UserMenu. Ví dụ dùng state và UiLink adapter
+của host, không gắn framework.
+
 ## Một menu dùng chung
 
 Khai báo menu một lần trong `navigation.ts`. Mở rộng `NavItem` bằng nhãn và kiểu nhóm

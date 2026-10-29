@@ -1,44 +1,23 @@
 'use client';
-import type { TestIdProps } from '../../components/common/testing';
-
+import { useEffect, useState, type ComponentProps, type ReactNode } from 'react';
+import { cn, partTestId } from '../../components/common';
+import { Drawer } from '../../components/drawer';
+import { ChevronLeftIcon } from '../../components/icon/outline/chevron-left';
+import { ChevronRightIcon } from '../../components/icon/outline/chevron-right';
+import { MenuIcon } from '../../components/icon/outline/menu';
+import { IconButton } from '../../components/icon-button';
+import { useUILocale } from '../../i18n/provider';
 import { filterNavByAccess, resolveActiveNav } from '../navigation';
 import { SidebarEntries } from './entries';
-import type { SidebarEntry } from './types';
-export type { SidebarEntry } from './types';
-import { partTestId } from '../../components/common';
-import { useUILocale } from '../../i18n/provider';
-import type { ComponentProps, ReactNode } from 'react';
-import { type SlotClasses, cn } from '../../components/common';
-
-export type SidebarProps<TAccess = unknown> = (ComponentProps<'aside'> & {
-  header?: ReactNode;
-  footer?: ReactNode;
-  items?: readonly SidebarEntry<TAccess>[];
-  /** Absolute host pathname; no router is imported. */
-  currentPath?: string;
-  isActive?: (item: SidebarEntry<TAccess>, currentPath: string) => boolean;
-  canAccess?: (access: TAccess, item: SidebarEntry<TAccess>) => boolean;
-  navigationLabel?: string;
-  classNames?: SlotClasses<
-    | 'root'
-    | 'header'
-    | 'content'
-    | 'footer'
-    | 'nav'
-    | 'group'
-    | 'groupLabel'
-    | 'item'
-    | 'icon'
-    | 'submenu'
-    | 'submenuTrigger'
-    | 'submenuContent'
-    | 'submenuIcon'
-    | 'submenuLabel'
-    | 'submenuChevron'
-    | 'submenuBody'
-  >;
-}) &
-  TestIdProps;
+import { SidebarHeader } from './header';
+import { useSidebarState } from './use-sidebar-state';
+import type { SidebarProps } from './types';
+export type {
+  SidebarEntry,
+  SidebarProps,
+  SidebarBrand,
+  SidebarClassNames,
+} from './types';
 
 export function Sidebar<TAccess = unknown>({
   header,
@@ -48,43 +27,102 @@ export function Sidebar<TAccess = unknown>({
   currentPath,
   isActive,
   canAccess,
+  collapsed: controlledCollapsed,
+  defaultCollapsed,
+  onCollapsedChange,
+  toggleShortcut,
+  collapseLabel,
+  expandLabel,
+  mobileTrigger,
+  mobileTriggerLabel,
+  drawerTitle,
   'data-testid': testId,
   children,
   className,
   classNames,
   ...props
 }: SidebarProps<TAccess>) {
+  const { t } = useUILocale();
+  const { collapsed, toggle } = useSidebarState({
+    ...(controlledCollapsed === undefined ? {} : { collapsed: controlledCollapsed }),
+    ...(defaultCollapsed === undefined ? {} : { defaultCollapsed }),
+    ...(onCollapsedChange ? { onCollapsedChange } : {}),
+    ...(toggleShortcut ? { toggleShortcut } : {}),
+  });
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  useEffect(() => setMobileOpen(false), [currentPath]);
+
+  useEffect(() => {
+    if (typeof window.matchMedia !== 'function') return;
+    const media = window.matchMedia('(min-width: 64rem)');
+
+    const close = () => {
+      if (media.matches) setMobileOpen(false);
+    };
+
+    media.addEventListener('change', close);
+
+    return () => media.removeEventListener('change', close);
+  }, []);
+
   const visibleItems =
-    items && (canAccess ? filterNavByAccess(items, canAccess) : items);
+    items &&
+    filterNavByAccess(items, (access, item) => !canAccess || canAccess(access, item));
   const activePath = visibleItems
     ? resolveActiveNav(visibleItems, currentPath ?? '', isActive)
     : [];
 
-  return (
-    <aside
-      {...props}
-      data-testid={testId}
-      className={cn(
-        'flex min-w-0 items-center justify-between gap-4 border-b border-line bg-sidebar px-5 py-5 sm:px-8 lg:flex-col lg:items-stretch lg:justify-start lg:border-b-0 lg:border-r lg:px-5 lg:py-8',
-        classNames?.root,
-        className,
-      )}
-    >
-      {header != null && (
-        <div className={cn('min-w-0', classNames?.header)}>{header}</div>
-      )}
-      <div className={cn('min-w-0 lg:mt-12', classNames?.content)}>
+  const body = (rail: boolean, id: string | undefined, mobile = false) => (
+    <>
+      <div
+        data-testid={partTestId(id, mobile ? 'sidebarHeader' : 'header')}
+        className={cn('min-w-0 shrink-0', classNames?.header)}
+      >
+        {header != null && (
+          <SidebarHeader
+            header={header}
+            collapsed={rail}
+            classNames={classNames}
+            testId={id}
+          />
+        )}
+        {!mobile && (
+          <IconButton
+            icon={rail ? ChevronRightIcon : ChevronLeftIcon}
+            label={
+              rail
+                ? (expandLabel ?? t('sidebar.expand'))
+                : (collapseLabel ?? t('sidebar.collapse'))
+            }
+            aria-expanded={!rail}
+            onClick={toggle}
+            variant="ghost"
+            data-testid={partTestId(id, 'toggle')}
+            className={cn('mt-2', classNames?.toggle)}
+          />
+        )}
+      </div>
+      <div
+        data-testid={partTestId(id, 'content')}
+        className={cn(
+          'min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden',
+          classNames?.content,
+        )}
+      >
         {items ? (
           <SidebarNav
             aria-label={navigationLabel}
-            data-testid={partTestId(testId, 'nav')}
+            data-testid={partTestId(id, 'nav')}
             className={cn('gap-4', classNames?.nav)}
           >
             <SidebarEntries
               items={visibleItems ?? []}
               activePath={activePath}
-              testId={testId}
+              testId={id}
               classNames={classNames}
+              collapsed={rail}
+              {...(mobile ? { onNavigate: () => setMobileOpen(false) } : {})}
             />
           </SidebarNav>
         ) : (
@@ -93,15 +131,63 @@ export function Sidebar<TAccess = unknown>({
       </div>
       {footer != null && (
         <div
+          data-testid={partTestId(id, 'footer')}
           className={cn(
-            'mt-auto hidden border-t border-line pt-5 text-ui-sm leading-relaxed text-muted lg:block',
+            'min-w-0 shrink-0 border-t border-line pt-3 text-ui-sm text-muted',
             classNames?.footer,
           )}
         >
           {footer}
         </div>
       )}
-    </aside>
+    </>
+  );
+
+  return (
+    <>
+      <div className="p-3 lg:hidden">
+        <Drawer
+          title={drawerTitle ?? navigationLabel ?? t('sidebar.label')}
+          side="left"
+          open={mobileOpen}
+          onOpenChange={setMobileOpen}
+          trigger={
+            mobileTrigger ?? (
+              <IconButton
+                label={mobileTriggerLabel ?? t('sidebar.open')}
+                icon={MenuIcon}
+                variant="ghost"
+              />
+            )
+          }
+          triggerAsChild
+          {...(testId ? { 'data-testid': partTestId(testId, 'drawer')! } : {})}
+          className={cn('bg-sidebar', classNames?.drawer)}
+          classNames={{
+            trigger: classNames?.mobileTrigger ?? '',
+            body: 'flex min-h-0 flex-1 flex-col overflow-hidden',
+            header: 'shrink-0',
+          }}
+        >
+          <div className="flex min-h-0 flex-1 flex-col gap-4">
+            {body(false, partTestId(testId, 'drawer'), true)}
+          </div>
+        </Drawer>
+      </div>
+      <aside
+        {...props}
+        data-testid={testId}
+        data-collapsed={collapsed}
+        className={cn(
+          'group/sidebar sticky top-0 hidden h-dvh min-w-0 flex-col gap-4 overflow-hidden border-r border-line bg-sidebar p-3 lg:flex motion-safe:transition-[width] motion-safe:duration-[var(--motion-duration-normal)]',
+          collapsed ? 'w-sidebar-collapsed px-2' : 'w-sidebar',
+          classNames?.root,
+          className,
+        )}
+      >
+        {body(collapsed, testId)}
+      </aside>
+    </>
   );
 }
 
@@ -116,7 +202,7 @@ export function SidebarNav({
     <nav
       {...props}
       aria-label={label ?? t('sidebar.label')}
-      className={cn('flex flex-wrap gap-2 lg:grid', className)}
+      className={cn('grid gap-2', className)}
     />
   );
 }
@@ -133,7 +219,7 @@ export function SidebarGroup({
       {label != null && (
         <p
           className={cn(
-            'mb-3 hidden px-3 text-eyebrow font-medium uppercase tracking-widest text-muted lg:block',
+            'mb-3 px-1 text-eyebrow font-medium uppercase tracking-widest text-muted break-words',
             labelClassName,
           )}
         >

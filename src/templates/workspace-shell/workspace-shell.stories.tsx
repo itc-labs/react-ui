@@ -20,7 +20,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'Shell dùng slot sidebar/body/header/main. Không gắn Next, registry hay nội dung Explore. Component không dùng hook; host quyết định navigation và route. Không có collapse/drawer behavior trong phiên bản này.',
+          'Shell dùng slot sidebar/body/header/main. Không gắn Next, registry hay nội dung Explore. Host quyết định navigation và route; lưới desktop tự theo trạng thái thu gọn của Sidebar.',
       },
     },
   },

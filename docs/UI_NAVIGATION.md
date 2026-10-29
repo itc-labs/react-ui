@@ -62,6 +62,81 @@ const menu: SidebarEntry<Permission>[] = [
 
 `SidebarProps<TAccess>` and `SidebarEntry<TAccess>` preserve the host's permission type. Sidebar filters before matching; `canAccess` is optional and omitting it leaves all entries visible. `isActive` receives `(entry, currentPath)` and follows the same precedence as the helper. Omitting `currentPath` keeps explicit active flags working; predicates then receive an empty path. Only the winning row receives `aria-current="page"`; its ancestors receive branch highlighting. Active descendants reveal uncontrolled branches when they become active. A host-controlled `open` remains authoritative, and users can manually collapse an active branch. Existing className/classNames slots, refs, localized labels and stable partTestId selectors remain available. Permission/path changes are processed on each render.
 
+### Sidebar rail and mobile navigation
+
+`Sidebar` also exports `SidebarBrand` and `SidebarClassNames`. `header` accepts
+any ReactNode (for example a workspace switcher) or `{ logo?, title, subtitle?, href? }`.
+Structured brands use UiLink when `href` is supplied; title/subtitle become
+screen-reader-only in the rail. Header and footer remain in view while the middle
+scrolls inside a viewport-height, sticky desktop sidebar. Custom header/footer nodes
+can adapt with `group-data-[collapsed=true]/sidebar:hidden`, for example on UserMenu's
+`details` and `chevron` class slots. Slots rendered in both desktop and mobile scopes
+must avoid fixed DOM IDs. The host owns workspace selection and account actions.
+
+```tsx
+<WorkspaceShell
+  sidebar={
+    <Sidebar
+      header={{ title: 'Lorem ipsum', logo: <Icon glyph={HomeIcon} />, href: '/' }}
+      footer={<UserMenu name="Alex Morgan" compact items={accountItems} />}
+      items={navigation}
+      currentPath={currentPath}
+      collapsed={collapsed}
+      onCollapsedChange={setCollapsed}
+      toggleShortcut="mod+b"
+    />
+  }
+  content={children}
+/>
+```
+
+Items/submenus accept `icon` as an existing registered icon name or a directly
+imported kit glyph, and `badge` as a number or Badge props excluding children.
+Expanded rows use Badge's standalone pill; collapsed rows put a dot on the icon.
+Badge visibility rules (zero, showZero, invisible) still apply. An item without an
+icon uses a folder glyph in the rail, so it remains reachable. Group labels stay
+visible. Disabled entries cannot activate or open flyouts.
+
+`collapsed` is controlled; otherwise `defaultCollapsed` initializes local state
+(default false). `onCollapsedChange` reports requested changes. The built-in toggle
+has localized collapse/expand names and `aria-expanded`. `collapseLabel` and
+`expandLabel` override them. Optional `toggleShortcut` supports `mod`, `ctrl`, `meta`,
+`alt`, `shift` and a key separated by `+`; `mod` accepts Control or Command. It is
+off by default and ignores editable controls, repeat/composition and already handled
+events. Give each shortcut a single owner when mounting multiple sidebars.
+
+Rail links expose label tooltips on hover/focus. Submenus become side flyouts:
+Enter/Space or ArrowRight/ArrowDown opens, focus moves to the first link/control,
+Tab visits the contents, Escape dismisses and returns focus. A parent with `href`
+remains available as the first flyout link. Only the winning link has aria-current;
+its rail branch stays highlighted. Existing submenu `open`, `defaultOpen` and
+`onOpenChange` work in both presentations. Uncontrolled rail flyouts default closed
+even for active descendants, while expanded disclosures reveal active branches.
+Changing between rail and expanded presentations remounts uncontrolled branches;
+control submenu `open` when it must persist across that change.
+
+Below `lg`, the desktop aside is hidden and an IconButton opens a left kit Drawer
+with the same filtered/active tree, header and footer. `mobileTrigger` can replace
+that button with a native/ref-forwarding control such as
+`<IconButton icon={MenuIcon} label="Open navigation" />`; supply its own accessible
+name. `mobileTriggerLabel` names the default button and `drawerTitle` names the
+Drawer; both otherwise use localized defaults. Selecting a mobile link/action,
+changing currentPath or crossing to desktop closes the Drawer. Escape, focus trap
+and focus restoration come from Drawer.
+
+`className` and React 19 ref still target the desktop aside. Existing class slots
+remain; additional slots are `brand`, `brandLogo`, `brandTitle`, `brandSubtitle`,
+`label`, `badge`, `toggle`, `tooltip`, `flyout`, `mobileTrigger` and `drawer`.
+The optional base selector derives `-header`, `-brand*`, `-toggle`, `-content`,
+`-footer`, `-nav`, `-drawer` and Drawer's standard `-drawer-trigger`/`-drawer-close`.
+Item paths retain stable type/id segments and derive `-icon`, `-label`, `-badge`
+(and Badge's parts), `-tooltip`, submenu `-content` and rail parent `-link`.
+Mobile item paths start under `-drawer`, with `-drawer-sidebarHeader` for the brand header inside the body, avoiding duplicate selectors.
+
+See Modules/Sidebar's WithHeaderFooter, IconsAndCounts, Collapsible,
+CollapsedFlyout and Mobile stories, and Templates/ApplicationLayout for clickable
+sidebar and top-navigation layouts.
+
 ## Permission filtering and route protection
 
 UI hiding is not security. Users can enter URLs directly or call APIs without using a menu. The host must also guard routes server-side / in middleware, verify sessions and permissions at the data boundary, and authorize every sensitive action. A client-side route guard helps navigation but does not secure backend data.

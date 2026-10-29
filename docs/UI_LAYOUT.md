@@ -9,7 +9,7 @@ Generic layout and navigation compositions. The library has no router dependency
 | WorkspaceShell/Body/Header/Main          | src/templates/workspace-shell | Supply sidebar, breadcrumb and header actions; compose page content                     |
 | Stepper                                  | src/modules/stepper           | Steps/currentStep and transitions; read-only progress, no automatic actions             |
 
-Sidebar lays out vertically from lg and horizontally below it; submenu disclosures use Radix Collapsible; a full sidebar collapse/mobile drawer is not implemented. Breadcrumb wraps long paths rather than hiding them. Stepper marks the current step and completed text for assistive tech. Each entry has colocated stories; link composition and keyboard/current-state assertions are covered by play functions.
+Sidebar is a sticky vertical panel from lg, with a scrollable middle and fixed header/footer. It supports an icon rail with tooltips and submenu flyouts, and a left Drawer below lg. Expanded submenu disclosures use Radix Collapsible. Breadcrumb wraps long paths rather than hiding them. Stepper marks the current step and completed text for assistive tech. Each entry has colocated stories; link composition and keyboard/current-state assertions are covered by play functions.
 
 ## Composition
 
@@ -65,7 +65,7 @@ In Next, the app may use `<SidebarItem asChild active icon={...}><Link href="/it
 
 ## Theme and overrides
 
-`--container-sidebar: 13rem` and `--container-workspace: 100rem` define the default layout dimensions. WorkspaceShell consumes them; cn registers the container names for consumer max-width overrides. All parts accept className/native props. Header actions and main content are slots, not product-specific props.
+`--container-sidebar: 13rem`, `--container-sidebar-collapsed: 4rem` and `--container-workspace: 100rem` define the default layout dimensions. WorkspaceShell consumes them; cn registers the container names for consumer max-width overrides. All parts accept className/native props. Header actions and main content are slots, not product-specific props.
 
 ## Submenus
 
@@ -96,7 +96,7 @@ import {
 </Sidebar>;
 ```
 
-For rich submenus, the stacked Sidebar/grid nav composition above also keeps mobile branches full width. The default simple horizontal navigation remains available.
+On mobile the same compound content appears in the Drawer; generated items use the same permission and active-route model as desktop.
 
 - `active` highlights the ancestor and defaults the uncontrolled disclosure open. Entering an active branch later opens it; manual collapse within the same active branch is respected. The host marks each active ancestor and the current leaf, and may control `open/onOpenChange` for other route-change or accordion rules. No pathname matching or permissions are inferred.
 - `defaultOpen` overrides the initial open value. Controlled `open` is always authoritative. `disabled` disables the disclosure trigger; permissions/disabled links remain the host's responsibility.
@@ -139,3 +139,19 @@ PageHeader is the per-page title block: it renders an h1 with optional eyebrow, 
 ```
 
 The breadcrumb renders above the eyebrow/title inside the content column. `classNames.breadcrumb` styles its wrapper; a base `data-testid` derives `-breadcrumb`, `-content`, `-eyebrow`, `-title`, `-description` and `-actions`. Breadcrumb retains its own navigation semantics and UiLink adapter support. PageHeader forwards the React 19 ref and native div props to its root.
+
+## Collapsed workspace column
+
+WorkspaceShell follows a direct child Sidebar's `data-collapsed="true"` using CSS
+`:has()`, including when collapse state is uncontrolled. Its desktop grid column
+uses `--container-sidebar-collapsed` instead of `--container-sidebar`; Sidebar width
+and grid animate with the same motion-duration-normal token only when motion is
+allowed. Keep Sidebar as a direct DOM child; providers/fragments are fine. When
+using an extra DOM wrapper, set the shell grid columns with `className` from host
+collapse state. Below lg the shell stacks the mobile trigger and body.
+
+Templates/ApplicationLayout composes a structured brand, footer UserMenu, icons,
+counts, a slim bar, PageHeader/Breadcrumb and Progress/ProgressList/Tag cards. Its
+TopNavigationLayout variant uses Navbar's mega menu and underline indicator without
+a sidebar. A local UiLink adapter changes host state for clickable fixture pages;
+no router, fetching or authentication is bundled.

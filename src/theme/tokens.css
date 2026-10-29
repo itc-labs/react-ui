@@ -47,6 +47,7 @@
   --spacing-control-md: 2.5rem;
   --spacing-control-lg: 3rem;
   --container-sidebar: 13rem;
+  --container-sidebar-collapsed: 4rem;
   --container-workspace: 100rem;
   --container-dialog: 32rem;
   --container-drawer: 32rem;

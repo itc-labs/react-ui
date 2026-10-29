@@ -106,7 +106,7 @@ References: [Radix CSS animation lifecycle](https://www.radix-ui.com/primitives/
 
 ## Shared workspace containers
 
-`--container-sidebar: 13rem` (208px), `--container-workspace: 100rem` (1600px). WorkspaceShell uses these for the desktop grid and maximum width. Override via theme scope; custom container names participate in cn/max-width merging. See UI_LAYOUT.md.
+`--container-sidebar: 13rem` (208px), `--container-sidebar-collapsed: 4rem` (64px), `--container-workspace: 100rem` (1600px). WorkspaceShell uses these for the desktop grid and maximum width. Override via theme scope; custom container names participate in cn/max-width merging. See UI_LAYOUT.md.
 
 Sidebar submenu height/chevron animations reuse motion-duration-normal/exit/control and shared enter/exit easings. The reduced-motion rule disables disclosure animation; nested parents return to auto height after entry so deeper items are not clipped.
 
