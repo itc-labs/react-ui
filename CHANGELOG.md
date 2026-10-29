@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.3.0
+
+### Minor Changes
+
+- [#8](https://github.com/itc-labs/react-ui/pull/8) [`b60ba1a`](https://github.com/itc-labs/react-ui/commit/b60ba1a2a75ac4ccdf9497ae6e8eb178e57ac733) Thanks [@vungbt](https://github.com/vungbt)! - Improve EventCalendar month, time-grid and list readability with ellipsized event text, readable overlapping columns, centered tone dots, a larger today marker and compact list dates. Add the overridable calendar.listDayLabel message and consistent localized time ranges with calendar-day offsets for overnight events. Existing props, class slots and selectors are preserved.
+
+- [#8](https://github.com/itc-labs/react-ui/pull/8) [`b60ba1a`](https://github.com/itc-labs/react-ui/commit/b60ba1a2a75ac4ccdf9497ae6e8eb178e57ac733) Thanks [@vungbt](https://github.com/vungbt)! - Add an event calendar at `@itclabs/react-ui/calendar` (`Calendar` there; `EventCalendar` from the root and `modules`, since `Calendar` remains the date picker).
+
+  - **Views:** month (week numbers, "+N more" popover), week as a time grid or day grid, day, and list; all-day and multi-day events, business hours, now indicator, localized titles and week start.
+  - **Interactions:** select-to-create (`selectable`, `onSelect`), drag to move and resize (`editable`, `onEventChange` with `revert` for optimistic updates, `eventAllow`), touch long-press, and a full keyboard model with live announcements.
+  - **Data:** controlled or uncontrolled `date`/`view`, `onRangeChange` for range-based loading, `loading`, `renderEvent`, `toolbarStart` actions and typed `classNames`/test IDs.
+  - **Engine:** React-free helpers (`viewRange`, `navigate`, `layoutMonth`, `layoutTimeGrid`, `layoutList`, `moveEvent`, `resizeEvent`, …) for custom views.
+
+  Recurrence, time zones and resource timelines are planned for later phases.
+
 ## 0.2.0
 
 ### Minor Changes
