@@ -69,3 +69,13 @@ node scripts/verify-package.mjs /tmp/react-ui-review.tgz
 ## Storybook deployment
 
 Storybook is deployed by Vercel's GitHub integration using `vercel.json`: `pnpm install --frozen-lockfile`, `pnpm build-storybook`, output `storybook-static`. Pushes to `main` update the production site; pull requests get preview URLs. No deployment token lives in this repository.
+
+## Releasing
+
+Releases are automated with [Changesets](https://github.com/changesets/changesets) and npm trusted publishing:
+
+1. A pull request that changes published behaviour includes a changeset (`pnpm changeset`).
+2. After it merges, the Release workflow opens or updates the "chore: version packages" pull request, which bumps `package.json` and `CHANGELOG.md`.
+3. Merging that pull request runs `pnpm release`: it packs with pnpm (applying `publishConfig`), verifies the tarball, publishes to npm with provenance through GitHub OIDC (no npm token is stored), then creates the `vX.Y.Z` tag and GitHub release.
+
+`pnpm release` is idempotent: it exits without publishing when the version is already on npm. The npm package must list this repository's `release.yml` workflow as a trusted publisher.

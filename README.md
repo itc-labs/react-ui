@@ -1,5 +1,9 @@
 # @itclabs/react-ui
 
+[![npm](https://img.shields.io/npm/v/@itclabs/react-ui)](https://www.npmjs.com/package/@itclabs/react-ui) [![CI](https://github.com/itc-labs/react-ui/actions/workflows/ci.yml/badge.svg)](https://github.com/itc-labs/react-ui/actions/workflows/ci.yml) [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+
+**[Storybook](https://react-ui-one-rose.vercel.app/)** · [npm](https://www.npmjs.com/package/@itclabs/react-ui) · [GitHub](https://github.com/itc-labs/react-ui)
+
 A reusable React 19 UI kit built on Tailwind CSS v4 tokens and Radix primitives: controls, data-driven overlays and menus, forms with schema validation, data tables, theming and a tree-shakeable icon set.
 
 - **ESM only**, TypeScript declarations included, `'use client'` boundaries preserved for the Next.js App Router.
@@ -142,7 +146,7 @@ import { outlineCatalog, boldCatalog } from '@itclabs/react-ui/icons/catalog';
 
 ## Documentation
 
-Storybook: deployed on Vercel — the public link is added after the first deployment
+Storybook: https://react-ui-one-rose.vercel.app/
 
 See [docs/](docs/) for component contracts, theming, localization, accessibility checks and Storybook conventions.
 
