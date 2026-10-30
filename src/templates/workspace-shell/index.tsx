@@ -23,7 +23,9 @@ export function WorkspaceShell({
   return (
     <div
       {...props}
+      data-variant={inset ? 'inset' : undefined}
       className={cn(
+        'group/shell',
         'mx-auto min-h-screen max-w-workspace bg-canvas text-ink',
         inset && 'lg:bg-sidebar',
         sidebar != null &&
@@ -37,13 +39,7 @@ export function WorkspaceShell({
     >
       {sidebar}
       {content !== undefined || header !== undefined ? (
-        <WorkspaceBody
-          className={cn(
-            inset &&
-              'lg:my-2 lg:mr-2 lg:min-h-[calc(100dvh-1rem)] lg:overflow-hidden lg:rounded-panel lg:border lg:border-line lg:bg-canvas lg:shadow-panel',
-            classNames?.body,
-          )}
-        >
+        <WorkspaceBody className={classNames?.body}>
           {header != null && (
             <WorkspaceHeader className={classNames?.header}>{header}</WorkspaceHeader>
           )}
@@ -59,7 +55,17 @@ export function WorkspaceShell({
 }
 
 export function WorkspaceBody({ className, ...props }: ComponentProps<'div'>) {
-  return <div {...props} className={cn('min-w-0', className)} />;
+  return (
+    <div
+      {...props}
+      className={cn(
+        'min-w-0',
+        // Inset shells raise the body into a card, whether it comes from slots or children.
+        'lg:group-data-[variant=inset]/shell:my-2 lg:group-data-[variant=inset]/shell:mr-2 lg:group-data-[variant=inset]/shell:min-h-[calc(100dvh-1rem)] lg:group-data-[variant=inset]/shell:overflow-hidden lg:group-data-[variant=inset]/shell:rounded-panel lg:group-data-[variant=inset]/shell:border lg:group-data-[variant=inset]/shell:border-line lg:group-data-[variant=inset]/shell:bg-canvas lg:group-data-[variant=inset]/shell:shadow-panel',
+        className,
+      )}
+    />
+  );
 }
 
 export function WorkspaceHeader({
