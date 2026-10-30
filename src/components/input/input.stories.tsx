@@ -6,16 +6,16 @@ const meta = {
     docs: {
       description: {
         component:
-          'Ô nhập một dòng với label, hint, error và biểu tượng tùy chọn. Nhận các thuộc tính input chuẩn, ref và className; dùng FormField khi cần nối với trạng thái form.',
+          'A single-line input with a label, hint, error message and optional icons. Accepts standard input attributes, ref and className; use FormField to connect it to form state.',
       },
     },
   },
   title: 'Components/Input',
   component: Input,
   args: {
-    label: 'Nội dung',
-    placeholder: 'Lorem ipsum',
-    hint: 'Dolor sit amet.',
+    label: 'Content',
+    placeholder: 'Enter content',
+    hint: 'Enter a short message.',
     required: true,
   },
 } satisfies Meta<typeof Input>;
@@ -32,8 +32,8 @@ export const Sizes: Story = {
         <Input
           key={size}
           size={size}
-          label={`Kích thước ${size}`}
-          placeholder="Nhập nội dung"
+          label={`Size ${size}`}
+          placeholder="Enter content"
         />
       ))}
     </div>
@@ -44,10 +44,10 @@ export const States: Story = {
   tags: ['states'],
   render: () => (
     <div className="grid max-w-2xl gap-5 sm:grid-cols-2">
-      <Input label="Mặc định" placeholder="Nhập nội dung" hint="Helper text" />
-      <Input label="Có nội dung" defaultValue="Item minh họa" />
-      <Input label="Có lỗi" error="Nhập nội dung hợp lệ." required />
-      <Input label="Disabled" defaultValue="Chưa sẵn sàng" disabled />
+      <Input label="Default" placeholder="Enter content" hint="Helper text" />
+      <Input label="With content" defaultValue="Lorem ipsum" />
+      <Input label="Error" error="Enter valid content." required />
+      <Input label="Disabled" defaultValue="Lorem ipsum" disabled />
     </div>
   ),
 };
@@ -56,7 +56,7 @@ export const Icons: Story = {
   tags: ['example'],
   render: () => (
     <div className="grid max-w-sm gap-4">
-      <Input label="Tìm kiếm" icon="search" placeholder="Nhập từ khóa" />
+      <Input label="Search" icon="search" placeholder="Enter keywords" />
       <Input
         label="Email"
         type="email"
@@ -78,11 +78,11 @@ export const CustomClasses: Story = {
   tags: ['customization'],
   render: () => (
     <Input
-      label="Lorem ipsum"
+      label="Content"
       icon="search"
       iconRight="info"
       required
-      hint="Dolor sit amet."
+      hint="Enter a search term."
       className="h-12 rounded-full bg-brand-50"
       classNames={{
         root: 'max-w-md gap-3',
@@ -99,7 +99,7 @@ export const CustomClasses: Story = {
 export const Default: Story = {
   tags: ['!dev', '!autodocs', 'regression'],
   play: async ({ canvasElement }) => {
-    const field = within(canvasElement).getByRole('textbox', { name: /Nội dung/ });
+    const field = within(canvasElement).getByRole('textbox', { name: /Content/ });
     await userEvent.clear(field);
     await userEvent.type(field, 'Lorem ipsum');
     await expect(field).toHaveValue('Lorem ipsum');
@@ -110,7 +110,7 @@ export const Focus: Story = {
   tags: ['!dev', '!autodocs', 'regression'],
   args: {
     rootClassName: 'max-w-lg',
-    hint: 'Focus thật: viền và halo nhẹ, không outline tách rời.',
+    hint: 'Focus the input to see its border and subtle halo.',
   },
   play: async ({ canvasElement }) => {
     const field = within(canvasElement).getByRole('textbox');
@@ -121,7 +121,7 @@ export const Focus: Story = {
 
 export const FocusError: Story = {
   tags: ['!dev', '!autodocs', 'regression'],
-  args: { rootClassName: 'max-w-lg', error: 'Nội dung cần kiểm tra lại.' },
+  args: { rootClassName: 'max-w-lg', error: 'Review the content.' },
   play: async ({ canvasElement }) => {
     const field = within(canvasElement).getByRole('textbox');
     await userEvent.click(field);

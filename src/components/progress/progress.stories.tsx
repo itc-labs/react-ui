@@ -3,13 +3,13 @@ import { Progress } from './index';
 const meta = {
   title: 'Components/Progress',
   component: Progress,
-  args: { variant: 'linear', value: 60, label: 'Tiến độ' },
+  args: { variant: 'linear', value: 60, label: 'Progress' },
   argTypes: { variant: { control: 'select', options: ['linear', 'circular'] } },
   parameters: {
     docs: {
       description: {
         component:
-          'Thanh hoặc vòng tiến độ theo value/max, hỗ trợ trạng thái chưa xác định và định dạng giá trị theo ngôn ngữ của UIProvider.',
+          'A progress bar or ring based on value/max. Supports indeterminate progress and formats values using the UIProvider locale.',
       },
     },
   },
@@ -44,10 +44,10 @@ export const States: Story = {
   tags: ['states'],
   render: () => (
     <div className="grid gap-4">
-      <Progress label="Chưa bắt đầu" value={0} showValue />
-      <Progress label="Hoàn tất" value={100} showValue />
-      <Progress label="Đang tải" value={null} showValue />
-      <Progress label="Tiến độ" value={45} striped showValue />
+      <Progress label="Not started" value={0} showValue />
+      <Progress label="Complete" value={100} showValue />
+      <Progress label="Loading" value={null} showValue />
+      <Progress label="Progress" value={45} striped showValue />
     </div>
   ),
 };
@@ -101,7 +101,7 @@ export const Indeterminate: Story = {
   tags: ['states'],
   render: () => (
     <div className="grid gap-4">
-      <Progress label="Đang tải" indeterminate showValue />
+      <Progress label="Loading" indeterminate showValue />
       <Progress variant="circular" indeterminate />
     </div>
   ),
@@ -112,7 +112,7 @@ export const CustomClasses: Story = {
     <div className="grid gap-4">
       <Progress
         value={60}
-        label="Tiến độ"
+        label="Progress"
         showValue
         className="rounded-panel border border-line p-4"
         classNames={{

@@ -16,7 +16,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'UiLink và UiImage giữ native props, refs và className; mặc định là a/img. Host truyền adapter Link/Image một lần qua LinkImageProvider, ví dụ router và image optimizer của app. Provider con kế thừa adapter chưa được thay thế.',
+          'UiLink and UiImage preserve native props, refs and className, and render as a/img by default. Supply Link/Image adapters through LinkImageProvider to use your app router or image optimizer. Nested providers inherit adapters they do not override.',
       },
     },
   },
@@ -29,12 +29,12 @@ export const Playground: Story = {
   render: () => (
     <div className="grid max-w-sm gap-4">
       <UiLink href="#image-example" className="text-brand-700 underline">
-        Xem ảnh minh họa
+        View example image
       </UiLink>
       <UiImage
         id="image-example"
         src={image}
-        alt="Hình tròn minh họa"
+        alt="A green circle on a light green background"
         width={320}
         height={180}
       />
@@ -56,12 +56,12 @@ export const CustomAdapters: Story = {
     <LinkImageProvider Link={ProjectLink} Image={ProjectImage}>
       <div className="grid max-w-sm gap-4">
         <UiLink href="#custom-image" className="text-brand-700 underline">
-          Xem ảnh qua adapter
+          View image through adapter
         </UiLink>
         <UiImage
           id="custom-image"
           src={image}
-          alt="Hình tròn minh họa"
+          alt="A green circle on a light green background"
           width={320}
           height={180}
         />
@@ -77,12 +77,12 @@ export const CustomClasses: Story = {
         href="#styled-image"
         className="rounded-full bg-brand-700 px-4 py-2 text-on-brand"
       >
-        Xem ảnh
+        View image
       </UiLink>
       <UiImage
         id="styled-image"
         src={image}
-        alt="Hình tròn minh họa"
+        alt="A green circle on a light green background"
         width={320}
         height={180}
         className="rounded-panel border-4 border-brand-700"

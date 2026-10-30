@@ -10,13 +10,13 @@ function Demo() {
 
   return (
     <Popover
-      trigger="Mở bộ lọc"
-      label="Bộ lọc"
+      trigger="Open filters"
+      label="Filters"
       content={
         <div className="grid gap-3">
           <p className="font-semibold">Lorem ipsum</p>
           <Select
-            label="Danh mục"
+            label="Category"
             searchable
             value={value}
             onValueChange={setValue}
@@ -35,13 +35,13 @@ const meta = {
   title: 'Components/Popover',
   component: Popover,
   args: {
-    trigger: 'Mở bộ lọc',
-    label: 'Bộ lọc',
+    trigger: 'Open filters',
+    label: 'Filters',
     content: (
       <div className="grid gap-3">
         <p className="font-semibold">Lorem ipsum</p>
         <Select
-          label="Danh mục"
+          label="Category"
           searchable
           options={[
             { value: 'pets', label: 'Pets' },
@@ -55,7 +55,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'Truyền trigger và content để mở nội dung bổ sung. Component tự căn vị trí, tránh cạnh màn hình, đóng khi tương tác bên ngoài và giữ đúng scope cho Select. Có prop content để dùng API dựng sẵn; bỏ prop này khi ghép các phần primitive. content không nhận null/undefined; chuỗi rỗng và 0 vẫn dùng API dựng sẵn.',
+          'Pass trigger and content to show additional content. The popover positions itself within the viewport, closes on outside interaction and keeps Select interactions within its scope. Provide content to use the built-in composition, or omit it to compose primitives. content cannot be null/undefined; an empty string or 0 still uses the built-in composition.',
       },
     },
   },
@@ -70,9 +70,9 @@ export const SelectInteraction: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     const body = within(document.body);
-    const trigger = canvas.getByRole('button', { name: 'Mở bộ lọc' });
+    const trigger = canvas.getByRole('button', { name: 'Open filters' });
     await userEvent.click(trigger);
-    await userEvent.click(await body.findByRole('combobox', { name: 'Danh mục' }));
+    await userEvent.click(await body.findByRole('combobox', { name: 'Category' }));
     await userEvent.click(await body.findByRole('option', { name: 'Gifts' }));
     await expect(body.getByText('Gifts')).toBeVisible();
     await userEvent.keyboard('{Escape}');
@@ -84,8 +84,8 @@ export const CustomClasses: Story = {
   tags: ['customization'],
   render: () => (
     <Popover
-      trigger="Mở nội dung"
-      label="Nội dung tùy chỉnh"
+      trigger="Open content"
+      label="Custom content"
       content="Lorem ipsum dolor sit amet."
       className="w-80"
       classNames={{ trigger: 'rounded-full', content: 'border-brand-700 bg-brand-50' }}

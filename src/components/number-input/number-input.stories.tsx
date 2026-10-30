@@ -5,7 +5,7 @@ const meta = {
   title: 'Components/NumberInput',
   component: NumberInput,
   tags: ['autodocs'],
-  args: { label: 'Số lượng', min: 0, step: 1, defaultValue: 3233232 },
+  args: { label: 'Quantity', min: 0, step: 1, defaultValue: 3233232 },
 } satisfies Meta<typeof NumberInput>;
 export default meta;
 type Story = StoryObj<typeof meta>;
@@ -16,7 +16,7 @@ function ControlledDemo() {
   return (
     <div className="grid max-w-sm gap-3">
       <NumberInput
-        label="Giá trị"
+        label="Value"
         value={value}
         onValueChange={setValue}
         min={-10}
@@ -35,7 +35,7 @@ export const States: Story = {
   render: () => (
     <div className="grid max-w-sm gap-4">
       <NumberInput label="Required" required />
-      <NumberInput label="Error" error="Nhập số trong khoảng 0–100." />
+      <NumberInput label="Error" error="Enter a number between 0 and 100." />
       <NumberInput label="Disabled" disabled defaultValue={20} />
       <NumberInput label="Read only" readOnly defaultValue={12.5} />
     </div>
@@ -44,7 +44,7 @@ export const States: Story = {
 
 export const Decimal: Story = {
   tags: ['example'],
-  args: { label: 'Giá trị', step: 0.01, icon: 'dollar', defaultValue: 12.5 },
+  args: { label: 'Value', step: 0.01, icon: 'dollar', defaultValue: 12.5 },
 };
 
 export const Controlled: Story = {
