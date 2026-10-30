@@ -41,6 +41,7 @@ export type ColorPickerProps = Omit<
     presets?: string[];
     eyeDropper?: boolean;
     readOnly?: boolean;
+    required?: boolean;
     size?: ControlSize;
     label?: ReactNode;
     placeholder?: string;
@@ -130,6 +131,7 @@ export function ColorPicker({
   eyeDropper = true,
   disabled,
   readOnly,
+  required,
   size = 'md',
   label,
   placeholder,
@@ -256,6 +258,11 @@ export function ColorPicker({
           className={cn('text-ui-sm font-medium text-ink', classNames?.label)}
         >
           {label}
+          {required && (
+            <span aria-hidden="true" className="ml-1 text-danger-700">
+              *
+            </span>
+          )}
         </label>
       )}
       <Popover
@@ -273,6 +280,7 @@ export function ColorPicker({
             type="button"
             disabled={disabled}
             aria-disabled={readOnly || undefined}
+            aria-required={required || undefined}
             aria-label={ariaLabel ?? (label == null ? t('color.label') : undefined)}
             aria-invalid={Boolean(error) || props['aria-invalid']}
             aria-describedby={fieldDescription(

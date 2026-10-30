@@ -143,9 +143,14 @@ export function Rating({
         <span
           id={`${id}-label`}
           data-testid={partTestId(testId, 'label')}
-          className={cn('text-control font-medium text-ink', classNames?.label)}
+          className={cn('text-ui-sm font-medium text-ink', classNames?.label)}
         >
           {label}
+          {required && !readOnly && (
+            <span aria-hidden="true" className="ml-1 text-danger-700">
+              *
+            </span>
+          )}
         </span>
       )}
       <span
