@@ -7,6 +7,7 @@ const require = createRequire(import.meta.url);
 const { build } = createRequire(require.resolve('vite/package.json'))('esbuild');
 const root = fileURLToPath(new URL('../', import.meta.url));
 const entries = {
+  Dnd: 'modules/dnd/index.tsx',
   Sidebar: 'modules/sidebar/index.tsx',
   Icon: 'components/icon/index.tsx',
   Divider: 'components/divider/index.tsx',
@@ -36,12 +37,11 @@ const entries = {
 };
 const sizes = {};
 for (const [name, file] of Object.entries(entries)) {
-  const exports =
-    name === 'Root'
-      ? '*'
-      : name === 'Form'
-        ? '{ Form, FormField, FormSubmit }'
-        : `{ ${name} }`;
+  const exports = ['Root', 'Dnd'].includes(name)
+    ? '*'
+    : name === 'Form'
+      ? '{ Form, FormField, FormSubmit }'
+      : `{ ${name} }`;
   const { outputFiles, metafile } = await build({
     stdin: {
       contents: `export ${exports} from './src/${file}';`,
@@ -61,6 +61,7 @@ for (const [name, file] of Object.entries(entries)) {
   });
   if (
     [
+      'Dnd',
       'TreeSelect',
       'Transfer',
       'Timeline',
@@ -101,7 +102,9 @@ for (const [name, file] of Object.entries(entries)) {
   }
   if (name === 'Root') {
     const isolatedSelection = Object.keys(metafile.inputs).filter((input) =>
-      /modules\/(?:tree-select|transfer)\/|@tanstack\/.*virtual/.test(input),
+      /modules\/(?:dnd|tree-select|transfer)\/|@dnd-kit\/|@tanstack\/.*virtual/.test(
+        input,
+      ),
     );
     if (isolatedSelection.length)
       throw new Error(`Root imports isolated selection modules: ${isolatedSelection}`);
@@ -135,9 +138,11 @@ for (const [name, file] of Object.entries(entries)) {
 console.log(JSON.stringify(sizes, null, 2));
 // Gzip budgets with a little headroom; raise them only for an intentional feature.
 for (const [name, limit] of Object.entries({
+  // Full dnd entry, including sensors, board, overlays and shared localization.
+  Dnd: 40_600,
   Icon: 20_000,
-  // Shared Sidebar tool translations add about 65 gzip bytes to locale consumers.
-  Rating: 20_100,
+  // Shared drag-and-drop translations add about 500 gzip bytes to locale consumers.
+  Rating: 20_700,
   Divider: 10_600,
   Kbd: 19_500,
   Slider: 32_300,

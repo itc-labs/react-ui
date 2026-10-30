@@ -1,4 +1,16 @@
 export const enMessages = {
+  'dnd.handle': 'Drag to reorder {label}',
+  'dnd.instructions':
+    'To pick up an item, press Space or Enter. Use the arrow keys to move. Press Space or Enter to drop, or Escape to cancel.',
+  'dnd.pickedUp': 'Picked up {label}.',
+  'dnd.over': 'Moving {label} over {target}.',
+  'dnd.outside': '{label} is outside a drop zone.',
+  'dnd.dropped': 'Dropped {label} over {target}.',
+  'dnd.cancelled': 'Cancelled dragging {label}.',
+  'dnd.empty': 'Drop items here',
+  'dnd.list': 'Sortable list',
+  'dnd.board': 'Sortable board',
+
   'transfer.label': 'Transfer selection',
   'transfer.available': 'Available',
   'transfer.selected': 'Selected',

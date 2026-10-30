@@ -19,6 +19,7 @@ it('keeps ordinary imports free of heavy modules and within gzip budgets', () =>
     'DataTable',
     'Dialog',
     'Divider',
+    'Dnd',
     'Form',
     'Icon',
     'JsonView',

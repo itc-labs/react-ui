@@ -169,7 +169,7 @@ async function checkLeanGraph(path) {
   ];
   for (const [, specifier] of imports) {
     assert.ok(
-      !/^(?:@tiptap\/|recharts(?:\/|$)|react-easy-crop(?:\/|$)|react-is(?:\/|$)|prism-react-renderer(?:\/|$)|embla-carousel(?:-react|-autoplay)?(?:\/|$)|dompurify(?:\/|$))/.test(
+      !/^(?:@dnd-kit\/|@tiptap\/|recharts(?:\/|$)|react-easy-crop(?:\/|$)|react-is(?:\/|$)|prism-react-renderer(?:\/|$)|embla-carousel(?:-react|-autoplay)?(?:\/|$)|dompurify(?:\/|$))/.test(
         specifier,
       ),
       `Optional dependency in core: ${specifier} (${relative(root, path)})`,
@@ -187,6 +187,7 @@ for (const subpath of [
   './navigation',
   './calendar',
   './carousel',
+  './dnd',
   './media-gallery',
   './code-view',
   './rich-text-view',
@@ -217,8 +218,9 @@ for (const subpath of [
       !('MediaGallery' in api) &&
         !('RichTextView' in api) &&
         !('TreeSelect' in api) &&
-        !('Transfer' in api),
-      `MediaGallery, RichTextView, TreeSelect and Transfer must remain isolated from ${subpath}`,
+        !('Transfer' in api) &&
+        !('SortableList' in api),
+      `MediaGallery, RichTextView, TreeSelect, Transfer and Dnd must remain isolated from ${subpath}`,
     );
   for (const name of [
     'LinkImageProvider',
@@ -383,3 +385,19 @@ const transfer = await import(
   pathToFileURL(resolve(root, packed.exports['./transfer'].import)).href
 );
 assert.equal(typeof transfer.Transfer, 'function');
+
+const dnd = await import(
+  pathToFileURL(resolve(root, packed.exports['./dnd'].import)).href
+);
+for (const name of [
+  'SortableList',
+  'SortableBoard',
+  'DragHandle',
+  'DndProvider',
+  'useSortableItem',
+])
+  assert.equal(typeof dnd[name], 'function', `Missing dnd API: ${name}`);
+assert.match(
+  await readFile(resolve(root, packed.exports['./dnd'].import), 'utf8'),
+  /['"]use client['"]/,
+);

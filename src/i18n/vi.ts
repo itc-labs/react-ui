@@ -1,5 +1,17 @@
 import type { UIMessages } from './types';
 export const viMessages = {
+  'dnd.handle': 'Kéo để sắp xếp lại {label}',
+  'dnd.instructions':
+    'Nhấn Space hoặc Enter để chọn mục. Dùng phím mũi tên để di chuyển. Nhấn Space hoặc Enter để thả, hoặc Escape để hủy.',
+  'dnd.pickedUp': 'Đã nhấc {label}.',
+  'dnd.over': 'Đang di chuyển {label} đến {target}.',
+  'dnd.outside': '{label} ở ngoài vùng thả.',
+  'dnd.dropped': 'Đã thả {label} vào {target}.',
+  'dnd.cancelled': 'Đã hủy kéo {label}.',
+  'dnd.empty': 'Thả mục vào đây',
+  'dnd.list': 'Danh sách sắp xếp',
+  'dnd.board': 'Bảng sắp xếp',
+
   'transfer.label': 'Chuyển lựa chọn',
   'transfer.available': 'Có sẵn',
   'transfer.selected': 'Đã chọn',

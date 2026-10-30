@@ -60,7 +60,8 @@
     "./media-gallery": "./src/modules/media-gallery/index.tsx",
     "./rich-text-view": "./src/modules/rich-text-view/index.tsx",
     "./tree-select": "./src/modules/tree-select/index.tsx",
-    "./transfer": "./src/modules/transfer/index.tsx"
+    "./transfer": "./src/modules/transfer/index.tsx",
+    "./dnd": "./src/modules/dnd/index.tsx"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
@@ -309,6 +310,10 @@
       "./transfer": {
         "types": "./dist/modules/transfer/index.d.ts",
         "import": "./dist/modules/transfer/index.js"
+      },
+      "./dnd": {
+        "types": "./dist/modules/dnd/index.d.ts",
+        "import": "./dist/modules/dnd/index.js"
       }
     },
     "access": "public"
