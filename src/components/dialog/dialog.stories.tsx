@@ -18,13 +18,13 @@ function Demo() {
 
   return (
     <Dialog
-      title="Chọn mục minh họa"
-      description="Dialog quản lý focus; Select hoạt động trong cùng scope."
-      trigger="Mở hộp thoại"
-      actions={[{ id: 'done', label: 'Xong', close: true }]}
+      title="Lorem ipsum"
+      description="The dialog manages focus; Select works within the same focus scope."
+      trigger="Open dialog"
+      actions={[{ id: 'done', label: 'Done', close: true }]}
     >
       <Select
-        label="Category trong dialog"
+        label="Category in dialog"
         searchable
         value={value}
         onValueChange={setValue}
@@ -41,13 +41,13 @@ const meta = {
   title: 'Components/Dialog',
   component: Dialog,
   args: {
-    title: 'Chọn mục minh họa',
-    trigger: 'Mở hộp thoại',
-    description: 'Dialog quản lý focus; Select hoạt động trong cùng scope.',
-    actions: [{ id: 'done', label: 'Xong', close: true }],
+    title: 'Lorem ipsum',
+    trigger: 'Open dialog',
+    description: 'The dialog manages focus; Select works within the same focus scope.',
+    actions: [{ id: 'done', label: 'Done', close: true }],
     children: (
       <Select
-        label="Category trong dialog"
+        label="Category in dialog"
         searchable
         options={[
           { value: 'pets', label: 'Pets' },
@@ -60,7 +60,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'Hộp thoại dùng cho nội dung hoặc thao tác cần tập trung. Truyền trigger, title, description, footer và nội dung; focus được giữ trong hộp thoại và trả lại khi đóng. Có prop title để dùng API dựng sẵn; bỏ prop này khi ghép các phần primitive. title không nhận null/undefined; chuỗi rỗng và 0 vẫn dùng API dựng sẵn.',
+          'Display content or actions that need focused attention. Pass trigger, title, description, footer and children. Focus stays inside the dialog and returns to the trigger on close. Supply title for the built-in composition, or omit it to compose primitives. title cannot be null/undefined; an empty string or 0 still uses the built-in composition.',
       },
     },
   },
@@ -74,7 +74,7 @@ function RefFocusDemo() {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button>Mở với focus tùy chỉnh</Button>
+        <Button>Open with custom focus</Button>
       </DialogTrigger>
       <DialogContent
         ref={panel}
@@ -83,12 +83,12 @@ function RefFocusDemo() {
           panel.current?.querySelector('textarea')?.focus();
         }}
       >
-        <DialogTitle>Focus qua ref của consumer</DialogTitle>
+        <DialogTitle>Focus using a consumer ref</DialogTitle>
         <DialogDescription>
-          Ref content cho phép chọn vị trí focus ban đầu.
+          Use the content ref to choose the initial focus target.
         </DialogDescription>
-        <Select label="Trạng thái" options={[{ value: 'test', label: 'Đáng thử' }]} />
-        <Textarea label="Ghi chú được focus" className="mt-4" />
+        <Select label="Status" options={[{ value: 'test', label: 'Ready to test' }]} />
+        <Textarea label="Focused note" className="mt-4" />
       </DialogContent>
     </Dialog>
   );
@@ -101,7 +101,7 @@ export const CustomClasses: Story = {
   render: () => (
     <Dialog>
       <DialogTrigger asChild>
-        <Button>Mở dialog tùy chỉnh</Button>
+        <Button>Open custom dialog</Button>
       </DialogTrigger>
       <DialogContent
         className="max-w-lg rounded-none"
@@ -123,11 +123,11 @@ export const KeyboardAndSelect: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     const body = within(document.body);
-    const trigger = canvas.getByRole('button', { name: 'Mở hộp thoại' });
+    const trigger = canvas.getByRole('button', { name: 'Open dialog' });
     await userEvent.click(trigger);
     const dialog = await body.findByRole('dialog');
     await userEvent.click(
-      within(dialog).getByRole('combobox', { name: 'Category trong dialog' }),
+      within(dialog).getByRole('combobox', { name: 'Category in dialog' }),
     );
     await userEvent.click(await body.findByRole('option', { name: 'Pets' }));
     await expect(within(dialog).getByText('Pets')).toBeVisible();
@@ -141,7 +141,7 @@ export const MotionLifecycle: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     const body = within(document.body);
-    const trigger = canvas.getByRole('button', { name: 'Mở hộp thoại' });
+    const trigger = canvas.getByRole('button', { name: 'Open dialog' });
     await userEvent.click(trigger);
     const panel = await body.findByRole('dialog');
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -150,7 +150,7 @@ export const MotionLifecycle: Story = {
     );
     await expect(getComputedStyle(panel).transform).toBe('none');
     await Promise.all(panel.getAnimations().map((animation) => animation.finished));
-    await userEvent.click(body.getByRole('button', { name: 'Xong' }));
+    await userEvent.click(body.getByRole('button', { name: 'Done' }));
     if (!reduced) {
       await expect(panel).toHaveAttribute('data-state', 'closed');
       await expect(getComputedStyle(panel).animationName).toBe('ui-fade-out');
@@ -165,12 +165,12 @@ export const ConsumerRefFocus: Story = {
   render: () => <RefFocusDemo />,
   play: async ({ canvasElement }) => {
     const trigger = within(canvasElement).getByRole('button', {
-      name: 'Mở với focus tùy chỉnh',
+      name: 'Open with custom focus',
     });
     await userEvent.click(trigger);
     await waitFor(() =>
       expect(
-        within(document.body).getByRole('textbox', { name: 'Ghi chú được focus' }),
+        within(document.body).getByRole('textbox', { name: 'Focused note' }),
       ).toHaveFocus(),
     );
     await userEvent.keyboard('{Escape}');

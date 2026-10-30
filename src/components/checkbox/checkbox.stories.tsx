@@ -9,14 +9,14 @@ function Demo() {
   return (
     <div className="grid gap-4">
       <Checkbox
-        label="Chọn bản minh họa"
+        label="Select example"
         checked={checked}
         onCheckedChange={(value) => setChecked(value === true)}
       />
-      <Checkbox label="Một phần được chọn" checked="indeterminate" />
-      <Checkbox label="Không chỉnh sửa" disabled />
-      <Checkbox label="Cần đồng ý" error="Chọn để tiếp tục." />
-      <output>{checked ? 'Đã chọn' : 'Chưa chọn'}</output>
+      <Checkbox label="Partially selected" checked="indeterminate" />
+      <Checkbox label="Disabled" disabled />
+      <Checkbox label="Agreement required" error="Select to continue." />
+      <output>{checked ? 'Selected' : 'Not selected'}</output>
     </div>
   );
 }
@@ -24,12 +24,12 @@ function Demo() {
 const meta = {
   title: 'Components/Checkbox',
   component: Checkbox,
-  args: { label: 'Chọn mục' },
+  args: { label: 'Select item' },
   parameters: {
     docs: {
       description: {
         component:
-          'Chọn hoặc bỏ chọn một giá trị, hỗ trợ trạng thái indeterminate. Label, hint và error được liên kết với control; checked/onCheckedChange dùng cho trạng thái có kiểm soát.',
+          'Select or deselect a value, with support for an indeterminate state. Labels, hints and errors are linked to the control. Use checked/onCheckedChange for controlled state.',
       },
     },
   },
@@ -45,8 +45,8 @@ export const CustomClasses: Story = {
   tags: ['customization'],
   render: () => (
     <Checkbox
-      label="Lorem ipsum"
-      hint="Dolor sit amet."
+      label="Select item"
+      hint="Select to include this item."
       defaultChecked
       className="size-5 rounded-md"
       classNames={{
@@ -64,7 +64,7 @@ export const ControlInteraction: Story = {
   render: () => <Demo />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await userEvent.click(canvas.getByRole('checkbox', { name: 'Chọn bản minh họa' }));
-    await expect(canvas.getByText('Đã chọn')).toBeVisible();
+    await userEvent.click(canvas.getByRole('checkbox', { name: 'Select example' }));
+    await expect(canvas.getByText('Selected')).toBeVisible();
   },
 };
