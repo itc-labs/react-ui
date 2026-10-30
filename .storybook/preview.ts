@@ -26,8 +26,21 @@ const preview: Preview = {
         ],
       },
     },
+    locale: {
+      description: 'Kit locale for built-in labels',
+      toolbar: {
+        title: 'Locale',
+        icon: 'globe',
+        dynamicTitle: true,
+        items: [
+          { value: 'en-US', title: 'English' },
+          { value: 'vi-VN', title: 'Tiếng Việt' },
+        ],
+      },
+    },
   },
-  initialGlobals: { theme: 'default' },
+  // Docs are English; the kit's own default locale stays vi-VN for host apps.
+  initialGlobals: { theme: 'default', locale: 'en-US' },
   decorators: [
     (Story, { globals }) => {
       // Theme the document root so portalled overlays and derived role tokens follow.
@@ -37,6 +50,7 @@ const preview: Preview = {
 
       return createElement(UIProvider, {
         theme: catalogTheme,
+        locale: typeof globals.locale === 'string' ? globals.locale : 'en-US',
         children: createElement(Story),
       });
     },
