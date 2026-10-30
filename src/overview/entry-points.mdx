@@ -11,7 +11,7 @@ Append each subpath to `@itclabs/react-ui`; `.` means the package root. Wildcard
 | Subpath                            | Contents                                                                                                                                                     |
 | ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `.`                                | Root API: components, modules, templates, theme, locale helpers, hooks, and shared utilities; excludes editor, chart, avatar upload, CodeView, and Carousel. |
-| `./components`                     | Primitive components, providers, and shared component utilities.                                                                                             |
+| `./components`                     | Primitive components, including Rating and JsonView, providers, and shared component utilities.                                                              |
 | `./modules`                        | Composed UI modules, navigation helpers, and the event calendar as `EventCalendar`.                                                                          |
 | `./theme/tokens.css`               | Tailwind v4 theme tokens and semantic CSS variables.                                                                                                         |
 | `./theme/custom-theme.example.css` | Example CSS token overrides to copy and adapt.                                                                                                               |
@@ -74,27 +74,29 @@ The script bundles source entries with esbuild for the browser as minified produ
 
 | Measured entry              | Gzip KB |
 | --------------------------- | ------: |
-| CodeView                    |   45.03 |
 | Icon                        |   17.79 |
-| Button                      |   16.83 |
-| Spinner                     |   16.09 |
-| Dialog                      |   33.75 |
-| Select                      |   52.17 |
-| DataTable                   |   82.09 |
-| Root (all exports)          |  247.37 |
-| Carousel                    |   26.87 |
-| Calendar (event calendar)   |   93.82 |
-| Form, FormField, FormSubmit |   16.35 |
+| Rating                      |   18.26 |
+| JsonView                    |   19.08 |
+| CodeView                    |   45.18 |
+| Button                      |   17.19 |
+| Spinner                     |   16.39 |
+| Dialog                      |   34.12 |
+| Select                      |   52.55 |
+| DataTable                   |   82.45 |
+| Root (all exports)          |  252.02 |
+| Calendar (event calendar)   |   94.19 |
+| Carousel                    |   27.51 |
+| Form, FormField, FormSubmit |   16.43 |
 
 These are script fixtures, not predictions for a complete application. The root fixture retains all root exports; the other fixtures retain the named exports shown. Application imports and bundler settings can produce different results.
 
-Gzip budgets are enforced by `src/components/icon/bundle-size.test.ts`, which runs the same script. It also guards against full icon packs in ordinary imports, the built-in icon registry in Button and Dialog, React Select in DataTable and Calendar, optional heavy features in Calendar, and Prism in the root entry.
+Gzip budgets are enforced by `src/components/icon/bundle-size.test.ts`, which runs the same script. It also guards against full icon packs in ordinary imports, the built-in icon registry in Button, Dialog, Rating, JsonView, CodeView, and Carousel, React Select in DataTable and Calendar, optional heavy features in Calendar, and Prism and Embla in the root entry. CodeView has a 50,000-byte gzip budget and Carousel has a 30,300-byte budget, each with about 10% headroom. Root remains within its existing 260,000-byte budget.
 
 ## Tree-shaking tips
 
 - Use named imports and keep ESM intact so the application bundler can remove unused exports. JavaScript modules are declared side-effect free; CSS is preserved as a side effect.
 - Import individual glyphs, such as `@itclabs/react-ui/icons/outline/search`, for explicit icon dependencies. Avoid importing `/icons/outline/pack` or `/icons/bold/pack` unless you need every icon in that runtime pack.
-- Import `CodeView` from `/code-view`; it is excluded from the root, `/components`, and `/modules` barrels.
+- Import `CodeView` from `/code-view` and `Carousel` from `/carousel`; both are excluded from the root, `/components`, and `/modules` barrels. Rating and JsonView are available from the root and `/components`. See [Data display](?path=/docs/guides-data-display--docs) for examples.
 - Import optional features from `/editor`, `/chart`, or `/avatar-upload` only where needed. They are excluded from the root and `/modules` barrels.
 - Use `/modal` and `/toast` for imperative calls outside React components; mount their providers in the React tree.
 - Load `/icons/catalog` only for icon discovery or tooling. Import individual `/illustrations/*` modules when a single illustration is enough.

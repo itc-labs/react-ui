@@ -1,0 +1,100 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Guides/Data display" />
+
+# Data display
+
+Use `CodeView` for read-only source, `JsonView` for inspecting structured values, and `Carousel` for browsing a sequence of items. Import CodeView and Carousel from their dedicated subpaths to keep Prism and Embla out of the core entry. Rating is available from the root; see [Forms](?path=/docs/guides-forms--docs) for a score field.
+
+## CodeView
+
+Supply source through `code` and choose a `language`. `title` takes precedence over `filename`. Line highlights accept one-based numbers and inclusive ranges; `wrap` and `maxHeight` control long content. The copy button copies the original source and announces success through localized feedback. Tab reaches the copy button and the scroll region.
+
+```tsx
+import { CodeView } from '@itclabs/react-ui/code-view';
+
+export function SourceExample() {
+  return (
+    <CodeView
+      code={'export function example() {\n  return "Lorem ipsum";\n}'}
+      language="ts"
+      filename="example.ts"
+      showLineNumbers
+      highlightLines={[1, '2-3']}
+      wrap
+      maxHeight={320}
+    />
+  );
+}
+```
+
+See [CodeView stories](?path=/docs/modules-codeview--docs) for supported languages and styling slots.
+
+## JsonView
+
+Pass a value through `data`; `rootName` labels the tree. Root depth is zero, so `defaultExpandDepth={1}` initially opens the root, while `true` opens all containers. `sortKeys` sorts object keys, and `collapseStringsAfter` adds inline expansion for long strings. Arrow keys navigate and expand the tree; Home and End move to its first and last visible rows. The copy button copies the complete value, including collapsed content.
+
+```tsx
+import { JsonView } from '@itclabs/react-ui';
+
+export function StructuredValueExample() {
+  return (
+    <JsonView
+      data={{
+        title: 'Lorem ipsum',
+        count: 0,
+        enabled: false,
+        items: [{ id: 'first', description: 'Dolor sit amet' }],
+      }}
+      rootName="Response"
+      defaultExpandDepth={1}
+      sortKeys
+      collapseStringsAfter={80}
+      maxHeight={320}
+    />
+  );
+}
+```
+
+See [JsonView stories](?path=/docs/components-jsonview--docs) for expansion and extended-value rendering.
+
+## Carousel
+
+Provide `items`, a stable `getItemKey`, and `renderItem`. `perView` accepts a column count or responsive counts at Tailwind breakpoints; `rows` stacks items in each column. `index`, `defaultIndex`, and `onSlideChange` address zero-based scroll snaps, including dots. Keep `index` synchronized with `onSlideChange` when controlling selection.
+
+```tsx
+import { useState } from 'react';
+import { Carousel } from '@itclabs/react-ui/carousel';
+
+const items = [
+  { id: 'first', title: 'Lorem ipsum' },
+  { id: 'second', title: 'Dolor sit amet' },
+  { id: 'third', title: 'Consectetur adipiscing' },
+  { id: 'fourth', title: 'Sed do eiusmod' },
+];
+
+export function ItemsExample() {
+  const [index, setIndex] = useState(0);
+
+  return (
+    <Carousel
+      aria-label="Featured items"
+      items={items}
+      getItemKey={(item) => item.id}
+      renderItem={(item) => (
+        <div className="rounded-panel border border-line bg-surface p-6 text-ink">
+          {item.title}
+        </div>
+      )}
+      perView={{ base: 1, sm: 2, lg: 3 }}
+      index={index}
+      onSlideChange={setIndex}
+      dots
+    />
+  );
+}
+```
+
+Labeled arrows and dots complement drag gestures and keyboard arrows. Non-looping edges disable the corresponding arrow. Autoplay is opt-in through `autoplay` or an options object such as `autoplay={{ delay: 5000 }}` and includes a pause/play control. Reduced motion removes scrolling animation and disables autoplay. Set `autoplay.force` only when automatic rotation should continue despite that preference.
+
+See [Carousel stories](?path=/docs/modules-carousel--docs) for multi-row, hero, autoplay, and drag-free examples. All three components accept `className`, typed `classNames` slots, refs, and `data-testid`; see [Customization](?path=/docs/guides-customization--docs).

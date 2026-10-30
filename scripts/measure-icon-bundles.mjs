@@ -96,8 +96,9 @@ for (const [name, limit] of Object.entries({
   Icon: 20_000,
   Rating: 20_000,
   JsonView: 22_000,
+  // About 10% above the measured display subpath fixtures.
   CodeView: 50_000,
-  Carousel: 40_000,
+  Carousel: 30_300,
   Button: 20_000,
   Spinner: 20_000,
   Dialog: 38_000,
