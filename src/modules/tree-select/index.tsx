@@ -788,7 +788,7 @@ export function TreeSelect(props: TreeSelectProps) {
           <div
             ref={scrollRef}
             className="max-h-72 overflow-y-auto overscroll-contain"
-            style={{ height: Math.min(280, Math.max(40, rows.length * 40)) }}
+            style={{ height: Math.min(280, rows.length * 40) }}
           >
             <div
               id={treeId}
@@ -994,7 +994,7 @@ export function TreeSelect(props: TreeSelectProps) {
                               <mark
                                 data-testid={partTestId(testId, 'highlight', node.id)}
                                 className={cn(
-                                  'rounded bg-warning-100 text-ink',
+                                  'rounded-sm bg-selected font-semibold text-selected-ink',
                                   classes?.highlight,
                                 )}
                               >

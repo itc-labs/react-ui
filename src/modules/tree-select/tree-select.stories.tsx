@@ -4,24 +4,68 @@ import { useState } from 'react';
 import { TreeSelect, type TreeSelectNode } from '@itclabs/react-ui/tree-select';
 import { Button, Form, FormField, useAppForm } from '@itclabs/react-ui';
 
+const leaf = (id: string, label: string): TreeSelectNode => ({ id, label });
+
 const nodes: TreeSelectNode[] = [
   {
     id: 'lorem',
-    label: 'Lorem',
+    label: 'Apparel',
     children: [
-      { id: 'ipsum', label: 'Ipsum' },
-      { id: 'dolor', label: 'Dolor' },
+      {
+        id: 'ipsum',
+        label: 'T-shirts',
+        children: [
+          leaf('crew-neck', 'Crew neck'),
+          leaf('v-neck', 'V-neck'),
+          leaf('long-sleeve', 'Long sleeve'),
+        ],
+      },
+      {
+        id: 'dolor',
+        label: 'Hoodies',
+        children: [leaf('pullover', 'Pullover'), leaf('zip-up', 'Zip-up')],
+      },
+      leaf('polos', 'Polos'),
     ],
   },
   {
     id: 'sit',
-    label: 'Sit',
+    label: 'Home & living',
     children: [
-      { id: 'amet', label: 'Amet' },
-      { id: 'elit', label: 'Elit' },
+      {
+        id: 'amet',
+        label: 'Mugs',
+        children: [leaf('ceramic', 'Ceramic mugs'), leaf('travel', 'Travel mugs')],
+      },
+      {
+        id: 'elit',
+        label: 'Wall art',
+        children: [leaf('posters', 'Posters'), leaf('canvas', 'Canvas prints')],
+      },
+      leaf('cafe', 'Café accessories'),
     ],
   },
+  {
+    id: 'bags',
+    label: 'Bags',
+    children: [leaf('totes', 'Tote bags'), leaf('backpacks', 'Backpacks')],
+  },
+  {
+    id: 'kids',
+    label: 'Kids & baby',
+    children: [leaf('bodysuits', 'Bodysuits'), leaf('kids-tees', 'Kids T-shirts')],
+  },
 ];
+
+const flatten = (
+  items: readonly TreeSelectNode[],
+  path: string[] = [],
+): TreeSelectNode[] =>
+  items.flatMap((node) => [
+    { id: node.id, label: node.label, path },
+    ...flatten(node.children ?? [], [...path, node.label]),
+  ]);
+
 const meta = {
   title: 'Modules/TreeSelect',
   component: TreeSelect,
@@ -43,25 +87,35 @@ export const Multiple: Story = {
   tags: ['example'],
   args: {
     multiple: true,
-    defaultValue: ['ipsum', 'dolor', 'amet', 'elit'],
+    defaultValue: ['crew-neck', 'v-neck', 'pullover', 'ceramic', 'posters'],
     maxTagCount: 3,
   },
 };
+
+function CascadeDemo({ strategy }: { strategy: 'parent' | 'child' | 'all' }) {
+  const [value, setValue] = useState<string[]>([]);
+
+  return (
+    <TreeSelect
+      nodes={nodes}
+      multiple
+      cascade
+      checkedStrategy={strategy}
+      label={`checkedStrategy="${strategy}"`}
+      value={value}
+      onValueChange={setValue}
+      hint={`Value: ${value.length ? value.join(', ') : '—'}`}
+      clearable
+    />
+  );
+}
+
 export const Cascade: Story = {
   tags: ['example'],
   render: () => (
     <div className="grid gap-6">
       {(['parent', 'child', 'all'] as const).map((strategy) => (
-        <TreeSelect
-          key={strategy}
-          nodes={nodes}
-          multiple
-          cascade
-          checkedStrategy={strategy}
-          label={strategy}
-          defaultValue={['lorem']}
-          clearable
-        />
+        <CascadeDemo key={strategy} strategy={strategy} />
       ))}
     </div>
   ),
@@ -198,7 +252,7 @@ function RemoteDemo() {
       searchable
       value={value}
       onValueChange={setValue}
-      selectedOptions={[{ id: 'ipsum', label: 'Ipsum', path: ['Lorem'] }]}
+      selectedOptions={[{ id: 'ipsum', label: 'T-shirts', path: ['Apparel'] }]}
       showPath
       searchLoading={loading}
       onSearchChange={(query) => {
@@ -208,12 +262,8 @@ function RemoteDemo() {
           setTimeout(() => {
             setItems(
               query
-                ? nodes.flatMap((node) =>
-                    (node.children ?? [])
-                      .filter((child) =>
-                        child.label.toLowerCase().includes(query.toLowerCase()),
-                      )
-                      .map((child) => ({ ...child, path: [node.label] })),
+                ? flatten(nodes).filter((node) =>
+                    node.label.toLowerCase().includes(query.toLowerCase()),
                   )
                 : nodes,
             );
@@ -254,7 +304,7 @@ export const DisabledSubtree: Story = {
   play: async ({ canvasElement }) => {
     await userEvent.click(within(canvasElement).getByRole('combobox'));
     await expect(
-      within(document.body).getByRole('treeitem', { name: /Lorem/ }),
+      within(document.body).getByRole('treeitem', { name: /Apparel/ }),
     ).toHaveAttribute('aria-disabled', 'true');
     await userEvent.keyboard('{Escape}');
   },
@@ -312,7 +362,7 @@ export const CustomClasses: Story = {
       popover: 'rounded-panel',
       rowSelected: 'bg-brand-100',
       row: 'rounded-lg',
-      highlight: 'bg-warning-100',
+      highlight: 'bg-brand-100',
       tag: 'rounded-full',
       search: 'rounded-full',
     },
