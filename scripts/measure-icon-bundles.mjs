@@ -7,6 +7,7 @@ const require = createRequire(import.meta.url);
 const { build } = createRequire(require.resolve('vite/package.json'))('esbuild');
 const root = fileURLToPath(new URL('../', import.meta.url));
 const entries = {
+  Sidebar: 'modules/sidebar/index.tsx',
   Icon: 'components/icon/index.tsx',
   Divider: 'components/divider/index.tsx',
   Timeline: 'components/timeline/index.tsx',

@@ -31,6 +31,7 @@ it('keeps ordinary imports free of heavy modules and within gzip budgets', () =>
     'RichTextView',
     'Root',
     'Select',
+    'Sidebar',
     'Slider',
     'Spinner',
     'Timeline',

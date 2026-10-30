@@ -27,7 +27,7 @@ export function SidebarHeader({
         <span
           data-testid={partTestId(testId, 'brandLogo')}
           className={cn(
-            'grid size-8 shrink-0 place-items-center rounded-control bg-accent text-on-brand [&>svg]:size-4',
+            'grid size-8 shrink-0 place-items-center rounded-control bg-[var(--sidebar-solid-bg,var(--color-accent))] text-[var(--sidebar-solid-fg,var(--color-on-brand))] [&>svg]:size-4',
             classNames?.brandLogo,
           )}
         >
@@ -48,7 +48,7 @@ export function SidebarHeader({
           <span
             data-testid={partTestId(testId, 'brandSubtitle')}
             className={cn(
-              'block truncate text-ui-sm leading-tight text-muted',
+              'block truncate text-ui-sm leading-tight text-[var(--sidebar-muted,var(--color-muted))]',
               classNames?.brandSubtitle,
             )}
           >
@@ -62,7 +62,7 @@ export function SidebarHeader({
     className: cn(
       'flex min-w-0 items-center gap-2.5 rounded-control p-1.5',
       header.href &&
-        'motion-safe:transition-colors hover:bg-surface/60 focus-visible:outline-2 focus-visible:outline-focus',
+        'motion-safe:transition-colors hover:bg-[var(--sidebar-hover,var(--color-hover))] focus-visible:outline-2 focus-visible:outline-focus',
       collapsed && 'justify-center',
       classNames?.brand,
     ),

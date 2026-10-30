@@ -3,6 +3,8 @@ import { useRef, useState } from 'react';
 import { expect, userEvent, waitFor, within } from 'storybook/test';
 import {
   Sidebar,
+  SidebarProvider,
+  SidebarTrigger,
   type SidebarProps,
   type SidebarEntry,
   SidebarGroup,
@@ -33,7 +35,7 @@ const meta = {
       },
     },
   },
-} satisfies Meta;
+} satisfies Meta<typeof Sidebar>;
 export default meta;
 type Story = StoryObj<typeof meta>;
 
@@ -274,7 +276,30 @@ function SimpleSidebarExample({ longLabel = false }: { longLabel?: boolean }) {
 
 export const Playground: Story = {
   tags: ['usage'],
-  render: () => <SimpleSidebarExample />,
+  args: {
+    variant: 'sidebar',
+    tone: 'default',
+    itemVariant: 'raised',
+    collapsible: 'icon',
+  },
+  argTypes: {
+    variant: { control: 'select', options: ['sidebar', 'floating'] },
+    tone: { control: 'select', options: ['default', 'dark', 'brand'] },
+    itemVariant: { control: 'select', options: ['raised', 'subtle', 'bar', 'solid'] },
+    collapsible: { control: 'select', options: ['icon', 'offcanvas', 'none'] },
+  },
+  render: (args: SidebarProps) => (
+    <SidebarProvider>
+      {args.collapsible === 'offcanvas' && (
+        <SidebarTrigger className="hidden lg:inline-flex" />
+      )}
+      <Sidebar
+        {...args}
+        header={{ title: 'Lorem ipsum', subtitle: 'Workspace' }}
+        items={railItems}
+      />
+    </SidebarProvider>
+  ),
 };
 
 export const States: Story = {
@@ -594,19 +619,19 @@ function RailExample({
 }
 
 export const WithHeaderFooter: Story = {
-  tags: ['example'],
+  tags: ['!dev', '!autodocs', 'regression'],
   render: () => <RailExample />,
 };
 export const IconsAndCounts: Story = {
-  tags: ['variants'],
+  tags: ['!dev', '!autodocs', 'regression'],
   render: () => <Sidebar items={railItems} />,
 };
 export const Collapsible: Story = {
-  tags: ['example'],
+  tags: ['!dev', '!autodocs', 'regression'],
   render: () => <RailExample controlled />,
 };
 export const CollapsedFlyout: Story = {
-  tags: ['example'],
+  tags: ['!dev', '!autodocs', 'regression'],
   render: () => <RailExample initialCollapsed />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
@@ -642,6 +667,118 @@ export const Mobile: Story = {
     await userEvent.keyboard('{Escape}');
     await expect(trigger).toHaveFocus();
   },
+};
+
+export const Variants: Story = {
+  tags: ['variants'],
+  render: () => (
+    <div className="flex flex-wrap gap-6 bg-canvas p-4">
+      {(['sidebar', 'floating'] as const).map((variant) =>
+        (['default', 'dark', 'brand'] as const).map((tone) => (
+          <div key={`${variant}-${tone}`}>
+            <p className="mb-2 text-ui-sm">
+              {variant} / {tone}
+            </p>
+            <Sidebar
+              variant={variant}
+              tone={tone}
+              header={{
+                title: 'Lorem ipsum',
+                subtitle: 'Workspace',
+                logo: <HomeIcon />,
+              }}
+              footer="Dolor sit amet."
+              items={railItems}
+              className="static h-96"
+            />
+          </div>
+        )),
+      )}
+    </div>
+  ),
+};
+
+export const ItemStyles: Story = {
+  name: 'Item styles',
+  tags: ['variants'],
+  render: () => (
+    <div className="flex flex-wrap gap-6">
+      {(['raised', 'subtle', 'bar', 'solid'] as const).map((itemVariant) => (
+        <div key={itemVariant}>
+          <p className="mb-2 text-ui-sm">{itemVariant}</p>
+          <Sidebar
+            itemVariant={itemVariant}
+            items={railItems}
+            className="static h-96"
+          />
+        </div>
+      ))}
+    </div>
+  ),
+};
+
+export const Offcanvas: Story = {
+  tags: ['example'],
+  parameters: {
+    layout: 'fullscreen',
+    docs: {
+      description: {
+        story:
+          'Wrap the shell in SidebarProvider and put SidebarTrigger in the header so the desktop sidebar can be reopened. The mobile Drawer keeps its own menu trigger.',
+      },
+    },
+  },
+  render: () => (
+    <SidebarProvider>
+      <WorkspaceShell
+        sidebar={
+          <Sidebar
+            collapsible="offcanvas"
+            toggleShortcut="mod+b"
+            items={railItems}
+            header={{ title: 'Lorem ipsum' }}
+          />
+        }
+        header={
+          <>
+            <SidebarTrigger className="hidden lg:inline-flex" />
+            <span>Workspace</span>
+          </>
+        }
+        content={<p>Lorem ipsum dolor sit amet.</p>}
+      />
+    </SidebarProvider>
+  ),
+};
+
+export const FloatingLayout: Story = {
+  name: 'Floating layout',
+  tags: ['example'],
+  parameters: { layout: 'fullscreen' },
+  render: () => (
+    <WorkspaceShell
+      variant="floating"
+      sidebar={
+        <Sidebar
+          variant="floating"
+          tone="dark"
+          items={railItems}
+          header={{ title: 'Lorem ipsum', subtitle: 'Workspace', logo: <HomeIcon /> }}
+          footer="Dolor sit amet."
+        />
+      }
+      header={<span>Workspace</span>}
+      content={
+        <div className="grid gap-4">
+          <h1 className="text-xl font-semibold">Lorem ipsum</h1>
+          <p>Dolor sit amet, consectetur adipiscing elit.</p>
+          <div className="min-h-48 rounded-panel border border-line bg-surface p-6">
+            Lorem ipsum dolor sit amet.
+          </div>
+        </div>
+      }
+    />
+  ),
 };
 
 export const CustomClasses: Story = {

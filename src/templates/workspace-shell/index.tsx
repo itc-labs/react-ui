@@ -15,15 +15,15 @@ export function WorkspaceShell({
   header?: ReactNode;
   content?: ReactNode;
   classNames?: SlotClasses<'root' | 'body' | 'header' | 'main'>;
-  /** `inset` raises the page into a rounded card beside the sidebar; `classic` divides them with a rule. */
-  variant?: 'inset' | 'classic';
+  /** `inset` raises the page into a rounded card beside the sidebar; `classic` divides them with a rule; `floating` leaves the page flat beside a floating sidebar. */
+  variant?: 'inset' | 'classic' | 'floating';
 }) {
   const inset = sidebar != null && variant === 'inset';
 
   return (
     <div
       {...props}
-      data-variant={inset ? 'inset' : undefined}
+      data-variant={sidebar != null ? variant : undefined}
       className={cn(
         'group/shell',
         'mx-auto min-h-screen max-w-workspace bg-canvas text-ink',
@@ -32,7 +32,10 @@ export function WorkspaceShell({
           variant === 'classic' &&
           '[&>aside]:border-r [&>aside]:border-line',
         sidebar != null &&
-          'lg:grid lg:grid-cols-[var(--container-sidebar)_minmax(0,1fr)] lg:has-[>aside[data-collapsed=true]]:grid-cols-[var(--container-sidebar-collapsed)_minmax(0,1fr)] motion-safe:transition-[grid-template-columns] motion-safe:duration-[var(--motion-duration-normal)]',
+          'lg:grid lg:grid-cols-[var(--container-sidebar)_minmax(0,1fr)] lg:has-[>aside[data-collapsed=true]]:grid-cols-[var(--container-sidebar-collapsed)_minmax(0,1fr)] lg:has-[>aside[data-collapsed=true][data-collapsible=offcanvas]]:grid-cols-[0_minmax(0,1fr)] motion-safe:transition-[grid-template-columns] motion-safe:duration-[var(--motion-duration-normal)]',
+        sidebar != null &&
+          variant === 'floating' &&
+          'lg:grid-cols-[calc(var(--container-sidebar)+1rem)_minmax(0,1fr)] lg:has-[>aside[data-collapsed=true]]:grid-cols-[calc(var(--container-sidebar-collapsed)+1rem)_minmax(0,1fr)] lg:has-[>aside[data-collapsed=true][data-collapsible=offcanvas]]:grid-cols-[0_minmax(0,1fr)]',
         classNames?.root,
         className,
       )}

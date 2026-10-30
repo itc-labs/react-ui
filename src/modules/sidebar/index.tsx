@@ -1,5 +1,15 @@
 'use client';
-import { useEffect, useState, type ComponentProps, type ReactNode } from 'react';
+import {
+  useContext,
+  useEffect,
+  useId,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type ComponentProps,
+  type ReactNode,
+} from 'react';
+import { useComposedRefs } from '../../components/common/refs';
 import { cn, partTestId } from '../../components/common';
 import { Drawer } from '../../components/drawer';
 import { PanelLeftIcon } from '../../components/icon/outline/panel-left';
@@ -7,6 +17,8 @@ import { MenuIcon } from '../../components/icon/outline/menu';
 import { KitIconButton } from '../../components/icon-button/kit-icon-button';
 import { useUILocale } from '../../i18n/provider';
 import { filterNavByAccess, resolveActiveNav } from '../navigation';
+import { SidebarContext, SidebarAppearanceContext } from './context';
+import { sidebarToneStyle } from './appearance';
 import { SidebarEntries } from './entries';
 import { SidebarHeader } from './header';
 import { useSidebarState } from './use-sidebar-state';
@@ -19,6 +31,12 @@ export type {
 } from './types';
 
 export function Sidebar<TAccess = unknown>({
+  variant = 'sidebar',
+  collapsible = 'icon',
+  tone = 'default',
+  itemVariant = 'raised',
+  style,
+  ref,
   header,
   footer,
   items,
@@ -42,12 +60,38 @@ export function Sidebar<TAccess = unknown>({
   ...props
 }: SidebarProps<TAccess>) {
   const { t } = useUILocale();
-  const { collapsed, toggle } = useSidebarState({
-    ...(controlledCollapsed === undefined ? {} : { collapsed: controlledCollapsed }),
+  const context = useContext(SidebarContext);
+  const generatedId = useId();
+  const sidebarId = props.id ?? context?.id ?? generatedId;
+  const asideRef = useRef<HTMLElement>(null);
+  const composedRef = useComposedRefs(asideRef, ref);
+  const state = useSidebarState({
+    ...(controlledCollapsed === undefined && !context
+      ? {}
+      : { collapsed: controlledCollapsed ?? context!.collapsed }),
     ...(defaultCollapsed === undefined ? {} : { defaultCollapsed }),
-    ...(onCollapsedChange ? { onCollapsedChange } : {}),
-    ...(toggleShortcut ? { toggleShortcut } : {}),
+    ...(onCollapsedChange || context
+      ? { onCollapsedChange: onCollapsedChange ?? (() => context?.toggle()) }
+      : {}),
+    ...(toggleShortcut && collapsible !== 'none' ? { toggleShortcut } : {}),
   });
+  const collapsed = collapsible !== 'none' && state.collapsed;
+
+  const toggle = state.toggle;
+  const offcanvas = collapsible === 'offcanvas' && collapsed;
+
+  useLayoutEffect(() => {
+    if (!offcanvas || !asideRef.current?.contains(document.activeElement)) return;
+    const trigger = Array.from(
+      document.querySelectorAll<HTMLButtonElement>('button[aria-controls]'),
+    ).find(
+      (button) =>
+        button.getAttribute('aria-controls') === sidebarId &&
+        !asideRef.current?.contains(button),
+    );
+    trigger?.focus();
+  }, [offcanvas, sidebarId]);
+
   const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => setMobileOpen(false), [currentPath]);
@@ -92,7 +136,7 @@ export function Sidebar<TAccess = unknown>({
             />
           </div>
         )}
-        {!mobile && (
+        {!mobile && collapsible !== 'none' && (
           <KitIconButton
             icon={PanelLeftIcon}
             label={
@@ -100,12 +144,13 @@ export function Sidebar<TAccess = unknown>({
                 ? (expandLabel ?? t('sidebar.expand'))
                 : (collapseLabel ?? t('sidebar.collapse'))
             }
-            aria-expanded={!rail}
+            aria-expanded={!collapsed}
+            aria-controls={sidebarId}
             onClick={toggle}
             variant="ghost"
             data-testid={partTestId(id, 'toggle')}
             className={cn(
-              'shrink-0 text-muted',
+              'shrink-0 text-[var(--sidebar-muted,var(--color-muted))] hover:bg-[var(--sidebar-hover)] hover:text-[var(--sidebar-fg)]',
               !header && !rail && 'ml-auto',
               classNames?.toggle,
             )}
@@ -142,7 +187,7 @@ export function Sidebar<TAccess = unknown>({
         <div
           data-testid={partTestId(id, 'footer')}
           className={cn(
-            'grid min-w-0 shrink-0 text-ui-sm text-muted [&>*]:min-w-0',
+            'grid min-w-0 shrink-0 text-ui-sm text-[var(--sidebar-muted,var(--color-muted))] [&>*]:min-w-0',
             classNames?.footer,
           )}
         >
@@ -153,7 +198,7 @@ export function Sidebar<TAccess = unknown>({
   );
 
   return (
-    <>
+    <SidebarAppearanceContext.Provider value={itemVariant}>
       <div className="p-3 lg:hidden">
         <Drawer
           title={drawerTitle ?? navigationLabel ?? t('sidebar.label')}
@@ -171,7 +216,11 @@ export function Sidebar<TAccess = unknown>({
           }
           triggerAsChild
           {...(testId ? { 'data-testid': partTestId(testId, 'drawer')! } : {})}
-          className={cn('bg-sidebar', classNames?.drawer)}
+          contentProps={{ style: sidebarToneStyle(tone) }}
+          className={cn(
+            'bg-[var(--sidebar-bg)] text-[var(--sidebar-fg)]',
+            classNames?.drawer,
+          )}
           classNames={{
             trigger: classNames?.mobileTrigger ?? '',
             body: 'flex min-h-0 flex-1 flex-col overflow-hidden',
@@ -186,17 +235,29 @@ export function Sidebar<TAccess = unknown>({
       <aside
         {...props}
         data-testid={testId}
+        id={sidebarId}
+        ref={composedRef}
         data-collapsed={collapsed}
+        data-variant={variant}
+        data-collapsible={collapsible}
+        data-tone={tone}
+        data-item-variant={itemVariant}
+        inert={offcanvas}
+        aria-hidden={offcanvas || undefined}
+        style={{ ...sidebarToneStyle(tone), ...style }}
         className={cn(
-          'group/sidebar sticky top-0 hidden h-dvh min-w-0 flex-col gap-4 overflow-hidden bg-sidebar p-3 lg:flex motion-safe:transition-[width] motion-safe:duration-[var(--motion-duration-normal)]',
+          'group/sidebar sticky top-0 hidden h-dvh min-w-0 flex-col gap-4 overflow-hidden bg-[var(--sidebar-bg)] text-[var(--sidebar-fg)] p-3 lg:flex motion-safe:transition-[width] motion-safe:duration-[var(--motion-duration-normal)]',
           collapsed ? 'w-sidebar-collapsed px-2' : 'w-sidebar',
+          variant === 'floating' &&
+            'top-2 m-2 h-[calc(100dvh-1rem)] rounded-panel border border-[var(--sidebar-border)] shadow-panel',
+          offcanvas && 'm-0 w-0 border-0 p-0',
           classNames?.root,
           className,
         )}
       >
-        {body(collapsed, testId)}
+        {body(collapsed && collapsible === 'icon', testId)}
       </aside>
-    </>
+    </SidebarAppearanceContext.Provider>
   );
 }
 
@@ -228,7 +289,7 @@ export function SidebarGroup({
       {label != null && (
         <p
           className={cn(
-            'mb-1 px-2.5 text-ui-sm font-medium text-muted break-words',
+            'mb-1 px-2.5 text-ui-sm font-medium text-[var(--sidebar-muted,var(--color-muted))] break-words',
             labelClassName,
           )}
         >
@@ -242,3 +303,6 @@ export function SidebarGroup({
 
 export { SidebarItem } from './item';
 export * from './submenu';
+
+export { SidebarProvider, SidebarTrigger } from './context';
+export type { SidebarProviderProps, SidebarTriggerProps } from './context';

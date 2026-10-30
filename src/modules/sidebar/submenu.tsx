@@ -21,6 +21,9 @@ import { type SlotClasses, cn } from '../../components/common';
 import { focusRingClassName } from '../../components/common/focus-ring';
 import { useComposedRefs } from '../../components/common/refs';
 
+import { SidebarAppearanceContext } from './context';
+import { sidebarItemClasses } from './appearance';
+
 const SubmenuContext = createContext<{
   open: boolean;
   active: boolean;
@@ -118,6 +121,7 @@ export function SidebarSubmenuTrigger({
   ...props
 }: SidebarSubmenuTriggerProps) {
   const context = useSubmenu();
+  const variant = useContext(SidebarAppearanceContext);
   const composedRef = useComposedRefs(context.trigger, ref);
 
   return (
@@ -130,7 +134,7 @@ export function SidebarSubmenuTrigger({
         iconOnly
           ? 'size-9 shrink-0 justify-center'
           : 'min-h-9 w-full px-2.5 py-1.5 text-left',
-        context.active ? 'text-ink' : 'text-muted hover:bg-surface/60 hover:text-ink',
+        sidebarItemClasses(variant, context.active),
         className,
       )}
     >
@@ -148,7 +152,7 @@ export function SidebarSubmenuTrigger({
         name="chevronDown"
         builtin={{ outline: ChevronDownIcon, bold: ChevronDownBoldIcon }}
         className={cn(
-          'size-4 shrink-0 text-muted motion-safe:transition-transform duration-[var(--motion-duration-control)] group-data-[state=open]:rotate-180',
+          'size-4 shrink-0 text-current motion-safe:transition-transform duration-[var(--motion-duration-control)] group-data-[state=open]:rotate-180',
           !iconOnly && 'ml-auto',
           classNames?.chevron,
         )}
@@ -181,7 +185,7 @@ export function SidebarSubmenuContent({
     >
       <div
         className={cn(
-          'ml-[1.125rem] mt-0.5 grid min-w-0 gap-0.5 border-l border-line pb-1 pl-2.5',
+          'ml-[1.125rem] mt-0.5 grid min-w-0 gap-0.5 border-l border-[var(--sidebar-border,var(--color-line))] pb-1 pl-2.5',
           contentClassName,
         )}
       >

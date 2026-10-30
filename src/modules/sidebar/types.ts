@@ -66,6 +66,10 @@ export type SidebarClassNames = SlotClasses<
 >;
 export type SidebarProps<TAccess = unknown> = ComponentProps<'aside'> &
   TestIdProps & {
+    variant?: 'sidebar' | 'floating';
+    collapsible?: 'icon' | 'offcanvas' | 'none';
+    tone?: 'default' | 'dark' | 'brand';
+    itemVariant?: 'raised' | 'subtle' | 'bar' | 'solid';
     header?: ReactNode | SidebarBrand;
     footer?: ReactNode;
     items?: readonly SidebarEntry<TAccess>[];

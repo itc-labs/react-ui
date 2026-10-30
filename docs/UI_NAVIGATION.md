@@ -519,3 +519,28 @@ PageHeader is the per-page title block: it renders an h1 with optional eyebrow, 
 ```
 
 The breadcrumb renders above the eyebrow/title inside the content column. `classNames.breadcrumb` styles its wrapper; a base `data-testid` derives `-breadcrumb`, `-content`, `-eyebrow`, `-title`, `-description` and `-actions`. Breadcrumb retains its own navigation semantics and UiLink adapter support. PageHeader forwards the React 19 ref and native div props to its root.
+
+### Sidebar appearance and offcanvas
+
+Sidebar keeps its existing appearance by default: `variant="sidebar"`,
+`collapsible="icon"`, `tone="default"` and `itemVariant="raised"`.
+Use `variant="floating"` on both Sidebar and WorkspaceShell for an inset sidebar
+card beside a flat page. Shell variants `inset` (default) and `classic` remain available.
+The tones `dark` and `brand` scope sidebar colors to the navigation; portalled
+tooltips and flyouts retain normal surface colors. Item styles `raised`, `subtle`,
+`bar` and `solid` apply to links, submenu triggers and rail buttons.
+
+For `collapsible="offcanvas"`, wrap WorkspaceShell in SidebarProvider and place a
+SidebarTrigger in its header slot (or inside WorkspaceHeader). The provider owns
+shared desktop collapse state; its optional `collapsed`, `defaultCollapsed` and
+`onCollapsedChange` props support controlled and uncontrolled use. Keep the header
+trigger visible on desktop with `className="hidden lg:inline-flex"`. The mobile
+Drawer retains its menu trigger and independent open state.
+
+Alternatively, pass the same `collapsed` and `onCollapsedChange` to Sidebar and
+SidebarTrigger, give Sidebar an `id`, and set the trigger's `aria-controls` to that
+ID. Avoid overriding Sidebar's state when using provider-owned triggers.
+`collapsible="none"` always shows expanded navigation and removes the internal
+collapse toggle and shortcut. Caller-supplied header and footer content can use
+`--sidebar-fg`, `--sidebar-muted`, `--sidebar-hover` and `--sidebar-border` to match
+the selected tone; caller classes and inline styles continue to take precedence.
