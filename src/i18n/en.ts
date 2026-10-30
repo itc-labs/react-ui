@@ -1,4 +1,13 @@
 export const enMessages = {
+  'treeSelect.label': 'Tree selection',
+  'treeSelect.placeholder': 'Select an item',
+  'treeSelect.search': 'Search items',
+  'treeSelect.empty': 'No items found',
+  'treeSelect.retry': 'Couldn’t load. Retry',
+  'treeSelect.loadMore': 'Load more',
+  'treeSelect.clear': 'Clear selection',
+  'treeSelect.remove': 'Remove {label}',
+  'treeSelect.moreTags': '+{count}',
   'slider.label': 'Value',
   'slider.minimum': 'Minimum',
   'slider.maximum': 'Maximum',

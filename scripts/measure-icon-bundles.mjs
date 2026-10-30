@@ -23,6 +23,7 @@ const entries = {
   Spinner: 'components/spinner/index.tsx',
   Dialog: 'components/dialog/index.tsx',
   Select: 'components/select/index.tsx',
+  TreeSelect: 'modules/tree-select/index.tsx',
   DataTable: 'modules/data-table/index.tsx',
   Root: 'index.ts',
   Calendar: 'modules/calendar/index.tsx',
@@ -58,6 +59,7 @@ for (const [name, file] of Object.entries(entries)) {
   });
   if (
     [
+      'TreeSelect',
       'Timeline',
       'Dialog',
       'Button',
@@ -79,7 +81,7 @@ for (const [name, file] of Object.entries(entries)) {
     if (registries.length)
       throw new Error(`${name} imports the built-in icon registry: ${registries}`);
   }
-  if (['DataTable', 'Calendar'].includes(name)) {
+  if (['DataTable', 'Calendar', 'TreeSelect'].includes(name)) {
     const forbidden = Object.keys(metafile.inputs).filter((input) =>
       /node_modules\/react-select\//.test(input),
     );
@@ -95,6 +97,10 @@ for (const [name, file] of Object.entries(entries)) {
       throw new Error(`Calendar imports optional features: ${forbidden}`);
   }
   if (name === 'Root') {
+    const treeSelect = Object.keys(metafile.inputs).filter((input) =>
+      /modules\/tree-select\/|@tanstack\/.*virtual/.test(input),
+    );
+    if (treeSelect.length) throw new Error(`Root imports TreeSelect: ${treeSelect}`);
     const galleries = Object.keys(metafile.inputs).filter((input) =>
       /modules\/media-gallery\//.test(input),
     );
@@ -144,6 +150,7 @@ for (const [name, limit] of Object.entries({
   Spinner: 20_000,
   Dialog: 38_000,
   Select: 58_000,
+  TreeSelect: 65_000,
   Form: 22_000,
   DataTable: 90_000,
   Calendar: 100_000,

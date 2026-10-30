@@ -1,5 +1,14 @@
 import type { UIMessages } from './types';
 export const viMessages = {
+  'treeSelect.label': 'Chọn trong cây',
+  'treeSelect.placeholder': 'Chọn mục',
+  'treeSelect.search': 'Tìm kiếm mục',
+  'treeSelect.empty': 'Không tìm thấy mục',
+  'treeSelect.retry': 'Không thể tải. Thử lại',
+  'treeSelect.loadMore': 'Tải thêm',
+  'treeSelect.clear': 'Xóa lựa chọn',
+  'treeSelect.remove': 'Xóa {label}',
+  'treeSelect.moreTags': '+{count}',
   'slider.label': 'Giá trị',
   'slider.minimum': 'Tối thiểu',
   'slider.maximum': 'Tối đa',
