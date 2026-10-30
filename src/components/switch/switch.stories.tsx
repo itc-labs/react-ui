@@ -7,9 +7,9 @@ function Demo() {
 
   return (
     <div className="grid gap-4">
-      <Switch label="Chế độ xem gọn" checked={checked} onCheckedChange={setChecked} />
-      <Switch label="Không chỉnh sửa" checked disabled />
-      <output>{checked ? 'Gọn' : 'Đầy đủ'}</output>
+      <Switch label="Compact view" checked={checked} onCheckedChange={setChecked} />
+      <Switch label="Read only" checked disabled />
+      <output>{checked ? 'Compact' : 'Full'}</output>
     </div>
   );
 }
@@ -17,12 +17,12 @@ function Demo() {
 const meta = {
   title: 'Components/Switch',
   component: Switch,
-  args: { label: 'Bật tùy chọn' },
+  args: { label: 'Enable option' },
   parameters: {
     docs: {
       description: {
         component:
-          'Bật hoặc tắt một tùy chọn. Dùng checked/onCheckedChange để quản lý giá trị; disabled ngăn thay đổi nhưng vẫn giữ nhãn và trạng thái hiện tại.',
+          'Turns an option on or off. Use checked/onCheckedChange to control the value; disabled prevents changes while preserving the label and current state.',
       },
     },
   },
@@ -38,7 +38,7 @@ export const CustomClasses: Story = {
   tags: ['customization'],
   render: () => (
     <Switch
-      label="Lorem ipsum"
+      label="Enable option"
       defaultChecked
       classNames={{
         root: 'flex-row-reverse justify-end gap-4',

@@ -12,10 +12,10 @@ function Trigger() {
   return (
     <Button
       onClick={() =>
-        notify.success({ title: 'Đã lưu', description: 'Lorem ipsum dolor sit amet.' })
+        notify.success({ title: 'Saved', description: 'Lorem ipsum dolor sit amet.' })
       }
     >
-      Hiện thông báo
+      Show notification
     </Button>
   );
 }
@@ -37,7 +37,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'Đặt ToastProvider một lần ở gốc ứng dụng. Gọi toast.success/error/warning/info để hiển thị thông báo; toast.promise theo dõi tác vụ bất đồng bộ. Thông báo hỗ trợ cập nhật, đóng, xếp hàng và tạm dừng bộ đếm khi hover.',
+          'Place ToastProvider once at the application root. Call toast.success/error/warning/info to show notifications; toast.promise tracks asynchronous operations. Notifications support updates, dismissal, queueing, and pausing the timer on hover.',
       },
     },
   },
@@ -63,7 +63,7 @@ function VariantsTrigger() {
       <Button
         onClick={() =>
           notify.success({
-            title: 'Đã lưu',
+            title: 'Saved',
             description: 'Lorem ipsum dolor sit amet.',
           })
         }
@@ -73,7 +73,7 @@ function VariantsTrigger() {
       <Button
         onClick={() =>
           notify.warning({
-            title: 'Cần kiểm tra',
+            title: 'Review needed',
             description: 'Lorem ipsum dolor sit amet.',
           })
         }
@@ -84,7 +84,7 @@ function VariantsTrigger() {
         variant="danger"
         onClick={() =>
           notify.error({
-            title: 'Không thể lưu',
+            title: 'Unable to save',
             description: 'Lorem ipsum dolor sit amet.',
           })
         }
@@ -101,10 +101,10 @@ function DuplicateTrigger() {
   return (
     <Button
       onClick={() =>
-        notify({ id: 'same-save', title: 'Một thông báo duy nhất', tone: 'info' })
+        notify({ id: 'same-save', title: 'One notification only', tone: 'info' })
       }
     >
-      Gửi lại cùng ID
+      Send again with the same ID
     </Button>
   );
 }
@@ -120,13 +120,13 @@ function LoadingTrigger() {
           setId(
             notify.loading({
               id: 'loading-demo',
-              title: 'Đang xử lý',
+              title: 'Processing',
               description: 'Lorem ipsum dolor sit amet.',
             }),
           )
         }
       >
-        Bắt đầu loading
+        Start loading
       </Button>
       <Button
         disabled={!id}
@@ -135,11 +135,11 @@ function LoadingTrigger() {
             notify.update(id, {
               loading: false,
               tone: 'success',
-              title: 'Đã hoàn tất',
+              title: 'Completed',
             });
         }}
       >
-        Hoàn tất
+        Complete
       </Button>
       <Button
         variant="secondary"
@@ -149,7 +149,7 @@ function LoadingTrigger() {
           setId(null);
         }}
       >
-        Đóng toast
+        Dismiss toast
       </Button>
     </div>
   );
@@ -171,11 +171,14 @@ function PromiseTrigger() {
         {
           loading: {
             id: 'promise-demo',
-            title: 'Đang lưu',
+            title: 'Saving',
             description: 'Lorem ipsum dolor sit amet.',
           },
-          success: { title: 'Đã lưu', description: 'Lorem ipsum dolor sit amet.' },
-          error: { title: 'Không thể lưu', description: 'Thử lại bằng nút bên dưới.' },
+          success: { title: 'Saved', description: 'Lorem ipsum dolor sit amet.' },
+          error: {
+            title: 'Unable to save',
+            description: 'Try again using the button below.',
+          },
         },
       )
       .catch(() => {});
@@ -183,9 +186,9 @@ function PromiseTrigger() {
 
   return (
     <div className="flex gap-3">
-      <Button onClick={() => run(false)}>Promise thành công</Button>
+      <Button onClick={() => run(false)}>Resolve promise</Button>
       <Button variant="danger" onClick={() => run(true)}>
-        Promise thất bại
+        Reject promise
       </Button>
     </div>
   );
@@ -201,18 +204,18 @@ function QueueTrigger() {
         onClick={() => {
           for (let index = 0; index < 5; index++)
             notify({
-              title: `Thông báo ${++counter.current}`,
+              title: `Notification ${++counter.current}`,
               description: 'Lorem ipsum dolor sit amet.',
             });
         }}
       >
-        Thêm 5 thông báo
+        Add 5 notifications
       </Button>
       <Button variant="secondary" onClick={() => notify.clearQueue()}>
-        Xóa hàng chờ
+        Clear queue
       </Button>
       <Button variant="secondary" onClick={() => notify.dismiss()}>
-        Đóng tất cả
+        Dismiss all
       </Button>
     </div>
   );
@@ -233,7 +236,7 @@ function PositionsDemo() {
     <ToastProvider client={null} position={position}>
       <div className="grid max-w-sm gap-4">
         <Select
-          label="Vị trí cho thông báo mới"
+          label="Position for new notifications"
           clearable={false}
           value={position}
           options={positions.map((value) => ({ value, label: value }))}
@@ -248,7 +251,7 @@ function PositionsDemo() {
 }
 
 function reportFailure() {
-  toast.error('Không thể lưu', { description: 'Lorem ipsum dolor sit amet.' });
+  toast.error('Unable to save', { description: 'Lorem ipsum dolor sit amet.' });
 }
 
 function PureFunctionTrigger() {
@@ -259,21 +262,21 @@ function PureFunctionTrigger() {
       </Button>
       <Button
         onClick={() =>
-          toast.info('Thông báo', { description: 'Lorem ipsum dolor sit amet.' })
+          toast.info('Notification', { description: 'Lorem ipsum dolor sit amet.' })
         }
       >
         toast.info
       </Button>
       <Button
         onClick={() =>
-          toast.warning('Cần kiểm tra', { description: 'Lorem ipsum dolor sit amet.' })
+          toast.warning('Review needed', { description: 'Lorem ipsum dolor sit amet.' })
         }
       >
         toast.warning
       </Button>
       <Button
         onClick={() =>
-          toast.success('Đã lưu', { description: 'Lorem ipsum dolor sit amet.' })
+          toast.success('Saved', { description: 'Lorem ipsum dolor sit amet.' })
         }
       >
         toast.success
@@ -289,7 +292,7 @@ export const Variants: Story = {
     docs: {
       description: {
         story:
-          'Info dùng màu info-700 cho icon và viền. Các tone giữ nền surface; spinner khi loading dùng màu trung tính.',
+          'Info uses info-700 for the icon and border. All tones use the surface background; the loading spinner uses a neutral color.',
       },
     },
   },
@@ -344,11 +347,11 @@ export const Dismissal: Story = {
   play: async ({ canvasElement }) => {
     const body = within(document.body);
     await userEvent.click(
-      within(canvasElement).getByRole('button', { name: 'Hiện thông báo' }),
+      within(canvasElement).getByRole('button', { name: 'Show notification' }),
     );
-    await expect(await body.findByText('Đã lưu')).toBeVisible();
-    await userEvent.click(body.getByRole('button', { name: 'Đóng thông báo' }));
-    await waitFor(() => expect(body.queryByText('Đã lưu')).not.toBeInTheDocument());
+    await expect(await body.findByText('Saved')).toBeVisible();
+    await userEvent.click(body.getByRole('button', { name: 'Dismiss notification' }));
+    await waitFor(() => expect(body.queryByText('Saved')).not.toBeInTheDocument());
   },
 };
 
@@ -361,13 +364,13 @@ export const Deduplicated: Story = {
   ),
   play: async ({ canvasElement }) => {
     const trigger = within(canvasElement).getByRole('button', {
-      name: 'Gửi lại cùng ID',
+      name: 'Send again with the same ID',
     });
     const body = within(document.body);
     await userEvent.click(trigger);
     await userEvent.click(trigger);
-    await expect(body.getAllByText('Một thông báo duy nhất')).toHaveLength(1);
-    await userEvent.click(body.getByRole('button', { name: 'Đóng thông báo' }));
+    await expect(body.getAllByText('One notification only')).toHaveLength(1);
+    await userEvent.click(body.getByRole('button', { name: 'Dismiss notification' }));
   },
 };
 
@@ -381,10 +384,10 @@ export const AutoDismiss: Story = {
   play: async ({ canvasElement }) => {
     const body = within(document.body);
     await userEvent.click(
-      within(canvasElement).getByRole('button', { name: 'Hiện thông báo' }),
+      within(canvasElement).getByRole('button', { name: 'Show notification' }),
     );
-    await expect(await body.findByText('Đã lưu')).toBeVisible();
-    await waitFor(() => expect(body.queryByText('Đã lưu')).not.toBeInTheDocument(), {
+    await expect(await body.findByText('Saved')).toBeVisible();
+    await waitFor(() => expect(body.queryByText('Saved')).not.toBeInTheDocument(), {
       timeout: 3000,
     });
   },
@@ -400,16 +403,16 @@ export const PauseOnHover: Story = {
   play: async ({ canvasElement }) => {
     const body = within(document.body);
     await userEvent.click(
-      within(canvasElement).getByRole('button', { name: 'Hiện thông báo' }),
+      within(canvasElement).getByRole('button', { name: 'Show notification' }),
     );
-    const title = await body.findByText('Đã lưu');
+    const title = await body.findByText('Saved');
     const toast = title.closest('.Toastify__toast');
     if (!toast) throw new Error('Missing toast root.');
     await userEvent.hover(toast);
     await new Promise((resolve) => setTimeout(resolve, 1000));
     await expect(title).toBeVisible();
     await userEvent.unhover(toast);
-    await waitFor(() => expect(body.queryByText('Đã lưu')).not.toBeInTheDocument(), {
+    await waitFor(() => expect(body.queryByText('Saved')).not.toBeInTheDocument(), {
       timeout: 2500,
     });
   },

@@ -9,13 +9,13 @@ const meta = {
   component: Tooltip,
   args: {
     content: 'Lorem ipsum dolor sit amet.',
-    children: <Button>Xem chi tiết</Button>,
+    children: <Button>View details</Button>,
   },
   parameters: {
     docs: {
       description: {
         component:
-          'Chú thích ngắn xuất hiện khi hover hoặc focus vào trigger. Trigger cần có nhãn riêng; tooltip cung cấp thông tin bổ sung.',
+          'A short hint shown when the trigger is hovered or focused. The trigger needs its own label; the tooltip provides additional information.',
       },
     },
   },
@@ -34,7 +34,7 @@ export const CustomClasses: Story = {
         className="rounded-full bg-brand-700 px-5"
         classNames={{ arrow: 'fill-brand-700' }}
       >
-        <IconButton label="Thông tin" icon="info" variant="secondary" />
+        <IconButton label="Information" icon="info" variant="secondary" />
       </Tooltip>
     </div>
   ),
@@ -45,7 +45,7 @@ export const VisualTrigger: Story = {
   render: () => (
     <Tooltip
       trigger={<Icon name="info" />}
-      triggerLabel="Thông tin bổ sung"
+      triggerLabel="Additional information"
       content="Lorem ipsum dolor sit amet."
     />
   ),

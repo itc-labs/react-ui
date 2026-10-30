@@ -9,7 +9,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'Chọn hoặc tìm giờ trong danh sách. minuteStep điều chỉnh khoảng cách giữa các lựa chọn; value luôn dùng HH:mm theo hệ 24 giờ.',
+          'Select or search for a time in the list. minuteStep controls the interval between options; value always uses the 24-hour HH:mm format.',
       },
     },
   },
@@ -23,7 +23,7 @@ function TimeExample() {
   return (
     <div className="grid max-w-xs gap-4">
       <TimePicker
-        label="Giờ bắt đầu"
+        label="Start time"
         name="time"
         value={value}
         onValueChange={setValue}
@@ -31,7 +31,7 @@ function TimeExample() {
         maxTime="17:00"
         minuteStep={15}
       />
-      <output>Giờ: {value ?? 'Chưa chọn'}</output>
+      <output>Time: {value ?? 'Not selected'}</output>
     </div>
   );
 }
@@ -41,14 +41,11 @@ export const Playground: Story = {
   render: () => <TimeExample />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await userEvent.type(
-      canvas.getByRole('combobox', { name: 'Giờ bắt đầu' }),
-      '09:30',
-    );
+    await userEvent.type(canvas.getByRole('combobox', { name: 'Start time' }), '09:30');
     await userEvent.click(
       await within(document.body).findByRole('option', { name: '09:30' }),
     );
-    await expect(canvas.getByText('Giờ: 09:30')).toBeVisible();
+    await expect(canvas.getByText('Time: 09:30')).toBeVisible();
   },
 };
 
@@ -57,8 +54,8 @@ export const States: Story = {
   render: () => (
     <div className="grid max-w-xs gap-5">
       <TimePicker label="Disabled" disabled defaultValue="09:30" />
-      <TimePicker label="Bắt buộc" required error="Chọn giờ." />
-      <TimePicker label="Giá trị ngoài bước chọn" value="09:07" minuteStep={15} />
+      <TimePicker label="Required" required error="Select a time." />
+      <TimePicker label="Time outside the interval" value="09:07" minuteStep={15} />
     </div>
   ),
 };
@@ -66,7 +63,7 @@ export const States: Story = {
 export const MinuteIntervals: Story = {
   tags: ['example'],
   args: {
-    label: 'Giờ theo bước 5 phút',
+    label: 'Time in 5-minute intervals',
     minTime: '08:10',
     maxTime: '10:00',
     minuteStep: 5,
@@ -76,14 +73,14 @@ export const MinuteIntervals: Story = {
 
 export const TwelveHour: Story = {
   tags: ['example'],
-  args: { label: 'Định dạng 12 giờ', defaultValue: '15:30', hourCycle: 12 },
+  args: { label: '12-hour format', defaultValue: '15:30', hourCycle: 12 },
 };
 
 export const CustomClasses: Story = {
   tags: ['customization'],
   render: () => (
     <TimePicker
-      label="Lorem ipsum"
+      label="Time"
       minTime="09:00"
       maxTime="17:00"
       classNames={{
