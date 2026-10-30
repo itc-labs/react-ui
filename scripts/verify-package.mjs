@@ -14,6 +14,33 @@ const packed = tarball
       }),
     )
   : { ...manifest, ...manifest.publishConfig };
+const sharedPeers = {
+  valibot: '^1.0.0',
+  'date-fns': '^4.0.0',
+  '@date-fns/tz': '^1.2.0',
+  '@tanstack/react-form': '^1.0.0',
+  '@tanstack/react-table': '^8.0.0',
+};
+for (const [name, range] of Object.entries(sharedPeers)) {
+  for (const pkg of [manifest, packed]) {
+    assert.equal(pkg.peerDependencies?.[name], range, `Missing shared peer: ${name}`);
+    assert.equal(
+      pkg.dependencies?.[name],
+      undefined,
+      `Shared peer in runtime dependencies: ${name}`,
+    );
+    assert.notEqual(
+      pkg.peerDependenciesMeta?.[name]?.optional,
+      true,
+      `Shared peer must be required: ${name}`,
+    );
+  }
+  assert.match(
+    manifest.devDependencies?.[name] ?? '',
+    /^\d+\.\d+\.\d+$/,
+    `Shared peer must be pinned for development: ${name}`,
+  );
+}
 const files = tarball
   ? new Set(
       execFileSync('tar', ['-tzf', resolve(tarball)], { encoding: 'utf8' })

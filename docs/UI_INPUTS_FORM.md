@@ -17,6 +17,14 @@ New UI-owned strings password.show/password.hide/otp.label are in typed vi/en di
 
 ## Form composition
 
+Install the kit and its required shared peers:
+
+```bash
+pnpm add @itclabs/react-ui valibot date-fns @date-fns/tz @tanstack/react-form @tanstack/react-table
+```
+
+The app and kit share a single copy of these peers, and the app can import them directly, including Valibot schemas shared with server code. `useAppForm` builds on TanStack Form and `createValibotFieldValidators` adapts Valibot schemas; DataTable adds `align` to TanStack Table column meta, and calendar helpers use date-fns with date-fns time-zone support. Import these libraries from their own packages; the kit does not re-export them.
+
 ```tsx
 'use client';
 import * as v from 'valibot';
