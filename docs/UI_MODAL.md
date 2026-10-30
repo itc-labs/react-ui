@@ -7,6 +7,7 @@
 Mount one root ModalProvider inside UIProvider and LinkImageProvider, at the same application-provider level as ToastProvider. Both scopes must wrap application children to expose both hooks; neither depends on the other's controller. The web client composition root owns these providers and framework adapters.
 
 ```tsx
+// AppLink/AppImage: the app's router link and image adapters (see the README or Overview/Providers).
 <UIProvider locale="vi-VN">
   <LinkImageProvider Link={AppLink} Image={AppImage}>
     <ToastProvider>

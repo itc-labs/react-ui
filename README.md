@@ -1,6 +1,6 @@
 # @itclabs/react-ui
 
-[![npm](https://img.shields.io/npm/v/@itclabs/react-ui)](https://www.npmjs.com/package/@itclabs/react-ui) [![CI](https://github.com/itc-labs/react-ui/actions/workflows/ci.yml/badge.svg)](https://github.com/itc-labs/react-ui/actions/workflows/ci.yml) [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+[![npm version](https://img.shields.io/npm/v/%40itclabs%2Freact-ui)](https://www.npmjs.com/package/@itclabs/react-ui) [![CI](https://github.com/itc-labs/react-ui/actions/workflows/ci.yml/badge.svg)](https://github.com/itc-labs/react-ui/actions/workflows/ci.yml) [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
 **[Storybook](https://react-ui-one-rose.vercel.app/)** · [npm](https://www.npmjs.com/package/@itclabs/react-ui) · [GitHub](https://github.com/itc-labs/react-ui)
 
@@ -45,21 +45,35 @@ Use one of the two, not both.
 
 ## Providers
 
-Every provider is optional; components fall back to sensible defaults (Vietnamese labels, Outline icons, native `<a>`/`<img>`).
+Every provider is optional; components fall back to sensible defaults (Vietnamese labels, Outline icons, native `<a>`/`<img>`). Mount them once in a client root.
 
 ```tsx
 'use client';
 
+import type { ReactNode } from 'react';
 import {
   UIProvider,
   LinkImageProvider,
   ToastProvider,
   ModalProvider,
+  defineTheme,
 } from '@itclabs/react-ui';
+import { AppLink, AppImage } from './ui-adapters';
 
-export function UIRoot({ children }: { children: React.ReactNode }) {
+// Define the theme outside render so its identity stays stable.
+const theme = defineTheme({
+  tokens: { 'color-brand-700': '#245b79' },
+  icons: { variant: 'outline', size: 16 },
+});
+
+export function UIRoot({ children }: { children: ReactNode }) {
   return (
-    <UIProvider locale="en-US">
+    <UIProvider
+      theme={theme}
+      locale="en-US"
+      fallbackLocale="en-US"
+      messages={{ 'dialog.close': 'Close panel' }}
+    >
       <LinkImageProvider Link={AppLink} Image={AppImage}>
         <ToastProvider>
           <ModalProvider>{children}</ModalProvider>
@@ -77,6 +91,40 @@ export function UIRoot({ children }: { children: React.ReactNode }) {
 | `ToastProvider`     | Enables `toast.success/error/info/warning` anywhere       |
 | `ModalProvider`     | Enables `modal.confirm/alert/open` with a FIFO queue      |
 
+`UIProvider` props:
+
+| Prop              | Purpose                                                                              |
+| ----------------- | ------------------------------------------------------------------------------------ |
+| `theme`           | `defineTheme({ tokens, icons })`: CSS token overrides and icon variant, size, packs  |
+| `locale`          | Locale code (`'vi-VN'` default, `'en-US'` built in) or a locale from `defineLocale`  |
+| `translations`    | Extra catalogs: `[{ locale: 'fr-FR', messages: { … } }]`; missing keys fall back     |
+| `fallbackLocale`  | Locale used for missing keys and unknown codes (`'en-US'` by default)                |
+| `messages`        | Per-key overrides for the active locale; explicit text props on components still win |
+| `calendarLocales` | date-fns locales for date pickers and the event calendar, keyed by locale code       |
+
+### Link and image adapters
+
+`LinkImageProvider` lets kit components (Sidebar, Navbar, Breadcrumb, Avatar…) render your router link and image component. Without it they render `<a>` and `<img>`. Adapters receive `UiLinkProps` / `UiImageProps`; a Next.js App Router version:
+
+```tsx
+'use client';
+
+import NextLink from 'next/link';
+import NextImage from 'next/image';
+import type { UiLinkProps, UiImageProps } from '@itclabs/react-ui';
+
+export function AppLink(props: UiLinkProps) {
+  return <NextLink {...props} />;
+}
+
+export function AppImage({ width, height, ...props }: UiImageProps) {
+  // next/image needs known dimensions; fall back to <img> otherwise.
+  if (!width || !height) return <img {...props} />;
+
+  return <NextImage {...props} width={width} height={height} />;
+}
+```
+
 ## Usage
 
 Components take plain props and data; no setup beyond the styles is required.
@@ -86,22 +134,64 @@ Sidebar accepts host-provided `currentPath`, `isActive` and `canAccess`. See [na
 ```tsx
 import { Button, Input, Select } from '@itclabs/react-ui';
 
-export function ProfileForm() {
+<Input placeholder="Search" aria-label="Search" />;
+<Select
+  label="Role"
+  options={[
+    { value: 'admin', label: 'Admin' },
+    { value: 'member', label: 'Member' },
+  ]}
+  onValueChange={setRole}
+/>;
+<Button onClick={save}>Save</Button>;
+```
+
+### Forms
+
+Forms use TanStack Form with Valibot schemas. Bound fields from `useAppForm` render label, control and error together; `FormField` wraps any other control.
+
+```tsx
+'use client';
+
+import * as v from 'valibot';
+import { Form, FormField, Select, useAppForm } from '@itclabs/react-ui';
+
+const profileSchema = v.object({
+  name: v.pipe(v.string(), v.trim(), v.minLength(1, 'Enter a name.')),
+  role: v.pipe(v.string(), v.minLength(1, 'Choose a role.')),
+});
+
+export function ProfileForm({
+  onSave,
+}: {
+  onSave: (value: v.InferOutput<typeof profileSchema>) => Promise<void>;
+}) {
+  const form = useAppForm({
+    defaultValues: { name: '', role: '' },
+    validators: { onChange: profileSchema },
+    onSubmit: async ({ value }) => onSave(value),
+  });
+
   return (
-    <form>
-      <Input label="Name" placeholder="Jane Doe" />
-      <Select
-        label="Role"
-        options={[
-          { value: 'admin', label: 'Admin' },
-          { value: 'member', label: 'Member' },
-        ]}
-      />
-      <Button type="submit">Save</Button>
-    </form>
+    <Form form={form} className="grid max-w-md gap-4">
+      <form.AppField name="name">
+        {(field) => <field.TextField label="Name" required />}
+      </form.AppField>
+      <FormField name="role" label="Role" required>
+        <Select
+          options={[
+            { value: 'admin', label: 'Admin' },
+            { value: 'member', label: 'Member' },
+          ]}
+        />
+      </FormField>
+      <form.SubmitButton>Save</form.SubmitButton>
+    </Form>
   );
 }
 ```
+
+The same `profileSchema` can validate the request on the server. See [forms and inputs](docs/UI_INPUTS_FORM.md) for every bound field, custom bindings and async submit.
 
 ### Menus and dialogs
 
