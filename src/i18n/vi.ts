@@ -1,5 +1,12 @@
 import type { UIMessages } from './types';
 export const viMessages = {
+  'kbd.command': 'Command',
+  'kbd.control': 'Control',
+  'kbd.controlShort': 'Ctrl',
+  'kbd.alt': 'Alt',
+  'kbd.shift': 'Shift',
+  'kbd.enter': 'Enter',
+
   'color.saturationValue': 'Độ bão hòa {saturation}%, độ sáng {brightness}%',
   'color.hexPlaceholder': '#rrggbb',
   'color.hexAlphaPlaceholder': '#rrggbbaa',

@@ -65,3 +65,6 @@ export * from './json-view';
 export * from './quantity-input';
 
 export * from './color-picker';
+
+export * from './divider';
+export * from './kbd';

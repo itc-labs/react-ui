@@ -8,6 +8,8 @@ const { build } = createRequire(require.resolve('vite/package.json'))('esbuild')
 const root = fileURLToPath(new URL('../', import.meta.url));
 const entries = {
   Icon: 'components/icon/index.tsx',
+  Divider: 'components/divider/index.tsx',
+  Kbd: 'components/kbd/index.tsx',
   Rating: 'components/rating/index.tsx',
   QuantityInput: 'components/quantity-input/index.tsx',
   ColorPicker: 'components/color-picker/index.tsx',

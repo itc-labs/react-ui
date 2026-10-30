@@ -1,4 +1,11 @@
 export const enMessages = {
+  'kbd.command': 'Command',
+  'kbd.control': 'Control',
+  'kbd.controlShort': 'Ctrl',
+  'kbd.alt': 'Alt',
+  'kbd.shift': 'Shift',
+  'kbd.enter': 'Enter',
+
   'color.saturationValue': 'Saturation {saturation}%, brightness {brightness}%',
   'color.hexPlaceholder': '#rrggbb',
   'color.hexAlphaPlaceholder': '#rrggbbaa',
