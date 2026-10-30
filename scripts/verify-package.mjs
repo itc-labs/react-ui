@@ -187,6 +187,7 @@ for (const subpath of [
   './navigation',
   './calendar',
   './carousel',
+  './media-gallery',
   './code-view',
   './templates',
   './theme',
@@ -208,6 +209,11 @@ for (const subpath of [
   const api = await import(
     pathToFileURL(resolve(root, packed.exports[subpath].import)).href
   );
+  if (['.', './components', './modules'].includes(subpath))
+    assert.ok(
+      !('MediaGallery' in api),
+      `MediaGallery must remain isolated from ${subpath}`,
+    );
   for (const name of [
     'LinkImageProvider',
     'LinkImageProviderProps',
@@ -330,6 +336,11 @@ const carousel = await import(
   pathToFileURL(resolve(root, packed.exports['./carousel'].import)).href
 );
 assert.equal(typeof carousel.Carousel, 'function');
+
+const mediaGallery = await import(
+  pathToFileURL(resolve(root, packed.exports['./media-gallery'].import)).href
+);
+assert.equal(typeof mediaGallery.MediaGallery, 'function');
 
 const codeView = await import(
   pathToFileURL(resolve(root, packed.exports['./code-view'].import)).href

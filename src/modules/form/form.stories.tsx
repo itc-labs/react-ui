@@ -7,6 +7,10 @@ import { NumberInput } from '../../components/number-input';
 import { InputOTP } from '../../components/input-otp';
 import { Select } from '../../components/select';
 import { Checkbox } from '../../components/checkbox';
+import { OptionGroup } from '../../components/option-group';
+import { QuantityInput } from '../../components/quantity-input';
+import { ColorPicker } from '../../components/color-picker';
+import { Rating } from '../../components/rating';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, userEvent, waitFor, within } from 'storybook/test';
 import { useState } from 'react';
@@ -509,6 +513,73 @@ function ComposedFormDemo() {
   );
 }
 
+function ProductOptionsDemo() {
+  const [saved, setSaved] = useState('');
+  const form = useAppForm({
+    defaultValues: { color: '', size: '', quantity: 1, customColor: '', rating: 0 },
+    onSubmit: async ({ value }) => {
+      setSaved(JSON.stringify(value, null, 2));
+    },
+  });
+  const schema = {
+    color: v.pipe(v.string(), v.minLength(1, 'Select a color.')),
+    size: v.pipe(v.string(), v.minLength(1, 'Select a size.')),
+    quantity: v.pipe(v.number(), v.minValue(1), v.maxValue(10)),
+    customColor: v.pipe(v.string(), v.regex(/^#[\da-f]{6}$/i, 'Choose a print color.')),
+    rating: v.pipe(v.number(), v.minValue(1, 'Rate this product.')),
+  };
+
+  return (
+    <Form
+      form={form}
+      schema={schema}
+      className="grid max-w-lg gap-5"
+      aria-label="Product options"
+    >
+      <FormField name="color" label="Color" required>
+        <OptionGroup
+          variant="swatch"
+          showSelectedLabel
+          maxVisible={4}
+          options={[
+            { value: 'pink', label: 'Light Pink', color: '#f4c7cf' },
+            { value: 'sand', label: 'Sand', color: '#e3d3b4' },
+            { value: 'sage', label: 'Sage', color: '#a9b8a0' },
+            { value: 'navy', label: 'Navy', color: '#24324f' },
+            { value: 'black', label: 'Black', color: '#1b1b1b' },
+            { value: 'red', label: 'Red', color: '#b3282d', disabled: true },
+          ]}
+        />
+      </FormField>
+      <FormField name="size" label="Size" required>
+        <OptionGroup
+          maxVisible={4}
+          options={['XS', 'S', 'M', 'L', 'XL', '2XL', '3XL'].map((size) => ({
+            value: size,
+            label: size,
+            disabled: size === 'XS',
+          }))}
+        />
+      </FormField>
+      <FormField name="quantity" label="Quantity" required>
+        <QuantityInput min={1} max={10} />
+      </FormField>
+      <FormField name="customColor" label="Print color" required>
+        <ColorPicker presets={['#203932', '#a3302b', '#f5a623', '#ffffff']} />
+      </FormField>
+      <FormField name="rating" label="Rating" required>
+        <Rating allowHalf showValue />
+      </FormField>
+      <Button type="submit">Add to cart</Button>
+      {saved && (
+        <pre role="status" className="rounded-control bg-surface p-3 text-ui-sm">
+          {saved}
+        </pre>
+      )}
+    </Form>
+  );
+}
+
 function ComposedCustomDemo() {
   const form = useAppForm({ defaultValues: { name: '' }, onSubmit: async () => {} });
 
@@ -586,6 +657,20 @@ export const ComposedFields: Story = {
       description: {
         story:
           'Use FormField to connect controls to form values, validation, and touched state. All fields in this example are required; click Save to check errors and submit the values.',
+      },
+    },
+  },
+};
+
+export const ProductOptions: Story = {
+  tags: ['example'],
+  name: 'Product options',
+  render: () => <ProductOptionsDemo />,
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'OptionGroup (swatch and chip), QuantityInput, ColorPicker, and Rating inside FormField. They bind through value/onValueChange like any other control; extra options open from the "+N" menu. Click Add to cart to see validation and the submitted values.',
       },
     },
   },

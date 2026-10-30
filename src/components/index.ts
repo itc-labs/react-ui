@@ -13,6 +13,7 @@ export * from './select';
 export * from './alert';
 export * from './checkbox';
 export * from './radio-group';
+export * from './option-group';
 export * from './switch';
 export * from './tabs';
 export * from './dialog';
@@ -60,3 +61,7 @@ export * from './top-loader';
 export * from './rating';
 
 export * from './json-view';
+
+export * from './quantity-input';
+
+export * from './color-picker';

@@ -6,6 +6,7 @@ import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import * as v from 'valibot';
 import { Form, FormField, FormSubmit, useAppForm } from './index';
 import { Input } from '../../components/input';
+import { QuantityInput } from '../../components/quantity-input';
 import { NumberInput } from '../../components/number-input';
 import { Select } from '../../components/select';
 import { InputPassword } from '../../components/input-password';
@@ -278,4 +279,46 @@ it('shows loading on a plain submit Button while the form submits', async () => 
   });
   expect(save!.getAttribute('aria-busy')).toBeNull();
   expect(save!.disabled).toBe(false);
+});
+
+it('auto-binds QuantityInput as a numeric value control and submits its value', async () => {
+  const saved = vi.fn();
+
+  function Demo() {
+    const form = useAppForm({
+      defaultValues: { quantity: 1 },
+      onSubmit: async ({ value }) => {
+        saved(value);
+      },
+    });
+
+    return (
+      <Form form={form}>
+        <FormField name="quantity" label="Quantity">
+          <QuantityInput max={5} />
+        </FormField>
+      </Form>
+    );
+  }
+
+  await act(async () => root.render(<Demo />));
+  const input = host.querySelector<HTMLInputElement>('[role="spinbutton"]')!;
+  expect(host.querySelector('label')!.htmlFor).toBe(input.id);
+
+  act(() => host.querySelectorAll('button')[1]!.click());
+
+  expect(input.value).toBe('2');
+  inputChange(input, '4');
+
+  act(() => input.dispatchEvent(new FocusEvent('focusout', { bubbles: true })));
+
+  await act(async () => {
+    host
+      .querySelector('form')!
+      .dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+  });
+  expect(saved).toHaveBeenCalledWith({ quantity: 4 });
+  expect(host.querySelector<HTMLInputElement>('input[type="hidden"]')!.name).toBe(
+    'quantity',
+  );
 });

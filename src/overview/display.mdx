@@ -97,4 +97,81 @@ export function ItemsExample() {
 
 Labeled arrows and dots complement drag gestures and keyboard arrows. Non-looping edges disable the corresponding arrow. Autoplay is opt-in through `autoplay` or an options object such as `autoplay={{ delay: 5000 }}` and includes a pause/play control. Reduced motion removes scrolling animation and disables autoplay. Set `autoplay.force` only when automatic rotation should continue despite that preference.
 
-See [Carousel stories](?path=/docs/modules-carousel--docs) for multi-row, hero, autoplay, and drag-free examples. All three components accept `className`, typed `classNames` slots, refs, and `data-testid`; see [Customization](?path=/docs/guides-customization--docs).
+See [Carousel stories](?path=/docs/modules-carousel--docs) for multi-row, hero, autoplay, and drag-free examples. These components accept `className`, typed `classNames` slots, refs, and `data-testid`; see [Customization](?path=/docs/guides-customization--docs).
+
+## MediaGallery and Lightbox
+
+Import both from `@itclabs/react-ui/media-gallery`. Supply `items` with stable `id`, `src`, and meaningful `alt` text; images can include dimensions for the host image adapter. Video items use `type: 'video'`, with optional `poster` and `thumbnail` URLs. Native video controls handle playback; leaving a video pauses it.
+
+`index` and `onIndexChange` control zero-based item selection; use `defaultIndex` for uncontrolled selection. Indices are clamped to available items. Omit `thumbnails` for left placement on desktop and bottom placement on small screens, or set it to `left`, `bottom`, or `none`. `aspectRatio` controls the main viewport. Image hover zoom is enabled for fine mouse pointers and respects reduced motion; use `zoom` and `zoomScale` to configure it.
+
+By default, activating an image opens the built-in fullscreen Lightbox. The example below uses `lightbox={false}` and `onOpen` to control a separate Lightbox, sharing selection with the gallery. A separate button also opens the viewer for the selected image or video. Replace the asset URLs with your own files.
+
+```tsx
+import { useState } from 'react';
+import { Button } from '@itclabs/react-ui';
+import {
+  Lightbox,
+  MediaGallery,
+  type MediaItem,
+} from '@itclabs/react-ui/media-gallery';
+
+const items: MediaItem[] = [
+  {
+    id: 'front',
+    src: '/media/front.jpg',
+    alt: 'Front view',
+    width: 800,
+    height: 1000,
+  },
+  {
+    id: 'detail',
+    src: '/media/detail.jpg',
+    alt: 'Fabric detail',
+    width: 800,
+    height: 1000,
+  },
+  {
+    id: 'video',
+    type: 'video',
+    src: '/media/preview.mp4',
+    alt: 'Rotating view',
+    poster: '/media/preview.jpg',
+    thumbnail: '/media/preview.jpg',
+  },
+];
+
+export function MediaExample() {
+  const [index, setIndex] = useState(0);
+  const [open, setOpen] = useState(false);
+
+  return (
+    <div className="grid max-w-2xl gap-4">
+      <MediaGallery
+        aria-label="Item media"
+        items={items}
+        index={index}
+        onIndexChange={setIndex}
+        aspectRatio="4 / 5"
+        lightbox={false}
+        onOpen={(next) => {
+          setIndex(next);
+          setOpen(true);
+        }}
+      />
+      <Button onClick={() => setOpen(true)}>Open fullscreen viewer</Button>
+      <Lightbox
+        items={items}
+        open={open}
+        onOpenChange={setOpen}
+        index={index}
+        onIndexChange={setIndex}
+      />
+    </div>
+  );
+}
+```
+
+Gallery arrow controls, keyboard arrows, and thumbnails complement swipe gestures. In Lightbox, Left/Right keys, navigation buttons, and thumbnails change items. Zoom buttons and double-click magnify images; drag to pan. Escape closes the dialog and restores focus to the opener. `open`/`onOpenChange` control visibility; `defaultOpen` initializes an uncontrolled viewer. Reduced motion removes overlay animation. Both components expose refs, `data-testid`, `className`, and typed `classNames` slots, including media, video, and thumbnails; Lightbox also exposes overlay, close, and zoom button slots.
+
+See [MediaGallery stories](?path=/docs/modules-mediagallery--docs) and [Lightbox stories](?path=/docs/modules-lightbox--docs).

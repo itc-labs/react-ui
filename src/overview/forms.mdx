@@ -131,6 +131,95 @@ export function ScoreForm({
 
 See [Rating stories](?path=/docs/components-rating--docs) for sizes, display mode, and custom glyphs.
 
+## Variant selector with OptionGroup, QuantityInput, and ColorPicker
+
+All three controls bind automatically through `value` and `onValueChange` inside `FormField`. `OptionGroup` stores a string option value: use `variant="swatch"` with `color` or `image` options, or the default chips for sizes. Disabled options remain visible but cannot be selected. Arrow keys cycle through available visible options; Home and End select the first and last. `maxVisible` keeps the first options inline and moves the rest into a "+N" dropdown menu; the selected option always stays inline.
+
+`QuantityInput` stores a number and normalizes edits to `min`, `max`, and a step grid anchored at `min`. Arrow Up/Down steps once; Page Up/Down steps ten times. Empty edits restore the previous quantity on blur. `ColorPicker` stores a hex string; `alpha` enables eight-digit hex values. Hex edits commit on Enter or blur, and invalid edits leave the selection intact. Presets are optional; screen sampling appears only where the browser supports it. Escape closes the picker and restores trigger focus.
+
+```tsx
+import * as v from 'valibot';
+import {
+  Button,
+  ColorPicker,
+  Form,
+  FormField,
+  OptionGroup,
+  QuantityInput,
+  useAppForm,
+} from '@itclabs/react-ui';
+
+type VariantSelection = {
+  color: string;
+  size: string;
+  quantity: number;
+  customColor: string;
+};
+
+export function VariantForm({
+  save,
+}: {
+  save: (selection: VariantSelection) => Promise<void>;
+}) {
+  const form = useAppForm({
+    defaultValues: {
+      color: 'blue',
+      size: 'M',
+      quantity: 1,
+      customColor: '#336699',
+    },
+    onSubmit: async ({ value }) => {
+      await save(value);
+    },
+  });
+
+  return (
+    <Form
+      form={form}
+      className="grid max-w-md gap-6"
+      schema={{
+        color: v.picklist(['blue', 'pink'], 'Choose an available color.'),
+        size: v.picklist(['S', 'M', 'L'], 'Choose an available size.'),
+        quantity: v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(10)),
+        customColor: v.pipe(
+          v.string(),
+          v.regex(/^#[0-9a-f]{6}$/i, 'Choose a hex color.'),
+        ),
+      }}
+    >
+      <FormField name="color" label="Color" required>
+        <OptionGroup
+          variant="swatch"
+          options={[
+            { value: 'blue', label: 'Blue', color: '#336699' },
+            { value: 'pink', label: 'Pink', color: '#cc6699' },
+            { value: 'green', label: 'Green', color: '#669933', disabled: true },
+          ]}
+        />
+      </FormField>
+      <FormField name="size" label="Size" required>
+        <OptionGroup
+          options={[
+            { value: 'S', label: 'S' },
+            { value: 'M', label: 'M' },
+            { value: 'L', label: 'L' },
+          ]}
+        />
+      </FormField>
+      <FormField name="quantity" label="Quantity" required>
+        <QuantityInput min={1} max={10} step={1} />
+      </FormField>
+      <FormField name="customColor" label="Custom color" required>
+        <ColorPicker presets={['#336699', '#cc6699', '#669933']} />
+      </FormField>
+      <Button type="submit">Save variant</Button>
+    </Form>
+  );
+}
+```
+
+See [OptionGroup](?path=/docs/components-optiongroup--docs), [QuantityInput](?path=/docs/components-quantityinput--docs), and [ColorPicker](?path=/docs/components-colorpicker--docs) for focused examples and customization slots.
+
 ## Bound fields (alternative)
 
 As an alternative for simple forms, render bound controls inside `form.AppField`. Each field handles its value, blur state, and error message. Available fields include text, textarea, password, number, OTP, select, multi-select, checkbox, switch, radio group, date, time, date range, and upload. Editor and avatar fields have separate module entry points; see the [catalog](?path=/docs/reference-catalog--docs).

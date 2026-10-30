@@ -224,7 +224,7 @@ it('forwards labels, native attributes, refs, class slots and part selectors', (
   expect(
     host.querySelector(`[id="${ref.current?.getAttribute('aria-labelledby')}"]`)
       ?.textContent,
-  ).toBe('Score');
+  ).toBe('Score*');
   expect(
     host.querySelector(`[id="${ref.current?.getAttribute('aria-describedby')}"]`)
       ?.textContent,
