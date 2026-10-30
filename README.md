@@ -343,7 +343,7 @@ See [docs/](docs/) for component contracts, theming, localization, accessibility
 
 ### Navigation
 
-See [Overview/Navigation](https://react-ui-one-rose.vercel.app/?path=/docs/overview-navigation--docs) for shared Navbar/Sidebar menus, router adapters, permission checks and TopLoader usage.
+See [Guides/Navigation](https://react-ui-one-rose.vercel.app/?path=/docs/guides-navigation--docs) for shared Navbar/Sidebar menus, router adapters, permission checks and TopLoader usage.
 
 ## Development
 
