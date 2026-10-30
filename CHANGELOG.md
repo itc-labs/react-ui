@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.5.0
+
+### Minor Changes
+
+- [#15](https://github.com/itc-labs/react-ui/pull/15) [`54b03fe`](https://github.com/itc-labs/react-ui/commit/54b03fe043bf26c17bed178782155fa29df4e9a0) Thanks [@vungbt](https://github.com/vungbt)! - A `Button type="submit"` inside `Form` now shows its loading state and stays disabled while the form submits, so a plain submit button is enough. Pass `loading` explicitly to opt out; `FormSubmit` remains for buttons that also need `canSubmit`.
+
 ## 0.4.1
 
 ### Patch Changes
