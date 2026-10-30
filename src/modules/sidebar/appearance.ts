@@ -30,6 +30,9 @@ export function sidebarToneStyle(
       : 'var(--color-line)',
     '--sidebar-badge-ring': contrast ? 'var(--sidebar-bg)' : 'var(--color-surface)',
     '--sidebar-accent': contrast ? foreground : 'var(--color-accent)',
+    '--sidebar-tint': contrast
+      ? `color-mix(in srgb, ${foreground} 18%, transparent)`
+      : 'color-mix(in srgb, var(--color-accent) 12%, transparent)',
     '--sidebar-solid-bg': tone === 'brand' ? foreground : 'var(--color-accent)',
     '--sidebar-solid-fg':
       tone === 'brand' ? 'var(--color-accent)' : 'var(--color-on-brand)',
@@ -46,9 +49,9 @@ export function sidebarItemClasses(
       : 'text-[var(--sidebar-muted,var(--color-muted))] hover:bg-[var(--sidebar-hover,color-mix(in_srgb,var(--color-surface)_60%,transparent))] hover:text-[var(--sidebar-fg,var(--color-ink))]';
   switch (variant) {
     case 'subtle':
-      return 'bg-[var(--sidebar-hover,var(--color-hover))] font-medium text-[var(--sidebar-fg,var(--color-ink))]';
+      return 'bg-[var(--sidebar-tint,color-mix(in_srgb,var(--color-accent)_12%,transparent))] font-medium text-[var(--sidebar-accent,var(--color-accent))]';
     case 'bar':
-      return 'relative bg-transparent font-medium text-[var(--sidebar-fg,var(--color-ink))] before:absolute before:inset-y-1 before:left-0 before:w-[3px] before:rounded-full before:bg-[var(--sidebar-accent,var(--color-accent))]';
+      return 'relative bg-linear-to-r from-[var(--sidebar-tint,color-mix(in_srgb,var(--color-accent)_12%,transparent))] to-transparent font-semibold text-[var(--sidebar-accent,var(--color-accent))] before:absolute before:inset-y-1 before:left-0 before:w-1 before:rounded-full before:bg-[var(--sidebar-accent,var(--color-accent))]';
     case 'solid':
       return '[--sidebar-count:currentColor] bg-[var(--sidebar-solid-bg,var(--color-accent))] font-medium text-[var(--sidebar-solid-fg,var(--color-on-brand))]';
     default:

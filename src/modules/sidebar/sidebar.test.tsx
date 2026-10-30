@@ -216,7 +216,7 @@ it.each(['raised', 'subtle', 'bar', 'solid'] as const)(
     const expanded = host.querySelector('[aria-current="page"]')!;
     expect(host.querySelector('aside')?.dataset.itemVariant).toBe(itemVariant);
     expect(expanded.classList.contains('shadow-panel')).toBe(itemVariant === 'raised');
-    expect(expanded.classList.contains('before:w-[3px]')).toBe(itemVariant === 'bar');
+    expect(expanded.classList.contains('before:w-1')).toBe(itemVariant === 'bar');
     expect(
       expanded.classList.contains('bg-[var(--sidebar-solid-bg,var(--color-accent))]'),
     ).toBe(itemVariant === 'solid');
@@ -226,7 +226,7 @@ it.each(['raised', 'subtle', 'bar', 'solid'] as const)(
     await act(async () => render(true));
     const rail = host.querySelector('[aria-current="page"]')!;
     expect(rail.classList.contains('shadow-panel')).toBe(itemVariant === 'raised');
-    expect(rail.classList.contains('before:w-[3px]')).toBe(itemVariant === 'bar');
+    expect(rail.classList.contains('before:w-1')).toBe(itemVariant === 'bar');
   },
 );
 
