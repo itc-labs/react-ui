@@ -8,6 +8,9 @@ const { build } = createRequire(require.resolve('vite/package.json'))('esbuild')
 const root = fileURLToPath(new URL('../', import.meta.url));
 const entries = {
   Icon: 'components/icon/index.tsx',
+  Rating: 'components/rating/index.tsx',
+  JsonView: 'components/json-view/index.tsx',
+  CodeView: 'modules/code-view/index.tsx',
   Button: 'components/button/index.tsx',
   Spinner: 'components/spinner/index.tsx',
   Dialog: 'components/dialog/index.tsx',
@@ -15,6 +18,7 @@ const entries = {
   DataTable: 'modules/data-table/index.tsx',
   Root: 'index.ts',
   Calendar: 'modules/calendar/index.tsx',
+  Carousel: 'modules/carousel/index.tsx',
   Form: 'modules/form/index.tsx',
 };
 const sizes = {};
@@ -42,7 +46,9 @@ for (const [name, file] of Object.entries(entries)) {
     metafile: true,
     logLevel: 'silent',
   });
-  if (['Dialog', 'Button'].includes(name)) {
+  if (
+    ['Dialog', 'Button', 'Rating', 'JsonView', 'CodeView', 'Carousel'].includes(name)
+  ) {
     const registries = Object.keys(metafile.inputs).filter((input) =>
       /components\/icon\/kit-icons\.(?:ts|tsx)$/.test(input),
     );
@@ -64,6 +70,16 @@ for (const [name, file] of Object.entries(entries)) {
     if (forbidden.length)
       throw new Error(`Calendar imports optional features: ${forbidden}`);
   }
+  if (name === 'Root') {
+    const embla = Object.keys(metafile.inputs).filter((input) =>
+      /embla-carousel|modules\/carousel\//.test(input),
+    );
+    if (embla.length) throw new Error(`Root imports Embla: ${embla}`);
+    const prism = Object.keys(metafile.inputs).filter((input) =>
+      /(?:prism-react-renderer|modules\/code-view\/)/.test(input),
+    );
+    if (prism.length) throw new Error(`Root imports Prism: ${prism}`);
+  }
   const bytes = outputFiles[0].contents;
   const gzip = gzipSync(bytes).length;
   sizes[name] = { minified: bytes.length, gzip };
@@ -78,6 +94,11 @@ console.log(JSON.stringify(sizes, null, 2));
 // Gzip budgets with a little headroom; raise them only for an intentional feature.
 for (const [name, limit] of Object.entries({
   Icon: 20_000,
+  Rating: 20_000,
+  JsonView: 22_000,
+  // About 10% above the measured display subpath fixtures.
+  CodeView: 50_000,
+  Carousel: 30_300,
   Button: 20_000,
   Spinner: 20_000,
   Dialog: 38_000,

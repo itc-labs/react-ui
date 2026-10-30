@@ -1,5 +1,22 @@
 import type { UIMessages } from './types';
 export const viMessages = {
+  'carousel.label': 'Băng chuyền',
+  'carousel.previous': 'Trang trước',
+  'carousel.next': 'Trang sau',
+  'carousel.goTo': 'Đến trang {index}',
+  'carousel.pause': 'Tạm dừng tự động',
+  'carousel.play': 'Phát tự động',
+  'carousel.slide': '{index} trên {count}',
+  'codeView.label': 'Mẫu mã nguồn',
+  'jsonView.label': 'Trình xem JSON',
+  'jsonView.expand': 'Mở rộng {label}',
+  'jsonView.collapse': 'Thu gọn {label}',
+  'copy.label': 'Sao chép',
+  'copy.copied': 'Đã sao chép',
+
+  'rating.label': 'Đánh giá',
+  'rating.score': '{value} trên {max}',
+  'rating.value': '{value}/{max}',
   'progress.label': 'Tiến độ',
   'progress.listLabel': 'Tổng quan tiến độ',
   'progress.segmentsLabel': 'Phân bố',

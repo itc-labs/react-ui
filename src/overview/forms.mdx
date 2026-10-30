@@ -93,6 +93,44 @@ Return or await the save promise inside `onSubmit` so submitting state covers th
 
 Keep validation errors next to controls; use persistent feedback for submission failures. See [Overlays & feedback](?path=/docs/guides-overlays-feedback--docs) for optional success notifications.
 
+## Rating with FormField
+
+`Rating` binds automatically through `value` and `onValueChange`. Use zero for an unselected score and `allowHalf` for half-point choices. `allowClear` lets users select the current score again to reset it to zero; validate a positive minimum when a score is required. Arrow keys choose adjacent scores, while Home and End choose the first and last choices. For display only, use `readOnly` with `value` outside the form.
+
+```tsx
+import * as v from 'valibot';
+import { Button, Form, FormField, Rating, useAppForm } from '@itclabs/react-ui';
+
+export function ScoreForm({
+  save,
+}: {
+  save: (value: { score: number }) => Promise<void>;
+}) {
+  const form = useAppForm({
+    defaultValues: { score: 0 },
+    onSubmit: async ({ value }) => {
+      await save(value);
+    },
+  });
+
+  return (
+    <Form
+      form={form}
+      schema={{
+        score: v.pipe(v.number(), v.minValue(0.5, 'Select a score.')),
+      }}
+    >
+      <FormField name="score" label="Score" required>
+        <Rating max={5} allowHalf allowClear showValue />
+      </FormField>
+      <Button type="submit">Save score</Button>
+    </Form>
+  );
+}
+```
+
+See [Rating stories](?path=/docs/components-rating--docs) for sizes, display mode, and custom glyphs.
+
 ## Bound fields (alternative)
 
 As an alternative for simple forms, render bound controls inside `form.AppField`. Each field handles its value, blur state, and error message. Available fields include text, textarea, password, number, OTP, select, multi-select, checkbox, switch, radio group, date, time, date range, and upload. Editor and avatar fields have separate module entry points; see the [catalog](?path=/docs/reference-catalog--docs).

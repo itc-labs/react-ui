@@ -5,6 +5,14 @@
  * transition aliases: use the public motion duration/easing tokens instead.
  */
 export const uiThemeTokenNames = [
+  'color-code-surface',
+  'color-code-ink',
+  'color-code-comment',
+  'color-code-keyword',
+  'color-code-string',
+  'color-code-number',
+  'color-code-function',
+  'color-code-highlight',
   'color-canvas',
   'color-surface',
   'color-sidebar',

@@ -8,41 +8,43 @@ import { Meta } from '@storybook/addon-docs/blocks';
 
 Append each subpath to `@itclabs/react-ui`; `.` means the package root. Wildcards select individual modules without a file extension. The source and published package expose the same subpaths.
 
-| Subpath                            | Contents                                                                                                                                          |
-| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `.`                                | Root API: components, modules, templates, theme, locale helpers, hooks, and shared utilities; excludes optional editor, chart, and avatar upload. |
-| `./components`                     | Primitive components, providers, and shared component utilities.                                                                                  |
-| `./modules`                        | Composed UI modules, navigation helpers, and the event calendar as `EventCalendar`.                                                               |
-| `./theme/tokens.css`               | Tailwind v4 theme tokens and semantic CSS variables.                                                                                              |
-| `./theme/custom-theme.example.css` | Example CSS token overrides to copy and adapt.                                                                                                    |
-| `./templates`                      | `WorkspaceShell`, `WorkspaceBody`, `WorkspaceHeader`, and `WorkspaceMain`.                                                                        |
-| `./theme`                          | Theme definitions, token names, colors, icon pack helpers, and types.                                                                             |
-| `./theme/provider`                 | `UIProvider` and `useTheme` for React integration.                                                                                                |
-| `./i18n`                           | Locale definitions, built-in English and Vietnamese locales, and translation helpers.                                                             |
-| `./i18n/react`                     | `UILocaleProvider` and `useUILocale` for React locale integration.                                                                                |
-| `./hooks`                          | `useDebounce`, `useDebouncedCallback`, and `useClickOutside`.                                                                                     |
-| `./icons/custom`                   | Custom sorting glyphs and spinner glyph.                                                                                                          |
-| `./illustrations`                  | `Illustration`, its props, and the supported illustration names.                                                                                  |
-| `./illustrations/*`                | Individual illustration modules, such as `/illustrations/empty`.                                                                                  |
-| `./icons/outline`                  | Named outline glyph exports.                                                                                                                      |
-| `./icons/outline/*`                | Individual outline glyph modules, such as `/icons/outline/search`.                                                                                |
-| `./icons/bold`                     | Named bold glyph exports.                                                                                                                         |
-| `./icons/bold/*`                   | Individual bold glyph modules, such as `/icons/bold/search`.                                                                                      |
-| `./icons/catalog`                  | Icon inventory metadata for discovery and tooling.                                                                                                |
-| `./modal`                          | Hook-free `modal` facade, `createModalClient`, and client types; requires a mounted `ModalProvider` to call.                                      |
-| `./toast`                          | Hook-free `toast` facade, `createToastClient`, and client types; requires a mounted `ToastProvider` to call.                                      |
-| `./theme/styles.css`               | Tailwind source stylesheet combining tokens, fonts, base rules, vendor styles, and motion.                                                        |
-| `./theme/fonts.css`                | Be Vietnam Pro font faces at weights 400, 500, 600, and 700.                                                                                      |
-| `./theme/base.css`                 | Base body and interaction cursor styles.                                                                                                          |
-| `./theme/vendor.css`               | Toast, crop, editor, and event calendar styles.                                                                                                   |
-| `./theme/motion.css`               | Overlay, toast, submenu, and badge animations with reduced-motion support.                                                                        |
-| `./theme/fonts-800.css`            | Optional Be Vietnam Pro font faces at weight 800.                                                                                                 |
-| `./editor`                         | Optional Tiptap `Editor` and `EditorField` integration.                                                                                           |
-| `./chart`                          | Optional Recharts `Chart`, data types, and styling types.                                                                                         |
-| `./avatar-upload`                  | Optional `AvatarUpload` and `AvatarField` integration with cropping.                                                                              |
-| `./ui.css`                         | Compiled CSS for consumers without a Tailwind build.                                                                                              |
-| `./navigation`                     | Router-independent `matchPath`, `resolveActiveNav`, `filterNavByAccess`, and navigation types.                                                    |
-| `./calendar`                       | Event `Calendar`, its engine helpers, and types.                                                                                                  |
+| Subpath                            | Contents                                                                                                                                                     |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `.`                                | Root API: components, modules, templates, theme, locale helpers, hooks, and shared utilities; excludes editor, chart, avatar upload, CodeView, and Carousel. |
+| `./components`                     | Primitive components, including Rating and JsonView, providers, and shared component utilities.                                                              |
+| `./modules`                        | Composed UI modules, navigation helpers, and the event calendar as `EventCalendar`.                                                                          |
+| `./theme/tokens.css`               | Tailwind v4 theme tokens and semantic CSS variables.                                                                                                         |
+| `./theme/custom-theme.example.css` | Example CSS token overrides to copy and adapt.                                                                                                               |
+| `./templates`                      | `WorkspaceShell`, `WorkspaceBody`, `WorkspaceHeader`, and `WorkspaceMain`.                                                                                   |
+| `./theme`                          | Theme definitions, token names, colors, icon pack helpers, and types.                                                                                        |
+| `./theme/provider`                 | `UIProvider` and `useTheme` for React integration.                                                                                                           |
+| `./i18n`                           | Locale definitions, built-in English and Vietnamese locales, and translation helpers.                                                                        |
+| `./i18n/react`                     | `UILocaleProvider` and `useUILocale` for React locale integration.                                                                                           |
+| `./hooks`                          | `useDebounce`, `useDebouncedCallback`, and `useClickOutside`.                                                                                                |
+| `./icons/custom`                   | Custom sorting glyphs and spinner glyph.                                                                                                                     |
+| `./illustrations`                  | `Illustration`, its props, and the supported illustration names.                                                                                             |
+| `./illustrations/*`                | Individual illustration modules, such as `/illustrations/empty`.                                                                                             |
+| `./icons/outline`                  | Named outline glyph exports.                                                                                                                                 |
+| `./icons/outline/*`                | Individual outline glyph modules, such as `/icons/outline/search`.                                                                                           |
+| `./icons/bold`                     | Named bold glyph exports.                                                                                                                                    |
+| `./icons/bold/*`                   | Individual bold glyph modules, such as `/icons/bold/search`.                                                                                                 |
+| `./icons/catalog`                  | Icon inventory metadata for discovery and tooling.                                                                                                           |
+| `./modal`                          | Hook-free `modal` facade, `createModalClient`, and client types; requires a mounted `ModalProvider` to call.                                                 |
+| `./toast`                          | Hook-free `toast` facade, `createToastClient`, and client types; requires a mounted `ToastProvider` to call.                                                 |
+| `./theme/styles.css`               | Tailwind source stylesheet combining tokens, fonts, base rules, vendor styles, and motion.                                                                   |
+| `./theme/fonts.css`                | Be Vietnam Pro font faces at weights 400, 500, 600, and 700.                                                                                                 |
+| `./theme/base.css`                 | Base body and interaction cursor styles.                                                                                                                     |
+| `./theme/vendor.css`               | Toast, crop, editor, and event calendar styles.                                                                                                              |
+| `./theme/motion.css`               | Overlay, toast, submenu, and badge animations with reduced-motion support.                                                                                   |
+| `./theme/fonts-800.css`            | Optional Be Vietnam Pro font faces at weight 800.                                                                                                            |
+| `./editor`                         | Optional Tiptap `Editor` and `EditorField` integration.                                                                                                      |
+| `./chart`                          | Optional Recharts `Chart`, data types, and styling types.                                                                                                    |
+| `./avatar-upload`                  | Optional `AvatarUpload` and `AvatarField` integration with cropping.                                                                                         |
+| `./ui.css`                         | Compiled CSS for consumers without a Tailwind build.                                                                                                         |
+| `./navigation`                     | Router-independent `matchPath`, `resolveActiveNav`, `filterNavByAccess`, and navigation types.                                                               |
+| `./carousel`                       | Responsive `Carousel` and types; Embla is loaded only through this subpath.                                                                                  |
+| `./calendar`                       | Event `Calendar`, its engine helpers, and types.                                                                                                             |
+| `./code-view`                      | Read-only `CodeView` and its types; Prism is loaded only through this subpath.                                                                               |
 
 See [Getting started](?path=/docs/overview-getting-started--docs) for CSS setup and [Providers & adapters](?path=/docs/guides-providers-adapters--docs) for provider wiring.
 
@@ -73,23 +75,28 @@ The script bundles source entries with esbuild for the browser as minified produ
 | Measured entry              | Gzip KB |
 | --------------------------- | ------: |
 | Icon                        |   17.79 |
-| Button                      |   16.83 |
-| Spinner                     |   16.09 |
-| Dialog                      |   33.75 |
-| Select                      |   52.17 |
-| DataTable                   |   82.09 |
-| Root (all exports)          |  247.37 |
-| Calendar (event calendar)   |   93.82 |
-| Form, FormField, FormSubmit |   16.35 |
+| Rating                      |   18.26 |
+| JsonView                    |   19.08 |
+| CodeView                    |   45.18 |
+| Button                      |   17.19 |
+| Spinner                     |   16.39 |
+| Dialog                      |   34.12 |
+| Select                      |   52.55 |
+| DataTable                   |   82.45 |
+| Root (all exports)          |  252.02 |
+| Calendar (event calendar)   |   94.19 |
+| Carousel                    |   27.51 |
+| Form, FormField, FormSubmit |   16.43 |
 
 These are script fixtures, not predictions for a complete application. The root fixture retains all root exports; the other fixtures retain the named exports shown. Application imports and bundler settings can produce different results.
 
-Gzip budgets are enforced by `src/components/icon/bundle-size.test.ts`, which runs the same script. It also guards against full icon packs in ordinary imports, the built-in icon registry in Button and Dialog, React Select in DataTable and Calendar, and optional heavy features in Calendar.
+Gzip budgets are enforced by `src/components/icon/bundle-size.test.ts`, which runs the same script. It also guards against full icon packs in ordinary imports, the built-in icon registry in Button, Dialog, Rating, JsonView, CodeView, and Carousel, React Select in DataTable and Calendar, optional heavy features in Calendar, and Prism and Embla in the root entry. CodeView has a 50,000-byte gzip budget and Carousel has a 30,300-byte budget, each with about 10% headroom. Root remains within its existing 260,000-byte budget.
 
 ## Tree-shaking tips
 
 - Use named imports and keep ESM intact so the application bundler can remove unused exports. JavaScript modules are declared side-effect free; CSS is preserved as a side effect.
 - Import individual glyphs, such as `@itclabs/react-ui/icons/outline/search`, for explicit icon dependencies. Avoid importing `/icons/outline/pack` or `/icons/bold/pack` unless you need every icon in that runtime pack.
+- Import `CodeView` from `/code-view` and `Carousel` from `/carousel`; both are excluded from the root, `/components`, and `/modules` barrels. Rating and JsonView are available from the root and `/components`. See [Data display](?path=/docs/guides-data-display--docs) for examples.
 - Import optional features from `/editor`, `/chart`, or `/avatar-upload` only where needed. They are excluded from the root and `/modules` barrels.
 - Use `/modal` and `/toast` for imperative calls outside React components; mount their providers in the React tree.
 - Load `/icons/catalog` only for icon discovery or tooling. Import individual `/illustrations/*` modules when a single illustration is enough.

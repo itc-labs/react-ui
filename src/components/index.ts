@@ -47,3 +47,7 @@ export * from './modal';
 
 export * from './progress';
 export * from './top-loader';
+
+export * from './rating';
+
+export * from './json-view';

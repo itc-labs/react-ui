@@ -54,7 +54,9 @@
     "./avatar-upload": "./src/modules/avatar-upload/index.tsx",
     "./ui.css": "./dist/ui.css",
     "./navigation": "./src/modules/navigation/index.ts",
-    "./calendar": "./src/modules/calendar/index.tsx"
+    "./calendar": "./src/modules/calendar/index.tsx",
+    "./code-view": "./src/modules/code-view/index.tsx",
+    "./carousel": "./src/modules/carousel/index.tsx"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
@@ -84,7 +86,10 @@
     "react-day-picker": "9.14.0",
     "react-toastify": "11.1.0",
     "input-otp": "1.5.0",
-    "react-number-format": "5.4.5"
+    "react-number-format": "5.4.5",
+    "embla-carousel-react": "8.6.0",
+    "embla-carousel-autoplay": "8.6.0",
+    "prism-react-renderer": "2.4.1"
   },
   "devDependencies": {
     "@types/react": "19.3.0",
@@ -269,6 +274,14 @@
       "./calendar": {
         "types": "./dist/modules/calendar/index.d.ts",
         "import": "./dist/modules/calendar/index.js"
+      },
+      "./code-view": {
+        "types": "./dist/modules/code-view/index.d.ts",
+        "import": "./dist/modules/code-view/index.js"
+      },
+      "./carousel": {
+        "types": "./dist/modules/carousel/index.d.ts",
+        "import": "./dist/modules/carousel/index.js"
       }
     },
     "access": "public"

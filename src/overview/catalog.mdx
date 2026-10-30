@@ -49,6 +49,7 @@ Small UI building blocks for presentation, interaction, and feedback.
 
 | Name         | Purpose                                                           | Story docs                                            |
 | ------------ | ----------------------------------------------------------------- | ----------------------------------------------------- |
+| JsonView     | Inspect JSON with expandable nodes and clipboard copying.         | [Examples](?path=/docs/components-jsonview--docs)     |
 | Avatar       | Show an image with fallback and loading states.                   | [Examples](?path=/docs/components-avatar--docs)       |
 | Badge        | Attach a count or dot indicator to content.                       | [Examples](?path=/docs/components-badge--docs)        |
 | Tag          | Show a label with optional selection or removal.                  | [Examples](?path=/docs/components-tag--docs)          |
@@ -58,6 +59,7 @@ Small UI building blocks for presentation, interaction, and feedback.
 | Alert        | Show an inline or panel status message.                           | [Examples](?path=/docs/components-alert--docs)        |
 | Skeleton     | Reserve space with a decorative loading placeholder.              | [Examples](?path=/docs/components-skeleton--docs)     |
 | Spinner      | Indicate ongoing work with an accessible label.                   | [Examples](?path=/docs/components-spinner--docs)      |
+| Rating       | Select or display a score with whole or half stars.               | [Examples](?path=/docs/components-rating--docs)       |
 | Progress     | Show linear or circular progress, including indeterminate states. | [Examples](?path=/docs/components-progress--docs)     |
 | TopLoader    | Show progress for navigation or other asynchronous work.          | [Examples](?path=/docs/components-toploader--docs)    |
 | Toast        | Show transient notifications through a provider and client API.   | [Examples](?path=/docs/components-toast--docs)        |
@@ -93,13 +95,15 @@ Compositions of components for recurring interface patterns. The application sup
 
 ### Forms and data
 
-| Name              | Purpose                                                                | Story docs                                              |
-| ----------------- | ---------------------------------------------------------------------- | ------------------------------------------------------- |
-| Form              | Compose validated fields and submit controls with TanStack Form.       | [Examples](?path=/docs/modules-form--docs)              |
-| DataTable         | Display rows with sorting, pagination, selection, and column controls. | [Examples](?path=/docs/modules-datatable--docs)         |
-| Calendar          | Display and edit events in month, week, day, and list views.           | [Examples](?path=/docs/modules-calendar--docs)          |
-| ProgressList      | Compare item progress with optional thresholds and sorting.            | [Examples](?path=/docs/modules-progresslist--docs)      |
-| SegmentedProgress | Show a segmented distribution with a legend and text summary.          | [Examples](?path=/docs/modules-segmentedprogress--docs) |
+| Name              | Purpose                                                                                          | Story docs                                              |
+| ----------------- | ------------------------------------------------------------------------------------------------ | ------------------------------------------------------- |
+| Carousel          | Browse responsive items, hero slides and drag strips (import from `/carousel`).                  | [Examples](?path=/docs/modules-carousel--docs)          |
+| CodeView          | Display syntax-highlighted source with line highlighting and copying (import from `/code-view`). | [Examples](?path=/docs/modules-codeview--docs)          |
+| Form              | Compose validated fields and submit controls with TanStack Form.                                 | [Examples](?path=/docs/modules-form--docs)              |
+| DataTable         | Display rows with sorting, pagination, selection, and column controls.                           | [Examples](?path=/docs/modules-datatable--docs)         |
+| Calendar          | Display and edit events in month, week, day, and list views.                                     | [Examples](?path=/docs/modules-calendar--docs)          |
+| ProgressList      | Compare item progress with optional thresholds and sorting.                                      | [Examples](?path=/docs/modules-progresslist--docs)      |
+| SegmentedProgress | Show a segmented distribution with a legend and text summary.                                    | [Examples](?path=/docs/modules-segmentedprogress--docs) |
 
 ### Optional features
 
@@ -123,4 +127,4 @@ Workspace structure and complete layout examples. WorkspaceShell is exported by 
 
 The component Calendar selects dates. The module Calendar manages events and is exported as `EventCalendar` from the root and `/modules`, or as `Calendar` from `/calendar`. See [Event calendar](?path=/docs/guides-event-calendar--docs).
 
-For implementation guidance, see [Forms](?path=/docs/guides-forms--docs), [Navigation](?path=/docs/guides-navigation--docs), and [Overlays & feedback](?path=/docs/guides-overlays-feedback--docs).
+For implementation guidance, see [Data display](?path=/docs/guides-data-display--docs), [Forms](?path=/docs/guides-forms--docs), [Navigation](?path=/docs/guides-navigation--docs), and [Overlays & feedback](?path=/docs/guides-overlays-feedback--docs).
