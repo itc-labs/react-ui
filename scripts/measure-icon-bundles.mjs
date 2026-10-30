@@ -9,6 +9,7 @@ const root = fileURLToPath(new URL('../', import.meta.url));
 const entries = {
   Icon: 'components/icon/index.tsx',
   Button: 'components/button/index.tsx',
+  Spinner: 'components/spinner/index.tsx',
   Dialog: 'components/dialog/index.tsx',
   Select: 'components/select/index.tsx',
   DataTable: 'modules/data-table/index.tsx',
@@ -16,15 +17,8 @@ const entries = {
   Calendar: 'modules/calendar/index.tsx',
   Form: 'modules/form/index.tsx',
 };
-// Gzip bytes before kit controls switched to leaf glyphs.
-const baselineGzip = { Dialog: 41_227, Select: 59_415, DataTable: 115_077 };
 const sizes = {};
 for (const [name, file] of Object.entries(entries)) {
-  if (
-    process.argv.includes('--budget-only') &&
-    !['Icon', 'Button', 'Dialog', 'Calendar'].includes(name)
-  )
-    continue;
   const exports =
     name === 'Root'
       ? '*'
@@ -72,13 +66,7 @@ for (const [name, file] of Object.entries(entries)) {
   }
   const bytes = outputFiles[0].contents;
   const gzip = gzipSync(bytes).length;
-  sizes[name] = {
-    minified: bytes.length,
-    gzip,
-    ...(name in baselineGzip
-      ? { gzipBefore: baselineGzip[name], gzipChange: gzip - baselineGzip[name] }
-      : {}),
-  };
+  sizes[name] = { minified: bytes.length, gzip };
   // Ordinary kit imports must never reach either full runtime catalog.
   const fullPacks = Object.keys(metafile.inputs).filter((input) =>
     /icon\/(outline|bold)\/pack\.ts$/.test(input),
@@ -87,10 +75,17 @@ for (const [name, file] of Object.entries(entries)) {
     throw new Error(`${name} imports full icon packs: ${fullPacks}`);
 }
 console.log(JSON.stringify(sizes, null, 2));
+// Gzip budgets with a little headroom; raise them only for an intentional feature.
 for (const [name, limit] of Object.entries({
   Icon: 20_000,
-  Button: 30_000,
-  Calendar: 130_000,
+  Button: 20_000,
+  Spinner: 20_000,
+  Dialog: 38_000,
+  Select: 58_000,
+  Form: 22_000,
+  DataTable: 90_000,
+  Calendar: 100_000,
+  Root: 260_000,
 })) {
   if (sizes[name].gzip >= limit) {
     throw new Error(`${name}: ${sizes[name].gzip} gzip bytes exceeds ${limit}`);
