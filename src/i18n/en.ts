@@ -1,4 +1,10 @@
 export const enMessages = {
+  'jsonView.label': 'JSON viewer',
+  'jsonView.expand': 'Expand {label}',
+  'jsonView.collapse': 'Collapse {label}',
+  'copy.label': 'Copy',
+  'copy.copied': 'Copied',
+
   'rating.label': 'Rating',
   'rating.score': '{value} out of {max}',
   'rating.value': '{value}/{max}',

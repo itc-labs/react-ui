@@ -9,6 +9,7 @@ const root = fileURLToPath(new URL('../', import.meta.url));
 const entries = {
   Icon: 'components/icon/index.tsx',
   Rating: 'components/rating/index.tsx',
+  JsonView: 'components/json-view/index.tsx',
   Button: 'components/button/index.tsx',
   Spinner: 'components/spinner/index.tsx',
   Dialog: 'components/dialog/index.tsx',
@@ -43,7 +44,7 @@ for (const [name, file] of Object.entries(entries)) {
     metafile: true,
     logLevel: 'silent',
   });
-  if (['Dialog', 'Button', 'Rating'].includes(name)) {
+  if (['Dialog', 'Button', 'Rating', 'JsonView'].includes(name)) {
     const registries = Object.keys(metafile.inputs).filter((input) =>
       /components\/icon\/kit-icons\.(?:ts|tsx)$/.test(input),
     );
@@ -80,6 +81,7 @@ console.log(JSON.stringify(sizes, null, 2));
 for (const [name, limit] of Object.entries({
   Icon: 20_000,
   Rating: 20_000,
+  JsonView: 22_000,
   Button: 20_000,
   Spinner: 20_000,
   Dialog: 38_000,

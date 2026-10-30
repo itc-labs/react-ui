@@ -1,5 +1,11 @@
 import type { UIMessages } from './types';
 export const viMessages = {
+  'jsonView.label': 'Trình xem JSON',
+  'jsonView.expand': 'Mở rộng {label}',
+  'jsonView.collapse': 'Thu gọn {label}',
+  'copy.label': 'Sao chép',
+  'copy.copied': 'Đã sao chép',
+
   'rating.label': 'Đánh giá',
   'rating.score': '{value} trên {max}',
   'rating.value': '{value}/{max}',
