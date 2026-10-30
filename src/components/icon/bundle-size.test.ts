@@ -17,6 +17,7 @@ it('keeps ordinary imports free of heavy modules and within gzip budgets', () =>
     'CodeView',
     'ColorPicker',
     'DataTable',
+    'DataTableRowReorder',
     'Dialog',
     'Divider',
     'Dnd',
@@ -37,6 +38,7 @@ it('keeps ordinary imports free of heavy modules and within gzip budgets', () =>
     'Spinner',
     'Timeline',
     'Transfer',
+    'TransferDnd',
     'TreeSelect',
   ]);
 }, 60_000);

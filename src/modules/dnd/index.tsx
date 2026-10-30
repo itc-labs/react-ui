@@ -38,6 +38,9 @@ import {
 } from '@dnd-kit/modifiers';
 import { cn, partTestId } from '../../components/common';
 import { focusRingClassName } from '../../components/common/focus-ring';
+import { KitIcon } from '../../components/icon/kit-icon';
+import { GripVerticalIcon } from '../../components/icon/outline/grip-vertical';
+import { GripVerticalIcon as GripVerticalBoldIcon } from '../../components/icon/bold/grip-vertical';
 import { useUILocale } from '../../i18n/provider';
 
 export { useSortable as useSortableItem } from '@dnd-kit/sortable';
@@ -101,7 +104,7 @@ export function DndProvider({ accessibility, sensors, ...props }: DndProviderPro
 export interface DragHandleProps extends ComponentPropsWithRef<'button'> {
   label: string;
   classNames?: { root?: string; icon?: string };
-  'data-testid'?: string;
+  'data-testid'?: string | undefined;
 }
 
 export function DragHandle({
@@ -121,24 +124,20 @@ export function DragHandle({
       {...props}
       data-testid={testId}
       className={cn(
-        'inline-flex size-8 shrink-0 touch-none items-center justify-center rounded-control text-ink-muted enabled:cursor-grab active:cursor-grabbing disabled:cursor-not-allowed disabled:opacity-50',
+        'inline-flex size-8 shrink-0 touch-none items-center justify-center rounded-control text-ink-muted enabled:cursor-grab active:cursor-grabbing disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:cursor-not-allowed aria-disabled:opacity-50',
         focusRingClassName,
         classNames?.root,
         className,
       )}
     >
       {children ?? (
-        <svg
-          viewBox="0 0 16 24"
-          fill="currentColor"
+        <KitIcon
+          name="gripVertical"
+          builtin={{ outline: GripVerticalIcon, bold: GripVerticalBoldIcon }}
           aria-hidden="true"
           data-testid={partTestId(testId, 'icon')}
           className={cn('size-4', classNames?.icon)}
-        >
-          {[6, 12, 18].flatMap((cy) =>
-            [5, 11].map((cx) => <circle key={`${cx}-${cy}`} cx={cx} cy={cy} r="1.5" />),
-          )}
-        </svg>
+        />
       )}
     </button>
   );
@@ -737,3 +736,6 @@ export function SortableBoard<T>({
     </DndProvider>
   );
 }
+
+export { createTransferDnd, createRowReorder } from './integrations';
+export type { TransferDndPlugin, DataTableRowReorderPlugin } from './integration-types';

@@ -1,4 +1,10 @@
 export const enMessages = {
+  'dnd.integrationInstructions':
+    'Press Space or Enter to pick up. Use Up and Down to reorder, Left and Right to change lists, Space or Enter to drop, and Escape to cancel.',
+  'table.reorder': 'Reorder rows',
+  'table.reorderSorted': 'Clear sorting to reorder rows.',
+  'table.reorderServer':
+    'Row reordering is unavailable for server-managed pages or groups.',
   'dnd.handle': 'Drag to reorder {label}',
   'dnd.instructions':
     'To pick up an item, press Space or Enter. Use the arrow keys to move. Press Space or Enter to drop, or Escape to cancel.',

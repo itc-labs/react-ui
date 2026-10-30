@@ -1,5 +1,11 @@
 import type { UIMessages } from './types';
 export const viMessages = {
+  'dnd.integrationInstructions':
+    'Nhấn Space hoặc Enter để nhấc mục. Dùng mũi tên lên xuống để sắp xếp, trái phải để đổi danh sách, Space hoặc Enter để thả và Escape để hủy.',
+  'table.reorder': 'Sắp xếp dòng',
+  'table.reorderSorted': 'Xóa sắp xếp để đổi thứ tự dòng.',
+  'table.reorderServer':
+    'Không thể đổi thứ tự dòng trong trang hoặc nhóm do máy chủ quản lý.',
   'dnd.handle': 'Kéo để sắp xếp lại {label}',
   'dnd.instructions':
     'Nhấn Space hoặc Enter để chọn mục. Dùng phím mũi tên để di chuyển. Nhấn Space hoặc Enter để thả, hoặc Escape để hủy.',

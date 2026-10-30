@@ -95,3 +95,8 @@ NumberInput additionally exposes stepper/stepperButton classes alongside inherit
 ModalProvider and per-call options forward className to the composed panel. ModalClassNames preserves overlay slots and adds confirm/cancel/ok/error/icon/accent. Provider defaults merge before per-call classes through cn(); error styles the inline Alert, icon/accent style alert feedback. See [UI_MODAL.md](UI_MODAL.md).
 
 Tag exposes root/icon/label/remove slots; Badge exposes root/indicator/label. Both retain root className. See [Tag and Badge](UI_TAG_BADGE.md).
+
+Optional drag integrations expose `classNames.dragHandle` and
+`classNames.dragOverlay` on Transfer and DataTable. DataTable additionally exposes
+`classNames.reorderCell` for the leading header/body cells. Overlay selectors use
+`<data-testid>-dragOverlay`; handles retain stable item/row IDs in part selectors.

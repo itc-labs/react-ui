@@ -26,6 +26,10 @@ import { ArrowRightIcon as ArrowRightBoldIcon } from '../../components/icon/bold
 import { CloseIcon } from '../../components/icon/outline/close';
 import { CloseIcon as CloseBoldIcon } from '../../components/icon/bold/close';
 import { useUILocale } from '../../i18n/provider';
+import type { TransferDndPlugin } from '../dnd/integration-types';
+export type { TransferDndPlugin } from '../dnd/integration-types';
+
+const PassThrough = ({ children }: { children: ReactNode }) => children;
 
 export interface TransferItem {
   id: string;
@@ -42,6 +46,8 @@ export type TransferClassNames = SlotClasses<
   | 'list'
   | 'item'
   | 'itemChecked'
+  | 'dragHandle'
+  | 'dragOverlay'
   | 'actions'
   | 'button'
   | 'empty'
@@ -57,6 +63,8 @@ export interface TransferProps extends Omit<
   defaultValue?: readonly string[];
   onValueChange?: (ids: string[]) => void;
   order?: 'source' | 'selection';
+  /** Opt-in drag runtime from createTransferDnd(); implies selection order. */
+  dnd?: TransferDndPlugin;
   titles?: readonly [ReactNode, ReactNode];
   searchable?: boolean | readonly [boolean, boolean];
   filterItem?: (item: TransferItem, query: string) => boolean;
@@ -87,7 +95,8 @@ export function Transfer({
   value,
   defaultValue = [],
   onValueChange,
-  order = 'source',
+  order: suppliedOrder = 'source',
+  dnd,
   titles,
   searchable,
   filterItem,
@@ -111,6 +120,9 @@ export function Transfer({
   ...props
 }: TransferProps) {
   const { t } = useUILocale();
+  const order = dnd ? 'selection' : suppliedOrder;
+  const Provider = dnd?.Provider ?? PassThrough;
+  const [dragFocus, setDragFocus] = useState<{ id: string; container: string }>();
   const generated = useId();
   const id = suppliedId ?? generated;
   const [local, setLocal] = useState<readonly string[]>(defaultValue);
@@ -232,122 +244,206 @@ export function Transfer({
     );
   };
 
+  const drop = (activeId: string, container: string, index: number) => {
+    const item = known.get(activeId);
+    if (!item || item.disabled || disabled) return;
+    const from: TransferSide = selected.has(activeId) ? 'target' : 'source';
+    const to = container as TransferSide;
+    if (from !== to) {
+      if (oneWay && from === 'target') return;
+      const sideItems = from === 'source' ? source : target;
+      const moving = checked.has(activeId)
+        ? sideItems.filter((entry) => checked.has(entry.id) && !entry.disabled)
+        : [item];
+      if (from === 'source') {
+        if (moving.length > capacity) return;
+        const next = [...ids];
+        next.splice(index, 0, ...moving.map((entry) => entry.id));
+        setLocal(next);
+        onValueChange?.(next);
+
+        setChecked(
+          (previous) =>
+            new Set(
+              [...previous].filter((key) => !moving.some((entry) => entry.id === key)),
+            ),
+        );
+      } else move(from, moving);
+    } else if (from === 'target') {
+      const moving = checked.has(activeId)
+        ? target
+            .filter((entry) => checked.has(entry.id) && !entry.disabled)
+            .map((entry) => entry.id)
+        : [activeId];
+      const remaining = ids.filter((key) => !moving.includes(key));
+      const overId = ids[index];
+      if (overId && moving.includes(overId)) return;
+      const overIndex = overId ? remaining.indexOf(overId) : remaining.length;
+      const insertion = overId
+        ? overIndex + (index > ids.indexOf(activeId) ? 1 : 0)
+        : remaining.length;
+      const next = [...remaining];
+      next.splice(insertion, 0, ...moving);
+      if (next.every((key, position) => key === ids[position])) return;
+      setLocal(next);
+      onValueChange?.(next);
+    }
+    setDragFocus({ id: activeId, container: to });
+  };
+
   return (
-    <div
-      {...props}
-      id={id}
-      tabIndex={-1}
-      onBlur={(event) => {
-        if (!event.currentTarget.contains(event.relatedTarget)) onBlur?.(event);
+    <Provider
+      items={[
+        ...source.map((item) => ({ ...item, container: 'source' })),
+        ...target.map((item) => ({ ...item, container: 'target' })),
+      ]}
+      containers={['source', 'target']}
+      containerLabels={{
+        source: typeof titles?.[0] === 'string' ? titles[0] : t('transfer.available'),
+        target: typeof titles?.[1] === 'string' ? titles[1] : t('transfer.selected'),
       }}
-      role="group"
-      aria-label={
-        props['aria-label'] ?? (label == null ? t('transfer.label') : undefined)
-      }
-      aria-labelledby={
-        props['aria-labelledby'] ?? (label != null ? `${id}-label` : undefined)
-      }
-      aria-disabled={disabled}
-      aria-invalid={Boolean(error) || props['aria-invalid']}
-      aria-describedby={description}
-      data-testid={testId}
-      className={cn('grid min-w-0 content-start gap-2', classNames?.root, className)}
+      disabled={disabled}
+      overlayClassName={classNames?.dragOverlay}
+      testId={testId}
+      canDrop={(activeId, container) => {
+        const item = known.get(activeId);
+        if (disabled || !item || item.disabled) return false;
+        const from = selected.has(activeId) ? 'target' : 'source';
+        if (from === container) return true;
+        if (from === 'target') return !oneWay;
+        const count = checked.has(activeId)
+          ? source.filter((entry) => checked.has(entry.id) && !entry.disabled).length
+          : 1;
+
+        return count <= capacity;
+      }}
+      onDrop={drop}
+      onNavigate={(id, container) => setDragFocus({ id, container })}
     >
-      {label != null && (
-        <span id={`${id}-label`} className="text-ui-sm font-medium text-ink">
-          {label}
-          {required && (
-            <span aria-hidden="true" className="ml-1 text-danger-700">
-              *
-            </span>
-          )}
+      <div
+        {...props}
+        id={id}
+        tabIndex={-1}
+        onBlur={(event) => {
+          if (!event.currentTarget.contains(event.relatedTarget)) onBlur?.(event);
+        }}
+        role="group"
+        aria-label={
+          props['aria-label'] ?? (label == null ? t('transfer.label') : undefined)
+        }
+        aria-labelledby={
+          props['aria-labelledby'] ?? (label != null ? `${id}-label` : undefined)
+        }
+        aria-disabled={disabled}
+        aria-invalid={Boolean(error) || props['aria-invalid']}
+        aria-describedby={description}
+        data-testid={testId}
+        className={cn('grid min-w-0 content-start gap-2', classNames?.root, className)}
+      >
+        {label != null && (
+          <span id={`${id}-label`} className="text-ui-sm font-medium text-ink">
+            {label}
+            {required && (
+              <span aria-hidden="true" className="ml-1 text-danger-700">
+                *
+              </span>
+            )}
+          </span>
+        )}
+        <div className="grid min-w-0 grid-cols-1 items-center gap-3 sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]">
+          {(['source', 'target'] as const).map((side, index) => (
+            <TransferPanel
+              key={side}
+              {...{
+                side,
+                checked,
+                pick,
+                move,
+                disabled,
+                height,
+                emptyContent,
+                renderItem,
+                classNames,
+                filterItem,
+                dnd,
+                dragFocus,
+              }}
+              id={`${id}-${side}`}
+              testId={partTestId(testId, side)}
+              items={side === 'source' ? source : target}
+              title={
+                titles?.[index] ??
+                t(side === 'source' ? 'transfer.available' : 'transfer.selected')
+              }
+              searchable={
+                typeof searchable === 'boolean' ? searchable : searchable?.[index]
+              }
+              removable={Boolean(oneWay && side === 'target')}
+              required={required}
+              error={Boolean(error)}
+              description={description}
+              actions={
+                index === 0 ? (
+                  <div
+                    data-testid={partTestId(testId, 'actions')}
+                    className={cn(
+                      'flex justify-center gap-2 sm:flex-col',
+                      classNames?.actions,
+                    )}
+                  >
+                    {action('source', false)}
+                    {!oneWay && action('target', false)}
+                    {showMoveAll && action('source', true)}
+                    {showMoveAll && !oneWay && action('target', true)}
+                  </div>
+                ) : undefined
+              }
+            />
+          ))}
+        </div>
+        {name &&
+          ids.map((key) => (
+            <input
+              key={key}
+              type="hidden"
+              name={name}
+              value={key}
+              disabled={disabled}
+            />
+          ))}
+        {maxSelected !== undefined && (
+          <p
+            className={cn('text-ui-sm text-muted', classNames?.hint)}
+            id={`${id}-limit`}
+            data-testid={partTestId(testId, 'limit')}
+          >
+            {t('transfer.limit', { count: maxSelected })}
+          </p>
+        )}
+        {hint && !error && (
+          <p
+            id={`${id}-hint`}
+            data-testid={partTestId(testId, 'hint')}
+            className={cn('text-ui-sm text-muted', classNames?.hint)}
+          >
+            {hint}
+          </p>
+        )}
+        {error && (
+          <p
+            role="alert"
+            id={`${id}-error`}
+            data-testid={partTestId(testId, 'error')}
+            className={cn('text-ui-sm text-danger-700', classNames?.error)}
+          >
+            {error}
+          </p>
+        )}
+        <span aria-live="polite" aria-atomic="true" className="sr-only">
+          <span key={announcement.sequence}>{announcement.text}</span>
         </span>
-      )}
-      <div className="grid min-w-0 grid-cols-1 items-center gap-3 sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]">
-        {(['source', 'target'] as const).map((side, index) => (
-          <TransferPanel
-            key={side}
-            {...{
-              side,
-              checked,
-              pick,
-              move,
-              disabled,
-              height,
-              emptyContent,
-              renderItem,
-              classNames,
-              filterItem,
-            }}
-            id={`${id}-${side}`}
-            testId={partTestId(testId, side)}
-            items={side === 'source' ? source : target}
-            title={
-              titles?.[index] ??
-              t(side === 'source' ? 'transfer.available' : 'transfer.selected')
-            }
-            searchable={
-              typeof searchable === 'boolean' ? searchable : searchable?.[index]
-            }
-            removable={Boolean(oneWay && side === 'target')}
-            required={required}
-            error={Boolean(error)}
-            description={description}
-            actions={
-              index === 0 ? (
-                <div
-                  data-testid={partTestId(testId, 'actions')}
-                  className={cn(
-                    'flex justify-center gap-2 sm:flex-col',
-                    classNames?.actions,
-                  )}
-                >
-                  {action('source', false)}
-                  {!oneWay && action('target', false)}
-                  {showMoveAll && action('source', true)}
-                  {showMoveAll && !oneWay && action('target', true)}
-                </div>
-              ) : undefined
-            }
-          />
-        ))}
       </div>
-      {name &&
-        ids.map((key) => (
-          <input key={key} type="hidden" name={name} value={key} disabled={disabled} />
-        ))}
-      {maxSelected !== undefined && (
-        <p
-          className={cn('text-ui-sm text-muted', classNames?.hint)}
-          id={`${id}-limit`}
-          data-testid={partTestId(testId, 'limit')}
-        >
-          {t('transfer.limit', { count: maxSelected })}
-        </p>
-      )}
-      {hint && !error && (
-        <p
-          id={`${id}-hint`}
-          data-testid={partTestId(testId, 'hint')}
-          className={cn('text-ui-sm text-muted', classNames?.hint)}
-        >
-          {hint}
-        </p>
-      )}
-      {error && (
-        <p
-          role="alert"
-          id={`${id}-error`}
-          data-testid={partTestId(testId, 'error')}
-          className={cn('text-ui-sm text-danger-700', classNames?.error)}
-        >
-          {error}
-        </p>
-      )}
-      <span aria-live="polite" aria-atomic="true" className="sr-only">
-        <span key={announcement.sequence}>{announcement.text}</span>
-      </span>
-    </div>
+    </Provider>
   );
 }
 
@@ -364,6 +460,8 @@ type PanelOptions = Pick<
   | 'required'
 >;
 type PanelProps = { [Key in keyof PanelOptions]: PanelOptions[Key] | undefined } & {
+  dnd: TransferDndPlugin | undefined;
+  dragFocus: { id: string; container: string } | undefined;
   side: TransferSide;
   items: readonly TransferItem[];
   title: ReactNode;
@@ -380,6 +478,8 @@ type PanelProps = { [Key in keyof PanelOptions]: PanelOptions[Key] | undefined }
 };
 
 function TransferPanel({
+  dnd,
+  dragFocus,
   side,
   items,
   title,
@@ -402,6 +502,9 @@ function TransferPanel({
   description,
 }: PanelProps) {
   const { t } = useUILocale();
+  const Row = dnd?.Row ?? PassThrough;
+  const Zone = dnd?.Zone ?? PassThrough;
+  const Handle = dnd?.Handle;
   const [query, setQuery] = useState('');
   const [active, setActive] = useState<string>();
   const anchor = useRef<string | undefined>(undefined);
@@ -443,6 +546,13 @@ function TransferPanel({
   });
 
   useEffect(() => {
+    if (dragFocus?.container !== side) return;
+    setActive(dragFocus.id);
+    const index = visible.findIndex((item) => item.id === dragFocus.id);
+    if (virtual && index >= 0) virtualizer.scrollToIndex(index, { align: 'auto' });
+  }, [dragFocus, side]);
+
+  useEffect(() => {
     if (hadRowFocus.current) {
       hadRowFocus.current = false;
       const focused = document.activeElement;
@@ -459,143 +569,155 @@ function TransferPanel({
   const allChecked = enabled.length > 0 && selectedCount === enabled.length;
 
   const row = (item: TransferItem, index: number, start?: number) => (
-    <div
-      key={item.id}
-      data-index={index}
-      ref={virtual ? virtualizer.measureElement : undefined}
-      style={
-        virtual
-          ? {
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              width: '100%',
-              transform: `translateY(${start}px)`,
-            }
-          : undefined
-      }
-      className="flex items-center gap-1"
-    >
+    <Row key={item.id} id={item.id}>
       <div
-        role="option"
-        id={`${id}-item-${encodeURIComponent(item.id)}`}
-        aria-label={item.label}
-        aria-selected={checked.has(item.id)}
-        aria-disabled={disabled || item.disabled}
-        aria-posinset={index + 1}
-        aria-setsize={visible.length}
-        tabIndex={!disabled && !item.disabled && current === item.id ? 0 : -1}
-        ref={(element) => {
-          if (element && current === item.id && pendingFocus.current) {
-            pendingFocus.current = false;
-            element.focus({ preventScroll: virtual });
-          }
-        }}
-        data-testid={partTestId(testId, 'item', item.id)}
-        className={cn(
-          'flex min-w-0 flex-1 cursor-pointer items-center gap-2 rounded-control p-3 text-control text-ink hover:bg-hover aria-disabled:cursor-not-allowed aria-disabled:opacity-50',
-          focusRingClassName,
-          checked.has(item.id) && 'bg-selected',
-          classNames?.item,
-          checked.has(item.id) && classNames?.itemChecked,
-        )}
+        key={item.id}
+        data-index={index}
+        ref={virtual ? virtualizer.measureElement : undefined}
+        style={
+          virtual
+            ? {
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '100%',
+                transform: `translateY(${start}px)`,
+              }
+            : undefined
+        }
+        className="flex items-center gap-1"
         onFocus={() => setActive(item.id)}
-        onClick={() => {
-          if (!disabled && !item.disabled) {
-            setActive(item.id);
-            anchor.current = item.id;
-            pick([item.id], 'toggle');
-          }
-        }}
-        onKeyDown={(event) => {
-          if (disabled || item.disabled || event.nativeEvent.isComposing) return;
-          if (event.target !== event.currentTarget) return;
-          const position = enabled.findIndex((entry) => entry.id === item.id);
-          let next: TransferItem | undefined;
-          if (event.key === 'ArrowDown')
-            next = enabled[Math.min(position + 1, enabled.length - 1)];
-          if (event.key === 'ArrowUp') next = enabled[Math.max(0, position - 1)];
-          if (event.key === 'Home') next = enabled[0];
-          if (event.key === 'End') next = enabled.at(-1);
-          if (next) {
-            event.preventDefault();
-            if (event.shiftKey) {
-              anchor.current ??= item.id;
-              const from = Math.max(
-                0,
-                enabled.findIndex((entry) => entry.id === (anchor.current ?? item.id)),
-              );
+      >
+        <div
+          role="option"
+          id={`${id}-item-${encodeURIComponent(item.id)}`}
+          aria-label={item.label}
+          aria-selected={checked.has(item.id)}
+          aria-disabled={disabled || item.disabled}
+          aria-posinset={index + 1}
+          aria-setsize={visible.length}
+          tabIndex={!disabled && !item.disabled && current === item.id ? 0 : -1}
+          ref={(element) => {
+            if (element && current === item.id && pendingFocus.current) {
+              pendingFocus.current = false;
+              element.focus({ preventScroll: virtual });
+            }
+          }}
+          data-testid={partTestId(testId, 'item', item.id)}
+          className={cn(
+            'flex min-w-0 flex-1 cursor-pointer items-center gap-2 rounded-control p-3 text-control text-ink hover:bg-hover aria-disabled:cursor-not-allowed aria-disabled:opacity-50',
+            focusRingClassName,
+            checked.has(item.id) && 'bg-selected',
+            classNames?.item,
+            checked.has(item.id) && classNames?.itemChecked,
+          )}
+          onFocus={() => setActive(item.id)}
+          onClick={() => {
+            if (!disabled && !item.disabled) {
+              setActive(item.id);
+              anchor.current = item.id;
+              pick([item.id], 'toggle');
+            }
+          }}
+          onKeyDown={(event) => {
+            if (disabled || item.disabled || event.nativeEvent.isComposing) return;
+            if (event.target !== event.currentTarget) return;
+            const position = enabled.findIndex((entry) => entry.id === item.id);
+            let next: TransferItem | undefined;
+            if (event.key === 'ArrowDown')
+              next = enabled[Math.min(position + 1, enabled.length - 1)];
+            if (event.key === 'ArrowUp') next = enabled[Math.max(0, position - 1)];
+            if (event.key === 'Home') next = enabled[0];
+            if (event.key === 'End') next = enabled.at(-1);
+            if (next) {
+              event.preventDefault();
+              if (event.shiftKey) {
+                anchor.current ??= item.id;
+                const from = Math.max(
+                  0,
+                  enabled.findIndex(
+                    (entry) => entry.id === (anchor.current ?? item.id),
+                  ),
+                );
+                pick(
+                  enabled
+                    .slice(
+                      Math.min(from, enabled.indexOf(next)),
+                      Math.max(from, enabled.indexOf(next)) + 1,
+                    )
+                    .map((entry) => entry.id),
+                  'add',
+                );
+              } else anchor.current = next.id;
+              pendingFocus.current = true;
+              setActive(next.id);
+              if (virtual)
+                virtualizer.scrollToIndex(visible.indexOf(next), { align: 'auto' });
+            } else if (event.key === ' ') {
+              event.preventDefault();
+              anchor.current = item.id;
+              pick([item.id], 'toggle');
+            } else if (event.key === 'Enter') {
+              event.preventDefault();
+              panelMove(item);
+            } else if (
+              (event.ctrlKey || event.metaKey) &&
+              event.key.toLowerCase() === 'a'
+            ) {
+              event.preventDefault();
               pick(
-                enabled
-                  .slice(
-                    Math.min(from, enabled.indexOf(next)),
-                    Math.max(from, enabled.indexOf(next)) + 1,
-                  )
-                  .map((entry) => entry.id),
+                enabled.map((entry) => entry.id),
                 'add',
               );
-            } else anchor.current = next.id;
-            pendingFocus.current = true;
-            setActive(next.id);
-            if (virtual)
-              virtualizer.scrollToIndex(visible.indexOf(next), { align: 'auto' });
-          } else if (event.key === ' ') {
-            event.preventDefault();
-            anchor.current = item.id;
-            pick([item.id], 'toggle');
-          } else if (event.key === 'Enter') {
-            event.preventDefault();
-            panelMove(item);
-          } else if (
-            (event.ctrlKey || event.metaKey) &&
-            event.key.toLowerCase() === 'a'
-          ) {
-            event.preventDefault();
-            pick(
-              enabled.map((entry) => entry.id),
-              'add',
-            );
-          }
-        }}
-      >
-        <span aria-hidden="true" className="pointer-events-none">
-          <Checkbox
-            tabIndex={-1}
-            checked={checked.has(item.id)}
-            disabled={disabled || item.disabled}
-          />
-        </span>
-        <div className="min-w-0 flex-1">
-          {renderItem ? (
-            renderItem(item, { side, checked: checked.has(item.id) })
-          ) : (
-            <>
-              <div>{item.label}</div>
-              {item.description != null && (
-                <div className="text-ui-sm text-muted">{item.description}</div>
-              )}
-            </>
-          )}
-        </div>
-      </div>
-      {removable && (
-        <Button
-          variant="ghost"
-          size="sm"
-          aria-label={t('transfer.remove', { label: item.label })}
-          disabled={disabled || item.disabled}
-          className={cn('motion-reduce:transition-none', classNames?.button)}
-          data-testid={partTestId(testId, 'remove', item.id)}
-          onClick={() => panelMove(item)}
+            }
+          }}
         >
-          <KitIcon
-            name="close"
-            builtin={{ outline: CloseIcon, bold: CloseBoldIcon }}
-            size={16}
+          <span aria-hidden="true" className="pointer-events-none">
+            <Checkbox
+              tabIndex={-1}
+              checked={checked.has(item.id)}
+              disabled={disabled || item.disabled}
+            />
+          </span>
+          <div className="min-w-0 flex-1">
+            {renderItem ? (
+              renderItem(item, { side, checked: checked.has(item.id) })
+            ) : (
+              <>
+                <div>{item.label}</div>
+                {item.description != null && (
+                  <div className="text-ui-sm text-muted">{item.description}</div>
+                )}
+              </>
+            )}
+          </div>
+        </div>
+        {Handle && (
+          <Handle
+            id={item.id}
+            className={classNames?.dragHandle}
+            data-testid={partTestId(testId, 'dragHandle', item.id)}
           />
-        </Button>
-      )}
-    </div>
+        )}
+        {removable && (
+          <Button
+            variant="ghost"
+            size="sm"
+            aria-label={t('transfer.remove', { label: item.label })}
+            disabled={disabled || item.disabled}
+            className={cn('motion-reduce:transition-none', classNames?.button)}
+            data-testid={partTestId(testId, 'remove', item.id)}
+            onClick={() => panelMove(item)}
+          >
+            <KitIcon
+              name="close"
+              builtin={{ outline: CloseIcon, bold: CloseBoldIcon }}
+              size={16}
+            />
+          </Button>
+        )}
+      </div>
+    </Row>
   );
 
   return (
@@ -656,40 +778,45 @@ function TransferPanel({
             classNames={{ root: 'p-2' }}
           />
         )}
-        <div
-          ref={scroll}
-          role="listbox"
-          aria-labelledby={`${id}-title`}
-          aria-multiselectable="true"
-          aria-disabled={disabled}
-          aria-required={required}
-          aria-invalid={error}
-          aria-describedby={description}
-          tabIndex={!enabled.length && !disabled ? 0 : -1}
-          data-testid={partTestId(testId, 'list')}
-          className={cn('overflow-auto p-1', focusRingClassName, classNames?.list)}
-          style={{ height }}
-        >
-          {!visible.length ? (
-            <div
-              data-testid={partTestId(testId, 'empty')}
-              className={cn('p-6 text-center text-ui-sm text-muted', classNames?.empty)}
-            >
-              {emptyContent ?? t('transfer.empty')}
-            </div>
-          ) : virtual ? (
-            <div
-              role="presentation"
-              style={{ height: virtualizer.getTotalSize(), position: 'relative' }}
-            >
-              {virtualizer
-                .getVirtualItems()
-                .map((entry) => row(visible[entry.index]!, entry.index, entry.start))}
-            </div>
-          ) : (
-            visible.map((item, index) => row(item, index))
-          )}
-        </div>
+        <Zone id={side}>
+          <div
+            ref={scroll}
+            role="listbox"
+            aria-labelledby={`${id}-title`}
+            aria-multiselectable="true"
+            aria-disabled={disabled}
+            aria-required={required}
+            aria-invalid={error}
+            aria-describedby={description}
+            tabIndex={!enabled.length && !disabled ? 0 : -1}
+            data-testid={partTestId(testId, 'list')}
+            className={cn('overflow-auto p-1', focusRingClassName, classNames?.list)}
+            style={{ height }}
+          >
+            {!visible.length ? (
+              <div
+                data-testid={partTestId(testId, 'empty')}
+                className={cn(
+                  'p-6 text-center text-ui-sm text-muted',
+                  classNames?.empty,
+                )}
+              >
+                {emptyContent ?? t('transfer.empty')}
+              </div>
+            ) : virtual ? (
+              <div
+                role="presentation"
+                style={{ height: virtualizer.getTotalSize(), position: 'relative' }}
+              >
+                {virtualizer
+                  .getVirtualItems()
+                  .map((entry) => row(visible[entry.index]!, entry.index, entry.start))}
+              </div>
+            ) : (
+              visible.map((item, index) => row(item, index))
+            )}
+          </div>
+        </Zone>
       </section>
       {actions}
     </>

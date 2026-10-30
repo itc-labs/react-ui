@@ -48,6 +48,11 @@ export function DataTableHeader<T>({
           key={group.id}
           className={classNames?.headerRow}
         >
+          {view.reorderHandle && (
+            <th scope="col" className={cn('w-11 px-4', classNames?.reorderCell)}>
+              <span className="sr-only">{t('table.reorder')}</span>
+            </th>
+          )}
           {selectable && (
             <th
               data-testid={partTestId(view.testId, 'selectPageCell', group.id)}

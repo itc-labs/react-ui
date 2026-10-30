@@ -168,3 +168,29 @@ Navbar through its `header` slot; adjust the shell header wrapper classes
 when the Navbar supplies its own padding and border.
 
 Tag and Badge contracts, localization and migration are documented in [Tag and Badge](UI_TAG_BADGE.md).
+
+## Optional drag integrations
+
+Import `createTransferDnd` and `createRowReorder` from `@itclabs/react-ui/dnd`.
+Pass `dnd={createTransferDnd()}` to Transfer to enable cross-panel moves and target
+reordering. This implies `order="selection"`: target order is value order. Dragging
+a checked row moves the checked, enabled rows of that side together. `disabled`,
+item `disabled`, `maxSelected` and `oneWay` still constrain moves. Search does not
+change the underlying value order. Virtual lists retain an inert DragOverlay;
+keyboard navigation can reach rows outside the mounted range.
+
+Pass `rowReorder={{ plugin: createRowReorder(), onReorder }}` to DataTable.
+`onReorder(orderedIds, { id, from, to })` returns all supplied row IDs and zero-based
+positions in the supplied rows. The host applies the new order. Existing `rowId`
+feeds TanStack `getRowId`; IDs must remain stable across updates. `handle` defaults
+to true and adds a leading column; false makes each row the activator. Sorting
+always blocks reorder with a translated tooltip. Server mode, including server
+pages and groups, also blocks it unless `allowServerReorder: true`; the host then
+owns persistence across pages/groups. `disabled` and loading block interactions.
+Client pagination and filtering reorder within the visible view while preserving
+all supplied IDs in the callback.
+
+Space or Enter picks up and drops, Up/Down changes position, Home/End reaches the
+first/last position, and Escape cancels. Transfer also uses Left/Right to switch
+panels. Focus returns to the moved activator. Ordinary Transfer and DataTable
+imports contain no dnd-kit runtime; factories inject it from the optional entry.

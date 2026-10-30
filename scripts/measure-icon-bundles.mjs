@@ -8,6 +8,8 @@ const { build } = createRequire(require.resolve('vite/package.json'))('esbuild')
 const root = fileURLToPath(new URL('../', import.meta.url));
 const entries = {
   Dnd: 'modules/dnd/index.tsx',
+  TransferDnd: 'modules/transfer/index.tsx',
+  DataTableRowReorder: 'modules/data-table/index.tsx',
   Sidebar: 'modules/sidebar/index.tsx',
   Icon: 'components/icon/index.tsx',
   Divider: 'components/divider/index.tsx',
@@ -44,7 +46,12 @@ for (const [name, file] of Object.entries(entries)) {
       : `{ ${name} }`;
   const { outputFiles, metafile } = await build({
     stdin: {
-      contents: `export ${exports} from './src/${file}';`,
+      contents:
+        name === 'TransferDnd'
+          ? `export { Transfer } from './src/${file}'; export { createTransferDnd } from './src/modules/dnd/index.tsx';`
+          : name === 'DataTableRowReorder'
+            ? `export { DataTable } from './src/${file}'; export { createRowReorder } from './src/modules/dnd/index.tsx';`
+            : `export ${exports} from './src/${file}';`,
       resolveDir: root,
       loader: 'tsx',
     },
@@ -62,6 +69,7 @@ for (const [name, file] of Object.entries(entries)) {
   if (
     [
       'Dnd',
+      'TransferDnd',
       'TreeSelect',
       'Transfer',
       'Timeline',
@@ -90,6 +98,17 @@ for (const [name, file] of Object.entries(entries)) {
       /node_modules\/react-select\//.test(input),
     );
     if (forbidden.length) throw new Error(`${name} imports react-select: ${forbidden}`);
+  }
+  if (['TransferDnd', 'DataTableRowReorder'].includes(name)) {
+    if (!Object.keys(metafile.inputs).some((input) => /@dnd-kit\//.test(input)))
+      throw new Error(`${name} does not include its opt-in drag runtime`);
+  }
+  if (['Transfer', 'DataTable'].includes(name)) {
+    const forbidden = Object.keys(metafile.inputs).filter((input) =>
+      /@dnd-kit\//.test(input),
+    );
+    if (forbidden.length)
+      throw new Error(`${name} imports dnd-kit without a plugin: ${forbidden}`);
   }
   if (name === 'Calendar') {
     const forbidden = Object.keys(metafile.inputs).filter((input) =>
@@ -138,8 +157,10 @@ for (const [name, file] of Object.entries(entries)) {
 console.log(JSON.stringify(sizes, null, 2));
 // Gzip budgets with a little headroom; raise them only for an intentional feature.
 for (const [name, limit] of Object.entries({
-  // Full dnd entry, including sensors, board, overlays and shared localization.
-  Dnd: 40_600,
+  // Full dnd entry now includes integration adapters and accessible disabled-reason tooltips.
+  Dnd: 63_500,
+  TransferDnd: 77_000,
+  DataTableRowReorder: 110_000,
   Icon: 20_000,
   // Shared drag-and-drop translations add about 500 gzip bytes to locale consumers.
   Rating: 20_700,
@@ -157,7 +178,8 @@ for (const [name, limit] of Object.entries({
   Carousel: 30_300,
   // Fullscreen media adds Dialog focus management and image zoom controls.
   MediaGallery: 54_800,
-  Lightbox: 41_000,
+  // Shared reorder instructions and disabled reasons are included in locale consumers.
+  Lightbox: 41_500,
   Button: 20_000,
   Spinner: 20_000,
   Dialog: 38_000,
