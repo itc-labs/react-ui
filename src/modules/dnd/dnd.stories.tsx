@@ -10,6 +10,12 @@ import {
 } from '@itclabs/react-ui/dnd';
 import { UiImage } from '@itclabs/react-ui';
 
+const hue = (item: string) =>
+  [...item].reduce((sum, char) => sum + char.charCodeAt(0), 0) % 360;
+
+const cover = (item: string) =>
+  `data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 240"><rect width="400" height="240" fill="hsl(${hue(item)} 35% 88%)"/><circle cx="200" cy="120" r="60" fill="hsl(${hue(item)} 40% 60%)"/></svg>`)}`;
+
 const meta = {
   title: 'Modules/Dnd',
   component: SortableList<string>,
@@ -98,7 +104,7 @@ export const Grid: Story = {
     renderItem: (item: string) => (
       <div className="overflow-hidden rounded-panel border border-line bg-surface text-ink">
         <UiImage
-          src="https://images.unsplash.com/photo-1470252649378-9c29740c9fa8?w=400&auto=format&fit=crop"
+          src={cover(item)}
           alt=""
           width={400}
           height={240}

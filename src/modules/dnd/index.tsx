@@ -305,7 +305,7 @@ function SortableItem<T>({
       }}
       className={cn(
         'relative rounded-control border border-transparent motion-reduce:transition-none',
-        sortable.isDragging && 'border-dashed border-brand-500 bg-brand-50',
+        sortable.isDragging && 'border-2 border-dashed border-brand-500 bg-brand-50',
         classNames?.item,
         sortable.isDragging && classNames?.itemDragging,
         sortable.isDragging && classNames?.placeholder,
@@ -356,7 +356,7 @@ function Overlay<T>({
           inert
           data-testid={partTestId(testId, 'overlay')}
           className={cn(
-            'cursor-grabbing rounded-control border border-line bg-surface text-ink shadow-overlay',
+            'scale-[1.02] cursor-grabbing rounded-control bg-surface text-ink shadow-overlay ring-2 ring-brand-500',
             classNames?.overlay,
           )}
         >
