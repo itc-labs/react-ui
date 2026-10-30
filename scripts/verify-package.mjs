@@ -263,6 +263,19 @@ for (const [, asset] of css.matchAll(/url\((?:["']?)([^)"']+)(?:["']?)\)/g)) {
   );
 }
 assert.ok(files.has('THIRD_PARTY_NOTICES.md'));
+const notices = tarball
+  ? execFileSync('tar', ['-xOf', resolve(tarball), 'package/THIRD_PARTY_NOTICES.md'], {
+      encoding: 'utf8',
+    })
+  : await readFile(`${root}/THIRD_PARTY_NOTICES.md`, 'utf8');
+for (const notice of [
+  /@tanstack\/react-virtual 3\.14\.19[^\n]*MIT/,
+  /DOMPurify \/ dompurify 3\.4\.17[^\n]*Apache-2\.0 OR MPL-2\.0/,
+  /Copyright \(c\) 2021-present Tanner Linsley/,
+  /Apache License\s+Version 2\.0, January 2004/,
+])
+  assert.match(notices, notice, 'Missing selection or sanitizer dependency notice');
+
 for (const license of await readdir(`${root}/src/components/icon/licenses`))
   assert.ok(
     files.has(`src/components/icon/licenses/${license}`),

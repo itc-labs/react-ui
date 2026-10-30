@@ -6,6 +6,67 @@ import { Meta } from '@storybook/addon-docs/blocks';
 
 Use `CodeView` for read-only source, `JsonView` for inspecting structured values, and `Carousel` for browsing a sequence of items. Import CodeView and Carousel from their dedicated subpaths to keep Prism and Embla out of the core entry. Rating is available from the root; see [Forms](?path=/docs/guides-forms--docs) for a score field.
 
+## Timeline
+
+Use stable event IDs with `title`, optional `description`, `content`, `time`, and ISO `dateTime`. Timeline renders an ordered, read-only history. `activeId` completes events through that ID in input order; `reverse` changes display order while keeping progress semantics. `pending` adds a localized activity row at the end. Horizontal layouts scroll and can receive keyboard focus; use Stepper when users need a step navigation control.
+
+```tsx
+import { Timeline } from '@itclabs/react-ui';
+
+export function HistoryExample() {
+  return (
+    <Timeline
+      aria-label="Activity history"
+      activeId="second"
+      pending
+      items={[
+        {
+          id: 'first',
+          title: 'Lorem ipsum',
+          dateTime: '2026-10-29T09:00:00Z',
+          time: '09:00',
+          status: 'success',
+        },
+        {
+          id: 'second',
+          title: 'Dolor sit amet',
+          description: 'Consectetur adipiscing elit.',
+          dateTime: '2026-10-29T10:00:00Z',
+          time: '10:00',
+        },
+      ]}
+    />
+  );
+}
+```
+
+See [Timeline stories](?path=/docs/components-timeline--docs) for horizontal, alternate, and opposite-time layouts and styling slots.
+
+## Divider and Kbd
+
+Divider separates content horizontally or vertically, with optional children as a label. It is decorative and hidden from assistive technology by default, including its label. Set `decorative={false}` for a semantic separator, and supply an accessible name when useful. Give vertical dividers a parent with a defined height.
+
+Kbd displays a key or `keys` combination; it does not register shortcuts. `platformAware` resolves `mod`, `alt`, `shift`, and `enter` to platform symbols after mounting, with localized accessible names. Server output uses Control for consistent hydration. Bind the actual keyboard action in the host.
+
+```tsx
+import { Divider, Kbd } from '@itclabs/react-ui';
+
+export function DisplayDetails() {
+  return (
+    <section className="grid gap-4">
+      <p>Lorem ipsum dolor sit amet.</p>
+      <Divider decorative={false} aria-label="Section boundary" variant="dashed" />
+      <p>
+        Open search: <Kbd keys={['mod', 'K']} platformAware />
+      </p>
+      <Divider labelPosition="start">Lorem ipsum</Divider>
+    </section>
+  );
+}
+```
+
+See [Divider](?path=/docs/components-divider--docs) and [Kbd](?path=/docs/components-kbd--docs) for sizes and customization examples.
+
 ## CodeView
 
 Supply source through `code` and choose a `language`. `title` takes precedence over `filename`. Line highlights accept one-based numbers and inclusive ranges; `wrap` and `maxHeight` control long content. The copy button copies the original source and announces success through localized feedback. Tab reaches the copy button and the scroll region.
