@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.5.1
+
+### Patch Changes
+
+- [#18](https://github.com/itc-labs/react-ui/pull/18) [`a2497f0`](https://github.com/itc-labs/react-ui/commit/a2497f05b0d295235a11ea228f4eb2504b24f817) Thanks [@vungbt](https://github.com/vungbt)! - README: single-command install and form examples using FormField with a plain submit Button.
+
 ## 0.5.0
 
 ### Minor Changes
