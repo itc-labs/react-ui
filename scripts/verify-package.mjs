@@ -169,7 +169,7 @@ async function checkLeanGraph(path) {
   ];
   for (const [, specifier] of imports) {
     assert.ok(
-      !/^(?:@tiptap\/|recharts(?:\/|$)|react-easy-crop(?:\/|$)|react-is(?:\/|$)|prism-react-renderer(?:\/|$)|embla-carousel(?:-react|-autoplay)?(?:\/|$))/.test(
+      !/^(?:@tiptap\/|recharts(?:\/|$)|react-easy-crop(?:\/|$)|react-is(?:\/|$)|prism-react-renderer(?:\/|$)|embla-carousel(?:-react|-autoplay)?(?:\/|$)|dompurify(?:\/|$))/.test(
         specifier,
       ),
       `Optional dependency in core: ${specifier} (${relative(root, path)})`,
@@ -189,6 +189,7 @@ for (const subpath of [
   './carousel',
   './media-gallery',
   './code-view',
+  './rich-text-view',
   './templates',
   './theme',
   './theme/provider',
@@ -211,8 +212,8 @@ for (const subpath of [
   );
   if (['.', './components', './modules'].includes(subpath))
     assert.ok(
-      !('MediaGallery' in api),
-      `MediaGallery must remain isolated from ${subpath}`,
+      !('MediaGallery' in api) && !('RichTextView' in api),
+      `MediaGallery and RichTextView must remain isolated from ${subpath}`,
     );
   for (const name of [
     'LinkImageProvider',
@@ -244,6 +245,7 @@ for (const selector of [
   '.bg-surface',
   '.rounded-control',
   '.pod-toast',
+  '.pod-rich-text',
   '.reactEasyCrop_Container',
   '@font-face',
 ])
@@ -348,3 +350,8 @@ const codeView = await import(
 assert.equal(typeof codeView.CodeView, 'function');
 for (const barrel of ['components', 'modules'])
   await checkLeanGraph(`${root}/dist/${barrel}/index.js`);
+
+const richTextView = await import(
+  pathToFileURL(resolve(root, packed.exports['./rich-text-view'].import)).href
+);
+assert.equal(typeof richTextView.RichTextView, 'function');

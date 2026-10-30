@@ -175,3 +175,30 @@ export function MediaExample() {
 Gallery arrow controls, keyboard arrows, and thumbnails complement swipe gestures. In Lightbox, Left/Right keys, navigation buttons, and thumbnails change items. Zoom buttons and double-click magnify images; drag to pan. Escape closes the dialog and restores focus to the opener. `open`/`onOpenChange` control visibility; `defaultOpen` initializes an uncontrolled viewer. Reduced motion removes overlay animation. Both components expose refs, `data-testid`, `className`, and typed `classNames` slots, including media, video, and thumbnails; Lightbox also exposes overlay, close, and zoom button slots.
 
 See [MediaGallery stories](?path=/docs/modules-mediagallery--docs) and [Lightbox stories](?path=/docs/modules-lightbox--docs).
+
+## Editing and displaying rich text
+
+Import Editor from `/editor` and RichTextView from `/rich-text-view`. Both use the same content typography from the kit styles. Store HTML through `value` and `onValueChange`; RichTextView sanitizes it with a restricted Editor tag allowlist.
+
+```tsx
+import { useState } from 'react';
+import { Editor } from '@itclabs/react-ui/editor';
+import { RichTextView } from '@itclabs/react-ui/rich-text-view';
+
+export function RichTextExample() {
+  const [html, setHtml] = useState('<p>Lorem ipsum dolor sit amet.</p>');
+
+  return (
+    <div className="grid gap-6 md:grid-cols-2">
+      <Editor label="Content" value={html} onValueChange={setHtml} />
+      <RichTextView html={html} as="article" aria-label="Preview" />
+    </div>
+  );
+}
+```
+
+The Editor link popover accepts absolute http, https, and mailto URLs. Enter applies the link; Escape dismisses the popover and returns focus to the editor. Code block and horizontal rule controls complement the formatting toolbar.
+
+RichTextView accepts `as="div"` (default) or `as="article"`, `emptyFallback`, native props and ref, `data-testid`, `className`, and `classNames.root`. With default `sanitize={true}`, content is sanitized in a client effect: SSR and the first hydration render show the fallback, with no hydration mismatch. For SEO, sanitize on the server and pass `sanitize={false}`. This bypasses all sanitization: the host must guarantee the HTML is trusted and sanitized. Empty or fully stripped HTML uses the fallback.
+
+See [Editor](?path=/docs/modules-editor--docs) and [RichTextView](?path=/docs/modules-richtextview--docs) for live preview and sanitization examples.

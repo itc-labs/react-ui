@@ -18,6 +18,7 @@ const entries = {
   OptionGroup: 'components/option-group/index.tsx',
   JsonView: 'components/json-view/index.tsx',
   CodeView: 'modules/code-view/index.tsx',
+  RichTextView: 'modules/rich-text-view/index.tsx',
   Button: 'components/button/index.tsx',
   Spinner: 'components/spinner/index.tsx',
   Dialog: 'components/dialog/index.tsx',
@@ -102,6 +103,10 @@ for (const [name, file] of Object.entries(entries)) {
       /embla-carousel|modules\/carousel\//.test(input),
     );
     if (embla.length) throw new Error(`Root imports Embla: ${embla}`);
+    const sanitizer = Object.keys(metafile.inputs).filter((input) =>
+      /dompurify|modules\/rich-text-view\//.test(input),
+    );
+    if (sanitizer.length) throw new Error(`Root imports RichTextView: ${sanitizer}`);
     const prism = Object.keys(metafile.inputs).filter((input) =>
       /(?:prism-react-renderer|modules\/code-view\/)/.test(input),
     );
@@ -129,6 +134,8 @@ for (const [name, limit] of Object.entries({
   JsonView: 22_000,
   // About 10% above the measured display subpath fixtures.
   CodeView: 50_000,
+  // DOMPurify plus shared class merging, with about 10% headroom.
+  RichTextView: 24_000,
   Carousel: 30_300,
   // Fullscreen media adds Dialog focus management and image zoom controls.
   MediaGallery: 54_800,

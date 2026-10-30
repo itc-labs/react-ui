@@ -287,6 +287,7 @@ OptionGroup, QuantityInput, and ColorPicker are core controls with automatic For
 | `@itclabs/react-ui/modal`                              | Hook-free `modal.confirm/alert/open`                                                                                                                                                         |
 | `@itclabs/react-ui/icons/outline/*`, `/icons/bold/*`   | Single icon glyphs, e.g. `@itclabs/react-ui/icons/outline/search` (lightest)                                                                                                                 |
 | `@itclabs/react-ui/icons/catalog`                      | Full icon catalog for `<Icon name="…">` beyond the kit's own icons                                                                                                                           |
+| `@itclabs/react-ui/rich-text-view`                     | Sanitized HTML display with Editor typography; no optional peers.                                                                                                                            |
 | `@itclabs/react-ui/editor`, `/chart`, `/avatar-upload` | Optional features with optional peer dependencies                                                                                                                                            |
 | `@itclabs/react-ui/theme/styles.css`                   | Full theme for Tailwind v4 hosts (`tokens`, `fonts`, `base`, `vendor`, `motion` entries also available)                                                                                      |
 | `@itclabs/react-ui/ui.css`                             | Precompiled stylesheet for hosts without Tailwind                                                                                                                                            |
@@ -381,3 +382,9 @@ MIT © itclabs. Icon artwork keeps its own Lucide (ISC) and Heroicons (MIT) lice
 ### Tag and Badge migration
 
 Badge (label) is now Tag; Badge is now the count/dot indicator. Rename label-pill imports, JSX and types to Tag/TagProps/TagTone. See [Tag and Badge](docs/UI_TAG_BADGE.md) for the new APIs.
+
+### Displaying rich text
+
+Import `RichTextView` from `@itclabs/react-ui/rich-text-view` and pass stored Editor HTML through `html`. Include the kit styles for shared typography. `as` selects `div` or `article`; `emptyFallback` renders when content is empty. The component supports native props and ref, `data-testid`, `className`, and `classNames.root`.
+
+Sanitization defaults to true and runs after mount. SSR and the initial client render show the fallback, keeping hydration consistent. For SEO, sanitize on the server and pass `sanitize={false}` only when the host guarantees trusted, sanitized HTML; this disables all sanitization.

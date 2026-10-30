@@ -24,6 +24,7 @@ export type EditorProps = {
     | 'toolbarButton'
     | 'toolbarButtonActive'
     | 'toolbarIcon'
+    | 'linkPopover'
     | 'content'
     | 'hint'
     | 'error'

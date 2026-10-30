@@ -1,5 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, userEvent, within } from 'storybook/test';
+import { useState } from 'react';
+import { RichTextView } from '@itclabs/react-ui/rich-text-view';
 import { Editor } from '@itclabs/react-ui/editor';
 const meta = {
   title: 'Modules/Editor',
@@ -40,6 +42,21 @@ export const States: Story = {
       <Editor label="Error" required error="Enter content." />
     </div>
   ),
+};
+
+export const WriteAndPreview: Story = {
+  name: 'Write and preview',
+  tags: ['example'],
+  render: function Render() {
+    const [html, setHtml] = useState('<h2>Lorem ipsum</h2><p>Dolor sit amet.</p>');
+
+    return (
+      <div className="grid gap-6 md:grid-cols-2">
+        <Editor label="Content" value={html} onValueChange={setHtml} />
+        <RichTextView html={html} as="article" aria-label="Preview" />
+      </div>
+    );
+  },
 };
 
 export const CustomClasses: Story = {

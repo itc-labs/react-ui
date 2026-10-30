@@ -28,6 +28,7 @@ it('keeps ordinary imports free of heavy modules and within gzip budgets', () =>
     'OptionGroup',
     'QuantityInput',
     'Rating',
+    'RichTextView',
     'Root',
     'Select',
     'Slider',
