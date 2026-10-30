@@ -283,6 +283,12 @@ retry it; the collection does not repeat failed requests automatically. This
 example accepts a host loader and guards concurrent requests. Remount it when
 switching to a different dataset.
 
+While a later page loads, `loadingIndicator` picks the feedback below existing
+items: `"spinner"` (default) shows a spinner with "Loading more…", `"skeleton"`
+appends placeholder rows or one row of cards (using `renderSkeleton` when given),
+and `"bar"` pins a slim indeterminate bar to the bottom of the viewport so it stays
+visible while the user keeps scrolling. `renderLoadingMore` replaces all three.
+
 ```tsx
 'use client';
 

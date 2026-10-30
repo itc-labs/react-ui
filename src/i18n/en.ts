@@ -2,6 +2,7 @@ export const enMessages = {
   'virtualList.empty': 'No items found',
   'virtualList.loadMore': 'Load more',
   'virtualList.retry': 'Retry',
+  'virtualList.loadingMore': 'Loading more…',
   'virtualList.loaded': {
     one: 'Loaded {count} more item',
     other: 'Loaded {count} more items',

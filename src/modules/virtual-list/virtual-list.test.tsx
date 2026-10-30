@@ -315,3 +315,49 @@ it('respects a zero loading threshold and suppresses automatic loading without m
   await render({ items: items.slice(0, 21), hasMore: false, onLoadMore });
   expect(onLoadMore).toHaveBeenCalledOnce();
 });
+
+it('switches loading-more feedback between spinner, placeholders, bar and custom content', async () => {
+  const loader = () =>
+    host.querySelector<HTMLElement>('[data-testid="collection-loader"]')!;
+
+  await render({ items: items.slice(0, 8), hasMore: true, loading: true });
+  expect(loader().dataset.indicator).toBe('spinner');
+  expect(loader().textContent).toContain('Loading more…');
+  await render({
+    items: items.slice(0, 8),
+    hasMore: true,
+    loading: true,
+    loadingIndicator: 'skeleton',
+  });
+  expect(
+    host.querySelectorAll('[data-testid^="collection-moreSkeleton-"]'),
+  ).toHaveLength(3);
+  await render(
+    {
+      items: items.slice(0, 8),
+      hasMore: true,
+      loading: true,
+      loadingIndicator: 'skeleton',
+      columns: 4,
+    },
+    true,
+  );
+  expect(
+    host.querySelectorAll('[data-testid^="collection-moreSkeleton-"]'),
+  ).toHaveLength(4);
+  await render({
+    items: items.slice(0, 8),
+    hasMore: true,
+    loading: true,
+    loadingIndicator: 'bar',
+  });
+  expect(loader().className).toContain('sticky');
+  expect(loader().querySelector('[role="progressbar"]')).not.toBeNull();
+  await render({
+    items: items.slice(0, 8),
+    hasMore: true,
+    loading: true,
+    renderLoadingMore: () => 'Custom',
+  });
+  expect(loader().textContent).toBe('Custom');
+});

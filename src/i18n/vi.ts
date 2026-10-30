@@ -3,6 +3,7 @@ export const viMessages = {
   'virtualList.empty': 'Không có mục nào',
   'virtualList.loadMore': 'Tải thêm',
   'virtualList.retry': 'Thử lại',
+  'virtualList.loadingMore': 'Đang tải thêm…',
   'virtualList.loaded': { other: 'Đã tải thêm {count} mục' },
 
   'dnd.integrationInstructions':

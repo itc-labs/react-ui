@@ -14,6 +14,7 @@ import {
   KeyboardSensor,
   PointerSensor,
   closestCenter,
+  pointerWithin,
   useDroppable,
   useSensor,
   useSensors,
@@ -525,7 +526,7 @@ function BoardContainer<T>({
       data-testid={partTestId(testId, 'container', container.id)}
       data-over={isOver || undefined}
       className={cn(
-        'min-w-0 rounded-panel border border-line bg-canvas p-3 motion-safe:transition-colors data-[over]:border-brand-500 data-[over]:bg-brand-50',
+        'h-full min-w-0 rounded-panel border border-line bg-canvas p-3 motion-safe:transition-colors data-[over]:border-brand-500 data-[over]:bg-brand-50',
         classNames?.container,
       )}
     >
@@ -615,7 +616,7 @@ export function SortableBoard<T>({
       const below =
         overIndex >= 0 &&
         !!translated &&
-        translated.top > over.rect.top + over.rect.height / 2;
+        translated.top + translated.height / 2 > over.rect.top + over.rect.height / 2;
       const index = overIndex < 0 ? to.items.length : overIndex + (below ? 1 : 0);
 
       return list.map((container) => {
@@ -673,31 +674,69 @@ export function SortableBoard<T>({
     <DndProvider
       accessibility={{ restoreFocus: false }}
       modifiers={modifiersFor(restrictToParent, lockAxis)}
-      collisionDetection={(args) =>
-        closestCenter({
-          ...args,
-          droppableContainers: args.droppableContainers.filter((entry) => {
-            const target = shown.find(
-              (container) => container.id === entry.data.current?.containerId,
-            );
-            // A column is a drop zone only while it holds nothing but the dragged item.
-            if (
-              !target ||
-              (entry.data.current?.isContainer &&
-                target.items.some((item) => getId(item) !== args.active.id))
-            )
-              return false;
-            const from = containing(containers, args.active.id);
-            const item = from?.items.find((item) => getId(item) === args.active.id);
+      collisionDetection={(args) => {
+        const from = containing(containers, args.active.id);
+        const item = from?.items.find((item) => getId(item) === args.active.id);
+        const allowed = args.droppableContainers.filter((entry) => {
+          const target = shown.find(
+            (container) => container.id === entry.data.current?.containerId,
+          );
 
-            return (
-              !!from &&
-              item !== undefined &&
-              (!canDrop || canDrop(item, from.id, target.id))
-            );
-          }),
-        })
-      }
+          return (
+            !!target &&
+            !!from &&
+            item !== undefined &&
+            (!canDrop || canDrop(item, from.id, target.id))
+          );
+        });
+        const columns = allowed.filter((entry) => entry.data.current?.isContainer);
+        const pointer = args.pointerCoordinates;
+
+        if (!pointer)
+          // Keyboard: nearest card, or a column holding nothing but the dragged item.
+          return closestCenter({
+            ...args,
+            droppableContainers: allowed.filter((entry) => {
+              const target = shown.find(
+                (container) => container.id === entry.data.current?.containerId,
+              )!;
+
+              return (
+                !entry.data.current?.isContainer ||
+                !target.items.some((item) => getId(item) !== args.active.id)
+              );
+            }),
+          });
+
+        // Pointer: the column under the cursor wins, then the nearest card in it.
+        const point = {
+          ...args,
+          collisionRect: {
+            top: pointer.y,
+            bottom: pointer.y,
+            left: pointer.x,
+            right: pointer.x,
+            width: 0,
+            height: 0,
+          },
+        };
+        const [column] = pointerWithin({
+          ...args,
+          droppableContainers: columns,
+        }).concat(closestCenter({ ...point, droppableContainers: columns }));
+        if (!column) return [];
+        const containerId = columns.find((entry) => entry.id === column.id)?.data
+          .current?.containerId;
+        const cards = allowed.filter(
+          (entry) =>
+            !entry.data.current?.isContainer &&
+            entry.data.current?.containerId === containerId,
+        );
+
+        return cards.length
+          ? closestCenter({ ...point, droppableContainers: cards })
+          : [column];
+      }}
       onDragStart={({ active }) => drag.setActiveId(String(active.id))}
       onDragOver={over}
       onDragCancel={({ active }) => {

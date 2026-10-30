@@ -49,7 +49,7 @@ function InfiniteProducts({
       setCount((value) => Math.min(500, value + 24));
 
       setLoading(false);
-    }, 650);
+    }, 1200);
   };
 
   return (
@@ -97,11 +97,18 @@ export const Playground: Story = { tags: ['usage'] };
 
 export const ProductGrid: Story = {
   tags: ['example'],
+  args: { loadingIndicator: 'skeleton' },
+  argTypes: {
+    loadingIndicator: {
+      control: 'inline-radio',
+      options: ['spinner', 'skeleton', 'bar'],
+    },
+  },
   parameters: {
     docs: {
       description: {
         story:
-          'A simulated API returns 500 products in pages of 24. Scroll toward the last rendered items to request another page.',
+          'A simulated API returns 500 products in pages of 24. Scroll toward the last rendered items to request another page. Switch loadingIndicator to compare placeholder cards, a spinner with text, or a slim bar pinned to the bottom of the viewport.',
       },
     },
   },

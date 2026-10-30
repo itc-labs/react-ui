@@ -52,6 +52,13 @@ export interface VirtualListProps<T> extends Omit<ComponentProps<'div'>, 'childr
   onRetry?: () => void;
   skeletonCount?: number;
   renderSkeleton?: (index: number) => ReactNode;
+  /**
+   * Feedback while more items load below existing ones: a centered spinner, placeholder
+   * rows/cards that continue the list, or a slim bar pinned to the bottom of the viewport.
+   */
+  loadingIndicator?: 'spinner' | 'skeleton' | 'bar';
+  /** Replaces the built-in loading-more feedback. */
+  renderLoadingMore?: () => ReactNode;
   emptyContent?: ReactNode;
   /** Stores the scroll offset under this key in sessionStorage. */
   restoreKey?: string;
@@ -97,6 +104,8 @@ function VirtualCollection<T>({
   onRetry,
   skeletonCount = 6,
   renderSkeleton,
+  loadingIndicator = 'spinner',
+  renderLoadingMore,
   emptyContent,
   restoreKey,
   itemRole = 'listitem',
@@ -483,10 +492,57 @@ function VirtualCollection<T>({
       {loading && items.length > 0 && loadMore !== 'button' && (
         <div
           role="presentation"
-          className={cn('flex justify-center p-3', classNames?.loader)}
+          data-indicator={renderLoadingMore ? 'custom' : loadingIndicator}
+          className={cn(
+            renderLoadingMore
+              ? 'p-3'
+              : loadingIndicator === 'bar'
+                ? 'sticky bottom-0 z-1 px-3 py-2'
+                : loadingIndicator === 'skeleton'
+                  ? 'grid pt-2'
+                  : 'flex justify-center p-3',
+            classNames?.loader,
+          )}
+          style={
+            !renderLoadingMore && loadingIndicator === 'skeleton'
+              ? {
+                  gridTemplateColumns: `repeat(${columnCount}, minmax(0, 1fr))`,
+                  gap: grid ? gap : 8,
+                }
+              : undefined
+          }
           data-testid={partTestId(testId, 'loader')}
         >
-          <Spinner />
+          {renderLoadingMore ? (
+            renderLoadingMore()
+          ) : loadingIndicator === 'bar' ? (
+            <div
+              role="progressbar"
+              aria-label={t('virtualList.loadingMore')}
+              className="h-1 overflow-hidden rounded-full bg-line"
+            >
+              <div className="h-full w-1/4 rounded-full bg-accent motion-safe:animate-table-loading" />
+            </div>
+          ) : loadingIndicator === 'skeleton' ? (
+            Array.from({ length: grid ? columnCount : 3 }, (_, index) => (
+              <div
+                key={index}
+                className={classNames?.skeleton}
+                data-testid={partTestId(testId, 'moreSkeleton', index)}
+              >
+                {renderSkeleton ? (
+                  renderSkeleton(index)
+                ) : (
+                  <Skeleton style={{ height: rowSize }} />
+                )}
+              </div>
+            ))
+          ) : (
+            <span className="flex items-center gap-2 text-ui-sm text-muted">
+              <Spinner label={t('virtualList.loadingMore')} />
+              <span aria-hidden="true">{t('virtualList.loadingMore')}</span>
+            </span>
+          )}
         </div>
       )}
       <span role="presentation" className="sr-only">
