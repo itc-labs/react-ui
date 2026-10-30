@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.1
+
+### Patch Changes
+
+- [#12](https://github.com/itc-labs/react-ui/pull/12) [`797916d`](https://github.com/itc-labs/react-ui/commit/797916d35646435f0ea98c8bc43f624c5406c4d7) Thanks [@vungbt](https://github.com/vungbt)! - README: complete provider setup (theme, locale options and Next.js link/image adapters), a working Valibot form example and a fixed npm badge.
+
 ## 0.4.0
 
 ### Minor Changes
