@@ -1,4 +1,7 @@
 export const enMessages = {
+  'slider.label': 'Value',
+  'slider.minimum': 'Minimum',
+  'slider.maximum': 'Maximum',
   'timeline.label': 'Timeline',
   'timeline.pending': 'In progress',
   'timeline.completed': 'Completed',

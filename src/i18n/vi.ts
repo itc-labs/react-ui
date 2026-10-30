@@ -1,5 +1,8 @@
 import type { UIMessages } from './types';
 export const viMessages = {
+  'slider.label': 'Giá trị',
+  'slider.minimum': 'Tối thiểu',
+  'slider.maximum': 'Tối đa',
   'timeline.label': 'Dòng thời gian',
   'timeline.pending': 'Đang thực hiện',
   'timeline.completed': 'Đã hoàn thành',

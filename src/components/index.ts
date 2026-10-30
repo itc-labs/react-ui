@@ -70,3 +70,5 @@ export * from './divider';
 export * from './kbd';
 
 export * from './timeline';
+
+export * from './slider';

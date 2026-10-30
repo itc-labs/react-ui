@@ -12,6 +12,7 @@ const entries = {
   Timeline: 'components/timeline/index.tsx',
   Kbd: 'components/kbd/index.tsx',
   Rating: 'components/rating/index.tsx',
+  Slider: 'components/slider/index.tsx',
   QuantityInput: 'components/quantity-input/index.tsx',
   ColorPicker: 'components/color-picker/index.tsx',
   OptionGroup: 'components/option-group/index.tsx',
@@ -60,6 +61,7 @@ for (const [name, file] of Object.entries(entries)) {
       'Dialog',
       'Button',
       'Rating',
+      'Slider',
       'QuantityInput',
       'ColorPicker',
       'OptionGroup',
@@ -120,6 +122,7 @@ console.log(JSON.stringify(sizes, null, 2));
 for (const [name, limit] of Object.entries({
   Icon: 20_000,
   Rating: 20_000,
+  Slider: 31_400,
   Timeline: 21_000,
   QuantityInput: 20_600,
   OptionGroup: 52_000,
@@ -137,8 +140,8 @@ for (const [name, limit] of Object.entries({
   Form: 22_000,
   DataTable: 90_000,
   Calendar: 100_000,
-  // Core additions remain within the existing Root budget.
-  Root: 270_000,
+  // Slider adds the Radix pointer and keyboard interaction primitive to core.
+  Root: 275_000,
   ColorPicker: 54_300,
 })) {
   if (sizes[name].gzip >= limit) {

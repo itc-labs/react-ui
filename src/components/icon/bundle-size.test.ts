@@ -30,6 +30,7 @@ it('keeps ordinary imports free of heavy modules and within gzip budgets', () =>
     'Rating',
     'Root',
     'Select',
+    'Slider',
     'Spinner',
     'Timeline',
   ]);
