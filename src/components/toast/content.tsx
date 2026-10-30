@@ -1,14 +1,29 @@
 'use client';
+
+import { KitIcon } from '../icon/kit-icon';
+import { KitIconButton } from '../icon-button/kit-icon-button';
+import { WarningIcon } from '../icon/outline/warning';
+import { WarningIcon as WarningBoldIcon } from '../icon/bold/warning';
+import { SuccessIcon } from '../icon/outline/success';
+import { SuccessIcon as SuccessBoldIcon } from '../icon/bold/success';
+import { InfoIcon } from '../icon/outline/info';
+import { InfoIcon as InfoBoldIcon } from '../icon/bold/info';
+import { CloseIcon } from '../icon/outline/close';
+import { CloseIcon as CloseBoldIcon } from '../icon/bold/close';
 import { createContext, useContext, useSyncExternalStore } from 'react';
 import type { ToastContentProps } from 'react-toastify/unstyled';
 import { useUILocale } from '../../i18n/provider';
-import { Icon } from '../icon';
-import { IconButton } from '../icon-button';
 import { Spinner } from '../spinner';
 import { partTestId } from '../common/testing';
 import { cn } from '../common';
 import type { ToastEntry } from './entry';
 import type { ToastClassNames } from './types';
+const builtinIcons = {
+  warning: { outline: WarningIcon, bold: WarningBoldIcon },
+  success: { outline: SuccessIcon, bold: SuccessBoldIcon },
+  info: { outline: InfoIcon, bold: InfoBoldIcon },
+  close: { outline: CloseIcon, bold: CloseBoldIcon },
+};
 
 export const ToastStyleContext = createContext<{
   testId?: string | undefined;
@@ -56,13 +71,22 @@ export function ToastContent({
           <Spinner classNames={{ icon: iconClass }} />
         </span>
       ) : (
-        <Icon
+        <KitIcon
           name={
             message.tone === 'error' || message.tone === 'warning'
               ? 'warning'
               : message.tone === 'success'
                 ? 'success'
                 : 'info'
+          }
+          builtin={
+            builtinIcons[
+              message.tone === 'error' || message.tone === 'warning'
+                ? 'warning'
+                : message.tone === 'success'
+                  ? 'success'
+                  : 'info'
+            ]
           }
           className={iconClass}
         />
@@ -77,9 +101,10 @@ export function ToastContent({
           </div>
         )}
       </div>
-      <IconButton
+      <KitIconButton
         data-testid={partTestId(testId, 'close')}
         icon="close"
+        builtin={{ outline: CloseIcon, bold: CloseBoldIcon }}
         label={styles.closeLabel ?? t('toast.close')}
         variant="ghost"
         size="sm"

@@ -1,4 +1,8 @@
 'use client';
+
+import { KitIcon } from '../../components/icon/kit-icon';
+import { SettingsIcon } from '../../components/icon/outline/settings';
+import { SettingsIcon as SettingsBoldIcon } from '../../components/icon/bold/settings';
 import { partTestId } from '../../components/common/testing';
 
 import { useUILocale } from '../../i18n/provider';
@@ -6,7 +10,6 @@ import { cn } from '../../components/common';
 import type { DataTableView } from './use-data-table';
 import { Button } from '../../components/button';
 import { Input } from '../../components/input';
-import { Icon } from '../../components/icon';
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -90,7 +93,10 @@ export function DataTableToolbar<T>({
               className={classNames?.columnsTrigger}
               disabled={loading}
             >
-              <Icon name="settings" />
+              <KitIcon
+                name="settings"
+                builtin={{ outline: SettingsIcon, bold: SettingsBoldIcon }}
+              />
               {t('table.columns')}
             </Button>
           </DropdownMenuTrigger>

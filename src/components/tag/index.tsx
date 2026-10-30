@@ -1,4 +1,8 @@
 'use client';
+
+import { KitIcon } from '../icon/kit-icon';
+import { CloseIcon } from '../icon/outline/close';
+import { CloseIcon as CloseBoldIcon } from '../icon/bold/close';
 import type { ComponentProps, KeyboardEvent, MouseEvent, Ref } from 'react';
 import { useUILocale } from '../../i18n/provider';
 import { cn, partTestId, type SlotClasses, type TestIdProps } from '../common';
@@ -162,7 +166,11 @@ export function Tag({
             if (!disabled) onRemove(event);
           }}
         >
-          <Icon name="close" size={size === 'sm' ? 12 : 16} />
+          <KitIcon
+            name="close"
+            builtin={{ outline: CloseIcon, bold: CloseBoldIcon }}
+            size={size === 'sm' ? 12 : 16}
+          />
         </button>
       )}
     </Root>

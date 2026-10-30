@@ -1,10 +1,13 @@
 'use client';
 
+import { KitIcon } from '../icon/kit-icon';
+import { CheckIcon } from '../icon/outline/check';
+import { CheckIcon as CheckBoldIcon } from '../icon/bold/check';
+
 import type { ComponentProps } from 'react';
 import { DropdownMenu as Primitive } from 'radix-ui';
 import { type SlotClasses, cn, partTestId } from '../common';
 import { hasCompositionProp, overlayTrigger } from '../common/overlay-composition';
-import { Icon } from '../icon';
 import { menuContentClass, menuItemClass } from './classes';
 import { MenuEntries } from './items';
 import type { DropdownMenuProps } from './types';
@@ -103,7 +106,12 @@ export function DropdownMenuCheckboxItem({
     >
       <span className={cn('absolute left-2', classNames?.indicator)}>
         <Primitive.ItemIndicator>
-          <Icon className={classNames?.icon} name="check" size={14} />
+          <KitIcon
+            className={classNames?.icon}
+            name="check"
+            builtin={{ outline: CheckIcon, bold: CheckBoldIcon }}
+            size={14}
+          />
         </Primitive.ItemIndicator>
       </span>
       {children}

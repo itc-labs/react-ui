@@ -1,4 +1,8 @@
 'use client';
+
+import { KitIcon } from '../icon/kit-icon';
+import { FileIcon } from '../icon/outline/file';
+import { FileIcon as FileBoldIcon } from '../icon/bold/file';
 import { UiImage, UiLink } from '../link-image-provider';
 import { useUILocale } from '../../i18n/provider';
 import { useEffect, useState } from 'react';
@@ -7,7 +11,6 @@ import { partTestId } from '../common/testing';
 import { cn } from '../common';
 import { focusRingClassName } from '../common/focus-ring';
 import type { UploadFieldProps } from './index';
-import { Icon } from '../icon';
 import {
   Dialog,
   DialogTrigger,
@@ -81,7 +84,11 @@ export function FilePreview({
               onError={() => setFailed(true)}
             />
           ) : (
-            <Icon name="file" size={24} />
+            <KitIcon
+              name="file"
+              builtin={{ outline: FileIcon, bold: FileBoldIcon }}
+              size={24}
+            />
           )}
         </button>
       </DialogTrigger>

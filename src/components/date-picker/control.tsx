@@ -1,4 +1,11 @@
 'use client';
+
+import { KitIcon } from '../icon/kit-icon';
+import { KitIconButton } from '../icon-button/kit-icon-button';
+import { CalendarIcon } from '../icon/outline/calendar';
+import { CalendarIcon as CalendarBoldIcon } from '../icon/bold/calendar';
+import { CloseIcon } from '../icon/outline/close';
+import { CloseIcon as CloseBoldIcon } from '../icon/bold/close';
 import { partTestId } from '../common/testing';
 
 import { useUILocale } from '../../i18n/provider';
@@ -11,8 +18,6 @@ import {
   fieldDescription,
 } from '../common';
 import { useComposedRefs } from '../common/refs';
-import { Icon } from '../icon';
-import { IconButton } from '../icon-button';
 import { Popover, PopoverTrigger, PopoverContent } from '../popover';
 
 export type { PickerFieldProps } from './types';
@@ -129,9 +134,10 @@ export function PickerControl({
                 className,
               )}
             >
-              <Icon
+              <KitIcon
                 data-testid={partTestId(testId, 'icon')}
                 name="calendar"
+                builtin={{ outline: CalendarIcon, bold: CalendarBoldIcon }}
                 className={cn('shrink-0', classNames?.icon)}
               />
               <span
@@ -143,10 +149,11 @@ export function PickerControl({
             </button>
           </PopoverTrigger>
           {onClear && text && (
-            <IconButton
+            <KitIconButton
               data-testid={partTestId(testId, 'clear')}
               label={t('date.clear')}
               icon="close"
+              builtin={{ outline: CloseIcon, bold: CloseBoldIcon }}
               variant="ghost"
               size="sm"
               className={cn(

@@ -1,4 +1,12 @@
 'use client';
+
+import { KitIcon } from '../../components/icon/kit-icon';
+import { SortAscendingIcon } from '../../components/icon/outline/sort-ascending';
+import { SortAscendingIcon as SortAscendingBoldIcon } from '../../components/icon/bold/sort-ascending';
+import { SortDescendingIcon } from '../../components/icon/outline/sort-descending';
+import { SortDescendingIcon as SortDescendingBoldIcon } from '../../components/icon/bold/sort-descending';
+import { SortUnsortedIcon } from '../../components/icon/outline/sort-unsorted';
+import { SortUnsortedIcon as SortUnsortedBoldIcon } from '../../components/icon/bold/sort-unsorted';
 import { partTestId } from '../../components/common/testing';
 
 import { useUILocale } from '../../i18n/provider';
@@ -7,8 +15,12 @@ import { focusRingClassName } from '../../components/common/focus-ring';
 import type { DataTableView } from './use-data-table';
 import { flexRender } from '@tanstack/react-table';
 import { Checkbox } from '../../components/checkbox';
-import { Icon } from '../../components/icon';
 import { columnAlign } from './align';
+const builtinIcons = {
+  sortAscending: { outline: SortAscendingIcon, bold: SortAscendingBoldIcon },
+  sortDescending: { outline: SortDescendingIcon, bold: SortDescendingBoldIcon },
+  sortUnsorted: { outline: SortUnsortedIcon, bold: SortUnsortedBoldIcon },
+};
 
 export function DataTableHeader<T>({
   view,
@@ -112,7 +124,7 @@ export function DataTableHeader<T>({
                     }
                   >
                     {flexRender(header.column.columnDef.header, header.getContext())}
-                    <Icon
+                    <KitIcon
                       data-testid={partTestId(
                         view.testId,
                         'sortIcon',
@@ -125,6 +137,15 @@ export function DataTableHeader<T>({
                           : sorted === 'desc'
                             ? 'sortDescending'
                             : 'sortUnsorted'
+                      }
+                      builtin={
+                        builtinIcons[
+                          sorted === 'asc'
+                            ? 'sortAscending'
+                            : sorted === 'desc'
+                              ? 'sortDescending'
+                              : 'sortUnsorted'
+                        ]
                       }
                       strokeWidth={1.6}
                     />

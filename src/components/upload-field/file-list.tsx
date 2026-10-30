@@ -1,9 +1,12 @@
 'use client';
+
+import { KitIconButton } from '../icon-button/kit-icon-button';
+import { CloseIcon } from '../icon/outline/close';
+import { CloseIcon as CloseBoldIcon } from '../icon/bold/close';
 import { partTestId } from '../common/testing';
 
 import { useUILocale } from '../../i18n/provider';
 import { cn } from '../common';
-import { IconButton } from '../icon-button';
 import { FilePreview } from './file-preview';
 import type { UploadFieldProps } from './types';
 
@@ -74,7 +77,7 @@ export function UploadFileList({
               KB)
             </span>
           </span>
-          <IconButton
+          <KitIconButton
             data-testid={partTestId(
               testId,
               'remove',
@@ -85,6 +88,7 @@ export function UploadFileList({
             className={classNames?.remove}
             label={t('upload.remove', { name: file.name })}
             icon="close"
+            builtin={{ outline: CloseIcon, bold: CloseBoldIcon }}
             size="sm"
             variant="ghost"
             disabled={blocked}

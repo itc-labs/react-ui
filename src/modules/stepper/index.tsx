@@ -1,10 +1,13 @@
 'use client';
+
+import { KitIcon } from '../../components/icon/kit-icon';
+import { CheckIcon } from '../../components/icon/outline/check';
+import { CheckIcon as CheckBoldIcon } from '../../components/icon/bold/check';
 import type { TestIdProps } from '../../components/common/testing';
 
 import { useUILocale } from '../../i18n/provider';
 import type { ComponentProps, ReactNode } from 'react';
 import { type SlotClasses, cn } from '../../components/common';
-import { Icon } from '../../components/icon';
 
 export type StepperProps = (ComponentProps<'ol'> & {
   steps: readonly { id: string; label: ReactNode }[];
@@ -75,7 +78,15 @@ export function Stepper({
               classNames?.indicator,
             )}
           >
-            {index < current ? <Icon name="check" size={12} /> : index + 1}
+            {index < current ? (
+              <KitIcon
+                name="check"
+                builtin={{ outline: CheckIcon, bold: CheckBoldIcon }}
+                size={12}
+              />
+            ) : (
+              index + 1
+            )}
           </span>
           <span className={classNames?.label}>{step.label}</span>
           {index < current && <span className="sr-only">{t('stepper.completed')}</span>}

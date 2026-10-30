@@ -1,9 +1,12 @@
 'use client';
 
+import { KitIcon } from '../icon/kit-icon';
+import { ChevronDownIcon } from '../icon/outline/chevron-down';
+import { ChevronDownIcon as ChevronDownBoldIcon } from '../icon/bold/chevron-down';
+
 import { useContext } from 'react';
 import { Accordion as Primitive } from 'radix-ui';
 import { cn, partTestId } from '../common';
-import { Icon } from '../icon';
 import { AccordionContext, AccordionItemContext, useAccordion } from './context';
 import type {
   AccordionProps,
@@ -119,8 +122,9 @@ export function AccordionTrigger({
           )}
         >
           {children}
-          <Icon
+          <KitIcon
             name="chevronDown"
+            builtin={{ outline: ChevronDownIcon, bold: ChevronDownBoldIcon }}
             data-testid={partTestId(context.testId, 'icon', value)}
             className={cn(
               'size-4 shrink-0 text-muted motion-safe:transition-transform duration-[var(--motion-duration-normal)] ease-[var(--motion-ease-standard)] group-data-[state=open]:rotate-180',

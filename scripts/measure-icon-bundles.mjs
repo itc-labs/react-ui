@@ -16,11 +16,13 @@ const entries = {
   Calendar: 'modules/calendar/index.tsx',
   Form: 'modules/form/index.tsx',
 };
+// Gzip bytes before kit controls switched to leaf glyphs.
+const baselineGzip = { Dialog: 41_227, Select: 59_415, DataTable: 115_077 };
 const sizes = {};
 for (const [name, file] of Object.entries(entries)) {
   if (
     process.argv.includes('--budget-only') &&
-    !['Icon', 'Button', 'Calendar'].includes(name)
+    !['Icon', 'Button', 'Dialog', 'Calendar'].includes(name)
   )
     continue;
   const exports =
@@ -46,6 +48,13 @@ for (const [name, file] of Object.entries(entries)) {
     metafile: true,
     logLevel: 'silent',
   });
+  if (['Dialog', 'Button'].includes(name)) {
+    const registries = Object.keys(metafile.inputs).filter((input) =>
+      /components\/icon\/kit-icons\.(?:ts|tsx)$/.test(input),
+    );
+    if (registries.length)
+      throw new Error(`${name} imports the built-in icon registry: ${registries}`);
+  }
   if (name === 'Calendar') {
     const forbidden = Object.keys(metafile.inputs).filter((input) =>
       /(?:modules\/(?:editor|chart|avatar-upload)\/|node_modules\/.*(?:tiptap|recharts|react-easy-crop))/.test(
@@ -56,7 +65,14 @@ for (const [name, file] of Object.entries(entries)) {
       throw new Error(`Calendar imports optional features: ${forbidden}`);
   }
   const bytes = outputFiles[0].contents;
-  sizes[name] = { minified: bytes.length, gzip: gzipSync(bytes).length };
+  const gzip = gzipSync(bytes).length;
+  sizes[name] = {
+    minified: bytes.length,
+    gzip,
+    ...(name in baselineGzip
+      ? { gzipBefore: baselineGzip[name], gzipChange: gzip - baselineGzip[name] }
+      : {}),
+  };
   // Ordinary kit imports must never reach either full runtime catalog.
   const fullPacks = Object.keys(metafile.inputs).filter((input) =>
     /icon\/(outline|bold)\/pack\.ts$/.test(input),

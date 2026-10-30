@@ -1,12 +1,41 @@
 'use client';
+
+import { KitIconButton } from '../../components/icon-button/kit-icon-button';
+import { BoldIcon } from '../../components/icon/outline/bold';
+import { BoldIcon as BoldBoldIcon } from '../../components/icon/bold/bold';
+import { ItalicIcon } from '../../components/icon/outline/italic';
+import { ItalicIcon as ItalicBoldIcon } from '../../components/icon/bold/italic';
+import { StrikethroughIcon } from '../../components/icon/outline/strikethrough';
+import { StrikethroughIcon as StrikethroughBoldIcon } from '../../components/icon/bold/strikethrough';
+import { HeadingIcon } from '../../components/icon/outline/heading';
+import { HeadingIcon as HeadingBoldIcon } from '../../components/icon/bold/heading';
+import { ListIcon } from '../../components/icon/outline/list';
+import { ListIcon as ListBoldIcon } from '../../components/icon/bold/list';
+import { ListOrderedIcon } from '../../components/icon/outline/list-ordered';
+import { ListOrderedIcon as ListOrderedBoldIcon } from '../../components/icon/bold/list-ordered';
+import { QuoteIcon } from '../../components/icon/outline/quote';
+import { QuoteIcon as QuoteBoldIcon } from '../../components/icon/bold/quote';
+import { UndoIcon } from '../../components/icon/outline/undo';
+import { UndoIcon as UndoBoldIcon } from '../../components/icon/bold/undo';
+import { RedoIcon } from '../../components/icon/outline/redo';
+import { RedoIcon as RedoBoldIcon } from '../../components/icon/bold/redo';
 import { partTestId } from '../../components/common/testing';
 
 import type { Editor as TiptapEditor } from '@tiptap/react';
 import type { EditorProps } from './types';
-import type { IconName } from '../../components/icon';
-import { IconButton } from '../../components/icon-button';
 import { cn } from '../../components/common';
 import { useUILocale } from '../../i18n/provider';
+const builtinIcons = {
+  bold: { outline: BoldIcon, bold: BoldBoldIcon },
+  italic: { outline: ItalicIcon, bold: ItalicBoldIcon },
+  strikethrough: { outline: StrikethroughIcon, bold: StrikethroughBoldIcon },
+  heading: { outline: HeadingIcon, bold: HeadingBoldIcon },
+  list: { outline: ListIcon, bold: ListBoldIcon },
+  listOrdered: { outline: ListOrderedIcon, bold: ListOrderedBoldIcon },
+  quote: { outline: QuoteIcon, bold: QuoteBoldIcon },
+  undo: { outline: UndoIcon, bold: UndoBoldIcon },
+  redo: { outline: RedoIcon, bold: RedoBoldIcon },
+};
 
 export function EditorToolbar({
   'data-testid': testId,
@@ -23,7 +52,7 @@ export function EditorToolbar({
   const { t } = useUILocale();
   const commands: {
     label: string;
-    icon: IconName;
+    icon: keyof typeof builtinIcons;
     active?: boolean;
     run: () => void;
     unavailable?: boolean;
@@ -98,12 +127,13 @@ export function EditorToolbar({
       )}
     >
       {commands.map((command) => (
-        <IconButton
+        <KitIconButton
           data-testid={partTestId(testId, 'command', command.icon)}
           key={command.label}
           label={command.label}
           title={command.label}
           icon={command.icon}
+          builtin={builtinIcons[command.icon]}
           iconClassName={classNames?.toolbarIcon}
           size="sm"
           variant="ghost"

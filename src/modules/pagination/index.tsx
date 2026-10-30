@@ -1,11 +1,20 @@
 'use client';
+
+import { KitIcon } from '../../components/icon/kit-icon';
+import { FirstIcon } from '../../components/icon/outline/first';
+import { FirstIcon as FirstBoldIcon } from '../../components/icon/bold/first';
+import { ChevronLeftIcon } from '../../components/icon/outline/chevron-left';
+import { ChevronLeftIcon as ChevronLeftBoldIcon } from '../../components/icon/bold/chevron-left';
+import { ChevronRightIcon } from '../../components/icon/outline/chevron-right';
+import { ChevronRightIcon as ChevronRightBoldIcon } from '../../components/icon/bold/chevron-right';
+import { LastIcon } from '../../components/icon/outline/last';
+import { LastIcon as LastBoldIcon } from '../../components/icon/bold/last';
 import type { TestIdProps } from '../../components/common/testing';
 
 import { partTestId } from '../../components/common/testing';
 
 import { useUILocale } from '../../i18n/provider';
 import { Button } from '../../components/button';
-import { Icon } from '../../components/icon';
 import { type SlotClasses, cn } from '../../components/common';
 import { paginationItems } from './model';
 export type PaginationProps = {
@@ -52,7 +61,7 @@ export function Pagination({
         disabled={disabled || page === 0}
         onClick={() => change(0)}
       >
-        <Icon name="first" />
+        <KitIcon name="first" builtin={{ outline: FirstIcon, bold: FirstBoldIcon }} />
       </Button>
       <Button
         data-testid={partTestId(testId, 'previous')}
@@ -63,7 +72,10 @@ export function Pagination({
         disabled={disabled || page === 0}
         onClick={() => change(page - 1)}
       >
-        <Icon name="chevronLeft" />
+        <KitIcon
+          name="chevronLeft"
+          builtin={{ outline: ChevronLeftIcon, bold: ChevronLeftBoldIcon }}
+        />
       </Button>
       {paginationItems(page, count).map((item) =>
         typeof item === 'number' ? (
@@ -108,7 +120,10 @@ export function Pagination({
         disabled={disabled || page === count - 1}
         onClick={() => change(page + 1)}
       >
-        <Icon name="chevronRight" />
+        <KitIcon
+          name="chevronRight"
+          builtin={{ outline: ChevronRightIcon, bold: ChevronRightBoldIcon }}
+        />
       </Button>
       <Button
         data-testid={partTestId(testId, 'last')}
@@ -119,7 +134,7 @@ export function Pagination({
         disabled={disabled || page === count - 1}
         onClick={() => change(count - 1)}
       >
-        <Icon name="last" />
+        <KitIcon name="last" builtin={{ outline: LastIcon, bold: LastBoldIcon }} />
       </Button>
     </nav>
   );

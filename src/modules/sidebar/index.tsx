@@ -5,7 +5,7 @@ import { Drawer } from '../../components/drawer';
 import { ChevronLeftIcon } from '../../components/icon/outline/chevron-left';
 import { ChevronRightIcon } from '../../components/icon/outline/chevron-right';
 import { MenuIcon } from '../../components/icon/outline/menu';
-import { IconButton } from '../../components/icon-button';
+import { KitIconButton } from '../../components/icon-button/kit-icon-button';
 import { useUILocale } from '../../i18n/provider';
 import { filterNavByAccess, resolveActiveNav } from '../navigation';
 import { SidebarEntries } from './entries';
@@ -88,7 +88,7 @@ export function Sidebar<TAccess = unknown>({
           />
         )}
         {!mobile && (
-          <IconButton
+          <KitIconButton
             icon={rail ? ChevronRightIcon : ChevronLeftIcon}
             label={
               rail
@@ -153,7 +153,7 @@ export function Sidebar<TAccess = unknown>({
           onOpenChange={setMobileOpen}
           trigger={
             mobileTrigger ?? (
-              <IconButton
+              <KitIconButton
                 label={mobileTriggerLabel ?? t('sidebar.open')}
                 icon={MenuIcon}
                 variant="ghost"

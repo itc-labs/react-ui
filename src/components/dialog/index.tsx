@@ -1,5 +1,9 @@
 'use client';
 
+import { KitIconButton } from '../icon-button/kit-icon-button';
+import { CloseIcon } from '../icon/outline/close';
+import { CloseIcon as CloseBoldIcon } from '../icon/bold/close';
+
 import { partTestId } from '../common/testing';
 import {
   hasCompositionProp,
@@ -19,7 +23,6 @@ import {
   panelClass,
   dialogPanelClass,
 } from '../common/overlay';
-import { IconButton } from '../icon-button';
 
 type DialogRootProps = ComponentProps<typeof Primitive.Root>;
 export type DialogProps =
@@ -140,10 +143,11 @@ export function DialogContent({
           {children}
         </OverlayContainerContext.Provider>
         <Primitive.Close asChild>
-          <IconButton
+          <KitIconButton
             data-testid={partTestId(testId, 'close')}
             label={closeLabel ?? t('dialog.close')}
             icon="close"
+            builtin={{ outline: CloseIcon, bold: CloseBoldIcon }}
             variant="ghost"
             size="sm"
             className={cn('absolute right-3 top-3', classNames?.close)}

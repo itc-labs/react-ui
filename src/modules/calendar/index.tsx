@@ -1,8 +1,13 @@
 'use client';
 
+import { KitIconButton } from '../../components/icon-button/kit-icon-button';
+import { ChevronLeftIcon } from '../../components/icon/outline/chevron-left';
+import { ChevronLeftIcon as ChevronLeftBoldIcon } from '../../components/icon/bold/chevron-left';
+import { ChevronRightIcon } from '../../components/icon/outline/chevron-right';
+import { ChevronRightIcon as ChevronRightBoldIcon } from '../../components/icon/bold/chevron-right';
+
 import { useId, useRef, useImperativeHandle } from 'react';
 import { Button } from '../../components/button';
-import { IconButton } from '../../components/icon-button';
 import { Select } from '../../components/select';
 import { Spinner } from '../../components/spinner';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../components/tabs';
@@ -277,16 +282,18 @@ export function Calendar<TData = unknown>(props: CalendarProps<TData>) {
                   >
                     {t('calendar.todayButton')}
                   </Button>
-                  <IconButton
+                  <KitIconButton
                     icon="chevronLeft"
+                    builtin={{ outline: ChevronLeftIcon, bold: ChevronLeftBoldIcon }}
                     label={t('calendar.prev')}
                     variant="ghost"
                     className={classNames?.navigationButton}
                     data-testid={partTestId(testId, 'prev')}
                     onClick={() => state.onNavigate('prev')}
                   />
-                  <IconButton
+                  <KitIconButton
                     icon="chevronRight"
+                    builtin={{ outline: ChevronRightIcon, bold: ChevronRightBoldIcon }}
                     label={t('calendar.nextPeriod')}
                     variant="ghost"
                     className={classNames?.navigationButton}

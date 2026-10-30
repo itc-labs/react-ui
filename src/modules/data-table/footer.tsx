@@ -1,10 +1,13 @@
 'use client';
+
+import { KitIcon } from '../../components/icon/kit-icon';
+import { SpinnerIcon } from '../../components/icon/outline/spinner';
+import { SpinnerIcon as SpinnerBoldIcon } from '../../components/icon/bold/spinner';
 import { partTestId } from '../../components/common/testing';
 
 import { useUILocale } from '../../i18n/provider';
 import { cn } from '../../components/common';
 import type { DataTableView } from './use-data-table';
-import { Icon } from '../../components/icon';
 import { Select } from '../../components/select';
 import { Pagination } from '../pagination';
 
@@ -48,7 +51,11 @@ export function DataTableFooter<T>({
       >
         {loading ? (
           <>
-            <Icon name="spinner" className="motion-safe:animate-spin" />
+            <KitIcon
+              name="spinner"
+              builtin={{ outline: SpinnerIcon, bold: SpinnerBoldIcon }}
+              className="motion-safe:animate-spin"
+            />
             <span>{initialLoading ? t('select.loading') : t('table.updating')}</span>
           </>
         ) : (

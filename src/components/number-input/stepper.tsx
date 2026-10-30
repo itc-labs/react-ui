@@ -1,9 +1,18 @@
 'use client';
+
+import { KitIcon } from '../icon/kit-icon';
+import { ChevronUpIcon } from '../icon/outline/chevron-up';
+import { ChevronUpIcon as ChevronUpBoldIcon } from '../icon/bold/chevron-up';
+import { ChevronDownIcon } from '../icon/outline/chevron-down';
+import { ChevronDownIcon as ChevronDownBoldIcon } from '../icon/bold/chevron-down';
 import { partTestId } from '../common/testing';
-import { Icon } from '../icon';
 import { cn } from '../common';
 import { focusRingClassName } from '../common/focus-ring';
 import { useUILocale } from '../../i18n/provider';
+const builtinIcons = {
+  chevronUp: { outline: ChevronUpIcon, bold: ChevronUpBoldIcon },
+  chevronDown: { outline: ChevronDownIcon, bold: ChevronDownBoldIcon },
+};
 
 export function NumberStepper({
   'data-testid': testId,
@@ -44,7 +53,11 @@ export function NumberStepper({
           onMouseDown={(event) => event.preventDefault()}
           onClick={() => onStep(direction)}
         >
-          <Icon name={direction === 1 ? 'chevronUp' : 'chevronDown'} size={12} />
+          <KitIcon
+            name={direction === 1 ? 'chevronUp' : 'chevronDown'}
+            builtin={builtinIcons[direction === 1 ? 'chevronUp' : 'chevronDown']}
+            size={12}
+          />
         </button>
       ))}
     </span>
