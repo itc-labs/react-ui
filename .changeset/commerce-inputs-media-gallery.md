@@ -7,3 +7,5 @@ Add OptionGroup for chip and color/image swatch selection, QuantityInput for bou
 Add the isolated `@itclabs/react-ui/media-gallery` subpath with MediaGallery and Lightbox for images and videos, responsive thumbnails, keyboard navigation, hover zoom, fullscreen image zoom, and drag panning. Include usage guides, catalog links, and bundle budgets.
 
 Rating stars sit closer together and use the new `--color-rating` / `--color-rating-empty` tokens (amber by default).
+
+OptionGroup `maxVisible` now lists the remaining options in a "+N" dropdown instead of expanding them inline. ColorPicker and Rating show the required marker on their labels.

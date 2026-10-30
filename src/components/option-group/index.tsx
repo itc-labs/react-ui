@@ -17,6 +17,8 @@ import { HelpIcon } from '../icon/outline/help';
 import { HelpIcon as HelpBoldIcon } from '../icon/bold/help';
 import { Tooltip } from '../tooltip';
 import { UiImage } from '../link-image-provider';
+import { Popover, PopoverContent, PopoverTrigger } from '../popover';
+import { menuItemClass } from '../dropdown-menu/classes';
 
 export type OptionGroupOption = {
   value: string;
@@ -40,6 +42,8 @@ export type OptionGroupClassNames = SlotClasses<
   | 'image'
   | 'unavailable'
   | 'expand'
+  | 'menu'
+  | 'menuItem'
   | 'hint'
   | 'error'
 >;
@@ -63,7 +67,7 @@ export type OptionGroupProps = Omit<
     layout?: 'inline' | 'stacked';
     size?: 'sm' | 'md' | 'lg';
     variant?: 'chip' | 'swatch';
-    /** First N options remain visible, plus any selected option outside that range. */
+    /** First N options stay inline, plus the selected one; the rest open from a "+N" menu. */
     maxVisible?: number;
     classNames?: OptionGroupClassNames;
   };
@@ -101,8 +105,9 @@ export function OptionGroup({
   const id = useId();
   const { t } = useUILocale();
   const [internalValue, setInternalValue] = useState(defaultValue);
-  const [expanded, setExpanded] = useState(false);
   const controls = useRef(new Map<string, HTMLButtonElement>());
+  const picked = useRef<string | null>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
   const selected = value !== undefined ? value : internalValue;
   const selectedOption = options.find((option) => option.value === selected);
   const limit =
@@ -110,9 +115,10 @@ export function OptionGroup({
       ? Math.max(1, Math.floor(maxVisible))
       : options.length;
   const visible = options.filter(
-    (option, index) => expanded || index < limit || option.value === selected,
+    (option, index) => index < limit || option.value === selected,
   );
-  const hiddenCount = options.length - visible.length;
+  const hidden = options.filter((option) => !visible.includes(option));
+  const hiddenCount = hidden.length;
   const enabled = visible.filter((option) => !option.disabled && !disabled);
   const tabValue =
     enabled.find((option) => option.value === selected)?.value ?? enabled[0]?.value;
@@ -319,32 +325,115 @@ export function OptionGroup({
           );
         })}
         {hiddenCount > 0 && (
-          <button
-            type="button"
-            disabled={disabled}
-            aria-expanded={false}
-            aria-label={t('optionGroup.expand', { count: hiddenCount })}
-            data-testid={partTestId(testId, 'expand')}
-            className={cn(
-              'rounded-full border border-dashed border-control-border bg-surface text-ink disabled:opacity-50',
-              controlSizes[size],
-              focusRingClassName,
-              classNames?.expand,
-            )}
-            onClick={() => {
-              setExpanded(true);
-              const firstHidden = options.find(
-                (option, index) =>
-                  index >= limit && option.value !== selected && !option.disabled,
-              );
-              if (firstHidden)
-                requestAnimationFrame(() =>
-                  controls.current.get(firstHidden.value)?.focus(),
-                );
-            }}
-          >
-            {t('optionGroup.more', { count: hiddenCount })}
-          </button>
+          <Popover open={menuOpen && !disabled} onOpenChange={setMenuOpen}>
+            <PopoverTrigger asChild disabled={disabled}>
+              <button
+                type="button"
+                aria-haspopup="listbox"
+                aria-label={t('optionGroup.expand', { count: hiddenCount })}
+                data-testid={partTestId(testId, 'expand')}
+                className={cn(
+                  'cursor-pointer rounded-full border border-dashed border-control-border bg-surface text-ink hover:bg-hover disabled:cursor-not-allowed disabled:opacity-50 data-[state=open]:border-solid data-[state=open]:border-accent',
+                  controlSizes[size],
+                  focusRingClassName,
+                  classNames?.expand,
+                )}
+              >
+                {t('optionGroup.more', { count: hiddenCount })}
+              </button>
+            </PopoverTrigger>
+            <PopoverContent
+              align="start"
+              onOpenAutoFocus={(event) => {
+                event.preventDefault();
+                (event.currentTarget as HTMLElement)
+                  .querySelector<HTMLElement>(
+                    '[role="option"]:not([aria-disabled="true"])',
+                  )
+                  ?.focus();
+              }}
+              onCloseAutoFocus={(event) => {
+                const next = picked.current;
+                picked.current = null;
+                if (!next) return;
+                // The picked option renders inline after this close; focus it there.
+                event.preventDefault();
+
+                requestAnimationFrame(() => controls.current.get(next)?.focus());
+              }}
+              className={cn('w-auto min-w-40 p-1', classNames?.menu)}
+            >
+              <div
+                role="listbox"
+                aria-label={t('optionGroup.expand', { count: hiddenCount })}
+                data-testid={partTestId(testId, 'menu')}
+                className="grid max-h-72 overflow-y-auto"
+                onKeyDown={(event) => {
+                  const items = Array.from(
+                    event.currentTarget.querySelectorAll<HTMLElement>(
+                      '[role="option"]:not([aria-disabled="true"])',
+                    ),
+                  );
+                  const index = items.indexOf(document.activeElement as HTMLElement);
+                  const target =
+                    event.key === 'ArrowDown'
+                      ? items[(index + 1) % items.length]
+                      : event.key === 'ArrowUp'
+                        ? items[(index - 1 + items.length) % items.length]
+                        : event.key === 'Home'
+                          ? items[0]
+                          : event.key === 'End'
+                            ? items.at(-1)
+                            : undefined;
+                  if (!target) return;
+                  event.preventDefault();
+                  target.focus();
+                }}
+              >
+                {hidden.map((option) => (
+                  <button
+                    key={option.value}
+                    type="button"
+                    role="option"
+                    aria-selected={false}
+                    aria-disabled={option.disabled || undefined}
+                    tabIndex={-1}
+                    data-testid={partTestId(testId, 'menuItem', option.value)}
+                    className={cn(
+                      'relative w-full cursor-pointer gap-2 text-left focus:bg-hover focus:outline-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50',
+                      menuItemClass,
+                      classNames?.menuItem,
+                    )}
+                    onClick={() => {
+                      if (option.disabled) return;
+                      picked.current = option.value;
+                      choose(option);
+                      setMenuOpen(false);
+                    }}
+                  >
+                    {variant === 'swatch' && (
+                      <span
+                        aria-hidden="true"
+                        className="size-5 shrink-0 overflow-hidden rounded-full bg-canvas ring-1 ring-control-border"
+                        style={{ backgroundColor: option.color }}
+                      >
+                        {option.image && (
+                          <UiImage
+                            src={option.image}
+                            alt=""
+                            className="size-full object-cover"
+                          />
+                        )}
+                      </span>
+                    )}
+                    <span className={cn(option.disabled && 'line-through')}>
+                      {option.label}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </PopoverContent>
+          </Popover>
         )}
       </div>
       {name && (

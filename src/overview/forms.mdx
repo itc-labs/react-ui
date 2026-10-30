@@ -133,7 +133,7 @@ See [Rating stories](?path=/docs/components-rating--docs) for sizes, display mod
 
 ## Variant selector with OptionGroup, QuantityInput, and ColorPicker
 
-All three controls bind automatically through `value` and `onValueChange` inside `FormField`. `OptionGroup` stores a string option value: use `variant="swatch"` with `color` or `image` options, or the default chips for sizes. Disabled options remain visible but cannot be selected. Arrow keys cycle through available visible options; Home and End select the first and last. `maxVisible` adds an expansion button while keeping the selected option visible.
+All three controls bind automatically through `value` and `onValueChange` inside `FormField`. `OptionGroup` stores a string option value: use `variant="swatch"` with `color` or `image` options, or the default chips for sizes. Disabled options remain visible but cannot be selected. Arrow keys cycle through available visible options; Home and End select the first and last. `maxVisible` keeps the first options inline and moves the rest into a "+N" dropdown menu; the selected option always stays inline.
 
 `QuantityInput` stores a number and normalizes edits to `min`, `max`, and a step grid anchored at `min`. Arrow Up/Down steps once; Page Up/Down steps ten times. Empty edits restore the previous quantity on blur. `ColorPicker` stores a hex string; `alpha` enables eight-digit hex values. Hex edits commit on Enter or blur, and invalid edits leave the selection intact. Presets are optional; screen sampling appears only where the browser supports it. Escape closes the picker and restores trigger focus.
 

@@ -117,7 +117,7 @@ for (const [name, limit] of Object.entries({
   Icon: 20_000,
   Rating: 20_000,
   QuantityInput: 20_600,
-  OptionGroup: 45_200,
+  OptionGroup: 52_000,
   JsonView: 22_000,
   // About 10% above the measured display subpath fixtures.
   CodeView: 50_000,

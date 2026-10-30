@@ -21,7 +21,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'Choose a single variant using pill chips or color and image swatches. Supports keyboard navigation, unavailable options and native form values.',
+          'Choose a single variant using pill chips or color and image swatches. Supports keyboard navigation, unavailable options and native form values. maxVisible keeps the first options inline and lists the rest in a "+N" dropdown menu.',
       },
     },
   },

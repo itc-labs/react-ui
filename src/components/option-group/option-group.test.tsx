@@ -213,13 +213,28 @@ it('reveals only the remaining count and focuses the first newly available optio
 
   act(() => expand.click());
 
+  const menu = document.querySelector<HTMLElement>('[data-testid="sizes-menu"]')!;
+  expect(menu.getAttribute('role')).toBe('listbox');
+  const items = Array.from(menu.querySelectorAll<HTMLElement>('[role="option"]'));
+  expect(items.map((item) => item.textContent)).toEqual(['Gamma', 'Delta']);
+  expect(document.activeElement).toBe(items[0]);
+  press(items[0] as HTMLButtonElement, 'ArrowDown');
+  expect(document.activeElement).toBe(items[1]);
+
+  act(() => items[1]!.click());
+
   await act(async () => {
     await new Promise((resolve) => requestAnimationFrame(resolve));
   });
-  expect(radios()).toHaveLength(5);
-  expect(host.querySelector('[data-testid="sizes-expand"]')).toBeNull();
+  expect(document.querySelector('[data-testid="sizes-menu"]')).toBeNull();
+  expect(radios().map((radio) => radio.textContent)).toEqual([
+    'Alpha',
+    'Beta',
+    'Delta',
+  ]);
+  expect(radios()[2]!.getAttribute('aria-checked')).toBe('true');
   expect(document.activeElement).toBe(radios()[2]);
-  expect(radios()[4]!.getAttribute('aria-checked')).toBe('true');
+  expect(expand.textContent).toBe('+2');
 });
 
 it('forwards refs, attributes, test IDs and class slots, and associates labels, descriptions and feedback', () => {
