@@ -158,7 +158,8 @@ export function TreeSelect(props: TreeSelectProps) {
   );
   const searchRef = useRef<HTMLInputElement>(null);
   const treeRef = useRef<HTMLDivElement>(null);
-  const scrollRef = useRef<HTMLDivElement>(null);
+  // State (not a ref) so the virtualizer re-binds when the portal remounts the list on reopen.
+  const [scrollElement, setScrollElement] = useState<HTMLDivElement | null>(null);
   const composing = useRef(false);
   const lastSearch = useRef('');
   const notifySearch = useDebouncedCallback((text: string) => {
@@ -286,7 +287,7 @@ export function TreeSelect(props: TreeSelectProps) {
     : enabled[0]?.key;
   const virtualizer = useVirtualizer({
     count: rows.length,
-    getScrollElement: () => scrollRef.current,
+    getScrollElement: () => scrollElement,
     estimateSize: () => 40,
     overscan: 6,
     getItemKey: (index) => rows[index]!.key,
@@ -577,6 +578,79 @@ export function TreeSelect(props: TreeSelectProps) {
     <KitIcon name={icon} builtin={icons[icon]} size={14} />
   );
 
+  const comboboxProps = {
+    id,
+    role: 'combobox' as const,
+    'aria-haspopup': 'tree' as const,
+    'aria-expanded': open && !disabled,
+    'aria-controls': open ? treeId : undefined,
+    'aria-disabled': disabled,
+    'aria-required': required,
+    'aria-invalid': Boolean(error) || props['aria-invalid'],
+    'aria-describedby': fieldDescription(
+      id,
+      Boolean(error),
+      Boolean(hint),
+      props['aria-describedby'],
+    ),
+    'aria-labelledby': label != null ? `${id}-label` : undefined,
+    'aria-label':
+      props['aria-label'] ?? (label == null ? t('treeSelect.label') : undefined),
+  };
+
+  // Inline search inside the field, matching Select: type to open and filter.
+  const searchInput = (
+    <input
+      {...comboboxProps}
+      ref={searchRef}
+      aria-autocomplete="list"
+      aria-activedescendant={open ? activeDescendant : undefined}
+      disabled={disabled}
+      autoComplete="off"
+      spellCheck={false}
+      placeholder={
+        ids.length ? undefined : (props.placeholder ?? t('treeSelect.placeholder'))
+      }
+      value={query}
+      onChange={(event) => {
+        search(event.target.value);
+        if (!open) changeOpen(true);
+      }}
+      onCompositionStart={() => {
+        composing.current = true;
+        notifySearch.cancel();
+      }}
+      onCompositionEnd={(event) => {
+        composing.current = false;
+        search(event.currentTarget.value);
+      }}
+      onFocus={props.onFocus}
+      onBlur={props.onBlur}
+      onKeyDown={(event) => {
+        if (!open) {
+          if (['ArrowDown', 'ArrowUp', 'Enter'].includes(event.key)) {
+            event.preventDefault();
+            changeOpen(true);
+          }
+
+          return;
+        }
+        if (event.key === 'Backspace' && !query && multiple && ids.length) {
+          event.preventDefault();
+          remove(ids.at(-1)!);
+
+          return;
+        }
+        keyboard(event);
+      }}
+      data-testid={partTestId(testId, 'search')}
+      className={cn(
+        'h-6 min-w-[4ch] flex-1 bg-transparent text-control text-ink outline-none placeholder:text-muted',
+        classes?.search,
+      )}
+    />
+  );
+
   return (
     <div
       data-testid={partTestId(testId, 'root')}
@@ -601,31 +675,22 @@ export function TreeSelect(props: TreeSelectProps) {
       <Popover open={open && !disabled} onOpenChange={changeOpen}>
         <PopoverTrigger asChild>
           <div
-            id={id}
             ref={props.ref}
-            role="combobox"
-            aria-haspopup="tree"
-            aria-expanded={open && !disabled}
-            aria-controls={open ? treeId : undefined}
-            aria-disabled={disabled}
-            aria-required={required}
-            aria-invalid={Boolean(error) || props['aria-invalid']}
-            aria-describedby={fieldDescription(
-              id,
-              Boolean(error),
-              Boolean(hint),
-              props['aria-describedby'],
-            )}
-            aria-labelledby={label != null ? `${id}-label` : undefined}
-            aria-label={
-              props['aria-label'] ?? (label == null ? t('treeSelect.label') : undefined)
-            }
-            tabIndex={disabled ? -1 : 0}
+            {...(searchable ? {} : comboboxProps)}
+            tabIndex={searchable || disabled ? -1 : 0}
             data-testid={testId}
-            onBlur={props.onBlur}
-            onFocus={props.onFocus}
+            onBlur={searchable ? undefined : props.onBlur}
+            onFocus={searchable ? undefined : props.onFocus}
+            onClick={(event) => {
+              // Like Select: clicking the field while open keeps the menu and focuses the search.
+              if (searchable && open) {
+                event.preventDefault();
+                searchRef.current?.focus();
+              }
+            }}
             onKeyDown={(event) => {
               if (
+                !searchable &&
                 !disabled &&
                 ['ArrowDown', 'ArrowUp', 'Enter', ' '].includes(event.key)
               ) {
@@ -637,6 +702,8 @@ export function TreeSelect(props: TreeSelectProps) {
               controlBase,
               controlSizes[size],
               'flex cursor-pointer items-center gap-2',
+              searchable &&
+                'focus-within:border-accent focus-within:shadow-control-focus',
               size === 'sm'
                 ? 'min-h-control-sm'
                 : size === 'lg'
@@ -652,17 +719,19 @@ export function TreeSelect(props: TreeSelectProps) {
             <span
               data-testid={partTestId(testId, 'value')}
               className={cn(
-                'flex min-w-0 flex-1 flex-wrap items-center gap-1',
+                'relative flex min-w-0 flex-1 flex-wrap items-center gap-1',
                 classes?.value,
               )}
             >
               {!ids.length ? (
-                <span
-                  data-testid={partTestId(testId, 'placeholder')}
-                  className={cn('truncate text-muted', classes?.placeholder)}
-                >
-                  {props.placeholder ?? t('treeSelect.placeholder')}
-                </span>
+                searchable ? null : (
+                  <span
+                    data-testid={partTestId(testId, 'placeholder')}
+                    className={cn('truncate text-muted', classes?.placeholder)}
+                  >
+                    {props.placeholder ?? t('treeSelect.placeholder')}
+                  </span>
+                )
               ) : multiple ? (
                 <>
                   {ids.slice(0, Math.max(0, props.maxTagCount ?? 3)).map((key) => (
@@ -704,14 +773,20 @@ export function TreeSelect(props: TreeSelectProps) {
                     </span>
                   )}
                 </>
-              ) : (
+              ) : query ? null : (
                 <span
-                  className="min-w-0 truncate"
+                  className={cn(
+                    'min-w-0 truncate',
+                    searchable &&
+                      'pointer-events-none absolute inset-y-0 left-0 flex items-center',
+                    searchable && open && 'text-muted',
+                  )}
                   dir={props.showPath ? 'rtl' : undefined}
                 >
                   <bdi>{display(ids[0]!)}</bdi>
                 </span>
               )}
+              {searchable && searchInput}
             </span>
             {props.clearable && ids.length > 0 && (
               <button
@@ -754,39 +829,8 @@ export function TreeSelect(props: TreeSelectProps) {
             }
           }}
         >
-          {searchable && (
-            <input
-              ref={searchRef}
-              role="combobox"
-              aria-autocomplete="list"
-              aria-haspopup="tree"
-              aria-expanded={open}
-              aria-controls={treeId}
-              aria-activedescendant={activeDescendant}
-              aria-label={t('treeSelect.search')}
-              placeholder={t('treeSelect.search')}
-              value={query}
-              onChange={(event) => search(event.target.value)}
-              onCompositionStart={() => {
-                composing.current = true;
-                notifySearch.cancel();
-              }}
-              onCompositionEnd={(event) => {
-                composing.current = false;
-                search(event.currentTarget.value);
-              }}
-              onKeyDown={keyboard}
-              data-testid={partTestId(testId, 'search')}
-              className={cn(
-                controlBase,
-                'mb-1 h-control-sm px-2',
-                focusRingClassName,
-                classes?.search,
-              )}
-            />
-          )}
           <div
-            ref={scrollRef}
+            ref={setScrollElement}
             className="max-h-72 overflow-y-auto overscroll-contain"
             style={{ height: Math.min(280, rows.length * 40) }}
           >
