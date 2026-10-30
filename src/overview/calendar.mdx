@@ -1,25 +1,33 @@
 import { Meta } from '@storybook/addon-docs/blocks';
 
-<Meta title="Overview/Calendar" />
+<Meta title="Guides/Event calendar" />
 
-# Calendar
+# Event calendar
 
-Lịch sự kiện có bốn view: Month, Week, Day và List. Host giữ dữ liệu, tải theo
-khoảng hiển thị, kiểm tra quyền và lưu thay đổi. Xem
-[Modules/Calendar](?path=/docs/modules-calendar--docs) và
-[Templates/CalendarPage](?path=/story/templates-calendarpage--playground) để thử
-lịch trong WorkspaceShell với Sidebar, PageHeader, Dialog và Drawer.
-Phase 1 dùng giờ địa phương; recurrence, cấu hình múi giờ và resource timeline
-thuộc các phase sau.
+This guide covers the **event calendar**: `Calendar` from
+`@itclabs/react-ui/calendar`, also exported as `EventCalendar` from
+`@itclabs/react-ui`. The root `Calendar` is the date-selection grid used by
+`DatePicker`.
 
-## Import và dữ liệu
+The event calendar provides Month, Week, Day and List views. Your application owns
+events, range loading, permissions and persistence. It uses local time;
+**recurrence, time-zone configuration and resource timelines are not implemented yet**.
 
-`Calendar` tại subpath là lịch sự kiện; tại root/modules dùng tên `EventCalendar`.
-`Calendar` tại root vẫn là control chọn ngày. Import styles một lần ở host theo
-Overview/Getting started. Không cần provider; mặc định nhãn tiếng Việt.
-Mọi `end` đều **exclusive**: sự kiện kết thúc lúc 00:00 không chiếm ngày kế tiếp.
-Chuỗi ISO chỉ có ngày được đọc ở nửa đêm địa phương. Khi thiếu `end`, sự kiện giờ
-kéo dài một giờ, sự kiện cả ngày kéo dài một ngày. ID phải ổn định và duy nhất.
+Try [Modules/Calendar](?path=/docs/modules-calendar--docs) or
+[Templates/CalendarPage](?path=/story/templates-calendarpage--playground) for an
+example with WorkspaceShell, Sidebar, PageHeader, Dialog and Drawer.
+
+## Imports and event data
+
+Import styles once in your application, as described in
+[Getting started](?path=/docs/overview-getting-started--docs). No provider is
+required; the default locale is Vietnamese. Use `UIProvider locale="en-US"` for
+English labels and formatting (see Localization below).
+
+Every `end` is **exclusive**: an event ending at midnight does not occupy the next
+day. Date-only ISO strings are parsed at local midnight. An omitted `end` defaults
+to one hour for timed events or one day for all-day events. IDs must be stable and
+unique.
 
 ```tsx
 import { Calendar, type CalendarEvent } from '@itclabs/react-ui/calendar';
@@ -55,79 +63,31 @@ export function BasicCalendar() {
 }
 ```
 
-<table>
-  <thead>
-    <tr>
-      <th>Props</th>
-      <th>Hành vi</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>
-        <code>views</code>
-      </td>
-      <td>Danh sách không rỗng; mặc định month, week, day, list.</td>
-    </tr>
-    <tr>
-      <td>
-        <code>weekLayout</code>, <code>weekNumbers</code>
-      </td>
-      <td>Week dùng timeGrid hoặc dayGrid; số tuần ISO là tùy chọn.</td>
-    </tr>
-    <tr>
-      <td>
-        <code>slotDuration</code>, <code>slotMinTime</code>, <code>slotMaxTime</code>
-      </td>
-      <td>
-        Slot tính bằng phút nguyên chia hết 1440; cửa sổ giờ HH:mm hoặc HH:mm:ss, mặc
-        định 00:00–24:00.
-      </td>
-    </tr>
-    <tr>
-      <td>
-        <code>height</code>, <code>scrollTime</code>
-      </td>
-      <td>Giới hạn chiều cao và vị trí cuộn ban đầu của time grid.</td>
-    </tr>
-    <tr>
-      <td>
-        <code>responsiveView</code>
-      </td>
-      <td>
-        Tùy chọn list/day khi container hẹp hơn 640px; khôi phục view đã chọn khi rộng
-        lại.
-      </td>
-    </tr>
-    <tr>
-      <td>
-        <code>businessHours</code>, <code>nowIndicator</code>
-      </td>
-      <td>
-        Tô ngoài giờ làm việc và vạch giờ hiện tại; không thay thế kiểm tra quyền.
-      </td>
-    </tr>
-    <tr>
-      <td>
-        <code>className</code>, <code>classNames</code>
-      </td>
-      <td>Class root và slot có kiểu; xem CustomClasses để tùy chỉnh.</td>
-    </tr>
-    <tr>
-      <td>
-        <code>data-testid</code>, <code>ref</code>
-      </td>
-      <td>Base ID và React 19 ref tới root; part ID chỉ sinh khi có base.</td>
-    </tr>
-  </tbody>
-</table>
+## Views and display options
 
-## Controlled view và date
+| Prop                            | Behavior                                                                                                                                        |
+| ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `views`                         | Nonempty list of enabled views; defaults to `month`, `week`, `day`, `list`.                                                                     |
+| `weekLayout`                    | Week uses `timeGrid` by default; choose `dayGrid` for a row of dates. Day always uses a time grid.                                              |
+| `fixedWeekCount`                | Month shows six weeks by default; `false` uses only the weeks needed for that month.                                                            |
+| `dayMaxEvents`                  | Limits visible event levels in date grids and the all-day row; overflow opens a popover. Omitted means unlimited.                               |
+| `weekNumbers`                   | Shows localized ISO week numbers in Month and day-grid Week.                                                                                    |
+| `slotDuration`                  | Positive whole minutes dividing 1440; defaults to 30.                                                                                           |
+| `slotMinTime`, `slotMaxTime`    | Visible local time window in `HH:mm` or `HH:mm:ss`; defaults to `00:00`–`24:00`.                                                                |
+| `businessHours`                 | Shades nonbusiness time. `true` means Monday–Friday, 09:00–17:00; custom schedules are supported. This is a visual aid, not a permission check. |
+| `nowIndicator`                  | Shows the current local time, updated each minute; defaults to `true`.                                                                          |
+| `toolbarStart`, `renderToolbar` | Add an action before Today, or replace the toolbar. Return `null` from `renderToolbar` to hide it.                                              |
 
-Mỗi cặp state có thể controlled riêng. Callback đề xuất giá trị; host phải truyền
-lại props để commit. `onRangeChange` báo khoảng đã commit, gồm cả ngày lân cận ở
-Month và view thực tế khi dùng responsiveView. Mount trong StrictMode có thể gọi
-lại effect; yêu cầu tải dữ liệu cần chịu được việc đó.
+## Controlled navigation
+
+Control `date` and `view` independently, or use `defaultDate` and `defaultView`
+for internal state. Controlled callbacks propose values; pass those values back
+through props to commit navigation. A controlled `view` must be included in `views`.
+
+`onRangeChange` reports the committed visible range, including neighboring dates
+in Month and the effective view when `responsiveView` is active. Its end is
+exclusive. React StrictMode can repeat mount effects, so loading must tolerate
+repeated requests.
 
 ```tsx
 'use client';
@@ -149,11 +109,17 @@ export function ControlledCalendar() {
 }
 ```
 
-## Tải bất đồng bộ theo khoảng
+## Load events by range
 
-Truyền loader của host, giữ kết quả cũ trong khi `loading`. Hủy request và bỏ kết
-quả cũ khi đổi khoảng hoặc unmount; callback đổi identity đơn thuần không tải lại.
-`loadEvents` nên ổn định (khai báo ngoài component hoặc dùng useCallback).
+Pass an application-owned loader and keep previous events visible while `loading`.
+Request events that overlap the range (`event.start < range.end` and
+`event.end > range.start`), including events that started before it.
+
+The effect below aborts requests on range changes or unmount and ignores stale
+results even if the loader does not honor the signal. Changing only the
+`onRangeChange` callback identity does not emit another range notification.
+Keep `loadEvents` stable (declare it outside the component or use `useCallback`)
+to avoid restarting the loading effect unnecessarily.
 
 ```tsx
 'use client';
@@ -200,11 +166,13 @@ export function RemoteCalendar({ loadEvents }: { loadEvents: LoadEvents }) {
 }
 ```
 
-## Chọn khoảng để tạo sự kiện
+## Select a range to create an event
 
-`selectable` bật kéo chọn; touch cần giữ 300ms, Escape hủy. Shift+Enter/Space chọn
-ô đang focus. `selectAllow` có thể từ chối khoảng; không tự tạo dữ liệu.
-Host mở Dialog, nhập tiêu đề và thêm event với đúng exclusive end.
+`selectable` enables drag selection; touch requires a 300ms hold, and Escape
+cancels. Shift+Enter or Shift+Space selects the focused cell. `selectAllow` can
+reject a range. Selection only calls `onSelect`; your application creates the event.
+This example opens a Dialog, asks for a title and preserves the exclusive end.
+See [Overlays & feedback](?path=/docs/guides-overlays-feedback--docs) for overlay patterns.
 
 ```tsx
 'use client';
@@ -270,18 +238,22 @@ export function CreateCalendar() {
 }
 ```
 
-## Kéo, resize và optimistic update
+## Drag, resize and optimistic editing
 
-`editable` bật move/resize ở Month, Week, Day; List chỉ đọc. Các cờ trên event ưu
-tiên: startEditable/durationEditable → event.editable → calendar.editable.
-`eventAllow` kiểm tra preview và commit. Time grid cho phép kéo giữa hàng cả ngày
-và slot giờ để đổi allDay. Kéo handle cuối event để resize exclusive end.
+`editable` enables moving and resizing in Month, Week and Day; List does not
+support editing. Per-event flags take precedence: `startEditable` for moving or
+`durationEditable` for resizing, then `event.editable`, then calendar `editable`.
+`eventAllow` checks both previews and commits. In time grids, dragging between the
+all-day row and timed slots changes `allDay`. Drag the end handle to resize the
+exclusive end.
 
-Calendar giữ proposal trong lúc chờ lưu. Giữ nguyên array `events` đến khi lưu
-thành công; array mới xóa mọi proposal đang chờ. Khi lỗi, gọi `revert()` và báo lỗi.
-Không cập nhật array trước khi gọi revert rồi kỳ vọng revert sửa state của host.
-Ví dụ tuần tự hóa lưu để các proposal không ghi đè nhau; host cần kiểm tra quyền
-lần nữa ở nơi lưu dữ liệu.
+The calendar displays a pending proposal while you save. **Keep the same `events`
+array until saving succeeds**: replacing it clears all pending proposals. On
+failure, call `revert()` and report the error. `revert()` restores the calendar's
+pending edit; it does not update application state that you have already changed.
+
+This example serializes saves so replacing the array cannot discard another
+pending proposal. Validate permissions again in your persistence layer.
 
 ```tsx
 'use client';
@@ -333,15 +305,18 @@ export function EditableCalendar({
 }
 ```
 
-`revert` idempotent; callback cũ không hoàn tác edit mới hoặc array update của host.
-[OptimisticUpdate](?path=/story/modules-calendar--optimistic-update) mô phỏng lỗi
-và toast; [Keyboard](?path=/story/modules-calendar--keyboard) minh họa commit/hủy.
+`revert()` is idempotent. A stale callback cannot undo a newer edit or an application
+array update. Try [OptimisticUpdate](?path=/story/modules-calendar--optimistic-update)
+for a simulated failure with a toast, or [Keyboard](?path=/story/modules-calendar--keyboard)
+for commit and cancel behavior.
 
-## Render event tùy chỉnh
+## Custom event content
 
-`renderEvent` nhận event đã normalize, view, timeText, isStart/isEnd. Trả nội dung
-không tương tác vì chip ngoài giữ semantics, focus và edit handles. `data` giữ kiểu
-của host; tone dùng token, color chỉ đổi accent, không thay nền/chữ dễ đọc.
+`renderEvent` receives a normalized event (`Date` boundaries and a boolean
+`allDay`), `view`, `timeText`, `isStart` and `isEnd`. Return noninteractive content:
+the outer event chip owns semantics, focus and edit handles. Generic `data`
+preserves your application's type. `tone` uses theme tokens; `color` changes only
+the accent, preserving readable background and text colors.
 
 ```tsx
 import { Calendar, type CalendarEvent } from '@itclabs/react-ui/calendar';
@@ -373,11 +348,18 @@ export function CustomEvents() {
 }
 ```
 
-## Locale và ngày bắt đầu tuần
+## Localization and week start
 
-UIProvider đổi nhãn và định dạng Intl; mặc định vi bắt đầu thứ Hai, en bắt đầu Chủ
-nhật. `weekStartsOn` ghi đè rõ ràng (0=Chủ nhật, 6=thứ Bảy). Pure engine mặc định
-thứ Hai; truyền tùy chọn rõ ràng khi tính khoảng ngoài React.
+`UIProvider` controls translated labels and locale-aware `Intl` formatting.
+Without a `weekStartsOn` prop, the calendar uses the resolved calendar locale's
+week start: Vietnamese starts on Monday, while English uses Sunday. For other
+locales, configure `UILocale.calendarLocale` or the provider's `calendarLocales`;
+see [Localization](?path=/docs/guides-localization--docs).
+
+The example follows the English locale's Sunday start. To override it, add
+`weekStartsOn={1}` for Monday (`0` = Sunday through `6` = Saturday). Pure engine
+helpers such as `viewRange` default to Monday independently of React; pass
+`weekStartsOn` explicitly when calculating matching ranges outside the component.
 
 ```tsx
 import { UIProvider } from '@itclabs/react-ui';
@@ -386,81 +368,49 @@ import { Calendar } from '@itclabs/react-ui/calendar';
 export function EnglishCalendar() {
   return (
     <UIProvider locale="en-US">
-      <Calendar weekStartsOn={1} weekNumbers defaultView="week" />
+      <Calendar weekNumbers defaultView="week" />
     </UIProvider>
   );
 }
 ```
 
-## Bàn phím và trạng thái
+## Keyboard and interaction states
 
-<table>
-  <thead>
-    <tr>
-      <th>Vị trí</th>
-      <th>Phím</th>
-      <th>Kết quả</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>Toolbar</td>
-      <td>Tab, phím mũi tên trong Tabs</td>
-      <td>Điều hướng và đổi view; dưới sm dùng Select.</td>
-    </tr>
-    <tr>
-      <td>Month / dayGrid Week</td>
-      <td>Mũi tên, Home/End, PageUp/PageDown</td>
-      <td>
-        Đổi ngày/tuần, đầu/cuối hàng, tháng trước/sau; host controlled phải commit date
-        để focus đi theo.
-      </td>
-    </tr>
-    <tr>
-      <td>Slot giờ</td>
-      <td>Mũi tên, Home/End</td>
-      <td>Đổi slot/ngày trong khoảng; đầu/cuối cửa sổ giờ.</td>
-    </tr>
-    <tr>
-      <td>Ô ngày hoặc giờ</td>
-      <td>Enter/Space; Shift+Enter/Space</td>
-      <td>onDateClick; chọn một ô nếu selectable.</td>
-    </tr>
-    <tr>
-      <td>Event editable</td>
-      <td>Enter, mũi tên, Shift+mũi tên, Enter</td>
-      <td>
-        Nhấc event, preview move, preview resize, commit một lần. Trái/phải đổi ngày;
-        lên/xuống đổi slot (hoặc ngày ở dayGrid/all-day).
-      </td>
-    </tr>
-    <tr>
-      <td>Đang edit</td>
-      <td>Escape; Tab</td>
-      <td>
-        Hủy; hủy và tiếp tục chuyển focus. Live region đọc range và exclusive end.
-      </td>
-    </tr>
-    <tr>
-      <td>Event / handle</td>
-      <td>Alt+mũi tên</td>
-      <td>Move ngay; focus handle để resize ngay.</td>
-    </tr>
-    <tr>
-      <td>Event clickable</td>
-      <td>Space; Enter khi không editable</td>
-      <td>onEventClick; Enter dành cho edit khi editable.</td>
-    </tr>
-    <tr>
-      <td>Overflow / Dialog / Drawer</td>
-      <td>Escape</td>
-      <td>Đóng overlay và phục hồi focus.</td>
-    </tr>
-  </tbody>
-</table>
+| Focus or state                     | Keys                                     | Behavior                                                                                                                                                                                   |
+| ---------------------------------- | ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Toolbar                            | Tab; arrow keys within view tabs         | Navigate controls and switch views. Below the `sm` breakpoint, the view switcher is a dropdown menu.                                                                                       |
+| Month / day-grid Week cell         | Arrow keys; Home/End; PageUp/PageDown    | Move by date/week, jump to the first/last date of the row, or move a month. When navigation crosses the displayed period, a controlled application must commit `date` for focus to follow. |
+| Timed slot                         | Arrow keys; Home/End                     | Move between slots/days within the range, or jump to the start/end of the time window.                                                                                                     |
+| Date or timed cell                 | Enter/Space; Shift+Enter/Space           | Call `onDateClick`; select one cell when `selectable`.                                                                                                                                     |
+| Editable event                     | Enter, arrows, Shift+arrows, Enter       | Pick up, preview a move, preview a resize, then commit once. Left/right changes dates; up/down changes slots (or dates in day grids and all-day rows).                                     |
+| Active edit                        | Escape; Tab                              | Cancel; cancel and continue moving focus. A live region announces the range and exclusive end.                                                                                             |
+| Event / resize handle              | Alt+arrows                               | Move immediately; focus the resize handle to resize immediately.                                                                                                                           |
+| Clickable event                    | Space; Enter when editing is unavailable | Call `onEventClick`. Enter starts editing when editing is available.                                                                                                                       |
+| Overflow popover / Dialog / Drawer | Escape                                   | Close the overlay and restore focus.                                                                                                                                                       |
 
-`loading` khóa content nhưng vẫn cho đổi khoảng ở toolbar; `disabled` khóa toàn
-lịch. Focus giữ ở event nguồn khi preview, đi theo segment nhìn thấy sau commit;
-nếu event ra ngoài khoảng, focus về region. `onEventClick` có thể mở Drawer như
-CalendarPage. Kiểm tra focus, touch, overlay và kích thước mobile trong browser;
-build Storybook không chạy play functions.
+`loading` blocks content interactions while keeping toolbar navigation available;
+`disabled` blocks the entire calendar. During a keyboard preview, focus stays on
+the source event. After a commit it follows a visible segment; if the event leaves
+the range, focus returns to the calendar region. `onEventClick` can open a Drawer,
+as shown in CalendarPage.
+
+## Sizing and customization
+
+`height` sets the root height and accepts a number of pixels or a CSS height value.
+The time grid scrolls within its content area (with a default maximum height of
+40rem). `scrollTime` sets the initial local scroll position, defaults to `06:00`,
+and is clamped to the visible time window. Dense overlapping events widen the
+scrollable canvas to keep event columns readable.
+
+`responsiveView="list"` or `responsiveView="day"` switches the effective view when
+the **container** is narrower than 640px, then restores the selected view when it
+widens. This is separate from the toolbar's breakpoint-based view switcher.
+
+Use `className` on the root and typed `classNames` for individual slots; see
+[Customization](?path=/docs/guides-customization--docs) and
+[Theming](?path=/docs/guides-theming--docs). `ref` points to the root div through the
+React 19 ref prop. `data-testid` supplies a base ID; part IDs are generated only
+when a base is provided.
+
+Verify focus, touch selection, overlays and narrow layouts in a browser.
+A Storybook build alone does not run story play functions.
