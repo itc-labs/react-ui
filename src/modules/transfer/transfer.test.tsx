@@ -221,11 +221,13 @@ it('supports roving focus, range checks, Space, select-all and Enter', async () 
   expect(document.activeElement).toBe(part('source-item-a'));
 });
 
-it('moves on double click and never moves disabled items', async () => {
+it('ignores repeated clicks and never moves disabled items', async () => {
   await render({ name: 'items' });
   await act(async () =>
     part('source-item-a').dispatchEvent(new MouseEvent('dblclick', { bubbles: true })),
   );
+  expect(ids()).toEqual([]);
+  await key(part('source-item-a'), 'Enter');
   expect(ids()).toEqual(['a']);
   await click(part('source-item-c'));
   await act(async () =>

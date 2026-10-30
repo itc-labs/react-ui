@@ -507,7 +507,6 @@ function TransferPanel({
             pick([item.id], 'toggle');
           }
         }}
-        onDoubleClick={() => panelMove(item)}
         onKeyDown={(event) => {
           if (disabled || item.disabled || event.nativeEvent.isComposing) return;
           if (event.target !== event.currentTarget) return;

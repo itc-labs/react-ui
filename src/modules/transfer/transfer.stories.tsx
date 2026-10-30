@@ -17,7 +17,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'Move items between available and selected lists. Check rows, then use the move buttons, or move a row with Enter or a double click. Arrow keys move focus, Space checks a row, Shift+Arrow extends the checked range, and Ctrl/Cmd+A checks visible rows. Import from @itclabs/react-ui/transfer. Values contain target IDs in source order by default; order="selection" preserves the order in which rows were checked. Select-all applies to the filtered list, while move-all applies to the entire side. Moves exceeding maxSelected are disabled.',
+          'Move items between available and selected lists. Check rows, then use the move buttons, or move the focused row with Enter. Clicking a row only checks it. Arrow keys move focus, Space checks a row, Shift+Arrow extends the checked range, and Ctrl/Cmd+A checks visible rows. Import from @itclabs/react-ui/transfer. Values contain target IDs in source order by default; order="selection" preserves the order in which rows were checked. Select-all applies to the filtered list, while move-all applies to the entire side. Moves exceeding maxSelected are disabled.',
       },
     },
   },
