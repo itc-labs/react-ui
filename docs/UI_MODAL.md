@@ -40,7 +40,7 @@ const value = await modal.open<string>({
 });
 ```
 
-All calls accept `id?`, `title`, `description?`, `stack?`, `data-testid?`, `className?` and `classNames?`. Supply a meaningful accessible title. `confirm`/`alert` additionally accept a ReactNode `content`. `open<T>` requires a content render function receiving `{ close(result?: T), dismiss() }`; its optional `actions` function receives the same API. Dialog has no size prop, so Modal does not add one. Consumer content keeps local state while other entries enqueue.
+All calls accept `id?`, `title`, `description?`, `priority?`, `stack?`, `data-testid?`, `className?` and `classNames?`. Supply a meaningful accessible title. `confirm`/`alert` additionally accept a ReactNode `content`. `open<T>` requires a content render function receiving `{ close(result?: T), dismiss() }`; its optional `actions` function receives the same API. Dialog has no size prop, so Modal does not add one. Consumer content keeps local state while other entries enqueue.
 
 - `confirm`: resolves true on confirmation, false on Cancel/Escape or dismissal. Defaults use `alertDialog.confirm` and `alertDialog.cancel`; explicit `confirmLabel`/`cancelLabel` win. `tone="danger"` selects the existing danger button variant.
 - `alert`: resolves void on OK or Escape. One OK button uses `modal.ok`; optional `okLabel` wins. `info` (default), `danger`, `warning` and `success` reuse the existing Alert icon/accent and semantic tokens. AlertDialog does not dismiss through overlay clicks.
@@ -53,9 +53,58 @@ Use imperative modals for short confirm/alert flows and non-React callers. Use d
 
 ## Order, stacking and identity
 
-Normal calls enter a FIFO queue with one visible entry. Closing it admits the oldest waiting entry; admission need not wait for exit animation. `stack: true` immediately displays above the current entry, with actual nested Radix dialogs and focus return to the initiating control. Closing the stacked entry exposes the existing underlying dialog; queued entries wait until all visible entries close.
+Normal calls enter a queue with one visible entry. `priority?: number` defaults to `0`; closing the visible entry admits the highest-priority waiting entry, with equal priorities keeping call order (FIFO). Priority never interrupts a visible modal. Admission need not wait for exit animation. `stack: true` immediately displays above the current entry, with actual nested Radix dialogs and focus return to the initiating control. Closing the stacked entry exposes the existing underlying dialog; queued entries wait until all visible entries close.
 
 An explicit `id` dedupes queued and visible calls: every call with the same pending ID returns the exact same promise and keeps the first options. Reuse an ID only for the same kind/result contract. Once settled, the ID can be used again. Generated IDs and React keys are stable; array indexes are never keys. Enqueuing another entry does not remount the active one. Different provider scopes can reuse IDs independently.
+
+### Sequential onboarding and changelog
+
+Enqueue onboarding steps, changelog entries, or announcements together without `stack` to show one modal at a time. Use stable, versioned IDs to deduplicate pending calls, including repeated clicks. In this example, Welcome opens first; Important update then precedes What is new because it has higher priority. Equal priorities preserve call order.
+
+The host owns “show once” persistence; the modal queue keeps no history after settlement. This example uses `localStorage` and marks each alert seen when it closes, including Escape or host dismissal. Choose storage availability/error handling, account scoping, and acknowledgment rules in the host. For explicit acknowledgment, use `confirm` and persist only when it resolves to `true`.
+
+```tsx
+import { Button, ModalProvider, useModal } from '@itclabs/react-ui';
+
+const updates = [
+  { id: 'onboarding-v1', title: 'Welcome', description: 'Lorem ipsum dolor sit amet.' },
+  {
+    id: 'changelog-v2',
+    title: 'What is new',
+    description: 'Lorem ipsum dolor sit amet.',
+  },
+  {
+    id: 'notice-v1',
+    title: 'Important update',
+    description: 'Lorem ipsum dolor sit amet.',
+    priority: 10,
+  },
+];
+
+function UpdatesButton() {
+  const dialogs = useModal();
+
+  function showUpdates() {
+    for (const update of updates) {
+      const storageKey = `modal-seen:${update.id}`;
+      if (localStorage.getItem(storageKey) === 'true') continue;
+      void dialogs.alert(update).then(() => {
+        localStorage.setItem(storageKey, 'true');
+      });
+    }
+  }
+
+  return <Button onClick={showUpdates}>Show onboarding and updates</Button>;
+}
+
+export function UpdatesExample() {
+  return (
+    <ModalProvider client={null}>
+      <UpdatesButton />
+    </ModalProvider>
+  );
+}
+```
 
 ## Async confirmation and errors
 
@@ -75,4 +124,4 @@ Each call's `data-testid` is its portalled panel base. Otherwise, an explicit pr
 
 ## Verification
 
-Colocated jsdom tests cover confirm/cancel/Escape, alert, typed custom results and dismissal, FIFO, stack/focus return, exact promise dedupe, async success/failure/retry/cancel/loading, error visibility/observer, close/closeAll, late completion, unmount/rebind, facade binding, hook-only scopes, StrictMode, isolation, selectors/classes and reactive locales. Storybook Components/Modal provides Playground, Queue, Stacked, AsyncConfirm, Dedupe, CustomContent and CustomClasses. Static builds and jsdom tests do not establish browser layout or assistive-device validation.
+Colocated jsdom tests cover confirm/cancel/Escape, alert, typed custom results and dismissal, FIFO, priority ordering without interruption/remounting, stack/focus return, exact promise dedupe, async success/failure/retry/cancel/loading, error visibility/observer, close/closeAll, late completion, unmount/rebind, facade binding, hook-only scopes, StrictMode, isolation, selectors/classes and reactive locales. Storybook Components/Modal provides Playground, Queue, PriorityQueue, Stacked, AsyncConfirm, Dedupe, CustomContent and CustomClasses. Static builds and jsdom tests do not establish browser layout or assistive-device validation.

@@ -199,6 +199,55 @@ export function ModalExample() {
 
 `confirm` resolves to `true` after confirmation succeeds, or `false` on dismissal. An async `onConfirm` shows loading state and keeps the modal open on failure so users can retry. Use `onError` to observe failures and `showErrorMessage` to include the thrown error message instead of the generic failure text. `alert` resolves when closed. `open<T>` passes `close(result)` and `dismiss()` to its content/actions and resolves to `T | undefined`.
 
-Requests queue by default; `stack: true` opens a nested modal immediately. Repeated requests with the same `id` reuse the pending promise. `close(id, result)`, `closeAll()`, and `isOpen(id?)` manage a scope, including queued entries. Provider unmount resolves pending requests as dismissed. For isolated applications, use `createModalClient()` with `ModalProvider client`, or `client={null}` with `useModal` only. Facades are browser-only and require a mounted provider; do not invoke them from server code.
+Requests queue by default with `priority?: number` (default `0`). The highest-priority waiting entry opens next; equal priorities stay FIFO. Priority never interrupts a visible modal. `stack: true` opens a nested modal immediately regardless of priority; waiting entries stay queued until all visible modals close. Repeated requests with the same `id` reuse the pending promise and retain the original options, including priority. `close(id, result)`, `closeAll()`, and `isOpen(id?)` manage a scope, including queued entries. Provider unmount resolves pending requests as dismissed. For isolated applications, use `createModalClient()` with `ModalProvider client`, or `client={null}` with `useModal` only. Facades are browser-only and require a mounted provider; do not invoke them from server code.
+
+### Sequential onboarding and changelog
+
+Enqueue onboarding steps, changelog entries, or announcements together without `stack` to show one modal at a time. Use stable, versioned IDs to deduplicate pending calls, including repeated clicks. In this example, Welcome opens first; Important update then precedes What is new because it has higher priority. Equal priorities preserve call order.
+
+The host owns “show once” persistence; the modal queue keeps no history after settlement. This example uses `localStorage` and marks each alert seen when it closes, including Escape or host dismissal. Choose storage availability/error handling, account scoping, and acknowledgment rules in the host. For explicit acknowledgment, use `confirm` and persist only when it resolves to `true`.
+
+```tsx
+import { Button, ModalProvider, useModal } from '@itclabs/react-ui';
+
+const updates = [
+  { id: 'onboarding-v1', title: 'Welcome', description: 'Lorem ipsum dolor sit amet.' },
+  {
+    id: 'changelog-v2',
+    title: 'What is new',
+    description: 'Lorem ipsum dolor sit amet.',
+  },
+  {
+    id: 'notice-v1',
+    title: 'Important update',
+    description: 'Lorem ipsum dolor sit amet.',
+    priority: 10,
+  },
+];
+
+function UpdatesButton() {
+  const dialogs = useModal();
+
+  function showUpdates() {
+    for (const update of updates) {
+      const storageKey = `modal-seen:${update.id}`;
+      if (localStorage.getItem(storageKey) === 'true') continue;
+      void dialogs.alert(update).then(() => {
+        localStorage.setItem(storageKey, 'true');
+      });
+    }
+  }
+
+  return <Button onClick={showUpdates}>Show onboarding and updates</Button>;
+}
+
+export function UpdatesExample() {
+  return (
+    <ModalProvider client={null}>
+      <UpdatesButton />
+    </ModalProvider>
+  );
+}
+```
 
 Use [Theming](?path=/docs/guides-theming--docs) and [Customization](?path=/docs/guides-customization--docs) to adjust tokens and component slots consistently.

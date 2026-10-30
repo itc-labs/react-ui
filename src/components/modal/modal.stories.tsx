@@ -5,7 +5,14 @@ import { Button } from '../button';
 import { Input } from '../input';
 
 type Example =
-  'playground' | 'queue' | 'stacked' | 'async' | 'dedupe' | 'custom' | 'classes';
+  | 'playground'
+  | 'queue'
+  | 'priority'
+  | 'stacked'
+  | 'async'
+  | 'dedupe'
+  | 'custom'
+  | 'classes';
 
 function ModalValueContent({ close }: { close: (value?: string) => void }) {
   const [value, setValue] = useState('');
@@ -47,6 +54,25 @@ function ModalExamples({ example }: { example: Example }) {
       title: 'Step 3',
       description: 'Lorem ipsum dolor sit amet.',
       tone: 'success',
+    });
+  }
+
+  function priorityQueue() {
+    void modal.alert({
+      id: 'current',
+      title: 'Current dialog',
+      description: 'Lorem ipsum dolor sit amet.',
+    });
+    void modal.alert({
+      id: 'normal',
+      title: 'Normal priority: shown third',
+      description: 'Lorem ipsum dolor sit amet.',
+    });
+    void modal.alert({
+      id: 'high',
+      title: 'High priority: shown second',
+      description: 'Lorem ipsum dolor sit amet.',
+      priority: 10,
     });
   }
 
@@ -129,6 +155,11 @@ function ModalExamples({ example }: { example: Example }) {
         {example === 'queue' && (
           <Button onClick={queue}>Open three dialogs in sequence</Button>
         )}
+        {example === 'priority' && (
+          <Button onClick={priorityQueue}>
+            Open a sequence with a high-priority entry
+          </Button>
+        )}
         {example === 'stacked' && (
           <Button onClick={stacked}>Open dialog with nested confirmation</Button>
         )}
@@ -178,6 +209,22 @@ export const Queue: Story = {
   render: (args: ModalProviderProps) => (
     <ModalProvider {...args}>
       <ModalExamples example="queue" />
+    </ModalProvider>
+  ),
+};
+export const PriorityQueue: Story = {
+  tags: ['example'],
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'The current dialog stays open. After it closes, the later high-priority entry appears before the earlier normal entry.',
+      },
+    },
+  },
+  render: (args: ModalProviderProps) => (
+    <ModalProvider {...args}>
+      <ModalExamples example="priority" />
     </ModalProvider>
   ),
 };
