@@ -91,7 +91,9 @@
     "embla-carousel-react": "8.6.0",
     "embla-carousel-autoplay": "8.6.0",
     "prism-react-renderer": "2.4.1",
-    "react-colorful": "5.8.1"
+    "react-colorful": "5.8.1",
+    "@tanstack/react-virtual": "3.14.19",
+    "dompurify": "3.4.17"
   },
   "devDependencies": {
     "@types/react": "19.3.0",
