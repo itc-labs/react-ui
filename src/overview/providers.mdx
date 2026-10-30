@@ -1,78 +1,39 @@
 import { Meta } from '@storybook/addon-docs/blocks';
 
-<Meta title="Overview/Providers" />
+<Meta title="Guides/Providers & adapters" />
 
-# Providers
+# Providers & adapters
 
-Các control dùng được với text mặc định tiếng Việt, icon Outline, link/ảnh native `a`/`img`. Toast và modal cần provider để hiển thị; các provider khác thêm cấu hình của ứng dụng.
+`UIProvider` configures theme and language. `LinkImageProvider` connects host routing and image rendering. `ToastProvider` and `ModalProvider` mount imperative feedback services. The application owns data fetching and business behavior.
 
-<table>
-  <thead>
-    <tr>
-      <th>Provider</th>
-      <th>Khi nào cần</th>
-      <th>Cấu hình chính</th>
-      <th>Mặc định khi thiếu</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>
-        <code>UIProvider</code>
-      </td>
-      <td>Đổi ngôn ngữ, message, icon variant/pack và token toàn trang</td>
-      <td>
-        <code>locale</code>, <code>translations</code>, <code>fallbackLocale</code>,{' '}
-        <code>messages</code>, <code>theme.icons</code>, <code>theme.tokens</code>
-      </td>
-      <td>Tiếng Việt, icon Outline, token CSS mặc định</td>
-    </tr>
-    <tr>
-      <td>
-        <code>LinkImageProvider</code>
-      </td>
-      <td>Dùng router/ảnh tối ưu của framework</td>
-      <td>
-        <code>Link</code>, <code>Image</code> adapter
-      </td>
-      <td>
-        <code>&lt;a&gt;</code> / <code>&lt;img&gt;</code> native
-      </td>
-    </tr>
-    <tr>
-      <td>
-        <code>ModalProvider</code>
-      </td>
-      <td>Confirm/alert ngắn và nội dung mở bằng API</td>
-      <td>
-        <code>client</code>, <code>className</code>, <code>classNames</code>,{' '}
-        <code>data-testid</code>
-      </td>
-      <td>Không có hàng đợi; gọi facade sẽ báo lỗi</td>
-    </tr>
-    <tr>
-      <td>
-        <code>ToastProvider</code>
-      </td>
-      <td>Hiển thị toast</td>
-      <td>
-        <code>position</code>, <code>duration</code>, <code>maxVisible</code>,{' '}
-        <code>client</code>, classNames
-      </td>
-      <td>Không render toast</td>
-    </tr>
-  </tbody>
-</table>
+Without configuration, controls use the `vi-VN` locale, outline icons, CSS tokens, and native links and images. Toast and modal APIs require mounted providers.
 
-Ứng dụng chịu trách nhiệm tải dữ liệu; UI kit nhận dữ liệu và callback qua props.
+## UIProvider props
 
-## Thứ tự lồng
+All configuration props are optional; `children` is required. Theme types are exported from `@itclabs/react-ui/theme`; locale types from `@itclabs/react-ui/i18n`.
 
-```tsx snippet
+| Prop              | Type                  | Behavior                                                                                                                                                                                                    |
+| ----------------- | --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `theme`           | `UITheme`             | Optional readonly `icons` and `tokens` settings; inherits the parent theme.                                                                                                                                 |
+| `locale`          | `string \| UILocale`  | A locale code or an object containing `code`, readonly `messages`, and optional `calendarLocale`. Inherits the parent; defaults to `vi-VN`.                                                                 |
+| `translations`    | `UITranslations`      | A readonly array of `{ locale: string; messages: Readonly<Partial<UIMessages>> }`. Replaces the inherited catalog when supplied. Defaults to an empty catalog with built-in English and Vietnamese support. |
+| `fallbackLocale`  | `string`              | Fallback locale code for catalog resolution; inherits the parent, defaulting to `en-US`.                                                                                                                    |
+| `messages`        | `Partial<UIMessages>` | Message overrides for this subtree. Values are strings or plural forms with required `other` and optional `Intl.LDMLPluralRule` keys.                                                                       |
+| `calendarLocales` | `UICalendarLocales`   | A readonly record mapping locale codes to `NonNullable<UILocale['calendarLocale']>` (React Day Picker locale objects). Merges with the parent map; defaults to an empty map.                                |
+| `children`        | `ReactNode`           | Application content.                                                                                                                                                                                        |
+
+`UITheme.tokens` is `Readonly<UIThemeTokens>`: typed CSS token names without the `--` prefix and CSS string values. Empty values, unknown names, and unsafe declaration syntax are rejected. `UITheme.icons` accepts `packs`, `defaultPack`, `variant` (`outline` or `bold`), `overrides`, `size`, and `strokeWidth`. Only the kit's internal glyphs ship in its default registry; import individual glyphs or register a catalog for additional icons. See [Theming](?path=/docs/guides-theming--docs) and [Icons](?path=/docs/guides-icons--docs).
+
+String locales resolve against the catalog, then the configured fallback, then English. Missing message keys fall back through the selected built-in locale and fallback catalog. A `UILocale` object is used directly. See [Localization](?path=/docs/guides-localization--docs) for catalogs and calendar locale setup.
+
+## Provider order and mounting
+
+Use this order at the application root. Each example below is a separate complete client module.
+
+```tsx
 'use client';
 
-import NextLink from 'next/link';
-import NextImage from 'next/image';
+import type { ReactNode } from 'react';
 import {
   UIProvider,
   LinkImageProvider,
@@ -80,10 +41,10 @@ import {
   ModalProvider,
 } from '@itclabs/react-ui';
 
-export function UIRoot({ children }: { children: React.ReactNode }) {
+export function UIRoot({ children }: { children: ReactNode }) {
   return (
-    <UIProvider locale="vi-VN">
-      <LinkImageProvider Link={AppLink} Image={AppImage}>
+    <UIProvider locale="en-US">
+      <LinkImageProvider>
         <ToastProvider position="bottom-right">
           <ModalProvider>{children}</ModalProvider>
         </ToastProvider>
@@ -93,67 +54,106 @@ export function UIRoot({ children }: { children: React.ReactNode }) {
 }
 ```
 
-1. **UIProvider ngoài cùng**: ToastProvider, ModalProvider và mọi component đọc nhãn mặc định từ locale của nó.
-2. **LinkImageProvider**: Breadcrumb, Sidebar, DropdownMenu (item có `href`), Avatar và file preview dùng adapter này.
-3. **ToastProvider**: chỉ mount **một** provider gốc để `toast.success/error/...` hoạt động ở mọi nơi, kể cả code không phải React.
+- Put `UIProvider` outside feedback providers so their labels and icons use its configuration.
+- Put `LinkImageProvider` around consumers such as Breadcrumb, Sidebar, menu links, avatars, and file previews.
+- Mount one default `ToastProvider` and one default `ModalProvider` for the exported `toast` and `modal` clients. They do not depend on each other's controllers; either can wrap the other. Keep both around children that use their hooks.
+- Call imperative APIs after mount, for example in event handlers. There is no server or pre-mount queue. `useToast()` and `useModal()` require their respective providers.
 
-4. **ModalProvider**: cùng tầng provider ứng dụng với ToastProvider, bên trong UIProvider và LinkImageProvider. Cả hai bọc children để dùng hook; không phụ thuộc controller của nhau. Chỉ mount một provider gốc cho facade `modal`.
+`ToastProvider` supports `position`, `duration` (milliseconds or `false`), `maxVisible`, `pauseOnHover`, `pauseOnFocusLoss`, `newestOnTop`, `closeLabel`, `viewportLabel`, `client`, `className`, `classNames`, and `data-testid`. Defaults include bottom-right positioning, a 5000 ms duration, and five visible messages.
 
-Dùng modal imperative cho confirm/alert ngắn và code không phải React. Dùng `<Dialog>` khai báo cho form và nội dung dài có state cục bộ. Xem **Components/Modal** và `docs/UI_MODAL.md`.
+`ModalProvider` supports `client`, `className`, `classNames`, and `data-testid`. Use imperative modals for short confirmations and alerts. Use a declarative `Dialog` for longer forms with local state. See [Overlays & feedback](?path=/docs/guides-overlays-feedback--docs).
 
-## Token giao diện qua UIProvider
+## Nesting and scope
 
-`theme.tokens` nhận các chuỗi CSS có tên typed, không có tiền tố `--`; có thể dùng `defineTheme({ tokens: { 'color-brand-700': '#1d4ed8' } })`. Tên lạ, giá trị rỗng và ký tự có thể thoát declaration/style bị từ chối. Xem **Overview/Theming** để biết đầy đủ quy tắc validation và file CSS tham khảo.
+**Theme:** icon settings inherit; nested `packs` and `overrides` merge by key. The first provider supplying nonempty tokens owns a document-wide, unlayered `:root` style, rendered before its children, including during SSR. It updates and disappears with that provider. Descendant token overrides are ignored when an ancestor already owns tokens, with a development warning. Tokens cover portalled overlays; nested providers do not create a local token scope. Use a selector on the document root to switch themes, and avoid competing CSS and provider overrides for the same token.
 
-Provider ngoài cùng có token render `<style>` inline trước children, với rule `:root` không layer. SSR chứa rule ngay; style cập nhật và bị gỡ cùng provider. Rule thắng layer theme mặc định; CSS host không layer còn theo specificity và thứ tự xuất hiện. Chọn CSS hoặc UIProvider cho cùng token để tránh xung đột. Token là toàn trang, bao phủ portal; provider con không tạo scope token riêng.
+**Locale:** nested providers inherit omitted settings. Calendar maps merge, while a supplied translations array replaces the catalog. Message overrides merge for the same locale; switching locale code or supplying a different locale object resets inherited overrides. These settings apply to the React subtree.
 
-## Server Components (Next.js App Router)
+**Adapters:** a nested `LinkImageProvider` replaces only the adapters supplied to it; the other adapter inherits from its parent.
 
-- Đặt các provider trong một file `'use client'` (composition root), rồi dùng trong `layout.tsx`.
-- Không truyền component/hàm (adapter, icon pack) từ Server Component sang Client Component qua props; định nghĩa chúng ngay trong file client đó.
-- `theme.tokens` là chuỗi serializable, có thể truyền từ Server Component; `useTheme().tokens` trả cấu hình đang hoạt động chỉ đọc.
-- `translations` dạng JSON truyền được qua ranh giới server/client; `calendarLocales` là hàm nên khai báo phía client.
-- Không có hàng đợi toast/modal phía server hoặc trước mount: chỉ gọi facade trong trình duyệt sau khi provider mount.
+**Feedback:** each toast or modal provider has its own controller. One client can bind to only one mounted provider. Use `createToastClient()` and `createModalClient()` for independent application roots, and retain those clients for the root's lifetime. For a local subtree, set `client={null}` and call `useToast()` or `useModal()`; the default exported clients still target the root providers. Changing a modal provider's client or unmounting it settles pending modals as dismissed.
 
-## Adapter link và ảnh
+## SSR and client boundaries
 
-```tsx snippet
+In Next.js App Router, put providers, hooks, and adapters in a `'use client'` module and render that wrapper from the server layout. Server-rendered content can be passed as `children`.
+
+Do not pass adapter functions or icon components from a Server Component across the client boundary. Define or import them in the client module. Token strings and JSON translation catalogs are serializable. Calendar locale objects contain functions, so import them on the client as well. Keep the server's initial locale and theme consistent with the client's initial render.
+
+## Next.js App Router adapters
+
+In a Next.js host with `next` installed, use `next/link` and `next/image`. The image adapter falls back to a native image when either dimension is missing, because this recipe uses explicit dimensions for optimized images. Both branches preserve native attributes, events, refs, and `data-testid`.
+
+```tsx
+'use client';
+
+import type { ReactNode } from 'react';
+import NextLink from 'next/link';
+import NextImage from 'next/image';
+import {
+  UIProvider,
+  LinkImageProvider,
+  ToastProvider,
+  ModalProvider,
+  type UiLinkProps,
+  type UiImageProps,
+} from '@itclabs/react-ui';
+
 function AppLink(props: UiLinkProps) {
   return <NextLink {...props} />;
 }
 
 function AppImage({ width, height, ...props }: UiImageProps) {
-  // next/image cần kích thước; thiếu thì dùng img native.
-  if (!width || !height) return <img {...props} />;
+  if (width === undefined || height === undefined) {
+    return <img {...props} width={width} height={height} />;
+  }
 
   return <NextImage {...props} width={width} height={height} />;
 }
+
+export function AppProviders({ children }: { children: ReactNode }) {
+  return (
+    <UIProvider locale="en-US">
+      <LinkImageProvider Link={AppLink} Image={AppImage}>
+        <ToastProvider>
+          <ModalProvider>{children}</ModalProvider>
+        </ToastProvider>
+      </LinkImageProvider>
+    </UIProvider>
+  );
+}
 ```
 
-Với React Router, map `href` sang `to`: `<RouterLink {...props} to={props.href} />`. Adapter nhận đủ thuộc tính native, ref, sự kiện và `data-testid`.
+Render `AppProviders` around the layout's children inside the document body. Supply positive image dimensions when requesting optimization and configure allowed remote image sources in the host's Next.js configuration.
 
-## Lồng theo phạm vi
+## React Router link adapter
 
-- `UIProvider` con bỏ qua `theme.tokens` riêng nếu cha đã có token và cảnh báo một lần trong development; dùng selector CSS trên `<html>` để đổi theme. Provider lồng nhau vẫn gộp icon pack/override của cha; `locale`/`messages` của con áp dụng cho nhánh con.
-- `LinkImageProvider` lồng nhau chỉ thay adapter được truyền, adapter còn lại kế thừa từ cha.
-- Ứng dụng độc lập trên cùng trang dùng `createToastClient()` và truyền `client` cho `ToastProvider` riêng; `client={null}` khi chỉ dùng `useToast()` trong một nhánh.
+React Router's `Link` takes `to` instead of `href`. This complete module accepts the host's router component as a prop, keeping the kit independent of the router package. Pass the `Link` exported by your installed `react-router` or `react-router-dom` package as `RouterLink`, and render this wrapper **inside** your router. Native image rendering continues to inherit from the surrounding provider.
 
-- Modal dùng `createModalClient()` cho ứng dụng độc lập và `client={null}` với `useModal()` cho phạm vi cục bộ. Đổi client hoặc unmount giải quyết mọi modal như bị hủy.
+```tsx
+'use client';
 
-## Test và Storybook
+import { useMemo, type ComponentType, type ReactNode } from 'react';
+import { LinkImageProvider, type UiLinkProps } from '@itclabs/react-ui';
 
-Bọc cùng bộ provider của ứng dụng (hoặc chỉ provider cần cho test) quanh component:
+type RouterLinkProps = Omit<UiLinkProps, 'href'> & { to: string };
 
-```tsx snippet
-render(
-  <UIProvider locale="en-US">
-    <ToastProvider>
-      <Component />
-    </ToastProvider>
-  </UIProvider>,
-);
+export function RouterAdapters({
+  RouterLink,
+  children,
+}: {
+  RouterLink: ComponentType<RouterLinkProps>;
+  children: ReactNode;
+}) {
+  const AppLink = useMemo(() => {
+    function Adapter({ href, ...props }: UiLinkProps) {
+      return <RouterLink {...props} to={href} />;
+    }
+
+    return Adapter;
+  }, [RouterLink]);
+
+  return <LinkImageProvider Link={AppLink}>{children}</LinkImageProvider>;
+}
 ```
 
-Xem thêm: **Foundations/Localization**, **Components/Toast**, `docs/UI_LOCALIZATION.md`, `docs/UI_TOAST.md`, `docs/UI_COMPOSITION_API.md`.
-
-Icon chỉ kèm các glyph nội bộ của kit. Khi dùng tên khác, import từng glyph qua `@itclabs/react-ui/icons/outline/<name>` hoặc `@itclabs/react-ui/icons/bold/<name>` và truyền `glyph`; để tra cứu đầy đủ, đăng ký `outlineCatalog`/`boldCatalog` từ `@itclabs/react-ui/icons/catalog` trong `UIProvider theme={defineTheme({ icons: { packs: { outline: outlineCatalog, bold: boldCatalog } } })}`. Xem Components/Icon để chọn cách dùng và variant.
+Keep the adapter's identity stable to avoid remounting links. Use the same provider configuration in tests and stories as in the host application, adding only the feedback providers a test needs.
