@@ -178,10 +178,45 @@ it('keeps controlled selection host-owned and does not echo prop updates', () =>
   expect(change).not.toHaveBeenCalled();
 });
 
+it('plays video through custom controls and supports a custom play button', () => {
+  const play = vi
+    .spyOn(HTMLMediaElement.prototype, 'play')
+    .mockImplementation(function (this: HTMLMediaElement) {
+      this.dispatchEvent(new Event('play'));
+
+      return Promise.resolve();
+    });
+  render({ defaultIndex: 1 });
+  expect(part('video-b-controls')).toBeNull();
+  click('video-b-play');
+  expect(play).toHaveBeenCalledOnce();
+  expect(part('video-b-play')).toBeNull();
+  expect(part('video-b-toggle').getAttribute('aria-label')).toBe('Pause video');
+  expect(part('video-b-seek').getAttribute('aria-label')).toBe('Seek');
+  click('video-b-mute');
+  expect((part('video-b') as HTMLVideoElement).muted).toBe(true);
+
+  render({
+    defaultIndex: 1,
+    renderPlayButton: ({ buttonProps }) => (
+      <button {...buttonProps} data-testid="gallery-custom-play">
+        Play
+      </button>
+    ),
+  });
+
+  act(() => part('video-b').dispatchEvent(new Event('pause')));
+
+  expect(part('video-b-play')).toBeNull();
+  expect(part('custom-play').getAttribute('aria-label')).toBe('Play video');
+  click('custom-play');
+  expect(play).toHaveBeenCalledTimes(2);
+});
+
 it('pauses video after leaving its slide and keeps inactive media inert', () => {
   render({ defaultIndex: 1 });
   const video = part('video-b') as HTMLVideoElement;
-  expect(video.controls).toBe(true);
+  expect(video.controls).toBe(false);
   expect(video.playsInline).toBe(true);
   expect(video.getAttribute('poster')).toBe('b.svg');
   expect(video.getAttribute('aria-label')).toBe('Second video');
@@ -364,7 +399,7 @@ it('navigates the lightbox by buttons, keys and thumbnails, resets zoom, and pla
   act(() => lb('next').click());
 
   expect(lb('counter').textContent).toBe('2 / 3');
-  expect((lb('video') as HTMLVideoElement).controls).toBe(true);
+  expect(lb('video-play').getAttribute('aria-label')).toBe('Play video');
   expect(lb('zoomIn').hasAttribute('disabled')).toBe(true);
   key('ArrowRight', lb('video'));
   expect(lb('counter').textContent).toBe('3 / 3');

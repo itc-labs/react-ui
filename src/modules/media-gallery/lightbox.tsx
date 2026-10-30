@@ -16,6 +16,7 @@ import { ZoomOutIcon as ZoomOutBoldIcon } from '../../components/icon/bold/zoom-
 import { UiImage } from '../../components/link-image-provider';
 import { useUILocale } from '../../i18n/provider';
 import type { MediaItem } from './index';
+import { VideoPlayer, type RenderVideoPlayButton } from './video-player';
 
 export type LightboxClassNames = Partial<
   Record<
@@ -30,6 +31,8 @@ export type LightboxClassNames = Partial<
     | 'viewport'
     | 'media'
     | 'video'
+    | 'playButton'
+    | 'videoControls'
     | 'thumbnails'
     | 'thumbnail',
     string
@@ -46,6 +49,8 @@ export interface LightboxProps extends Omit<
   index?: number;
   defaultIndex?: number;
   onIndexChange?: (index: number) => void;
+  /** Replaces the centered play button shown on paused videos. */
+  renderPlayButton?: RenderVideoPlayButton | undefined;
   classNames?: LightboxClassNames;
 }
 
@@ -65,6 +70,7 @@ export function Lightbox({
   index,
   defaultIndex = 0,
   onIndexChange,
+  renderPlayButton,
   className,
   classNames,
   'data-testid': testId,
@@ -200,6 +206,7 @@ export function Lightbox({
             key={`${isOpen}-${item.id}-${item.src}`}
             item={item}
             classNames={classNames}
+            renderPlayButton={renderPlayButton}
             testId={testId}
           />
         )}
@@ -263,10 +270,12 @@ export function Lightbox({
 function LightboxMedia({
   item,
   classNames,
+  renderPlayButton,
   testId,
 }: {
   item: MediaItem;
   classNames: LightboxClassNames | undefined;
+  renderPlayButton: RenderVideoPlayButton | undefined;
   testId: string | undefined;
 }) {
   const { t } = useUILocale();
@@ -348,20 +357,18 @@ function LightboxMedia({
         }}
       >
         {item.type === 'video' ? (
-          <video
+          <VideoPlayer
             src={item.src}
             poster={item.poster}
-            controls
-            playsInline
-            preload="metadata"
-            aria-label={item.alt}
-            data-testid={partTestId(testId, 'video')}
-            className={cn(
-              'h-full w-full object-contain',
-              focusRingClassName,
-              classNames?.media,
-              classNames?.video,
-            )}
+            label={item.alt}
+            renderPlayButton={renderPlayButton}
+            testId={partTestId(testId, 'video')}
+            videoClassName={cn(focusRingClassName, classNames?.media)}
+            classNames={{
+              video: classNames?.video,
+              playButton: classNames?.playButton,
+              controls: classNames?.videoControls,
+            }}
           />
         ) : (
           <UiImage

@@ -10,8 +10,10 @@ import { UiImage } from '../../components/link-image-provider';
 import { useUILocale } from '../../i18n/provider';
 import { Carousel } from '../carousel';
 import { Lightbox, clampMediaIndex } from './lightbox';
+import { VideoPlayer, type RenderVideoPlayButton } from './video-player';
 export { Lightbox } from './lightbox';
 export type { LightboxProps, LightboxClassNames } from './lightbox';
+export type { RenderVideoPlayButton, VideoPlayButtonState } from './video-player';
 
 export interface MediaItem {
   id: string;
@@ -25,7 +27,15 @@ export interface MediaItem {
 }
 export type MediaGalleryClassNames = Partial<
   Record<
-    'root' | 'main' | 'slide' | 'media' | 'thumbnails' | 'thumbnail' | 'video',
+    | 'root'
+    | 'main'
+    | 'slide'
+    | 'media'
+    | 'thumbnails'
+    | 'thumbnail'
+    | 'video'
+    | 'playButton'
+    | 'videoControls',
     string
   >
 >;
@@ -46,6 +56,8 @@ export interface MediaGalleryProps extends Omit<
   zoomScale?: number;
   lightbox?: boolean;
   onOpen?: (index: number) => void;
+  /** Replaces the centered play button shown on paused videos. */
+  renderPlayButton?: RenderVideoPlayButton;
   classNames?: MediaGalleryClassNames;
   'data-testid'?: string;
 }
@@ -62,6 +74,7 @@ export function MediaGallery({
   zoomScale = 2,
   lightbox = true,
   onOpen,
+  renderPlayButton,
   className,
   classNames,
   'data-testid': testId,
@@ -191,7 +204,7 @@ export function MediaGallery({
             style={{ aspectRatio }}
           >
             {item.type === 'video' ? (
-              <video
+              <VideoPlayer
                 ref={(node) => {
                   if (node) {
                     videoRefs.current.set(item.id, node);
@@ -203,22 +216,15 @@ export function MediaGallery({
                 }}
                 src={item.src}
                 poster={item.poster}
-                width={item.width}
-                height={item.height}
-                controls
-                playsInline
-                preload="metadata"
-                aria-label={item.alt}
-                data-testid={partTestId(testId, 'video', item.id)}
-                className={cn(
-                  'h-full w-full object-contain',
-                  focusRingClassName,
-                  classNames?.media,
-                  classNames?.video,
-                )}
-                onClick={() => openMedia(itemIndex)}
-                onKeyDown={(event) => {
-                  if (event.key === 'Enter') openMedia(itemIndex);
+                label={item.alt}
+                fit={fit}
+                renderPlayButton={renderPlayButton}
+                testId={partTestId(testId, 'video', item.id)}
+                videoClassName={cn(focusRingClassName, classNames?.media)}
+                classNames={{
+                  video: classNames?.video,
+                  playButton: classNames?.playButton,
+                  controls: classNames?.videoControls,
                 }}
               />
             ) : (
@@ -310,6 +316,7 @@ export function MediaGallery({
           }}
           index={active}
           onIndexChange={select}
+          renderPlayButton={renderPlayButton}
           data-testid={partTestId(testId, 'lightbox')}
         />
       )}
