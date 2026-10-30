@@ -20,6 +20,8 @@ import { filterNavByAccess, resolveActiveNav } from '../navigation';
 import { SidebarContext, SidebarAppearanceContext } from './context';
 import { sidebarToneStyle } from './appearance';
 import { SidebarEntries } from './entries';
+import { SidebarSearchControl, isSidebarSearch } from './search';
+import { useSidebarShortcut } from './use-sidebar-state';
 import { SidebarHeader } from './header';
 import { useSidebarState } from './use-sidebar-state';
 import type { SidebarProps } from './types';
@@ -28,7 +30,12 @@ export type {
   SidebarProps,
   SidebarBrand,
   SidebarClassNames,
+  SidebarSearch,
+  SidebarWorkspaceSwitcher,
+  SidebarItemAction,
 } from './types';
+
+const noop = () => {};
 
 export function Sidebar<TAccess = unknown>({
   variant = 'sidebar',
@@ -39,6 +46,7 @@ export function Sidebar<TAccess = unknown>({
   ref,
   header,
   footer,
+  search,
   items,
   navigationLabel,
   currentPath,
@@ -60,6 +68,8 @@ export function Sidebar<TAccess = unknown>({
   ...props
 }: SidebarProps<TAccess>) {
   const { t } = useUILocale();
+  const searchConfig = isSidebarSearch(search) ? search : undefined;
+  useSidebarShortcut(searchConfig?.shortcut, searchConfig?.onOpen ?? noop);
   const context = useContext(SidebarContext);
   const generatedId = useId();
   const sidebarId = props.id ?? context?.id ?? generatedId;
@@ -157,6 +167,14 @@ export function Sidebar<TAccess = unknown>({
           />
         )}
       </div>
+      {search != null && (
+        <SidebarSearchControl
+          search={search}
+          collapsed={rail}
+          testId={id}
+          classNames={classNames}
+        />
+      )}
       <div
         data-testid={partTestId(id, 'content')}
         className={cn(

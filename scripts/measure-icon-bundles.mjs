@@ -136,7 +136,8 @@ console.log(JSON.stringify(sizes, null, 2));
 // Gzip budgets with a little headroom; raise them only for an intentional feature.
 for (const [name, limit] of Object.entries({
   Icon: 20_000,
-  Rating: 20_000,
+  // Shared Sidebar tool translations add about 65 gzip bytes to locale consumers.
+  Rating: 20_100,
   Divider: 10_600,
   Kbd: 19_500,
   Slider: 32_300,

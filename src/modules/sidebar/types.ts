@@ -16,10 +16,20 @@ type NavigationEntry<TAccess> = EntryBase<TAccess> & {
   icon?: IconName | IconGlyph;
   badge?: number | Omit<BadgeProps, 'children'>;
   disabled?: boolean;
+  actions?: SidebarItemAction[];
+  onAdd?: () => void;
+  addLabel?: string;
 };
 export type SidebarEntry<TAccess = unknown> =
   | (NavigationEntry<TAccess> & { type?: 'item'; href?: string; onSelect?: () => void })
-  | (EntryBase<TAccess> & { type: 'group'; items: readonly SidebarEntry<TAccess>[] })
+  | (EntryBase<TAccess> & {
+      type: 'group';
+      items: readonly SidebarEntry<TAccess>[];
+      collapsible?: boolean;
+      defaultOpen?: boolean;
+      open?: boolean;
+      onOpenChange?: (open: boolean) => void;
+    })
   | (NavigationEntry<TAccess> & {
       type: 'submenu';
       items: readonly SidebarEntry<TAccess>[];
@@ -29,7 +39,27 @@ export type SidebarEntry<TAccess = unknown> =
       toggleLabel?: string;
     } & ({ href: string; onSelect?: () => void } | { href?: never; onSelect?: never }));
 
+export type SidebarItemAction = {
+  id: string;
+  label: string;
+  icon?: IconName | IconGlyph;
+  onSelect: () => void;
+  danger?: boolean;
+  disabled?: boolean;
+};
+export type SidebarSearch = {
+  placeholder?: string;
+  shortcut?: string;
+  onOpen: () => void;
+};
+export type SidebarWorkspaceSwitcher = {
+  items: { id: string; label: ReactNode; description?: ReactNode; logo?: ReactNode }[];
+  value: string;
+  onValueChange: (id: string) => void;
+  footer?: ReactNode;
+};
 export type SidebarBrand = {
+  switcher?: SidebarWorkspaceSwitcher;
   logo?: ReactNode;
   title: ReactNode;
   subtitle?: ReactNode;
@@ -42,6 +72,12 @@ export type SidebarClassNames = SlotClasses<
   | 'brandLogo'
   | 'brandTitle'
   | 'brandSubtitle'
+  | 'search'
+  | 'workspaceMenu'
+  | 'workspaceItem'
+  | 'groupContent'
+  | 'itemActions'
+  | 'actionButton'
   | 'content'
   | 'footer'
   | 'nav'
@@ -71,6 +107,7 @@ export type SidebarProps<TAccess = unknown> = ComponentProps<'aside'> &
     tone?: 'default' | 'dark' | 'brand';
     itemVariant?: 'raised' | 'subtle' | 'bar' | 'solid';
     header?: ReactNode | SidebarBrand;
+    search?: ReactNode | SidebarSearch;
     footer?: ReactNode;
     items?: readonly SidebarEntry<TAccess>[];
     /** Absolute host pathname; no router is imported. */

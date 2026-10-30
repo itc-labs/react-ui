@@ -3,7 +3,8 @@
 import { useUILocale } from '../../i18n/provider';
 import { cn, partTestId } from '../../components/common';
 import { SidebarEntryIcon, SidebarEntryLabel, SidebarRailEntry } from './rail-entry';
-import { SidebarGroup } from './index';
+import { SidebarEntryGroup } from './group';
+import { SidebarItemRow } from './item-actions';
 import { SidebarItem } from './item';
 import {
   SidebarSubmenu,
@@ -40,12 +41,13 @@ export function SidebarEntries({
         const id = partTestId(testId, item.type ?? 'item', item.id);
         if (item.type === 'group')
           return (
-            <SidebarGroup
+            <SidebarEntryGroup
               key={item.id}
-              label={item.label}
-              data-testid={id}
-              className={cn(classNames?.group, item.className)}
-              labelClassName={cn(collapsed && 'sr-only', classNames?.groupLabel)}
+              item={item}
+              activeKey={childActivePath.join('/')}
+              collapsed={collapsed}
+              testId={id}
+              classNames={classNames}
             >
               <div className="grid gap-0.5">
                 <SidebarEntries
@@ -57,7 +59,7 @@ export function SidebarEntries({
                   onNavigate={onNavigate}
                 />
               </div>
-            </SidebarGroup>
+            </SidebarEntryGroup>
           );
         if (collapsed)
           return (
@@ -95,26 +97,40 @@ export function SidebarEntries({
               {...(item.onOpenChange ? { onOpenChange: item.onOpenChange } : {})}
               className={cn(classNames?.submenu, item.className)}
             >
-              {item.href ? (
-                <SidebarSubmenuRow>
-                  <SidebarItem
-                    {...(!item.disabled ? { href: item.href } : {})}
-                    active={active}
-                    aria-disabled={item.disabled || undefined}
-                    {...(item.onSelect || onNavigate ? { onClick: select } : {})}
-                    className={classNames?.item}
-                    icon={icon}
-                  >
-                    {label}
-                  </SidebarItem>
+              <SidebarItemRow item={item} testId={id} classNames={classNames}>
+                {item.href ? (
+                  <SidebarSubmenuRow>
+                    <SidebarItem
+                      {...(!item.disabled ? { href: item.href } : {})}
+                      active={active}
+                      aria-disabled={item.disabled || undefined}
+                      {...(item.onSelect || onNavigate ? { onClick: select } : {})}
+                      className={classNames?.item}
+                      icon={icon}
+                    >
+                      {label}
+                    </SidebarItem>
+                    <SidebarSubmenuTrigger
+                      iconOnly
+                      aria-label={
+                        item.toggleLabel ??
+                        (typeof item.label === 'string'
+                          ? t('sidebar.toggle', { label: item.label })
+                          : undefined)
+                      }
+                      className={classNames?.submenuTrigger}
+                      classNames={{
+                        icon: classNames?.submenuIcon ?? '',
+                        label: cn('flex-1', classNames?.submenuLabel),
+                        chevron: classNames?.submenuChevron ?? '',
+                      }}
+                    >
+                      {item.label}
+                    </SidebarSubmenuTrigger>
+                  </SidebarSubmenuRow>
+                ) : (
                   <SidebarSubmenuTrigger
-                    iconOnly
-                    aria-label={
-                      item.toggleLabel ??
-                      (typeof item.label === 'string'
-                        ? t('sidebar.toggle', { label: item.label })
-                        : undefined)
-                    }
+                    icon={icon}
                     className={classNames?.submenuTrigger}
                     classNames={{
                       icon: classNames?.submenuIcon ?? '',
@@ -122,22 +138,10 @@ export function SidebarEntries({
                       chevron: classNames?.submenuChevron ?? '',
                     }}
                   >
-                    {item.label}
+                    {label}
                   </SidebarSubmenuTrigger>
-                </SidebarSubmenuRow>
-              ) : (
-                <SidebarSubmenuTrigger
-                  icon={icon}
-                  className={classNames?.submenuTrigger}
-                  classNames={{
-                    icon: classNames?.submenuIcon ?? '',
-                    label: cn('flex-1', classNames?.submenuLabel),
-                    chevron: classNames?.submenuChevron ?? '',
-                  }}
-                >
-                  {label}
-                </SidebarSubmenuTrigger>
-              )}
+                )}
+              </SidebarItemRow>
               <SidebarSubmenuContent
                 data-testid={partTestId(id, 'content')}
                 className={classNames?.submenuContent}
@@ -156,44 +160,51 @@ export function SidebarEntries({
           );
         if (!item.href && item.onSelect)
           return (
-            <SidebarItem
+            <SidebarItemRow
               key={item.id}
-              asChild
-              active={active}
-              icon={icon}
-              className={cn(classNames?.item, item.className)}
+              item={item}
+              testId={id}
+              classNames={classNames}
             >
-              <button
-                type="button"
-                disabled={item.disabled}
-                onClick={select}
-                data-testid={id}
+              <SidebarItem
+                asChild
+                active={active}
+                icon={icon}
+                className={cn(classNames?.item, item.className)}
               >
-                {label}
-              </button>
-            </SidebarItem>
+                <button
+                  type="button"
+                  disabled={item.disabled}
+                  onClick={select}
+                  data-testid={id}
+                >
+                  {label}
+                </button>
+              </SidebarItem>
+            </SidebarItemRow>
           );
 
         return (
-          <SidebarItem
-            key={item.id}
-            {...(!item.disabled && item.href ? { href: item.href } : {})}
-            data-testid={id}
-            {...((item.onSelect || onNavigate) && !item.disabled
-              ? { onClick: select }
-              : {})}
-            aria-disabled={item.disabled || undefined}
-            {...(item.disabled ? { tabIndex: -1 } : {})}
-            active={active}
-            icon={icon}
-            className={cn(
-              item.disabled && 'cursor-not-allowed opacity-50',
-              classNames?.item,
-              item.className,
-            )}
-          >
-            {label}
-          </SidebarItem>
+          <SidebarItemRow key={item.id} item={item} testId={id} classNames={classNames}>
+            <SidebarItem
+              {...(!item.disabled && item.href ? { href: item.href } : {})}
+              data-testid={id}
+              {...((item.onSelect || onNavigate) && !item.disabled
+                ? { onClick: select }
+                : {})}
+              aria-disabled={item.disabled || undefined}
+              {...(item.disabled ? { tabIndex: -1 } : {})}
+              active={active}
+              icon={icon}
+              className={cn(
+                item.disabled && 'cursor-not-allowed opacity-50',
+                classNames?.item,
+                item.className,
+              )}
+            >
+              {label}
+            </SidebarItem>
+          </SidebarItemRow>
         );
       })}
     </>

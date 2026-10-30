@@ -62,10 +62,38 @@ const menu: SidebarEntry<Permission>[] = [
 
 `SidebarProps<TAccess>` and `SidebarEntry<TAccess>` preserve the host's permission type. Sidebar filters before matching; `canAccess` is optional and omitting it leaves all entries visible. `isActive` receives `(entry, currentPath)` and follows the same precedence as the helper. Omitting `currentPath` keeps explicit active flags working; predicates then receive an empty path. Only the winning row receives `aria-current="page"`; its ancestors receive branch highlighting. Active descendants reveal uncontrolled branches when they become active. A host-controlled `open` remains authoritative, and users can manually collapse an active branch. Existing className/classNames slots, refs, localized labels and stable partTestId selectors remain available. Permission/path changes are processed on each render.
 
+### Sidebar header and item tools
+
+A structured `header` accepts `switcher: { items, value, onValueChange, footer? }`.
+Each workspace has a stable `id`, ReactNode `label`, optional `description` and
+optional `logo`. The brand becomes a menu button, including its logo in the rail;
+`href` is used only when no switcher is supplied. Selection stays controlled by the
+host, which also supplies the current brand title/logo and any footer action.
+
+`search` accepts a ReactNode or `{ placeholder?, shortcut?, onOpen }`. The default
+launcher displays localized search copy and platform-aware Kbd caps. Shortcuts use
+the same chord syntax as `toggleShortcut` (for example `mod+k`) and ignore editable
+fields, repeats, composing input and already handled events. One listener serves
+both desktop and mobile launchers. The host owns the search dialog and results.
+
+Group entries accept `collapsible`, `defaultOpen` (defaults to true), `open` and
+`onOpenChange`. Enter/Space toggles the label. An initially active uncontrolled
+group opens even with `defaultOpen: false`; entering a different active child opens
+it again. A controlled `open` remains authoritative, with route-driven opening
+reported through `onOpenChange(true)`. Rail groups show their items without group
+controls.
+
+Items and submenus accept `actions: { id, label, icon?, onSelect, danger?, disabled? }[]`
+and `onAdd` with optional `addLabel`. Buttons sit beside the navigation control and
+do not navigate or toggle submenus. Hover/focus reveals them; touch devices keep
+them visible. Rail rows omit these buttons. Generated accessible names include the
+item label. New styling slots are `search`, `workspaceMenu`, `workspaceItem`,
+`groupContent`, `itemActions` and `actionButton`.
+
 ### Sidebar rail and mobile navigation
 
 `Sidebar` also exports `SidebarBrand` and `SidebarClassNames`. `header` accepts
-any ReactNode (for example a workspace switcher) or `{ logo?, title, subtitle?, href? }`.
+any ReactNode (for example a workspace switcher) or `{ logo?, title, subtitle?, href?, switcher? }`.
 Structured brands use UiLink when `href` is supplied; title/subtitle become
 screen-reader-only in the rail. Header and footer remain in view while the middle
 scrolls inside a viewport-height, sticky desktop sidebar. Custom header/footer nodes
@@ -314,7 +342,7 @@ mobile entries are scoped under `-drawer`. Drawer also derives its standard part
 ### Brand, switcher and active indicator
 
 The surface bar is at least 64px tall with a bottom border. `brand` accepts a
-ReactNode or `{ logo?, title, subtitle?, href? }`. Structured brands render a
+ReactNode or `{ logo?, title, subtitle?, href?, switcher? }`. Structured brands render a
 rounded accent logo tile, bold title and muted uppercase subtitle. Supply an
 `Icon` glyph or image node as `logo`; override `classNames.brandLogo` for image
 backgrounds. `href` uses UiLink and takes precedence over legacy `brandHref`.
