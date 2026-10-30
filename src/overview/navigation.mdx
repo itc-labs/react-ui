@@ -156,7 +156,7 @@ before resolving active state and remove empty groups and sections. Without a
 
 ## Next.js App Router: client root
 
-Mount this client root in a persistent layout, inside the host's `UIProvider`.
+Mount this client root in a persistent layout, using `UIProvider` for the host adapters.
 After verifying the session, the server supplies permissions as a serializable
 array. Import menu data and define adapters in the client module so functions do
 not cross the server/client boundary.
@@ -172,7 +172,7 @@ See [usePathname](https://nextjs.org/docs/app/api-reference/functions/use-pathna
 import type { ReactNode } from 'react';
 import NextLink from 'next/link';
 import {
-  LinkImageProvider,
+  UIProvider,
   Navbar,
   TopLoaderProvider,
   type NavbarItem,
@@ -195,7 +195,7 @@ export function NavigationRoot({
   permissions: readonly string[];
 }) {
   return (
-    <LinkImageProvider Link={AppLink}>
+    <UIProvider link={AppLink}>
       <TopLoaderProvider trackLinks currentPath={pathname}>
         <Navbar
           brand="Lorem ipsum"
@@ -207,15 +207,15 @@ export function NavigationRoot({
         />
         {children}
       </TopLoaderProvider>
-    </LinkImageProvider>
+    </UIProvider>
   );
 }
 ```
 
 To add Sidebar, import `Sidebar` and `sidebarItems` in that client module, then pass
 `items={sidebarItems}`, `currentPath={pathname}`, and the same permission callback.
-If no ancestor supplies an image adapter, omitting `Image` keeps native images;
-otherwise the adapter inherits from the nearest `LinkImageProvider`.
+If no ancestor supplies an image adapter, omitting `image` keeps native images;
+otherwise the adapter inherits from the nearest adapter provider.
 
 For query-only navigation, combine pathname with `useSearchParams()` for
 TopLoaderProvider's `currentPath`; keep Navbar's path as the pathname. Follow the
@@ -235,7 +235,7 @@ Memoizing the adapter keeps its identity stable across route changes.
 
 import { useMemo, type ComponentType, type ReactNode } from 'react';
 import {
-  LinkImageProvider,
+  UIProvider,
   Navbar,
   TopLoaderProvider,
   type NavbarItem,
@@ -272,7 +272,7 @@ export function NavigationRoot({
   }, [RouterLink]);
 
   return (
-    <LinkImageProvider Link={AppLink}>
+    <UIProvider link={AppLink}>
       <TopLoaderProvider trackLinks currentPath={pathname + search}>
         <Navbar
           brand="Lorem ipsum"
@@ -284,7 +284,7 @@ export function NavigationRoot({
         />
         {children}
       </TopLoaderProvider>
-    </LinkImageProvider>
+    </UIProvider>
   );
 }
 ```

@@ -58,7 +58,6 @@ This complete client module uses native link and image adapters. Wrap your scree
 import type { ReactNode } from 'react';
 import {
   UIProvider,
-  LinkImageProvider,
   ToastProvider,
   ModalProvider,
   type UiLinkProps,
@@ -75,12 +74,10 @@ function AppImage(props: UiImageProps) {
 
 export function UIRoot({ children }: { children: ReactNode }) {
   return (
-    <UIProvider locale="en-US">
-      <LinkImageProvider Link={AppLink} Image={AppImage}>
-        <ToastProvider>
-          <ModalProvider>{children}</ModalProvider>
-        </ToastProvider>
-      </LinkImageProvider>
+    <UIProvider locale="en-US" link={AppLink} image={AppImage}>
+      <ToastProvider>
+        <ModalProvider>{children}</ModalProvider>
+      </ToastProvider>
     </UIProvider>
   );
 }

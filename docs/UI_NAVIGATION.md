@@ -1,6 +1,6 @@
 # Navigation
 
-The host supplies paths and permission decisions. The kit never imports a router or reads location/session globals. Sidebar links continue to use UiLink and the host's LinkImageProvider adapter.
+The host supplies paths and permission decisions. The kit never imports a router or reads location/session globals. Sidebar links continue to use UiLink and the host's UIProvider link adapter.
 
 ## Pure helpers
 
@@ -143,7 +143,7 @@ UI hiding is not security. Users can enter URLs directly or call APIs without us
 
 ### Next.js host
 
-Keep framework imports in the host. A client navigation wrapper passes [usePathname](https://nextjs.org/docs/app/api-reference/functions/use-pathname) to Sidebar. `items` is the typed menu above; the server provides serializable granted permissions. Install a Next Link adapter through LinkImageProvider in the host composition root for client navigation (see [composition guidance](UI_COMPOSITION_API.md#link-and-image-boundary)).
+Keep framework imports in the host. A client navigation wrapper passes [usePathname](https://nextjs.org/docs/app/api-reference/functions/use-pathname) to Sidebar. `items` is the typed menu above; the server provides serializable granted permissions. Install a Next Link adapter through UIProvider link in the host composition root for client navigation (see [composition guidance](UI_COMPOSITION_API.md#link-and-image-boundary)).
 
 ```tsx
 'use client';
@@ -195,7 +195,7 @@ Choose matchers/permissions for the host's route tree. Also verify authorization
 
 ### React Router host
 
-Read [useLocation](https://reactrouter.com/api/hooks/useLocation) inside the host router and pass its pathname. Configure a LinkImageProvider adapter mapping UiLink's `href` to React Router Link's `to`, forwarding native props and ref.
+Read [useLocation](https://reactrouter.com/api/hooks/useLocation) inside the host router and pass its pathname. Configure a UIProvider link adapter mapping UiLink's `href` to React Router Link's `to`, forwarding native props and ref.
 
 ```tsx
 import { useLocation } from 'react-router';

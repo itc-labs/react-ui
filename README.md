@@ -55,7 +55,6 @@ Every provider is optional; components fall back to sensible defaults (Vietnames
 import type { ReactNode } from 'react';
 import {
   UIProvider,
-  LinkImageProvider,
   ToastProvider,
   ModalProvider,
   defineTheme,
@@ -71,32 +70,34 @@ const theme = defineTheme({
 export function UIRoot({ children }: { children: ReactNode }) {
   return (
     <UIProvider
+      link={AppLink}
+      image={AppImage}
       theme={theme}
       locale="en-US"
       fallbackLocale="en-US"
       messages={{ 'dialog.close': 'Close panel' }}
     >
-      <LinkImageProvider Link={AppLink} Image={AppImage}>
-        <ToastProvider>
-          <ModalProvider>{children}</ModalProvider>
-        </ToastProvider>
-      </LinkImageProvider>
+      <ToastProvider>
+        <ModalProvider>{children}</ModalProvider>
+      </ToastProvider>
     </UIProvider>
   );
 }
 ```
 
-| Provider            | Purpose                                                   |
-| ------------------- | --------------------------------------------------------- |
-| `UIProvider`        | Locale, translations, icon theme and runtime theme tokens |
-| `LinkImageProvider` | Router link / optimized image adapters (e.g. Next.js)     |
-| `ToastProvider`     | Enables `toast.success/error/info/warning` anywhere       |
-| `ModalProvider`     | Enables `modal.confirm/alert/open` with a FIFO queue      |
+| Provider            | Purpose                                              |
+| ------------------- | ---------------------------------------------------- |
+| `UIProvider`        | Locale, theme, router link and image adapters        |
+| `LinkImageProvider` | Advanced/scoped link and image adapter overrides     |
+| `ToastProvider`     | Enables `toast.success/error/info/warning` anywhere  |
+| `ModalProvider`     | Enables `modal.confirm/alert/open` with a FIFO queue |
 
 `UIProvider` props:
 
 | Prop              | Purpose                                                                              |
 | ----------------- | ------------------------------------------------------------------------------------ |
+| `link`            | `UiLinkComponent`: host router link adapter; inherits when omitted                   |
+| `image`           | `UiImageComponent`: host image adapter; inherits when omitted                        |
 | `theme`           | `defineTheme({ tokens, icons })`: CSS token overrides and icon variant, size, packs  |
 | `locale`          | Locale code (`'vi-VN'` default, `'en-US'` built in) or a locale from `defineLocale`  |
 | `translations`    | Extra catalogs: `[{ locale: 'fr-FR', messages: { … } }]`; missing keys fall back     |
@@ -106,7 +107,7 @@ export function UIRoot({ children }: { children: ReactNode }) {
 
 ### Link and image adapters
 
-`LinkImageProvider` lets kit components (Sidebar, Navbar, Breadcrumb, Avatar…) render your router link and image component. Without it they render `<a>` and `<img>`. Adapters receive `UiLinkProps` / `UiImageProps`; a Next.js App Router version:
+`UIProvider link={AppLink} image={AppImage}` lets kit components (Sidebar, Navbar, Breadcrumb, Avatar…) render your router link and image component. Without adapters they render `<a>` and `<img>`. Adapters receive `UiLinkProps` / `UiImageProps`; a Next.js App Router version:
 
 ```tsx
 'use client';
@@ -126,6 +127,8 @@ export function AppImage({ width, height, ...props }: UiImageProps) {
   return <NextImage {...props} width={width} height={height} />;
 }
 ```
+
+`LinkImageProvider` remains available for advanced/scoped overrides: `<LinkImageProvider Link={ScopedLink}>` replaces the link adapter while inheriting the image adapter. Nested `UIProvider` scopes also inherit each omitted adapter. Define adapters in a client module; do not pass adapter functions across a server/client boundary.
 
 ## Usage
 
@@ -322,6 +325,25 @@ Or apply runtime tokens through the root provider:
 ```
 
 `@itclabs/react-ui/theme/custom-theme.example.css` lists every overridable token with its default value.
+
+### Editor autocomplete for classNames
+
+Configure VS Code Tailwind CSS IntelliSense in your application's `.vscode/settings.json`; a package cannot configure the editor:
+
+```jsonc
+{
+  "tailwindCSS.classAttributes": ["class", "className", "classNames"],
+  "tailwindCSS.classFunctions": ["cn", "cva"],
+}
+```
+
+For `prettier-plugin-tailwindcss`, add this option to your Prettier configuration to sort classes in `classNames`:
+
+```json
+{
+  "tailwindAttributes": ["classNames"]
+}
+```
 
 ## Icons
 
