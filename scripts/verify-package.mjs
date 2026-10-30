@@ -276,8 +276,14 @@ for (const notice of [
   /DOMPurify \/ dompurify 3\.4\.17[^\n]*Apache-2\.0 OR MPL-2\.0/,
   /Copyright \(c\) 2021-present Tanner Linsley/,
   /Apache License\s+Version 2\.0, January 2004/,
+  /@dnd-kit\/core 6\.3\.1/,
+  /@dnd-kit\/sortable 10\.0\.0/,
+  /@dnd-kit\/utilities 3\.2\.2/,
+  /@dnd-kit\/modifiers 9\.0\.0/,
+  /@dnd-kit\/accessibility 3\.1\.1/,
+  /MIT License\s+Copyright \(c\) 2021, Claudéric Demers/,
 ])
-  assert.match(notices, notice, 'Missing selection or sanitizer dependency notice');
+  assert.match(notices, notice, 'Missing third-party dependency notice');
 
 for (const license of await readdir(`${root}/src/components/icon/licenses`))
   assert.ok(
@@ -402,6 +408,8 @@ for (const name of [
   'DragHandle',
   'DndProvider',
   'useSortableItem',
+  'createTransferDnd',
+  'createRowReorder',
 ])
   assert.equal(typeof dnd[name], 'function', `Missing dnd API: ${name}`);
 assert.match(

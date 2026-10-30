@@ -1,0 +1,210 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Guides/Drag & drop" />
+
+# Drag & drop
+
+Import sortable compositions and integration factories from `@itclabs/react-ui/dnd`.
+`SortableList` reorders one collection; `SortableBoard` moves items between
+containers, including empty ones. Transfer and DataTable opt in through plugins.
+Ordinary root, Transfer and DataTable imports stay independent of dnd-kit.
+All examples keep ordering in host state; persist successful changes in your application.
+
+## Accessibility and interaction
+
+Use stable item IDs, unique across the entire board, and readable `getLabel`
+values for announcements. With `handle`, spread `handleProps` onto `DragHandle`;
+its `label` names the item being moved. Without `handle`, the item is the activator.
+Keep visible focus indicators and avoid nesting interactive controls inside a
+whole-row activator; use a handle when rows contain links or buttons.
+
+Tab to an activator. Space or Enter picks up and drops; arrow keys move; Escape
+cancels. Transfer also uses Left/Right to change panel, and its reorder integration
+and DataTable support Home/End. Focus returns to the moved activator. Announcements
+and instructions follow UIProvider's English/Vietnamese locale. Reduced motion
+disables sorting transitions and drop animation. Pointer activation requires 4px
+of movement; auto-scroll and inert drag overlays are provided.
+
+`DndProvider` supplies sensors and announcements for advanced compositions and
+accepts DndContext options. `useSortableItem` exposes the sortable hook. Custom
+compositions own their sortable contexts, item bindings, drop zones and overlays.
+The list, board and plugin compositions already provide their own context.
+
+## Sortable list
+
+`onReorder(next, event)` returns reordered items and the moved ID and indices.
+`orientation` supports `vertical`, `horizontal`, and `grid`; `lockAxis` and
+`restrictToParent` constrain movement. `gap` uses kit spacing steps.
+
+```tsx
+'use client';
+
+import { useState } from 'react';
+import { DragHandle, SortableList } from '@itclabs/react-ui/dnd';
+
+type Item = { id: string; label: string };
+
+export function ReorderList() {
+  const [items, setItems] = useState<Item[]>([
+    { id: 'first', label: 'Lorem ipsum' },
+    { id: 'second', label: 'Dolor sit amet' },
+  ]);
+
+  return (
+    <SortableList
+      aria-label="Reorder items"
+      items={items}
+      getId={(item) => item.id}
+      getLabel={(item) => item.label}
+      onReorder={setItems}
+      handle
+      lockAxis="y"
+      renderItem={(item, { handleProps }) => (
+        <div className="flex items-center gap-3 rounded-control border border-line bg-surface p-4">
+          <DragHandle {...handleProps} label={item.label} />
+          <span>{item.label}</span>
+        </div>
+      )}
+    />
+  );
+}
+```
+
+See [List stories](?path=/docs/modules-dnd--docs) for horizontal and grid layouts
+and typed `classNames` targets for items, placeholders and overlays.
+
+## Sortable board
+
+Apply the complete next container array from `onMove`. Optional `canDrop(item,
+fromId, toId)` restricts destinations. Custom `renderContainer(container, children)`
+must retain the supplied children, which include the drop zone.
+
+```tsx
+'use client';
+
+import { useState } from 'react';
+import {
+  DragHandle,
+  SortableBoard,
+  type SortableContainer,
+} from '@itclabs/react-ui/dnd';
+
+type Item = { id: string; label: string };
+
+export function ReorderBoard() {
+  const [containers, setContainers] = useState<SortableContainer<Item>[]>([
+    { id: 'todo', title: 'To do', items: [{ id: 'first', label: 'Lorem ipsum' }] },
+    { id: 'done', title: 'Done', items: [] },
+  ]);
+
+  return (
+    <SortableBoard
+      aria-label="Work board"
+      containers={containers}
+      getId={(item) => item.id}
+      getLabel={(item) => item.label}
+      onMove={setContainers}
+      handle
+      renderItem={(item, { handleProps }) => (
+        <div className="flex items-center gap-3 rounded-control border border-line bg-surface p-4">
+          <DragHandle {...handleProps} label={item.label} />
+          <span>{item.label}</span>
+        </div>
+      )}
+    />
+  );
+}
+```
+
+See [Board](?path=/story/modules-dnd--board).
+
+## Transfer plugin
+
+Inject `createTransferDnd()` to move between panels and reorder selected items.
+Dragging implies `order="selection"`: target order follows the value array.
+Dragging a checked row moves the checked, enabled rows on that side together.
+Search preserves underlying value order. `disabled`, item `disabled`, `maxSelected`
+and `oneWay` still constrain moves. Virtualized rows retain an overlay during
+scrolling, and keyboard navigation can reach unmounted rows.
+
+```tsx
+'use client';
+
+import { useState } from 'react';
+import { Transfer, type TransferItem } from '@itclabs/react-ui/transfer';
+import { createTransferDnd } from '@itclabs/react-ui/dnd';
+
+const dnd = createTransferDnd();
+const items: TransferItem[] = [
+  { id: 'first', label: 'Lorem ipsum' },
+  { id: 'second', label: 'Dolor sit amet' },
+  { id: 'third', label: 'Consectetur adipiscing', disabled: true },
+];
+
+export function TransferItems() {
+  const [value, setValue] = useState<string[]>(['second']);
+
+  return (
+    <Transfer
+      label="Items"
+      items={items}
+      value={value}
+      onValueChange={setValue}
+      dnd={dnd}
+      searchable
+    />
+  );
+}
+```
+
+Transfer also supports `defaultValue` and automatic `FormField` binding.
+See [Transfer drag and drop](?path=/story/modules-transfer--drag-and-drop).
+
+## DataTable row reorder plugin
+
+Inject `createRowReorder()` through `rowReorder.plugin`. Supply stable `rowId`
+values and apply the ordered IDs in `onReorder`. The callback includes every
+supplied ID and `{ id, from, to }` with zero-based positions in the supplied rows.
+Client filtering and pagination reorder the visible view while preserving all
+other IDs. Sorting blocks reorder with a localized explanation. Server mode,
+including server pages/groups, also blocks it unless `allowServerReorder: true`;
+the host then owns persistence across pages and groups. Loading and `disabled`
+block interactions. `handle` defaults to true; false makes the row the activator.
+
+```tsx
+'use client';
+
+import { useState } from 'react';
+import { DataTable, type ColumnDef } from '@itclabs/react-ui';
+import { createRowReorder } from '@itclabs/react-ui/dnd';
+
+type Row = { id: string; label: string };
+const plugin = createRowReorder();
+const columns: ColumnDef<Row, unknown>[] = [{ accessorKey: 'label', header: 'Name' }];
+
+export function ReorderRows() {
+  const [rows, setRows] = useState<Row[]>([
+    { id: 'first', label: 'Lorem ipsum' },
+    { id: 'second', label: 'Dolor sit amet' },
+  ]);
+
+  return (
+    <DataTable
+      caption="Reorder rows"
+      rows={rows}
+      rowId={(row) => row.id}
+      columns={columns}
+      rowReorder={{
+        plugin,
+        onReorder: (ids) =>
+          setRows(ids.map((id) => rows.find((row) => row.id === id)!)),
+      }}
+    />
+  );
+}
+```
+
+See [Row reorder](?path=/story/modules-datatable--row-reorder).
+Transfer and DataTable expose `classNames.dragHandle` and `classNames.dragOverlay`;
+DataTable also has `classNames.reorderCell`. Their ordinary selection, search,
+form and table APIs continue to work when no plugin is supplied.

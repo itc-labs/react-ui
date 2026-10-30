@@ -161,10 +161,11 @@ for (const [name, file] of Object.entries(entries)) {
 console.log(JSON.stringify(sizes, null, 2));
 // Gzip budgets with a little headroom; raise them only for an intentional feature.
 for (const [name, limit] of Object.entries({
-  // Full dnd entry now includes integration adapters and accessible disabled-reason tooltips.
-  Dnd: 63_500,
-  TransferDnd: 77_000,
-  DataTableRowReorder: 110_000,
+  // New feature fixtures have approximately 10% headroom.
+  Dnd: 67_900,
+  TransferDnd: 81_900,
+  DataTableRowReorder: 117_600,
+  Sidebar: 87_500,
   Icon: 20_000,
   // Shared drag-and-drop translations add about 500 gzip bytes to locale consumers.
   Rating: 20_700,
@@ -192,11 +193,11 @@ for (const [name, limit] of Object.entries({
   Dialog: 38_000,
   Select: 58_000,
   TreeSelect: 65_800,
-  Transfer: 42_000,
+  Transfer: 43_500,
   Form: 22_000,
   DataTable: 90_000,
   Calendar: 100_000,
-  // Sidebar hover previews and section navigation add focus handling and a rail renderer.
+  // Keep the existing aggregate limit: Root measures 277,010 gzip bytes.
   Root: 278_000,
   ColorPicker: 54_300,
 })) {

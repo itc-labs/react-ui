@@ -288,8 +288,9 @@ Slider, OptionGroup, QuantityInput, and ColorPicker are core controls with autom
 | `@itclabs/react-ui/icons/outline/*`, `/icons/bold/*`   | Single icon glyphs, e.g. `@itclabs/react-ui/icons/outline/search` (lightest)                                                                                                                                                 |
 | `@itclabs/react-ui/icons/catalog`                      | Full icon catalog for `<Icon name="…">` beyond the kit's own icons                                                                                                                                                           |
 | `@itclabs/react-ui/tree-select`                        | TreeSelect with multiple/cascade selection, lazy children, paging, remote search, and virtualization; no optional peers.                                                                                                     |
+| `@itclabs/react-ui/dnd`                                | SortableList, SortableBoard, DragHandle, DndProvider, useSortableItem, createTransferDnd and createRowReorder; isolated from all barrels.                                                                                    |
 | `@itclabs/react-ui/virtual-list`                       | VirtualList and responsive VirtualGrid with measured rows, incremental loading and scroll restoration; isolated from all barrels.                                                                                            |
-| `@itclabs/react-ui/transfer`                           | Transfer with searchable virtualized lists and automatic FormField binding; no optional peers.                                                                                                                               |
+| `@itclabs/react-ui/transfer`                           | Transfer with searchable virtualized lists, automatic FormField binding and opt-in drag and drop through createTransferDnd; no optional peers.                                                                               |
 | `@itclabs/react-ui/rich-text-view`                     | Sanitized HTML display with Editor typography; no optional peers.                                                                                                                                                            |
 | `@itclabs/react-ui/editor`, `/chart`, `/avatar-upload` | Optional features with optional peer dependencies                                                                                                                                                                            |
 | `@itclabs/react-ui/theme/styles.css`                   | Full theme for Tailwind v4 hosts (`tokens`, `fonts`, `base`, `vendor`, `motion` entries also available)                                                                                                                      |
@@ -391,3 +392,25 @@ Badge (label) is now Tag; Badge is now the count/dot indicator. Rename label-pil
 Import `RichTextView` from `@itclabs/react-ui/rich-text-view` and pass stored Editor HTML through `html`. Include the kit styles for shared typography. `as` selects `div` or `article`; `emptyFallback` renders when content is empty. The component supports native props and ref, `data-testid`, `className`, and `classNames.root`.
 
 Sanitization defaults to true and runs after mount. SSR and the initial client render show the fallback, keeping hydration consistent. For SEO, sanitize on the server and pass `sanitize={false}` only when the host guarantees trusted, sanitized HTML; this disables all sanitization.
+
+## Navigation, drag and drop, and large collections
+
+Sidebar supports floating surfaces, icon/offcanvas/fixed expansion, default/dark/brand
+tones and raised/subtle/bar/solid item styles. SidebarProvider shares collapse state
+with SidebarTrigger; WorkspaceShell supports a matching floating layout. Header
+workspace switching, search launchers, collapsible groups, item actions, hover
+previews and two-tier sections are documented in the
+[Navigation guide](https://react-ui-one-rose.vercel.app/?path=/docs/guides-navigation--docs).
+
+Import sorting compositions and opt-in Transfer/DataTable plugins from
+`@itclabs/react-ui/dnd`. Keep item IDs stable and apply callback results to host
+state. Keyboard input, localized announcements, focus restoration and reduced
+motion are built in. See the
+[Drag & drop guide](https://react-ui-one-rose.vercel.app/?path=/docs/guides-drag-drop--docs).
+
+Import VirtualList and VirtualGrid from `@itclabs/react-ui/virtual-list` for
+measured rows, responsive columns, container/window scrolling and infinite
+loading. Supply stable keys, container sizing when needed, and host-owned loading
+state. See [Data display](https://react-ui-one-rose.vercel.app/?path=/docs/guides-data-display--docs)
+and [bundle measurements](https://react-ui-one-rose.vercel.app/?path=/docs/reference-entry-points-bundle-size--docs).
+Both new subpaths use included runtime dependencies and require no extra peers.

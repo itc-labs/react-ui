@@ -37,7 +37,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-@tanstack/react-virtual 3.14.19 by Tanner Linsley and contributors, MIT: https://github.com/TanStack/virtual . Used for TreeSelect and Transfer row virtualization. Preserve the dependency copyright and license when redistributing bundled dependency code. Its full MIT notice follows:
+@tanstack/react-virtual 3.14.19 by Tanner Linsley and contributors, MIT: https://github.com/TanStack/virtual . Used for TreeSelect, Transfer, VirtualList and VirtualGrid row virtualization. Preserve the dependency copyright and license when redistributing bundled dependency code. Its full MIT notice follows:
 
 MIT License
 
@@ -272,7 +272,10 @@ DOMPurify / dompurify 3.4.17 by Cure53 and other contributors, Apache-2.0 OR MPL
 ## @dnd-kit
 
 Drag and drop uses @dnd-kit/core 6.3.1, @dnd-kit/sortable 10.0.0,
-@dnd-kit/utilities 3.2.2, @dnd-kit/modifiers 9.0.0 and their @dnd-kit/accessibility dependency.
+@dnd-kit/utilities 3.2.2, @dnd-kit/modifiers 9.0.0 and their
+@dnd-kit/accessibility 3.1.1 dependency. All five packages are MIT-licensed and
+carry the identical copyright and license text reproduced below. They power the
+isolated dnd entry and opt-in Transfer/DataTable integrations.
 Source: https://github.com/clauderic/dnd-kit
 
 ```text

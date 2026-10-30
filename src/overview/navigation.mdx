@@ -26,7 +26,8 @@ menu button opens a Drawer with the same permission-filtered tree and active pat
 `WorkspaceShell` adjusts its columns from the Sidebar's `data-collapsed` attribute;
 pass Sidebar directly to its `sidebar` slot. `variant="inset"` (default) raises the
 header and page into a rounded card beside the sidebar; `variant="classic"` keeps a
-flat page divided from the sidebar by a rule. The sidebar width comes from the
+flat page divided from the sidebar by a rule; `variant="floating"` gives the sidebar
+and content separate rounded surfaces with a gap. The sidebar width comes from the
 `--container-sidebar` token (15rem).
 
 Try [Collapsible](?path=/story/modules-sidebar--collapsible),
@@ -36,6 +37,186 @@ Try [Collapsible](?path=/story/modules-sidebar--collapsible),
 clickable application demo; [TopNavigationLayout](?path=/story/templates-applicationlayout--top-navigation-layout)
 combines a Navbar mega menu, underline indicator, and UserMenu. These demos use
 host state and a UiLink adapter without a framework dependency.
+
+## Sidebar variants
+
+| Prop            | Values                             | Default   | Purpose                                                            |
+| --------------- | ---------------------------------- | --------- | ------------------------------------------------------------------ |
+| `variant`       | `sidebar`, `floating`              | `sidebar` | Full-height navigation or a rounded floating surface.              |
+| `collapsible`   | `icon`, `offcanvas`, `none`        | `icon`    | Collapse to a rail, hide the desktop sidebar, or keep it expanded. |
+| `tone`          | `default`, `dark`, `brand`         | `default` | Scoped sidebar colors.                                             |
+| `itemVariant`   | `raised`, `subtle`, `bar`, `solid` | `raised`  | Active and hover treatment for navigation items.                   |
+| `expandOnHover` | boolean                            | `false`   | Preview an icon rail without changing its layout width.            |
+
+Pair `Sidebar variant="floating"` with `WorkspaceShell variant="floating"`.
+For offcanvas navigation, keep `SidebarTrigger` outside the sidebar so users can
+reopen it. `SidebarProvider` shares uncontrolled or controlled collapse state;
+without a provider, pass the same `collapsed` and `onCollapsedChange` to both.
+`collapsible="none"` ignores collapse state and hides the collapse control.
+Mobile navigation continues to use the Drawer and its own menu trigger.
+
+```tsx
+'use client';
+
+import {
+  Sidebar,
+  SidebarProvider,
+  SidebarTrigger,
+  WorkspaceShell,
+} from '@itclabs/react-ui';
+
+export function FloatingWorkspace() {
+  return (
+    <SidebarProvider defaultCollapsed={false}>
+      <WorkspaceShell
+        variant="floating"
+        sidebar={
+          <Sidebar
+            variant="floating"
+            collapsible="offcanvas"
+            tone="dark"
+            itemVariant="bar"
+            toggleShortcut="mod+b"
+            header={{ title: 'Lorem ipsum' }}
+            items={[{ id: 'home', label: 'Home', href: '/', active: true }]}
+          />
+        }
+        header={
+          <>
+            <SidebarTrigger className="hidden lg:inline-flex" />
+            <span>Workspace</span>
+          </>
+        }
+        content={<p>Lorem ipsum dolor sit amet.</p>}
+      />
+    </SidebarProvider>
+  );
+}
+```
+
+See [Floating layout](?path=/story/modules-sidebar--floating-layout),
+[Offcanvas](?path=/story/modules-sidebar--offcanvas), and
+[Item styles](?path=/story/modules-sidebar--item-styles).
+
+## Switcher, search, groups and item actions
+
+`header.switcher` is controlled through `value` and `onValueChange`. Its items
+can include `logo` and `description`, and `footer` supplies extra menu content.
+`search` accepts a React node or `{ onOpen, placeholder, shortcut }`; the host
+opens its search UI. Shortcuts are opt-in and ignore editable controls.
+Groups can use `collapsible`, `defaultOpen`, or controlled `open/onOpenChange`.
+An active descendant reveals its group. Item `onAdd` creates a dedicated add
+action; `actions` supplies a contextual menu with stable IDs and accessible labels.
+Disabled actions remain disabled. Action buttons stay separate from the row link
+and become available on keyboard focus as well as hover; rail mode retains them.
+
+```tsx
+'use client';
+
+import { useState } from 'react';
+import { Sidebar } from '@itclabs/react-ui';
+import { HomeIcon } from '@itclabs/react-ui/icons/outline/home';
+
+export function SidebarTools({
+  openSearch,
+  addItem,
+  renameItem,
+}: {
+  openSearch: () => void;
+  addItem: () => void;
+  renameItem: () => void;
+}) {
+  const [workspace, setWorkspace] = useState('first');
+
+  return (
+    <Sidebar
+      defaultCollapsed
+      expandOnHover
+      header={{
+        title: 'Lorem ipsum',
+        switcher: {
+          value: workspace,
+          onValueChange: setWorkspace,
+          items: [
+            { id: 'first', label: 'Lorem ipsum', description: 'Dolor sit amet' },
+            { id: 'second', label: 'Consectetur adipiscing' },
+          ],
+        },
+      }}
+      search={{
+        placeholder: 'Search navigation',
+        shortcut: 'mod+k',
+        onOpen: openSearch,
+      }}
+      items={[
+        {
+          id: 'workspace',
+          type: 'group',
+          label: 'Workspace',
+          collapsible: true,
+          defaultOpen: true,
+          items: [
+            {
+              id: 'home',
+              label: 'Home',
+              href: '/',
+              icon: HomeIcon,
+              onAdd: addItem,
+              addLabel: 'Add item',
+              actions: [{ id: 'rename', label: 'Rename', onSelect: renameItem }],
+            },
+          ],
+        },
+      ]}
+    />
+  );
+}
+```
+
+Hover expansion applies only to collapsed icon navigation on a fine pointer.
+Focus also opens the preview; Escape dismisses it. It preserves the collapsed
+layout width and collapse state. Coarse pointers use the normal toggle, and
+reduced motion removes the transition. See
+[Sidebar tools](?path=/docs/modules-sidebar-tools--docs) and
+[Hover preview](?path=/story/modules-sidebar-rail--expand-on-hover).
+
+## Two-tier sections
+
+Use `sections` in place of `items` for an icon rail beside an active section panel.
+Each section has a stable `id`, a string `label`, an `icon`, optional numeric
+`badge`, and its own entries. `currentPath` derives the initial active section;
+`defaultSection` supplies a fallback. Use `section/onSectionChange` when the host
+owns section selection. Permission filtering applies within every section.
+The mobile Drawer presents section buttons above the selected section's links.
+
+```tsx
+'use client';
+
+import { Sidebar, type SidebarSection } from '@itclabs/react-ui';
+import { HomeIcon } from '@itclabs/react-ui/icons/outline/home';
+import { SettingsIcon } from '@itclabs/react-ui/icons/outline/settings';
+
+const sections: SidebarSection[] = [
+  {
+    id: 'home',
+    label: 'Home',
+    icon: HomeIcon,
+    items: [{ id: 'overview', label: 'Overview', href: '/' }],
+  },
+  {
+    id: 'settings',
+    label: 'Settings',
+    icon: SettingsIcon,
+    items: [{ id: 'profile', label: 'Profile', href: '/settings/profile' }],
+  },
+];
+
+export function SectionNavigation({ pathname }: { pathname: string }) {
+  return <Sidebar sections={sections} currentPath={pathname} defaultSection="home" />;
+}
+```
+
+See [Two-tier sections](?path=/story/modules-sidebar-rail--two-tier-sections).
 
 ## One shared menu
 
