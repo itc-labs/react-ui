@@ -22,6 +22,7 @@ const entries = {
   Root: 'index.ts',
   Calendar: 'modules/calendar/index.tsx',
   Carousel: 'modules/carousel/index.tsx',
+  MediaGallery: 'modules/media-gallery/index.tsx',
   Form: 'modules/form/index.tsx',
 };
 const sizes = {};
@@ -60,6 +61,7 @@ for (const [name, file] of Object.entries(entries)) {
       'JsonView',
       'CodeView',
       'Carousel',
+      'MediaGallery',
     ].includes(name)
   ) {
     const registries = Object.keys(metafile.inputs).filter((input) =>
@@ -84,6 +86,10 @@ for (const [name, file] of Object.entries(entries)) {
       throw new Error(`Calendar imports optional features: ${forbidden}`);
   }
   if (name === 'Root') {
+    const galleries = Object.keys(metafile.inputs).filter((input) =>
+      /modules\/media-gallery\//.test(input),
+    );
+    if (galleries.length) throw new Error(`Root imports MediaGallery: ${galleries}`);
     const embla = Object.keys(metafile.inputs).filter((input) =>
       /embla-carousel|modules\/carousel\//.test(input),
     );
@@ -114,6 +120,7 @@ for (const [name, limit] of Object.entries({
   // About 10% above the measured display subpath fixtures.
   CodeView: 50_000,
   Carousel: 30_300,
+  MediaGallery: 35_000,
   Button: 20_000,
   Spinner: 20_000,
   Dialog: 38_000,

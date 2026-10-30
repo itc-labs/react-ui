@@ -56,7 +56,8 @@
     "./navigation": "./src/modules/navigation/index.ts",
     "./calendar": "./src/modules/calendar/index.tsx",
     "./code-view": "./src/modules/code-view/index.tsx",
-    "./carousel": "./src/modules/carousel/index.tsx"
+    "./carousel": "./src/modules/carousel/index.tsx",
+    "./media-gallery": "./src/modules/media-gallery/index.tsx"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
@@ -283,6 +284,10 @@
       "./carousel": {
         "types": "./dist/modules/carousel/index.d.ts",
         "import": "./dist/modules/carousel/index.js"
+      },
+      "./media-gallery": {
+        "types": "./dist/modules/media-gallery/index.d.ts",
+        "import": "./dist/modules/media-gallery/index.js"
       }
     },
     "access": "public"
