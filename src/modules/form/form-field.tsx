@@ -10,7 +10,8 @@ import type { AnyFieldApi } from '@tanstack/react-form';
 import { errorText, useFormContext } from './context';
 import { useFormValidators, type FieldValidators } from './validation';
 import { cn, type SlotClasses } from '../../components/common';
-import { valueControls, changedValue } from './binding';
+import { changedValue } from './binding';
+import { isValueControl } from '../../components/common/form-control';
 import { partTestId } from '../../components/common/testing';
 import { Switch } from '../../components/switch';
 
@@ -78,7 +79,7 @@ function FormFieldContent({
     binding ??
     (typeof value === 'boolean'
       ? 'checked'
-      : valueControls.has(child.type) || childProps.onValueChange
+      : isValueControl(child.type) || childProps.onValueChange
         ? 'value'
         : 'native');
   const native = typeof child.type === 'string';

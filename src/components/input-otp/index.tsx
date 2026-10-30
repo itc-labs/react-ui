@@ -1,4 +1,5 @@
 'use client';
+import { valueControl } from '../common/form-control';
 import { interactiveTrigger } from '../common/interactive-trigger';
 import type { TestIdProps } from '../common/testing';
 
@@ -176,3 +177,5 @@ export function InputOTP({
 }
 
 InputOTP[interactiveTrigger] = true;
+
+InputOTP[valueControl] = true;

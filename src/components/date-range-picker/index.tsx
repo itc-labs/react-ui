@@ -1,4 +1,5 @@
 'use client';
+import { valueControl } from '../common/form-control';
 import { partTestId } from '../common/testing';
 import { useUILocale } from '../../i18n/provider';
 import { useId, useState } from 'react';
@@ -151,3 +152,5 @@ export function DateRangePicker({
     </>
   );
 }
+
+DateRangePicker[valueControl] = true;

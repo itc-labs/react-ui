@@ -1,4 +1,5 @@
 'use client';
+import { valueControl } from '../common/form-control';
 import type { TestIdProps } from '../common/testing';
 
 import { useUILocale } from '../../i18n/provider';
@@ -71,3 +72,5 @@ export function TimePicker({
     />
   );
 }
+
+TimePicker[valueControl] = true;

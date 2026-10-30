@@ -1,4 +1,5 @@
 'use client';
+import { valueControl } from '../common/form-control';
 import { useContext, useEffect, useId, useState } from 'react';
 import ReactSelect from 'react-select';
 import { partTestId } from '../common/testing';
@@ -209,3 +210,5 @@ export function Select(props: SelectProps) {
     </div>
   );
 }
+
+Select[valueControl] = true;

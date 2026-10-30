@@ -1,4 +1,5 @@
 'use client';
+import { valueControl } from '../common/form-control';
 import { partTestId } from '../common/testing';
 
 import { useUILocale } from '../../i18n/provider';
@@ -210,3 +211,5 @@ export function UploadField({
 
 export type { FileRules } from './validation';
 export { validateFiles } from './validation';
+
+UploadField[valueControl] = true;

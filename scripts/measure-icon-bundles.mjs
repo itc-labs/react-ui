@@ -14,6 +14,7 @@ const entries = {
   DataTable: 'modules/data-table/index.tsx',
   Root: 'index.ts',
   Calendar: 'modules/calendar/index.tsx',
+  Form: 'modules/form/index.tsx',
 };
 const sizes = {};
 for (const [name, file] of Object.entries(entries)) {
@@ -22,9 +23,15 @@ for (const [name, file] of Object.entries(entries)) {
     !['Icon', 'Button', 'Calendar'].includes(name)
   )
     continue;
+  const exports =
+    name === 'Root'
+      ? '*'
+      : name === 'Form'
+        ? '{ Form, FormField, FormSubmit }'
+        : `{ ${name} }`;
   const { outputFiles, metafile } = await build({
     stdin: {
-      contents: `export ${name === 'Root' ? '*' : `{ ${name} }`} from './src/${file}';`,
+      contents: `export ${exports} from './src/${file}';`,
       resolveDir: root,
       loader: 'tsx',
     },
