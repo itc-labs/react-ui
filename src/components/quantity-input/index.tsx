@@ -140,10 +140,11 @@ export function QuantityInput({
       <div
         data-testid={testId}
         className={cn(
-          'inline-flex w-fit items-center rounded-full border border-control-border bg-surface text-ink',
+          'inline-flex w-fit items-center gap-1 rounded-full border border-control-border bg-surface text-ink motion-safe:transition-[border-color,box-shadow] duration-[var(--motion-duration-control)] has-[input:focus]:border-accent has-[input:focus]:shadow-control-focus',
           controlSizes[size],
-          'px-1',
-          error && 'border-danger-700',
+          'p-1',
+          error &&
+            'border-danger-700 has-[input:focus]:border-danger-700 has-[input:focus]:shadow-control-error',
           disabled && 'bg-canvas opacity-60',
           classNames?.root,
           className,
@@ -186,8 +187,7 @@ export function QuantityInput({
             describedBy,
           )}
           className={cn(
-            'h-full w-12 min-w-0 rounded-full bg-transparent text-center tabular-nums disabled:cursor-not-allowed',
-            focusRingClassName,
+            'h-full w-10 min-w-0 bg-transparent text-center font-medium tabular-nums outline-none disabled:cursor-not-allowed',
             classNames?.input,
           )}
           onChange={(event) => {

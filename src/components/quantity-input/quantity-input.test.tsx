@@ -264,7 +264,9 @@ it('forwards refs, input attributes, feedback, test IDs and classes with caller 
   expect(buttons()[1]!.dataset.testid).toBe('qty-increment');
   expect(buttons()[0]!.className).toContain('minus-custom');
   expect(buttons()[1]!.className).toContain('plus-custom');
-  expect(input().className).toContain('focus-visible:outline-focus');
+  expect(host.querySelector('[data-testid="qty"]')!.className).toContain(
+    'has-[input:focus]:shadow-control-focus',
+  );
   expect(host.querySelector('[classNames]')).toBeNull();
   blur();
   expect(blurred).toHaveBeenCalledOnce();
