@@ -26,7 +26,7 @@ Năm thư viện sau kit là peer dependency bắt buộc: ứng dụng và kit 
 
 ## 2. Bọc provider ở gốc ứng dụng
 
-```tsx
+```tsx snippet
 // AppLink/AppImage là adapter của ứng dụng (ví dụ bọc next/link, next/image) — xem **Overview/Providers**.
 import { AppLink, AppImage } from './ui-adapters';
 
@@ -53,7 +53,7 @@ Root `@itclabs/react-ui` cũng export toàn bộ. Barrel gốc tương thích Se
 
 ## 4. Dùng theo dữ liệu, không ráp primitive
 
-```tsx
+```tsx snippet
 <DropdownMenu
   trigger={<IconButton icon="more" label="Tác vụ" />}
   items={[

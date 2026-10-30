@@ -2,6 +2,14 @@
 
 Storybook documents the public UI API. Describe what the control does and when to use it. Do not describe implementation history, compare the API with another repository or use generic filler such as “interactive synthetic examples.” Architecture notes belong in engineering documents.
 
+## Docs pages
+
+Organize MDX pages in `src/overview/` into three sections: **Overview** for Introduction and Getting started, **Guides** for practical usage recipes, and **Reference** for the catalog, entry points and bundle size, and hooks. Existing **Foundations** stories stay in place.
+
+Write docs page copy in clear, concise English. Vietnamese may appear only as a locale example. Use lorem ipsum for decorative demo text; keep functional labels and instructions meaningful.
+
+Every fenced `tsx` block must be a complete, self-contained module: import from `@itclabs/react-ui` or its public subpaths and define every identifier it uses. `src/overview/examples.test.ts` typechecks each block independently against the public source API. Use a `tsx snippet` fence only for an intentionally partial fragment, and keep these rare. CSS and bash blocks are not checked.
+
 ## One component page
 
 - Set `meta.component` to the actual public component. A composition may use `meta.render` to supply its surrounding context; the source builder expands that render into usable code.

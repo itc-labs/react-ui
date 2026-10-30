@@ -153,7 +153,7 @@ nhóm và section rỗng được bỏ đi.
 của host. Server truyền `permissions` dạng mảng serializable sau khi xác thực session.
 Định nghĩa adapter ngay trong file client để giữ ref và mọi thuộc tính native.
 
-```tsx
+```tsx snippet
 // navigation-root.tsx
 'use client';
 
@@ -213,7 +213,7 @@ Mount bên trong router của host, bên ngoài các route element bị unmount.
 chuyển `href` thành `to`; ref, sự kiện và `data-testid` được truyền tiếp.
 Với URL ngoài ứng dụng, giữ anchor native.
 
-```tsx
+```tsx snippet
 // navigation-root.tsx
 import type { ReactNode } from 'react';
 import { Link as RouterLink, useLocation } from 'react-router';
@@ -312,7 +312,7 @@ không trả promise hoàn tất route: để provider kết thúc khi đường
 `done()` khi lỗi hoặc hủy, kể cả redirect quay về URL cũ. Không gọi `done()` ngay
 sau `push()` thành công.
 
-```tsx
+```tsx snippet
 'use client';
 
 import { usePathname, useRouter } from 'next/navigation';

@@ -68,7 +68,7 @@ Các control dùng được với text mặc định tiếng Việt, icon Outlin
 
 ## Thứ tự lồng
 
-```tsx
+```tsx snippet
 'use client';
 
 import NextLink from 'next/link';
@@ -117,7 +117,7 @@ Provider ngoài cùng có token render `<style>` inline trước children, với
 
 ## Adapter link và ảnh
 
-```tsx
+```tsx snippet
 function AppLink(props: UiLinkProps) {
   return <NextLink {...props} />;
 }
@@ -144,7 +144,7 @@ Với React Router, map `href` sang `to`: `<RouterLink {...props} to={props.href
 
 Bọc cùng bộ provider của ứng dụng (hoặc chỉ provider cần cho test) quanh component:
 
-```tsx
+```tsx snippet
 render(
   <UIProvider locale="en-US">
     <ToastProvider>
