@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.9.1
+
+### Patch Changes
+
+- [#28](https://github.com/itc-labs/react-ui/pull/28) [`f64e680`](https://github.com/itc-labs/react-ui/commit/f64e6809ede43f435b557b768fb5bad73ba2d7e5) Thanks [@vungbt](https://github.com/vungbt)! - Apply the inset card to `WorkspaceBody` when it is passed as `WorkspaceShell` children, not only through the `header`/`content` slots.
+
 ## 0.9.0
 
 ### Minor Changes
