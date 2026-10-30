@@ -211,6 +211,8 @@ export function Slider(props: SliderProps) {
           marks.some((mark) => typeof mark === 'object' && mark.label != null) &&
             !vertical &&
             'mb-6',
+          // Leave room for the always-visible value bubble above the thumbs.
+          showValue === 'always' && !vertical && 'mt-8',
           disabled && 'cursor-not-allowed',
         )}
         onKeyDownCapture={(event) => {
@@ -244,7 +246,7 @@ export function Slider(props: SliderProps) {
           <Primitive.Range
             data-testid={partTestId(testId, 'range')}
             className={cn(
-              'absolute rounded-full bg-brand-600 data-[orientation=horizontal]:h-full data-[orientation=vertical]:w-full',
+              'absolute rounded-full bg-accent data-[orientation=horizontal]:h-full data-[orientation=vertical]:w-full',
               classNames?.range,
             )}
           />
@@ -264,7 +266,7 @@ export function Slider(props: SliderProps) {
                   key={mark.value}
                   data-testid={partTestId(testId, 'mark', mark.value)}
                   className={cn(
-                    'pointer-events-none absolute size-1.5 rounded-full bg-ink-subtle',
+                    'pointer-events-none absolute size-1.5 rounded-full bg-muted',
                     vertical
                       ? 'left-1/2 -translate-x-1/2 -translate-y-1/2'
                       : 'top-1/2 -translate-x-1/2 -translate-y-1/2',
@@ -278,11 +280,16 @@ export function Slider(props: SliderProps) {
                       disabled={disabled || readOnly}
                       data-testid={partTestId(testId, 'markLabel', mark.value)}
                       className={cn(
-                        'pointer-events-auto absolute whitespace-nowrap rounded-control text-ui-xs text-ink-subtle focus-visible:outline-offset-2',
+                        'pointer-events-auto absolute whitespace-nowrap rounded-control text-[0.75rem] text-muted focus-visible:outline-offset-2',
                         focusRingClassName,
                         vertical
                           ? 'left-4 top-1/2 -translate-y-1/2'
-                          : 'left-1/2 top-4 -translate-x-1/2',
+                          : // Edge labels align inward so they stay inside the track width.
+                            offset <= 0
+                            ? 'left-0 top-4'
+                            : offset >= 100
+                              ? 'right-0 top-4'
+                              : 'left-1/2 top-4 -translate-x-1/2',
                         classNames?.markLabel,
                       )}
                       onPointerDown={(event) => event.stopPropagation()}
@@ -319,7 +326,7 @@ export function Slider(props: SliderProps) {
             aria-readonly={readOnly || undefined}
             aria-valuetext={formatValue(number)}
             className={cn(
-              'group relative block rounded-full border-2 border-brand-600 bg-white shadow-sm focus-visible:outline-offset-2',
+              'group relative block rounded-full border-2 border-accent bg-surface shadow-sm focus-visible:outline-offset-2',
               thumbSizes[size],
               focusRingClassName,
               classNames?.thumb,
@@ -335,7 +342,7 @@ export function Slider(props: SliderProps) {
                 aria-hidden="true"
                 data-testid={partTestId(testId, 'value', index)}
                 className={cn(
-                  'pointer-events-none absolute bottom-full left-1/2 mb-2 -translate-x-1/2 whitespace-nowrap rounded-control bg-ink px-2 py-1 text-ui-xs text-surface shadow-sm transition-opacity motion-reduce:transition-none',
+                  'pointer-events-none absolute bottom-full left-1/2 mb-2 -translate-x-1/2 whitespace-nowrap rounded-control bg-ink px-2 py-1 text-[0.75rem] text-surface shadow-sm transition-opacity motion-reduce:transition-none',
                   showValue === 'hover' &&
                     'opacity-0 group-hover:opacity-100 group-focus:opacity-100 group-active:opacity-100',
                   classNames?.value,
@@ -367,7 +374,7 @@ export function Slider(props: SliderProps) {
         <p
           id={`${id}-hint`}
           data-testid={partTestId(testId, 'hint')}
-          className={cn('text-ui-sm text-ink-subtle', classNames?.hint)}
+          className={cn('text-ui-sm text-muted', classNames?.hint)}
         >
           {hint}
         </p>

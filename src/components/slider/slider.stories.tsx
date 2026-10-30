@@ -149,7 +149,7 @@ export const CustomClasses: Story = {
         track: 'bg-brand-100',
         range: 'bg-brand-700',
         thumb: 'border-brand-700',
-        mark: 'bg-brand-900',
+        mark: 'bg-brand-800',
         markLabel: 'font-semibold',
         value: 'bg-brand-700',
         hint: 'text-brand-700',
