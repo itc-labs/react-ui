@@ -22,6 +22,7 @@ import {
 import { SortableContext, useSortable } from '@dnd-kit/sortable';
 import { snapCenterToCursor } from '@dnd-kit/modifiers';
 import { DndProvider, DragHandle } from './index';
+import { OverlayPortal } from './overlay-portal';
 import { KitIcon } from '../../components/icon/kit-icon';
 import { GripVerticalIcon } from '../../components/icon/outline/grip-vertical';
 import { GripVerticalIcon as GripVerticalBoldIcon } from '../../components/icon/bold/grip-vertical';
@@ -293,27 +294,29 @@ function Provider({
         <SortableContext items={items.map((item) => item.id)} disabled={disabled}>
           {children}
         </SortableContext>
-        <DragOverlay dropAnimation={null} modifiers={[snapCenterToCursor]}>
-          {activeItem && (
-            <div
-              inert
-              aria-hidden="true"
-              data-testid={partTestId(testId, 'dragOverlay')}
-              className={cn(
-                'mx-auto flex w-max max-w-xs cursor-grabbing items-center gap-2 rounded-control border border-brand-500 bg-surface py-2 pr-3 pl-2 text-ui-sm font-medium text-ink shadow-overlay',
-                overlayClassName,
-              )}
-            >
-              <KitIcon
-                name="gripVertical"
-                builtin={{ outline: GripVerticalIcon, bold: GripVerticalBoldIcon }}
+        <OverlayPortal>
+          <DragOverlay dropAnimation={null} modifiers={[snapCenterToCursor]}>
+            {activeItem && (
+              <div
+                inert
                 aria-hidden="true"
-                className="size-4 shrink-0 text-ink-muted"
-              />
-              <span className="truncate">{activeItem.label}</span>
-            </div>
-          )}
-        </DragOverlay>
+                data-testid={partTestId(testId, 'dragOverlay')}
+                className={cn(
+                  'mx-auto flex w-max max-w-xs cursor-grabbing items-center gap-2 rounded-control border border-brand-500 bg-surface py-2 pr-3 pl-2 text-ui-sm font-medium text-ink shadow-overlay',
+                  overlayClassName,
+                )}
+              >
+                <KitIcon
+                  name="gripVertical"
+                  builtin={{ outline: GripVerticalIcon, bold: GripVerticalBoldIcon }}
+                  aria-hidden="true"
+                  className="size-4 shrink-0 text-ink-muted"
+                />
+                <span className="truncate">{activeItem.label}</span>
+              </div>
+            )}
+          </DragOverlay>
+        </OverlayPortal>
       </DndProvider>
       <span id={instructions} className="sr-only">
         {t('dnd.integrationInstructions')}

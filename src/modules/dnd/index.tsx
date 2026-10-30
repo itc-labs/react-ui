@@ -44,6 +44,7 @@ import { KitIcon } from '../../components/icon/kit-icon';
 import { GripVerticalIcon } from '../../components/icon/outline/grip-vertical';
 import { GripVerticalIcon as GripVerticalBoldIcon } from '../../components/icon/bold/grip-vertical';
 import { useUILocale } from '../../i18n/provider';
+import { OverlayPortal } from './overlay-portal';
 
 export { useSortable as useSortableItem } from '@dnd-kit/sortable';
 export type {
@@ -305,7 +306,8 @@ function SortableItem<T>({
       }}
       className={cn(
         'relative rounded-control border border-transparent motion-reduce:transition-none',
-        sortable.isDragging && 'border-2 border-dashed border-brand-500 bg-brand-50',
+        sortable.isDragging &&
+          'bg-brand-50 outline-2 -outline-offset-2 outline-brand-500 outline-dashed',
         classNames?.item,
         sortable.isDragging && classNames?.itemDragging,
         sortable.isDragging && classNames?.placeholder,
@@ -349,26 +351,28 @@ function Overlay<T>({
   testId: string | undefined;
 }) {
   return (
-    <DragOverlay dropAnimation={reduced ? null : undefined}>
-      {item !== undefined && (
-        <div
-          aria-hidden="true"
-          inert
-          data-testid={partTestId(testId, 'overlay')}
-          className={cn(
-            'scale-[1.02] cursor-grabbing rounded-control bg-surface text-ink shadow-overlay ring-2 ring-brand-500',
-            classNames?.overlay,
-          )}
-        >
-          {(renderOverlay ?? renderItem)(item, {
-            handleProps: { disabled: true, tabIndex: -1 },
-            isDragging: true,
-            isOverlay: true,
-            index,
-          })}
-        </div>
-      )}
-    </DragOverlay>
+    <OverlayPortal>
+      <DragOverlay dropAnimation={reduced ? null : undefined}>
+        {item !== undefined && (
+          <div
+            aria-hidden="true"
+            inert
+            data-testid={partTestId(testId, 'overlay')}
+            className={cn(
+              'scale-[1.02] cursor-grabbing rounded-control bg-surface text-ink shadow-overlay ring-2 ring-brand-500',
+              classNames?.overlay,
+            )}
+          >
+            {(renderOverlay ?? renderItem)(item, {
+              handleProps: { disabled: true, tabIndex: -1 },
+              isDragging: true,
+              isOverlay: true,
+              index,
+            })}
+          </div>
+        )}
+      </DragOverlay>
+    </OverlayPortal>
   );
 }
 

@@ -190,6 +190,46 @@ export const ErrorAndRetry: Story = {
   ),
 };
 
+export const LoadingStates: Story = {
+  name: 'Loading states',
+  tags: ['states'],
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Frozen loading states for comparison: the first page shows skeleton rows, and later pages use loadingIndicator spinner, skeleton or bar below existing items.',
+      },
+    },
+  },
+  render: (args: VirtualGridProps<Product>) => (
+    <div className="grid gap-6 sm:grid-cols-2">
+      {(
+        [
+          ['First page', { items: [] }],
+          ['spinner', { loadingIndicator: 'spinner' }],
+          ['skeleton', { loadingIndicator: 'skeleton' }],
+          ['bar', { loadingIndicator: 'bar' }],
+        ] as const
+      ).map(([label, state]) => (
+        <section key={label} className="grid gap-2">
+          <h3 className="text-ui-sm text-muted">{label}</h3>
+          <VirtualList
+            {...args}
+            items={products.slice(0, 3)}
+            {...state}
+            aria-label={label}
+            height={260}
+            loading
+            hasMore
+            skeletonCount={4}
+            className="rounded-panel border border-line bg-surface"
+          />
+        </section>
+      ))}
+    </div>
+  ),
+};
+
 export const Empty: Story = {
   tags: ['states'],
   args: { items: [] },

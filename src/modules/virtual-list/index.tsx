@@ -424,7 +424,7 @@ function VirtualCollection<T>({
       {loading && !items.length && (
         <div
           role="presentation"
-          className={cn('grid', classNames?.loader)}
+          className={cn('grid', !grid && 'gap-2 p-2', classNames?.loader)}
           data-testid={partTestId(testId, 'loader')}
           style={
             grid
@@ -499,7 +499,7 @@ function VirtualCollection<T>({
               : loadingIndicator === 'bar'
                 ? 'sticky bottom-0 z-1 px-3 py-2'
                 : loadingIndicator === 'skeleton'
-                  ? 'grid pt-2'
+                  ? cn('grid', grid ? 'pt-4' : 'p-2')
                   : 'flex justify-center p-3',
             classNames?.loader,
           )}
