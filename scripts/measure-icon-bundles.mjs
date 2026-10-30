@@ -10,6 +10,7 @@ const entries = {
   Icon: 'components/icon/index.tsx',
   Rating: 'components/rating/index.tsx',
   QuantityInput: 'components/quantity-input/index.tsx',
+  ColorPicker: 'components/color-picker/index.tsx',
   OptionGroup: 'components/option-group/index.tsx',
   JsonView: 'components/json-view/index.tsx',
   CodeView: 'modules/code-view/index.tsx',
@@ -54,6 +55,7 @@ for (const [name, file] of Object.entries(entries)) {
       'Button',
       'Rating',
       'QuantityInput',
+      'ColorPicker',
       'OptionGroup',
       'JsonView',
       'CodeView',
@@ -119,7 +121,9 @@ for (const [name, limit] of Object.entries({
   Form: 22_000,
   DataTable: 90_000,
   Calendar: 100_000,
-  Root: 260_000,
+  // ColorPicker adds react-colorful to the core entry.
+  Root: 270_000,
+  ColorPicker: 54_000,
 })) {
   if (sizes[name].gzip >= limit) {
     throw new Error(`${name}: ${sizes[name].gzip} gzip bytes exceeds ${limit}`);

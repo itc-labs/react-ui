@@ -15,6 +15,7 @@ it('keeps ordinary imports free of heavy modules and within gzip budgets', () =>
     'Calendar',
     'Carousel',
     'CodeView',
+    'ColorPicker',
     'DataTable',
     'Dialog',
     'Form',

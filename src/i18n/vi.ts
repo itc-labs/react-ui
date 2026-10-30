@@ -1,5 +1,19 @@
 import type { UIMessages } from './types';
 export const viMessages = {
+  'color.saturationValue': 'Độ bão hòa {saturation}%, độ sáng {brightness}%',
+  'color.hexPlaceholder': '#rrggbb',
+  'color.hexAlphaPlaceholder': '#rrggbbaa',
+  'color.label': 'Màu sắc',
+  'color.placeholder': 'Chọn màu',
+  'color.saturation': 'Độ bão hòa và độ sáng',
+  'color.hue': 'Sắc độ',
+  'color.alpha': 'Độ trong suốt',
+  'color.hex': 'Mã màu hex',
+  'color.invalid': 'Nhập mã màu hex hợp lệ.',
+  'color.presets': 'Màu có sẵn',
+  'color.select': 'Chọn {color}',
+  'color.eyeDropper': 'Lấy màu từ màn hình',
+
   'quantity.label': 'Số lượng',
   'quantity.decrease': 'Giảm số lượng',
   'quantity.increase': 'Tăng số lượng',

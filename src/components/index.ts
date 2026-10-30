@@ -63,3 +63,5 @@ export * from './rating';
 export * from './json-view';
 
 export * from './quantity-input';
+
+export * from './color-picker';

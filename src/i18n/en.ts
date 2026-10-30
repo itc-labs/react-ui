@@ -1,4 +1,18 @@
 export const enMessages = {
+  'color.saturationValue': 'Saturation {saturation}%, brightness {brightness}%',
+  'color.hexPlaceholder': '#rrggbb',
+  'color.hexAlphaPlaceholder': '#rrggbbaa',
+  'color.label': 'Color',
+  'color.placeholder': 'Select color',
+  'color.saturation': 'Saturation and brightness',
+  'color.hue': 'Hue',
+  'color.alpha': 'Opacity',
+  'color.hex': 'Hex color',
+  'color.invalid': 'Enter a valid hex color.',
+  'color.presets': 'Preset colors',
+  'color.select': 'Select {color}',
+  'color.eyeDropper': 'Pick color from screen',
+
   'quantity.label': 'Quantity',
   'quantity.decrease': 'Decrease quantity',
   'quantity.increase': 'Increase quantity',
