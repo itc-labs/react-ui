@@ -1,5 +1,9 @@
 'use client';
 
+import { KitIcon } from '../icon/kit-icon';
+import { ChevronRightIcon } from '../icon/outline/chevron-right';
+import { ChevronRightIcon as ChevronRightBoldIcon } from '../icon/bold/chevron-right';
+
 import { DropdownMenu as Primitive } from 'radix-ui';
 import { cn, partTestId } from '../common';
 import { Icon } from '../icon';
@@ -106,8 +110,9 @@ export function MenuEntries({
             className={cn(menuItemClass, shared.className, classNames?.submenuTrigger)}
           >
             {content}
-            <Icon
+            <KitIcon
               name="chevronRight"
+              builtin={{ outline: ChevronRightIcon, bold: ChevronRightBoldIcon }}
               className={cn('ml-auto size-4', classNames?.icon)}
             />
           </Primitive.SubTrigger>

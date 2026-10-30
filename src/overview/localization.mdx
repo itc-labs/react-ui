@@ -48,7 +48,7 @@ Button có loadingLabel, Spinner có label, DialogContent/DrawerContent có clos
 
 Dùng defineLocale với code BCP 47 và messages. Key thiếu fallback về English. Dictionary hỗ trợ template như `{count}`, `{name}` và plural forms one/other/few… theo Intl.PluralRules. Interpolation chỉ trả string; không render HTML.
 
-Có thể nối next-intl/i18next bằng cách đưa message đã dịch vào provider; kit không áp đặt thư viện/router/storage của app. Khi thêm ngôn ngữ mới cho lịch, truyền calendarLocale tương ứng từ react-day-picker/locale. Nếu bỏ qua, weekday/date-library locale fallback English; header và các ngày hiển thị vẫn dùng Intl theo code.
+Có thể nối next-intl/i18next bằng cách đưa message đã dịch vào provider; kit không áp đặt thư viện/router/storage của app. Khi thêm ngôn ngữ mới cho lịch, truyền calendarLocale tương ứng từ react-day-picker/locale. calendarLocale là override tùy chọn; locale ngày chỉ được nạp trong component lịch. Thứ tự: calendarLocales[selected] → locale.calendarLocale → vi/en của selected → calendarLocales[fallback] → vi/en của fallback → English. Header và các ngày hiển thị vẫn dùng Intl theo code.
 
 <Canvas of={Localization.PartialLocaleFallback} />
 

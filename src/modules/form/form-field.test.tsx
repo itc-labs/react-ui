@@ -7,6 +7,7 @@ import * as v from 'valibot';
 import { Form, FormField, FormSubmit, useAppForm } from './index';
 import { Input } from '../../components/input';
 import { NumberInput } from '../../components/number-input';
+import { Select } from '../../components/select';
 import { InputPassword } from '../../components/input-password';
 import { Checkbox } from '../../components/checkbox';
 import { Button } from '../../components/button';
@@ -188,4 +189,49 @@ it('does not coerce field schemas or replace zero with an empty value', () => {
   expect(rule({ value: 0 })).toBeUndefined();
   expect(rule({ value: null })).toBeTruthy();
   expect(rule({ value: '0' })).toBeTruthy();
+});
+
+it('binds a marked Select through onValueChange without a child handler', async () => {
+  const saved = vi.fn();
+
+  function Demo() {
+    const form = useAppForm({
+      defaultValues: { choice: null as string | null },
+      onSubmit: async ({ value }) => {
+        saved(value);
+      },
+    });
+
+    return (
+      <Form form={form}>
+        <FormField name="choice" label="Choice">
+          <Select options={[{ value: 'lorem', label: 'Lorem ipsum' }]} />
+        </FormField>
+        <form.Subscribe selector={(state) => state.values.choice}>
+          {(choice) => <output>{choice}</output>}
+        </form.Subscribe>
+      </Form>
+    );
+  }
+
+  await act(async () => root.render(<Demo />));
+  const input = host.querySelector('[role="combobox"]')!;
+
+  act(() => {
+    input.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }),
+    );
+  });
+
+  act(() => {
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+  });
+
+  expect(host.querySelector('output')?.textContent).toBe('lorem');
+  await act(async () => {
+    host
+      .querySelector('form')!
+      .dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+  });
+  expect(saved).toHaveBeenCalledWith({ choice: 'lorem' });
 });

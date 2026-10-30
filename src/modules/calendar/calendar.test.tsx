@@ -1,9 +1,10 @@
 // @vitest-environment jsdom
 import { act, createRef } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
-import { userEvent } from 'storybook/test';
+import { userEvent, within } from 'storybook/test';
 import { beforeEach, afterEach, it, expect, vi } from 'vitest';
 import { UILocaleProvider } from '../../i18n/provider';
+import { enUS } from 'react-day-picker/locale';
 import { Calendar, type CalendarProps } from './index';
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
@@ -62,6 +63,33 @@ it('navigates uncontrolled dates, reports exclusive ranges on mount and each nav
   expect(onRangeChange).toHaveBeenCalledTimes(6);
 });
 
+it('uses calendar map week defaults and lets the explicit weekStartsOn prop override them', () => {
+  const onRangeChange = vi.fn();
+  const calendarLocale = {
+    ...enUS,
+    options: { ...enUS.options, weekStartsOn: 6 as const },
+  };
+
+  const renderCalendar = (weekStartsOn?: 1) =>
+    act(() =>
+      root.render(
+        <UILocaleProvider locale="vi-VN" calendarLocales={{ 'vi-vn': calendarLocale }}>
+          <Calendar
+            defaultDate={date}
+            defaultView="week"
+            onRangeChange={onRangeChange}
+            {...(weekStartsOn === undefined ? {} : { weekStartsOn })}
+          />
+        </UILocaleProvider>,
+      ),
+    );
+
+  renderCalendar();
+  expect(onRangeChange.mock.lastCall?.[0].start).toEqual(new Date(2026, 9, 24));
+  renderCalendar(1);
+  expect(onRangeChange.mock.lastCall?.[0].start).toEqual(new Date(2026, 9, 26));
+});
+
 it('keeps controlled navigation and view changes pending until the host supplies new values', () => {
   const onDateChange = vi.fn();
   const onViewChange = vi.fn();
@@ -93,9 +121,13 @@ it('keeps controlled navigation and view changes pending until the host supplies
   expect(onRangeChange).toHaveBeenCalledTimes(2);
 });
 
-it('switches uncontrolled views using keyboard tabs and the narrow-screen Select', async () => {
+it('switches uncontrolled views using keyboard tabs and the narrow-screen radio menu', async () => {
   const onRangeChange = vi.fn();
-  render({ views: ['month', 'week', 'day'], onRangeChange });
+  render({
+    views: ['month', 'week', 'day'],
+    onRangeChange,
+    classNames: { viewSelect: 'custom-view-select' },
+  });
   await act(async () => {
     part('view-month').focus();
     await userEvent.setup({ document }).keyboard('{ArrowRight}');
@@ -108,13 +140,27 @@ it('switches uncontrolled views using keyboard tabs and the narrow-screen Select
     end: new Date(2026, 10, 1),
     view: 'week',
   });
-  const input = host.querySelector<HTMLInputElement>('[role="combobox"]')!;
+  const trigger = within(host).getByRole('button', { name: 'Calendar view' });
+  expect(trigger).toBe(part('viewSelect'));
+  expect(trigger.parentElement?.classList.contains('custom-view-select')).toBe(true);
+  expect(trigger.textContent).toContain('Week');
   await act(async () => {
-    input.focus();
-    await userEvent.setup({ document }).keyboard('{ArrowDown}{End}{Enter}');
+    trigger.focus();
+    await userEvent.setup({ document }).keyboard('{ArrowDown}');
+  });
+  const menu = within(document.body).getByRole('menu', { name: 'Calendar view' });
+  expect(
+    within(menu)
+      .getByRole('menuitemradio', { name: 'Week' })
+      .getAttribute('aria-checked'),
+  ).toBe('true');
+  await act(async () => {
+    await userEvent.setup({ document }).keyboard('{End}{Enter}');
   });
   expect(host.firstElementChild?.getAttribute('data-view')).toBe('day');
   expect(part('view-day').getAttribute('aria-selected')).toBe('true');
+  expect(trigger.textContent).toContain('Day');
+  expect(document.activeElement).toBe(trigger);
 });
 
 it('uses locale week defaults, explicit overrides and compact month ranges without resetting state', () => {

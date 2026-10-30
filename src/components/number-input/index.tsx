@@ -1,4 +1,5 @@
 'use client';
+import { valueControl } from '../common/form-control';
 import { interactiveTrigger } from '../common/interactive-trigger';
 import type { TestIdProps } from '../common/testing';
 
@@ -151,3 +152,5 @@ export function NumberInput({
 }
 
 NumberInput[interactiveTrigger] = true;
+
+NumberInput[valueControl] = true;

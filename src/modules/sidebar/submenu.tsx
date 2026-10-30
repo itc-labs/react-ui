@@ -1,4 +1,8 @@
 'use client';
+
+import { KitIcon } from '../../components/icon/kit-icon';
+import { ChevronDownIcon } from '../../components/icon/outline/chevron-down';
+import { ChevronDownIcon as ChevronDownBoldIcon } from '../../components/icon/bold/chevron-down';
 import type { TestIdProps } from '../../components/common/testing';
 
 import {
@@ -16,7 +20,6 @@ import { Collapsible } from 'radix-ui';
 import { type SlotClasses, cn } from '../../components/common';
 import { focusRingClassName } from '../../components/common/focus-ring';
 import { useComposedRefs } from '../../components/common/refs';
-import { Icon } from '../../components/icon';
 
 const SubmenuContext = createContext<{
   open: boolean;
@@ -141,8 +144,9 @@ export function SidebarSubmenuTrigger({
       >
         {children}
       </span>
-      <Icon
+      <KitIcon
         name="chevronDown"
+        builtin={{ outline: ChevronDownIcon, bold: ChevronDownBoldIcon }}
         className={cn(
           'shrink-0 motion-safe:transition-transform duration-[var(--motion-duration-control)] group-data-[state=open]:rotate-180',
           !iconOnly && 'ml-auto',

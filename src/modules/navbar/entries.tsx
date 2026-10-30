@@ -1,3 +1,6 @@
+import { KitIcon } from '../../components/icon/kit-icon';
+import { ChevronDownIcon } from '../../components/icon/outline/chevron-down';
+import { ChevronDownIcon as ChevronDownBoldIcon } from '../../components/icon/bold/chevron-down';
 import { NavigationMenu } from 'radix-ui';
 import { cn, partTestId } from '../../components/common';
 import { Icon } from '../../components/icon';
@@ -161,7 +164,11 @@ export function HeaderEntries<TAccess>({
                 className={cn(rowClass, 'cursor-pointer', classNames?.trigger)}
               >
                 <HeaderLabel item={item} className={classNames?.icon} testId={id} />
-                <Icon name="chevronDown" size={16} />
+                <KitIcon
+                  name="chevronDown"
+                  builtin={{ outline: ChevronDownIcon, bold: ChevronDownBoldIcon }}
+                  size={16}
+                />
               </summary>
               <div
                 data-testid={partTestId(id, 'content')}
@@ -189,8 +196,9 @@ export function HeaderEntries<TAccess>({
               className={cn(itemRowClass, 'group', classNames?.trigger)}
             >
               <HeaderLabel item={item} className={classNames?.icon} testId={id} />
-              <Icon
+              <KitIcon
                 name="chevronDown"
+                builtin={{ outline: ChevronDownIcon, bold: ChevronDownBoldIcon }}
                 size={16}
                 className="group-data-[state=open]:rotate-180"
               />

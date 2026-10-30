@@ -1,4 +1,9 @@
 'use client';
+
+import { KitIcon } from '../icon/kit-icon';
+import { UploadIcon } from '../icon/outline/upload';
+import { UploadIcon as UploadBoldIcon } from '../icon/bold/upload';
+import { valueControl } from '../common/form-control';
 import { partTestId } from '../common/testing';
 
 import { useUILocale } from '../../i18n/provider';
@@ -6,7 +11,6 @@ import { useId, useRef, useState } from 'react';
 import { cn, fieldDescription } from '../common';
 import { useComposedRefs } from '../common/refs';
 import { Button } from '../button';
-import { Icon } from '../icon';
 import { getFileIssue, type FileValidationIssue } from './validation';
 export type { UploadFieldProps } from './types';
 import type { UploadFieldProps } from './types';
@@ -138,7 +142,10 @@ export function UploadField({
             onBlur={onBlur}
             onClick={() => input.current?.click()}
           >
-            <Icon name="upload" />
+            <KitIcon
+              name="upload"
+              builtin={{ outline: UploadIcon, bold: UploadBoldIcon }}
+            />
             {t('upload.choose')}
           </Button>
           <span
@@ -210,3 +217,5 @@ export function UploadField({
 
 export type { FileRules } from './validation';
 export { validateFiles } from './validation';
+
+UploadField[valueControl] = true;

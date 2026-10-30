@@ -1,4 +1,11 @@
 'use client';
+
+import { KitIcon } from '../../components/icon/kit-icon';
+import { KitIconButton } from '../../components/icon-button/kit-icon-button';
+import { UploadIcon } from '../../components/icon/outline/upload';
+import { UploadIcon as UploadBoldIcon } from '../../components/icon/bold/upload';
+import { CloseIcon } from '../../components/icon/outline/close';
+import { CloseIcon as CloseBoldIcon } from '../../components/icon/bold/close';
 import { partTestId } from '../../components/common/testing';
 
 import { useUILocale } from '../../i18n/provider';
@@ -12,8 +19,6 @@ import {
   getFileIssue,
   type FileValidationIssue,
 } from '../../components/upload-field/validation';
-import { Icon } from '../../components/icon';
-import { IconButton } from '../../components/icon-button';
 import { AvatarCropDialog } from './crop-dialog';
 export type { AvatarUploadProps } from './types';
 import type { AvatarUploadProps } from './types';
@@ -131,9 +136,10 @@ export function AvatarUpload({
             )}
             style={blocked ? { opacity: 0 } : undefined}
           >
-            <Icon
+            <KitIcon
               data-testid={partTestId(testId, 'uploadIcon')}
               name="upload"
+              builtin={{ outline: UploadIcon, bold: UploadBoldIcon }}
               className={classNames?.uploadIcon}
             />
             {avatar.size === 'lg' && (
@@ -147,9 +153,10 @@ export function AvatarUpload({
           </button>
         )}
         {uploadable && file && (
-          <IconButton
+          <KitIconButton
             data-testid={partTestId(testId, 'remove')}
             icon="close"
+            builtin={{ outline: CloseIcon, bold: CloseBoldIcon }}
             label={t('avatar.remove')}
             title={t('avatar.remove')}
             variant="secondary"

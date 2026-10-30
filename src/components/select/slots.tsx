@@ -1,4 +1,10 @@
 'use client';
+
+import { KitIcon } from '../icon/kit-icon';
+import { CloseIcon } from '../icon/outline/close';
+import { CloseIcon as CloseBoldIcon } from '../icon/bold/close';
+import { ChevronDownIcon } from '../icon/outline/chevron-down';
+import { ChevronDownIcon as ChevronDownBoldIcon } from '../icon/bold/chevron-down';
 import { createContext, useContext } from 'react';
 import {
   components,
@@ -12,7 +18,6 @@ import { useUILocale } from '../../i18n/provider';
 import { partTestId } from '../common/testing';
 import { SelectTestIdContext } from './testing-slots';
 import { cn } from '../common';
-import { Icon } from '../icon';
 import { Spinner } from '../spinner';
 import { Button } from '../button';
 import type { SelectClassNames, SelectOption } from './types';
@@ -31,7 +36,7 @@ export function ClearIndicator(props: ClearIndicatorProps<SelectOption, boolean>
         ...{ 'data-testid': partTestId(base, 'clear') },
       }}
     >
-      <Icon name="close" />
+      <KitIcon name="close" builtin={{ outline: CloseIcon, bold: CloseBoldIcon }} />
     </components.ClearIndicator>
   );
 }
@@ -41,7 +46,10 @@ export function DropdownIndicator(
 ) {
   return (
     <components.DropdownIndicator {...props}>
-      <Icon name="chevronDown" />
+      <KitIcon
+        name="chevronDown"
+        builtin={{ outline: ChevronDownIcon, bold: ChevronDownBoldIcon }}
+      />
     </components.DropdownIndicator>
   );
 }
@@ -59,7 +67,11 @@ export function MultiValueRemove(props: MultiValueRemoveProps<SelectOption, bool
         ...{ 'data-testid': partTestId(base, 'remove', props.data.value) },
       }}
     >
-      <Icon name="close" size={12} />
+      <KitIcon
+        name="close"
+        builtin={{ outline: CloseIcon, bold: CloseBoldIcon }}
+        size={12}
+      />
     </components.MultiValueRemove>
   );
 }

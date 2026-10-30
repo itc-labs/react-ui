@@ -1,5 +1,6 @@
 'use client';
 import { useUILocale } from '../../i18n/provider';
+import { useCalendarLocale } from './locale';
 import { useState } from 'react';
 import {
   DayPicker,
@@ -21,6 +22,7 @@ import { CalendarHeader } from './header';
 
 export function Calendar(props: CalendarProps) {
   const { t, locale } = useUILocale();
+  const calendarLocale = useCalendarLocale();
   const {
     minDate = '1900-01-01',
     maxDate = '2100-12-31',
@@ -80,7 +82,7 @@ export function Calendar(props: CalendarProps) {
     classNames: dayClasses,
     labels,
     lang: locale.code,
-    locale: locale.calendarLocale,
+    locale: calendarLocale,
     month,
     onMonthChange: setMonth,
     startMonth: min,

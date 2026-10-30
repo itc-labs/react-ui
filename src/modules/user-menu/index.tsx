@@ -1,5 +1,9 @@
 'use client';
 
+import { KitIcon } from '../../components/icon/kit-icon';
+import { ChevronDownIcon } from '../../components/icon/outline/chevron-down';
+import { ChevronDownIcon as ChevronDownBoldIcon } from '../../components/icon/bold/chevron-down';
+
 import type { ComponentProps, ReactNode } from 'react';
 import { Avatar, type AvatarProps } from '../../components/avatar';
 import { cn, partTestId, type SlotClasses } from '../../components/common';
@@ -9,7 +13,6 @@ import {
   type DropdownMenuEntry,
   type DropdownMenuProps,
 } from '../../components/dropdown-menu';
-import { Icon } from '../../components/icon';
 import { useUILocale } from '../../i18n/provider';
 
 export type UserMenuClassNames = SlotClasses<
@@ -115,8 +118,9 @@ export function UserMenu({
               </span>
             )}
           </span>
-          <Icon
+          <KitIcon
             name="chevronDown"
+            builtin={{ outline: ChevronDownIcon, bold: ChevronDownBoldIcon }}
             size={16}
             data-testid={partTestId(testId, 'chevron')}
             className={cn(

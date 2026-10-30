@@ -9,22 +9,25 @@ const root = fileURLToPath(new URL('../', import.meta.url));
 const entries = {
   Icon: 'components/icon/index.tsx',
   Button: 'components/button/index.tsx',
+  Spinner: 'components/spinner/index.tsx',
   Dialog: 'components/dialog/index.tsx',
   Select: 'components/select/index.tsx',
   DataTable: 'modules/data-table/index.tsx',
   Root: 'index.ts',
   Calendar: 'modules/calendar/index.tsx',
+  Form: 'modules/form/index.tsx',
 };
 const sizes = {};
 for (const [name, file] of Object.entries(entries)) {
-  if (
-    process.argv.includes('--budget-only') &&
-    !['Icon', 'Button', 'Calendar'].includes(name)
-  )
-    continue;
+  const exports =
+    name === 'Root'
+      ? '*'
+      : name === 'Form'
+        ? '{ Form, FormField, FormSubmit }'
+        : `{ ${name} }`;
   const { outputFiles, metafile } = await build({
     stdin: {
-      contents: `export ${name === 'Root' ? '*' : `{ ${name} }`} from './src/${file}';`,
+      contents: `export ${exports} from './src/${file}';`,
       resolveDir: root,
       loader: 'tsx',
     },
@@ -39,6 +42,19 @@ for (const [name, file] of Object.entries(entries)) {
     metafile: true,
     logLevel: 'silent',
   });
+  if (['Dialog', 'Button'].includes(name)) {
+    const registries = Object.keys(metafile.inputs).filter((input) =>
+      /components\/icon\/kit-icons\.(?:ts|tsx)$/.test(input),
+    );
+    if (registries.length)
+      throw new Error(`${name} imports the built-in icon registry: ${registries}`);
+  }
+  if (['DataTable', 'Calendar'].includes(name)) {
+    const forbidden = Object.keys(metafile.inputs).filter((input) =>
+      /node_modules\/react-select\//.test(input),
+    );
+    if (forbidden.length) throw new Error(`${name} imports react-select: ${forbidden}`);
+  }
   if (name === 'Calendar') {
     const forbidden = Object.keys(metafile.inputs).filter((input) =>
       /(?:modules\/(?:editor|chart|avatar-upload)\/|node_modules\/.*(?:tiptap|recharts|react-easy-crop))/.test(
@@ -49,7 +65,8 @@ for (const [name, file] of Object.entries(entries)) {
       throw new Error(`Calendar imports optional features: ${forbidden}`);
   }
   const bytes = outputFiles[0].contents;
-  sizes[name] = { minified: bytes.length, gzip: gzipSync(bytes).length };
+  const gzip = gzipSync(bytes).length;
+  sizes[name] = { minified: bytes.length, gzip };
   // Ordinary kit imports must never reach either full runtime catalog.
   const fullPacks = Object.keys(metafile.inputs).filter((input) =>
     /icon\/(outline|bold)\/pack\.ts$/.test(input),
@@ -58,10 +75,17 @@ for (const [name, file] of Object.entries(entries)) {
     throw new Error(`${name} imports full icon packs: ${fullPacks}`);
 }
 console.log(JSON.stringify(sizes, null, 2));
+// Gzip budgets with a little headroom; raise them only for an intentional feature.
 for (const [name, limit] of Object.entries({
   Icon: 20_000,
-  Button: 30_000,
-  Calendar: 130_000,
+  Button: 20_000,
+  Spinner: 20_000,
+  Dialog: 38_000,
+  Select: 58_000,
+  Form: 22_000,
+  DataTable: 90_000,
+  Calendar: 100_000,
+  Root: 260_000,
 })) {
   if (sizes[name].gzip >= limit) {
     throw new Error(`${name}: ${sizes[name].gzip} gzip bytes exceeds ${limit}`);

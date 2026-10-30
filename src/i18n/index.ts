@@ -1,4 +1,3 @@
-import { vi, enUS as calendarEnglish } from 'react-day-picker/locale';
 import { enMessages } from './en';
 import { viMessages } from './vi';
 import type { UILocale, UIMessages, UIMessageKey, UITranslate } from './types';
@@ -15,7 +14,7 @@ export type {
 export function defineLocale({
   code,
   messages,
-  calendarLocale = calendarEnglish,
+  calendarLocale,
 }: {
   code: string;
   messages: Partial<UIMessages>;
@@ -26,7 +25,7 @@ export function defineLocale({
 
   return Object.freeze({
     code,
-    calendarLocale,
+    ...(calendarLocale ? { calendarLocale } : {}),
     messages: Object.freeze(
       Object.fromEntries(
         Object.entries(merged).map(([key, message]) => [
@@ -41,12 +40,10 @@ export function defineLocale({
 export const viVN = defineLocale({
   code: 'vi-VN',
   messages: viMessages,
-  calendarLocale: vi,
 });
 export const enUS = defineLocale({
   code: 'en-US',
   messages: enMessages,
-  calendarLocale: calendarEnglish,
 });
 
 export function createTranslator(
@@ -138,11 +135,6 @@ export function resolveUILocale(
       ...builtin(selected)?.messages,
       ...entries.get(selected),
     },
-    calendarLocale:
-      calendars[selected] ??
-      builtin(selected)?.calendarLocale ??
-      calendars[fallback] ??
-      builtin(fallback)?.calendarLocale ??
-      calendarEnglish,
+    calendarLocale: calendars[selected],
   });
 }

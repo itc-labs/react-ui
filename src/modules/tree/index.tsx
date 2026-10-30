@@ -1,11 +1,27 @@
 'use client';
+
+import { KitIcon } from '../../components/icon/kit-icon';
+import { ChevronDownIcon } from '../../components/icon/outline/chevron-down';
+import { ChevronDownIcon as ChevronDownBoldIcon } from '../../components/icon/bold/chevron-down';
+import { ChevronRightIcon } from '../../components/icon/outline/chevron-right';
+import { ChevronRightIcon as ChevronRightBoldIcon } from '../../components/icon/bold/chevron-right';
+import { FolderOpenIcon } from '../../components/icon/outline/folder-open';
+import { FolderOpenIcon as FolderOpenBoldIcon } from '../../components/icon/bold/folder-open';
+import { FolderIcon } from '../../components/icon/outline/folder';
+import { FolderIcon as FolderBoldIcon } from '../../components/icon/bold/folder';
 import { partTestId, type TestIdProps } from '../../components/common/testing';
 
 import { useUILocale } from '../../i18n/provider';
 import { useMemo, useRef, useState } from 'react';
 import { type SlotClasses, cn } from '../../components/common';
-import { Icon } from '../../components/icon';
 import { validateTree, visibleTree, type TreeNode } from './model';
+const builtinIcons = {
+  chevronDown: { outline: ChevronDownIcon, bold: ChevronDownBoldIcon },
+  chevronRight: { outline: ChevronRightIcon, bold: ChevronRightBoldIcon },
+  folderOpen: { outline: FolderOpenIcon, bold: FolderOpenBoldIcon },
+  folder: { outline: FolderIcon, bold: FolderBoldIcon },
+};
+
 export type { TreeNode } from './model';
 export interface TreeProps extends TestIdProps {
   nodes: readonly TreeNode[];
@@ -159,9 +175,14 @@ export function Tree({
                 classNames?.toggle,
               )}
             >
-              <Icon
+              <KitIcon
                 data-testid={partTestId(testId, 'toggleIcon', node.id)}
                 name={expanded.includes(node.id) ? 'chevronDown' : 'chevronRight'}
+                builtin={
+                  builtinIcons[
+                    expanded.includes(node.id) ? 'chevronDown' : 'chevronRight'
+                  ]
+                }
                 size={14}
                 className={classNames?.icon}
               />
@@ -170,9 +191,12 @@ export function Tree({
             <span className="w-6" />
           )}
           {node.icon ?? (
-            <Icon
+            <KitIcon
               data-testid={partTestId(testId, 'icon', node.id)}
               name={expanded.includes(node.id) ? 'folderOpen' : 'folder'}
+              builtin={
+                builtinIcons[expanded.includes(node.id) ? 'folderOpen' : 'folder']
+              }
               className={classNames?.icon}
             />
           )}

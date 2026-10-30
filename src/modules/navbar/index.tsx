@@ -5,7 +5,7 @@ import { NavigationMenu } from 'radix-ui';
 import { cn, partTestId } from '../../components/common';
 import { Drawer } from '../../components/drawer';
 import { MenuIcon } from '../../components/icon/outline/menu';
-import { IconButton } from '../../components/icon-button';
+import { KitIconButton } from '../../components/icon-button/kit-icon-button';
 import { NavbarBrandBlock } from './brand';
 import { useUILocale } from '../../i18n/provider';
 import { filterNavByAccess, resolveActiveNav } from '../navigation';
@@ -142,7 +142,7 @@ export function Navbar<TAccess = unknown>({
           {...(testId ? { 'data-testid': partTestId(testId, 'drawer')! } : {})}
           className={classNames?.drawer ?? ''}
           trigger={
-            <IconButton
+            <KitIconButton
               icon={MenuIcon}
               variant="ghost"
               label={mobileTriggerLabel ?? t('navbar.openMenu')}

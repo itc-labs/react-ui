@@ -1,4 +1,5 @@
 'use client';
+import { valueControl } from '../common/form-control';
 import type { TestIdProps } from '../common/testing';
 
 import { partTestId } from '../common/testing';
@@ -123,3 +124,5 @@ export function RadioGroup({
     </div>
   );
 }
+
+RadioGroup[valueControl] = true;

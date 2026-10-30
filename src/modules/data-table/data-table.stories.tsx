@@ -292,9 +292,9 @@ export const ClientPagination: Story = {
     const canvas = within(canvasElement);
     await userEvent.click(canvas.getByRole('button', { name: 'Trang 3' }));
     await expect(canvas.getByText('Mẫu 21')).toBeVisible();
-    await userEvent.click(canvas.getByRole('combobox', { name: 'Số dòng' }));
+    await userEvent.click(canvas.getByRole('button', { name: 'Số dòng' }));
     await userEvent.click(
-      within(document.body).getByRole('option', { name: '20 dòng' }),
+      within(document.body).getByRole('menuitemradio', { name: '20 dòng' }),
     );
     await expect(canvas.getByText('Trang 1 / 3')).toBeVisible();
     await expect(canvas.getByText('Mẫu 01')).toBeVisible();

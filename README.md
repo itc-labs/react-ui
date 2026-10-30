@@ -14,12 +14,16 @@ A reusable React 19 UI kit built on Tailwind CSS v4 tokens and Radix primitives:
 ## Install
 
 ```bash
-pnpm add @itclabs/react-ui
+pnpm add @itclabs/react-ui valibot date-fns @date-fns/tz @tanstack/react-form @tanstack/react-table
 # peer dependencies
 pnpm add react@^19 react-dom@^19
 ```
 
 Requires Node.js >= 22.12.
+
+These five data/form/date libraries are required peers so the app and the kit share a single copy, and the app can import them directly (for example, Valibot schemas shared with server code). `useAppForm` builds on TanStack Form, `createValibotFieldValidators` adapts Valibot schemas, DataTable extends TanStack Table column meta with `align`, and calendar helpers build on date-fns with date-fns time-zone support. Import the libraries from their own packages; the kit does not re-export them.
+
+All five remain required at package level because the core entries expose forms, tables and date controls; importing a narrower subpath does not change that peer contract.
 
 ## Styles
 

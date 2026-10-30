@@ -1,7 +1,19 @@
+import { KitIcon } from '../icon/kit-icon';
+import { InfoIcon } from '../icon/outline/info';
+import { InfoIcon as InfoBoldIcon } from '../icon/bold/info';
+import { SuccessIcon } from '../icon/outline/success';
+import { SuccessIcon as SuccessBoldIcon } from '../icon/bold/success';
+import { WarningIcon } from '../icon/outline/warning';
+import { WarningIcon as WarningBoldIcon } from '../icon/bold/warning';
 import type { TestIdProps } from '../common/testing';
 import type { ComponentProps, ReactNode } from 'react';
 import { type SlotClasses, cn } from '../common';
-import { Icon, type IconName } from '../icon';
+const builtinIcons = {
+  info: { outline: InfoIcon, bold: InfoBoldIcon },
+  success: { outline: SuccessIcon, bold: SuccessBoldIcon },
+  warning: { outline: WarningIcon, bold: WarningBoldIcon },
+};
+
 const tones = {
   neutral: 'border-line bg-brand-50 text-ink',
   info: 'border-info-700/20 bg-info-50 text-info-700',
@@ -16,13 +28,13 @@ const inlineTones = {
   warning: 'text-warning-700',
   danger: 'text-danger-700',
 };
-const glyphs: Record<keyof typeof tones, IconName> = {
+const glyphs = {
   neutral: 'info',
   info: 'info',
   success: 'success',
   warning: 'warning',
   danger: 'warning',
-};
+} as const;
 export type AlertProps = (ComponentProps<'div'> & {
   tone?: keyof typeof tones;
   variant?: 'panel' | 'inline';
@@ -57,8 +69,9 @@ export function Alert({
         className,
       )}
     >
-      <Icon
+      <KitIcon
         name={glyphs[tone]}
+        builtin={builtinIcons[glyphs[tone]]}
         className={cn('shrink-0', !inline && 'mt-0.5', classNames?.icon)}
       />
       <div

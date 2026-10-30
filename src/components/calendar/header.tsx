@@ -1,9 +1,14 @@
 'use client';
+
+import { KitIconButton } from '../icon-button/kit-icon-button';
+import { ChevronLeftIcon } from '../icon/outline/chevron-left';
+import { ChevronLeftIcon as ChevronLeftBoldIcon } from '../icon/bold/chevron-left';
+import { ChevronRightIcon } from '../icon/outline/chevron-right';
+import { ChevronRightIcon as ChevronRightBoldIcon } from '../icon/bold/chevron-right';
 import { partTestId } from '../common/testing';
 
 import { useUILocale } from '../../i18n/provider';
 import { cn } from '../common';
-import { IconButton } from '../icon-button';
 import { Select } from '../select';
 import { atMonth, monthKey } from './model';
 import type { CalendarProps } from './types';
@@ -40,11 +45,12 @@ export function CalendarHeader({
           classNames?.navigation,
         )}
       >
-        <IconButton
+        <KitIconButton
           data-testid={partTestId(testId, 'previous')}
           className={classNames?.navigationButton}
           label={t('calendar.previous')}
           icon="chevronLeft"
+          builtin={{ outline: ChevronLeftIcon, bold: ChevronLeftBoldIcon }}
           variant="ghost"
           size="sm"
           disabled={monthKey(previous) < monthKey(min)}
@@ -63,11 +69,12 @@ export function CalendarHeader({
             year: 'numeric',
           }).format(month)}
         </p>
-        <IconButton
+        <KitIconButton
           data-testid={partTestId(testId, 'next')}
           className={classNames?.navigationButton}
           label={t('calendar.next')}
           icon="chevronRight"
+          builtin={{ outline: ChevronRightIcon, bold: ChevronRightBoldIcon }}
           variant="ghost"
           size="sm"
           disabled={monthKey(next) > monthKey(max)}

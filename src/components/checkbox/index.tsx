@@ -1,4 +1,10 @@
 'use client';
+
+import { KitIcon } from '../icon/kit-icon';
+import { CheckIcon } from '../icon/outline/check';
+import { CheckIcon as CheckBoldIcon } from '../icon/bold/check';
+import { MinusIcon } from '../icon/outline/minus';
+import { MinusIcon as MinusBoldIcon } from '../icon/bold/minus';
 import { interactiveTrigger } from '../common/interactive-trigger';
 import type { TestIdProps } from '../common/testing';
 
@@ -8,7 +14,6 @@ import { useId, type ComponentProps, type ReactNode } from 'react';
 import { Checkbox as Primitive } from 'radix-ui';
 import { type SlotClasses, cn } from '../common';
 import { focusRingClassName } from '../common/focus-ring';
-import { Icon } from '../icon';
 export type CheckboxProps = (ComponentProps<typeof Primitive.Root> & {
   label?: ReactNode;
   hint?: string;
@@ -68,18 +73,20 @@ export function Checkbox({
             data-testid={partTestId(testId, 'indicator')}
             className={cn('group', classNames?.indicator)}
           >
-            <Icon
+            <KitIcon
               data-testid={partTestId(testId, 'checkedIcon')}
               name="check"
+              builtin={{ outline: CheckIcon, bold: CheckBoldIcon }}
               size={12}
               className={cn(
                 'group-data-[state=indeterminate]:hidden',
                 classNames?.icon,
               )}
             />
-            <Icon
+            <KitIcon
               data-testid={partTestId(testId, 'indeterminateIcon')}
               name="minus"
+              builtin={{ outline: MinusIcon, bold: MinusBoldIcon }}
               size={12}
               className={cn(
                 'hidden group-data-[state=indeterminate]:block',
