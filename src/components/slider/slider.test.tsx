@@ -249,7 +249,9 @@ it('forwards refs, root classes, slots, part selectors and accessible feedback',
       .split(' ')
       .slice(1)
       .map((id) => document.getElementById(id)?.textContent);
-    expect(descriptions).toEqual(['Use arrows', 'Invalid price']);
+    // Like other fields, the error replaces the hint.
+    expect(descriptions).toEqual(['Invalid price']);
+    expect(thumb.className).toContain('border-danger-700');
     expect(thumb.className).toContain('size-7');
     expect(thumb.className).toContain('focus-visible:outline-focus');
   }

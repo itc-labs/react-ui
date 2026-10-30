@@ -704,6 +704,9 @@ export function TreeSelect(props: TreeSelectProps) {
               'flex cursor-pointer items-center gap-2',
               searchable &&
                 'focus-within:border-accent focus-within:shadow-control-focus',
+              // The searchable field puts aria-invalid on the inner input, so mark the shell here.
+              (Boolean(error) || props['aria-invalid']) &&
+                'border-danger-700 focus-within:border-danger-700 focus-within:shadow-control-error',
               size === 'sm'
                 ? 'min-h-control-sm'
                 : size === 'lg'

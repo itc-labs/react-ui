@@ -118,7 +118,11 @@ export function Slider(props: SliderProps) {
   const vertical = orientation === 'vertical';
   const reverse = vertical ? !inverted : (dir === 'rtl') !== inverted;
   const description =
-    [describedBy, hint ? `${id}-hint` : undefined, error ? `${id}-error` : undefined]
+    [
+      describedBy,
+      hint && !error ? `${id}-hint` : undefined,
+      error ? `${id}-error` : undefined,
+    ]
       .filter(Boolean)
       .join(' ') || undefined;
   const baseLabel =
@@ -247,6 +251,7 @@ export function Slider(props: SliderProps) {
             data-testid={partTestId(testId, 'range')}
             className={cn(
               'absolute rounded-full bg-accent data-[orientation=horizontal]:h-full data-[orientation=vertical]:w-full',
+              error && 'bg-danger-700',
               classNames?.range,
             )}
           />
@@ -327,6 +332,7 @@ export function Slider(props: SliderProps) {
             aria-valuetext={formatValue(number)}
             className={cn(
               'group relative block rounded-full border-2 border-accent bg-surface shadow-sm focus-visible:outline-offset-2',
+              error && 'border-danger-700',
               thumbSizes[size],
               focusRingClassName,
               classNames?.thumb,
@@ -370,7 +376,7 @@ export function Slider(props: SliderProps) {
           />
         ) : null;
       })}
-      {hint && (
+      {hint && !error && (
         <p
           id={`${id}-hint`}
           data-testid={partTestId(testId, 'hint')}

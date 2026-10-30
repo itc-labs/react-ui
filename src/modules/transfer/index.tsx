@@ -606,6 +606,7 @@ function TransferPanel({
         data-testid={testId}
         className={cn(
           'min-w-0 overflow-hidden rounded-panel border border-line bg-surface',
+          error && 'border-danger-700',
           classNames?.panel,
         )}
       >
