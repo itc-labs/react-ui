@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.6.0
+
+### Minor Changes
+
+- [#20](https://github.com/itc-labs/react-ui/pull/20) [`9f609e1`](https://github.com/itc-labs/react-ui/commit/9f609e1586c1723bd58505113105b7d7eaf72836) Thanks [@vungbt](https://github.com/vungbt)! - Add four data display components with typed styling slots, localized labels, and accessible keyboard interactions:
+
+  - Rating in the core API supports whole and half scores, read-only display, custom glyphs, and automatic FormField binding.
+  - JsonView in the core API provides expandable tree navigation, long-string expansion, extended-value rendering, and clipboard copying.
+  - CodeView on `@itclabs/react-ui/code-view` provides themed syntax highlighting, line numbers and highlights, wrapping, and clipboard copying.
+  - Carousel on `@itclabs/react-ui/carousel` supports responsive columns, multi-row layouts, hero slides, drag scrolling, and autoplay with reduced-motion support.
+
+  Document imports and usage recipes, refresh measured bundle sizes, and enforce gzip budgets while keeping Prism and Embla isolated from the root entry.
+
 ## 0.5.1
 
 ### Patch Changes
