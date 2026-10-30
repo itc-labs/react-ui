@@ -6,10 +6,16 @@ import { Meta } from '@storybook/addon-docs/blocks';
 
 ## 1. Install
 
-Start with a React 19 application that already has `react` and `react-dom` installed. Add the kit and its required feature peers:
+Start with a React 19 application that already has `react` and `react-dom` installed, then add the kit:
 
 ```bash
-pnpm add @itclabs/react-ui valibot date-fns @date-fns/tz @tanstack/react-form @tanstack/react-table
+pnpm add @itclabs/react-ui
+```
+
+pnpm and npm (v7+) install the required peers automatically: `valibot`, `date-fns`, `@date-fns/tz`, `@tanstack/react-form` and `@tanstack/react-table`. Add them to your own `package.json` only if your app imports them directly (for example, Valibot schemas shared with server code) or your package manager does not auto-install peers (Yarn, or pnpm with `auto-install-peers=false`):
+
+```bash
+pnpm add valibot date-fns @date-fns/tz @tanstack/react-form @tanstack/react-table
 ```
 
 Supported peer versions: Valibot 1, date-fns 4, `@date-fns/tz` ^1.2.0, TanStack Form 1, and TanStack Table 8.

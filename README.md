@@ -14,16 +14,18 @@ A reusable React 19 UI kit built on Tailwind CSS v4 tokens and Radix primitives:
 ## Install
 
 ```bash
-pnpm add @itclabs/react-ui valibot date-fns @date-fns/tz @tanstack/react-form @tanstack/react-table
-# peer dependencies
-pnpm add react@^19 react-dom@^19
+pnpm add @itclabs/react-ui
 ```
 
-Requires Node.js >= 22.12.
+Requires React 19 and Node.js >= 22.12.
 
-These five data/form/date libraries are required peers so the app and the kit share a single copy, and the app can import them directly (for example, Valibot schemas shared with server code). `useAppForm` builds on TanStack Form, `createValibotFieldValidators` adapts Valibot schemas, DataTable extends TanStack Table column meta with `align`, and calendar helpers build on date-fns with date-fns time-zone support. Import the libraries from their own packages; the kit does not re-export them.
+pnpm and npm (v7+) install the required peers automatically: `valibot`, `date-fns`, `@date-fns/tz`, `@tanstack/react-form` and `@tanstack/react-table`. Add them to your own `package.json` only if your app imports them directly (for example, Valibot schemas shared with server code) or your package manager does not auto-install peers (Yarn, or pnpm with `auto-install-peers=false`):
 
-All five remain required at package level because the core entries expose forms, tables and date controls; importing a narrower subpath does not change that peer contract.
+```bash
+pnpm add valibot date-fns @date-fns/tz @tanstack/react-form @tanstack/react-table
+```
+
+They are peers so the app and the kit share a single copy. `useAppForm` builds on TanStack Form, `createValibotFieldValidators` adapts Valibot schemas, DataTable extends TanStack Table column meta with `align`, and calendar helpers build on date-fns with date-fns time-zone support. Import the libraries from their own packages; the kit does not re-export them.
 
 ## Styles
 
