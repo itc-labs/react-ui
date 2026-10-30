@@ -12,6 +12,7 @@ Every fenced `tsx` block must be a complete, self-contained module: import from 
 
 ## One component page
 
+- Each public component or module has exactly one story file and one Storybook title. Put feature-specific examples (for example sidebar search or two-tier sections) on that page instead of separate `Component tools`/`Component rail` pages. A separate page is only for a different public component.
 - Set `meta.component` to the actual public component. A composition may use `meta.render` to supply its surrounding context; the source builder expands that render into usable code.
 - Start with **Playground** for the smallest useful example. For a simple control, bind args to that control so Controls works. For a required provider/form composition, show real usage and disable meaningless controls for runtime objects.
 - Add **Variants**, **Sizes** and **States** only where those dimensions exist. Compare cases in a single gallery instead of one sidebar entry per prop value.

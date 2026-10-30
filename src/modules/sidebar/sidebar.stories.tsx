@@ -14,6 +14,7 @@ import {
   SidebarSubmenuTrigger,
   SidebarSubmenuContent,
   SidebarSubmenuRow,
+  type SidebarSection,
 } from './index';
 import { Icon } from '../../components/icon';
 import { HomeIcon } from '../../components/icon/outline/home';
@@ -23,6 +24,8 @@ import { UserMenu } from '../user-menu';
 import { WorkspaceShell } from '../../templates/workspace-shell';
 import { Button } from '../../components/button';
 import { UiLink } from '../../components/link-image-provider';
+import { Dialog } from '../../components/dialog';
+import { Avatar } from '../../components/avatar';
 
 const meta = {
   title: 'Modules/Sidebar',
@@ -31,7 +34,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'Pass items to build groups, links and submenus. The host supplies currentPath and canAccess for active links and permission filtering; active overrides route matching, and links use the host adapter. Use compound parts for custom layouts or refs.',
+          'Pass items to build groups, links and submenus, or sections for a two-tier icon rail. The host supplies currentPath and canAccess for active links and permission filtering; active overrides route matching, and links use the host adapter. Add a workspace switcher, search launcher, collapsible groups and row actions through props. Use compound parts for custom layouts or refs.',
       },
     },
   },
@@ -355,7 +358,7 @@ export const LinkComposition: Story = {
 };
 
 export const Submenu: Story = {
-  tags: ['example'],
+  tags: ['!dev', '!autodocs', 'regression'],
   render: () => <SubmenuExample />,
   play: async ({ canvasElement }) => {
     const canvas = await navigationCanvas(canvasElement);
@@ -646,16 +649,8 @@ export const CollapsedFlyout: Story = {
   },
 };
 export const Mobile: Story = {
-  tags: ['example'],
-  parameters: {
-    layout: 'fullscreen',
-    docs: {
-      description: {
-        story:
-          'View the canvas below lg to try the Drawer, Escape key and focus restoration to the menu button.',
-      },
-    },
-  },
+  tags: ['!dev', '!autodocs', 'regression'],
+  parameters: { layout: 'fullscreen' },
   render: () => <RailExample />,
   play: async ({ canvasElement }) => {
     if (window.innerWidth >= 1024) return;
@@ -671,49 +666,310 @@ export const Mobile: Story = {
 
 export const Variants: Story = {
   tags: ['variants'],
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Compare variant and tone, then itemVariant for hover and active rows: raised, subtle, bar and solid.',
+      },
+    },
+  },
   render: () => (
-    <div className="flex flex-wrap gap-6 bg-canvas p-4">
-      {(['sidebar', 'floating'] as const).map((variant) =>
-        (['default', 'dark', 'brand'] as const).map((tone) => (
-          <div key={`${variant}-${tone}`}>
-            <p className="mb-2 text-ui-sm">
-              {variant} / {tone}
-            </p>
+    <div className="grid gap-8 bg-canvas p-4">
+      <div className="flex flex-wrap gap-6">
+        {(['sidebar', 'floating'] as const).map((variant) =>
+          (['default', 'dark', 'brand'] as const).map((tone) => (
+            <div key={`${variant}-${tone}`}>
+              <p className="mb-2 text-ui-sm">
+                {variant} / {tone}
+              </p>
+              <Sidebar
+                variant={variant}
+                tone={tone}
+                header={{
+                  title: 'Lorem ipsum',
+                  subtitle: 'Workspace',
+                  logo: <HomeIcon />,
+                }}
+                footer="Dolor sit amet."
+                items={railItems}
+                className="static h-96"
+              />
+            </div>
+          )),
+        )}
+      </div>
+      <div className="flex flex-wrap gap-6">
+        {(['raised', 'subtle', 'bar', 'solid'] as const).map((itemVariant) => (
+          <div key={itemVariant}>
+            <p className="mb-2 text-ui-sm">{itemVariant}</p>
             <Sidebar
-              variant={variant}
-              tone={tone}
-              header={{
-                title: 'Lorem ipsum',
-                subtitle: 'Workspace',
-                logo: <HomeIcon />,
-              }}
-              footer="Dolor sit amet."
+              itemVariant={itemVariant}
               items={railItems}
               className="static h-96"
             />
           </div>
-        )),
-      )}
+        ))}
+      </div>
     </div>
   ),
 };
 
-export const ItemStyles: Story = {
-  name: 'Item styles',
-  tags: ['variants'],
-  render: () => (
-    <div className="flex flex-wrap gap-6">
-      {(['raised', 'subtle', 'bar', 'solid'] as const).map((itemVariant) => (
-        <div key={itemVariant}>
-          <p className="mb-2 text-ui-sm">{itemVariant}</p>
-          <Sidebar
-            itemVariant={itemVariant}
-            items={railItems}
-            className="static h-96"
-          />
-        </div>
-      ))}
+function HeaderToolsExample() {
+  const [workspace, setWorkspace] = useState('first');
+  const [searchOpen, setSearchOpen] = useState(false);
+
+  return (
+    <>
+      <Sidebar
+        className="static h-96"
+        header={{
+          title: workspace === 'first' ? 'Lorem ipsum' : 'Dolor sit amet',
+          logo: <HomeIcon />,
+          switcher: {
+            value: workspace,
+            onValueChange: setWorkspace,
+            items: [
+              {
+                id: 'first',
+                label: 'Lorem ipsum',
+                description: 'Dolor sit amet',
+                logo: <HomeIcon />,
+              },
+              {
+                id: 'second',
+                label: 'Dolor sit amet',
+                description: 'Consectetur adipiscing elit',
+                logo: <FolderIcon />,
+              },
+            ],
+            footer: (
+              <Button variant="ghost" className="w-full">
+                Create workspace
+              </Button>
+            ),
+          },
+        }}
+        search={{ shortcut: 'mod+k', onOpen: () => setSearchOpen(true) }}
+        items={railItems}
+      />
+      <Dialog
+        open={searchOpen}
+        onOpenChange={setSearchOpen}
+        title="Search"
+        description="Search workspace navigation."
+      >
+        <input
+          aria-label="Search query"
+          placeholder="Search…"
+          className="w-full rounded-control border border-line p-2"
+        />
+      </Dialog>
+    </>
+  );
+}
+
+export const HeaderTools: Story = {
+  name: 'Workspace switcher and search',
+  tags: ['example'],
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Select a workspace from the brand button; a collapsed sidebar opens the same menu from its logo. Click Search or press Command+K on macOS and Control+K elsewhere to open a host-owned dialog. The shortcut ignores editable fields.',
+      },
+    },
+  },
+  render: () => <HeaderToolsExample />,
+};
+
+function GroupsAndActionsExample() {
+  const [path, setPath] = useState('/');
+  const [status, setStatus] = useState('No action selected');
+
+  return (
+    <div className="grid max-w-xs gap-4">
+      <Button
+        variant="secondary"
+        onClick={() => setPath(path === '/' ? '/files' : '/')}
+      >
+        Change route
+      </Button>
+      <Sidebar
+        className="static h-96"
+        currentPath={path}
+        items={[
+          { id: 'overview', label: 'Overview', href: '/', icon: HomeIcon },
+          {
+            id: 'workspace',
+            type: 'group',
+            label: 'Workspace',
+            collapsible: true,
+            defaultOpen: false,
+            items: [
+              {
+                id: 'files',
+                label: 'Files',
+                href: '/files',
+                icon: FolderIcon,
+                onAdd: () => setStatus('Add selected'),
+                actions: [
+                  {
+                    id: 'rename',
+                    label: 'Rename',
+                    onSelect: () => setStatus('Rename selected'),
+                  },
+                  {
+                    id: 'delete',
+                    label: 'Delete',
+                    danger: true,
+                    onSelect: () => setStatus('Delete selected'),
+                  },
+                  {
+                    id: 'archive',
+                    label: 'Archive',
+                    disabled: true,
+                    onSelect: () => {},
+                  },
+                ],
+              },
+              {
+                id: 'saved',
+                type: 'submenu',
+                label: 'Saved',
+                onAdd: () => setStatus('Add selected'),
+                addLabel: 'Create saved item',
+                actions: [
+                  {
+                    id: 'rename',
+                    label: 'Rename',
+                    onSelect: () => setStatus('Rename selected'),
+                  },
+                ],
+                items: [{ id: 'recent', label: 'Recent', href: '/saved/recent' }],
+              },
+            ],
+          },
+        ]}
+      />
+      <output aria-live="polite">{status}</output>
     </div>
+  );
+}
+
+export const GroupsAndActions: Story = {
+  name: 'Collapsible groups and item actions',
+  tags: ['example'],
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Toggle a group with Enter or Space; changing the route into a closed group reveals its active item. Hover or focus a row to reveal its add and action buttons. Touch devices keep them visible; collapsed rails omit them.',
+      },
+    },
+  },
+  render: () => <GroupsAndActionsExample />,
+};
+
+const sections: SidebarSection[] = [
+  {
+    id: 'overview',
+    label: 'Overview',
+    icon: HomeIcon,
+    items: [
+      { id: 'home', label: 'Home', href: '/home', icon: HomeIcon },
+      {
+        id: 'reports',
+        type: 'group',
+        label: 'Reports',
+        items: [{ id: 'recent', label: 'Recent', href: '/reports/recent' }],
+      },
+    ],
+  },
+  {
+    id: 'files',
+    label: 'Files',
+    icon: FolderIcon,
+    badge: 3,
+    items: [
+      { id: 'all', label: 'All files', href: '/files', icon: FolderIcon, exact: true },
+      {
+        id: 'shared',
+        type: 'submenu',
+        label: 'Shared',
+        icon: FolderIcon,
+        items: [
+          { id: 'team', label: 'Team', href: '/files/team' },
+          {
+            id: 'archive',
+            type: 'submenu',
+            label: 'Archive',
+            items: [{ id: 'saved', label: 'Saved', href: '/files/archive/saved' }],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'settings',
+    label: 'Settings',
+    icon: SettingsIcon,
+    items: [
+      { id: 'profile', label: 'Profile', href: '/settings/profile' },
+      { id: 'preferences', label: 'Preferences', href: '/settings/preferences' },
+    ],
+  },
+];
+
+export const Sections: Story = {
+  name: 'Two-tier sections and hover preview',
+  tags: ['example'],
+  args: {
+    sections,
+    expandOnHover: true,
+    currentPath: '/files/team',
+    header: { title: 'Lorem ipsum', logo: <HomeIcon /> },
+    footer: <Avatar alt="Account" fallback="LI" />,
+  },
+  parameters: {
+    layout: 'fullscreen',
+    docs: {
+      description: {
+        story:
+          'Pick a section in the icon rail to show its items in the adjacent panel; nested routes derive the initial section, and section with onSectionChange supports host control. Collapse the sidebar, then hover for 150 ms on a fine pointer or move keyboard focus into it to preview full navigation. Escape dismisses the preview. The mobile Drawer shows section buttons above the active items.',
+      },
+    },
+  },
+  render: (args: SidebarProps) => (
+    <WorkspaceShell
+      sidebar={<Sidebar {...args} />}
+      content={<p>Lorem ipsum dolor sit amet.</p>}
+    />
+  ),
+};
+
+export const SectionsCollapsed: Story = {
+  ...Sections,
+  tags: ['!dev', '!autodocs', 'regression'],
+  args: { ...Sections.args, defaultCollapsed: true },
+};
+
+export const ExpandOnHover: Story = {
+  tags: ['!dev', '!autodocs', 'regression'],
+  parameters: { layout: 'fullscreen' },
+  render: () => (
+    <WorkspaceShell
+      sidebar={
+        <Sidebar
+          expandOnHover
+          defaultCollapsed
+          header={{ title: 'Lorem ipsum', logo: <HomeIcon /> }}
+          items={sections[1]!.items}
+          currentPath="/files/team"
+        />
+      }
+      content={<p>Lorem ipsum dolor sit amet.</p>}
+    />
   ),
 };
 
@@ -724,7 +980,7 @@ export const Offcanvas: Story = {
     docs: {
       description: {
         story:
-          'Wrap the shell in SidebarProvider and put SidebarTrigger in the header so the desktop sidebar can be reopened. The mobile Drawer keeps its own menu trigger.',
+          'Wrap the shell in SidebarProvider and put SidebarTrigger in the header so the desktop sidebar can be reopened. Below lg the sidebar opens in a Drawer from its own menu button; Escape returns focus to that button.',
       },
     },
   },
@@ -784,32 +1040,59 @@ export const FloatingLayout: Story = {
 export const CustomClasses: Story = {
   tags: ['customization'],
   render: () => (
-    <Sidebar
-      className="flex max-w-xs flex-col items-stretch rounded-panel border"
-      header="Lorem ipsum"
-      footer="Dolor sit amet."
-      classNames={{
-        header: 'font-bold text-brand-700',
-        content: 'mt-2 lg:mt-4',
-        footer: 'block bg-brand-50 p-3',
-        nav: 'grid',
-        groupLabel: 'block text-brand-700',
-        item: 'rounded-full',
-        submenuTrigger: 'rounded-full',
-        submenuContent: 'bg-brand-50',
-      }}
-      items={[
-        {
-          id: 'group',
-          type: 'group',
-          label: 'Team',
-          items: [
-            { id: 'first', label: 'Item 1', href: '#custom-sidebar', active: true },
-            { id: 'second', label: 'Item 2', href: '#custom-sidebar' },
-          ],
-        },
-      ]}
-    />
+    <div className="flex flex-wrap items-start gap-6">
+      <Sidebar
+        className="flex max-w-xs flex-col items-stretch rounded-panel border"
+        header="Lorem ipsum"
+        footer="Dolor sit amet."
+        classNames={{
+          header: 'font-bold text-brand-700',
+          content: 'mt-2 lg:mt-4',
+          footer: 'block bg-brand-50 p-3',
+          nav: 'grid',
+          groupLabel: 'block text-brand-700',
+          item: 'rounded-full',
+          submenuTrigger: 'rounded-full',
+          submenuContent: 'bg-brand-50',
+          search: 'rounded-full',
+          groupContent: 'bg-brand-50',
+          itemActions: 'gap-2',
+          actionButton: 'rounded-full',
+        }}
+        search={{ onOpen: () => {} }}
+        items={[
+          {
+            id: 'group',
+            type: 'group',
+            label: 'Team',
+            collapsible: true,
+            items: [
+              {
+                id: 'first',
+                label: 'Item 1',
+                href: '#custom-sidebar',
+                active: true,
+                onAdd: () => {},
+              },
+              { id: 'second', label: 'Item 2', href: '#custom-sidebar' },
+            ],
+          },
+        ]}
+      />
+      <Sidebar
+        className="static h-96 border-r border-line"
+        sections={sections}
+        currentPath="/files/team"
+        classNames={{
+          sectionRail: 'gap-6',
+          section: 'rounded-full',
+          sectionPanel: 'border-dashed',
+          sectionTitle: 'text-accent',
+          sections: 'gap-3',
+          overlay: 'gap-2',
+        }}
+      />
+    </div>
   ),
 };
 
