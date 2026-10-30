@@ -61,7 +61,8 @@
     "./rich-text-view": "./src/modules/rich-text-view/index.tsx",
     "./tree-select": "./src/modules/tree-select/index.tsx",
     "./transfer": "./src/modules/transfer/index.tsx",
-    "./dnd": "./src/modules/dnd/index.tsx"
+    "./dnd": "./src/modules/dnd/index.tsx",
+    "./virtual-list": "./src/modules/virtual-list/index.tsx"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
@@ -314,6 +315,10 @@
       "./dnd": {
         "types": "./dist/modules/dnd/index.d.ts",
         "import": "./dist/modules/dnd/index.js"
+      },
+      "./virtual-list": {
+        "types": "./dist/modules/virtual-list/index.d.ts",
+        "import": "./dist/modules/virtual-list/index.js"
       }
     },
     "access": "public"

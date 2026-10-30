@@ -1,5 +1,10 @@
 import type { UIMessages } from './types';
 export const viMessages = {
+  'virtualList.empty': 'Không có mục nào',
+  'virtualList.loadMore': 'Tải thêm',
+  'virtualList.retry': 'Thử lại',
+  'virtualList.loaded': { other: 'Đã tải thêm {count} mục' },
+
   'dnd.integrationInstructions':
     'Nhấn Space hoặc Enter để nhấc mục. Dùng mũi tên lên xuống để sắp xếp, trái phải để đổi danh sách, Space hoặc Enter để thả và Escape để hủy.',
   'table.reorder': 'Sắp xếp dòng',

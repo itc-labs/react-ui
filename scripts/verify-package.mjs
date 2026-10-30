@@ -193,6 +193,7 @@ for (const subpath of [
   './rich-text-view',
   './tree-select',
   './transfer',
+  './virtual-list',
   './templates',
   './theme',
   './theme/provider',
@@ -380,6 +381,12 @@ const treeSelect = await import(
   pathToFileURL(resolve(root, packed.exports['./tree-select'].import)).href
 );
 assert.equal(typeof treeSelect.TreeSelect, 'function');
+
+const virtualList = await import(
+  pathToFileURL(resolve(root, packed.exports['./virtual-list'].import)).href
+);
+assert.equal(typeof virtualList.VirtualList, 'function');
+assert.equal(typeof virtualList.VirtualGrid, 'function');
 
 const transfer = await import(
   pathToFileURL(resolve(root, packed.exports['./transfer'].import)).href

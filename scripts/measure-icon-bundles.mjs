@@ -33,6 +33,8 @@ const entries = {
   Root: 'index.ts',
   Calendar: 'modules/calendar/index.tsx',
   Carousel: 'modules/carousel/index.tsx',
+  VirtualList: 'modules/virtual-list/index.tsx',
+  VirtualGrid: 'modules/virtual-list/index.tsx',
   MediaGallery: 'modules/media-gallery/index.tsx',
   Lightbox: 'modules/media-gallery/index.tsx',
   Form: 'modules/form/index.tsx',
@@ -83,6 +85,8 @@ for (const [name, file] of Object.entries(entries)) {
       'JsonView',
       'CodeView',
       'Carousel',
+      'VirtualList',
+      'VirtualGrid',
       'MediaGallery',
       'Lightbox',
     ].includes(name)
@@ -121,7 +125,7 @@ for (const [name, file] of Object.entries(entries)) {
   }
   if (name === 'Root') {
     const isolatedSelection = Object.keys(metafile.inputs).filter((input) =>
-      /modules\/(?:dnd|tree-select|transfer)\/|@dnd-kit\/|@tanstack\/.*virtual/.test(
+      /modules\/(?:dnd|tree-select|transfer|virtual-list)\/|@dnd-kit\/|@tanstack\/.*virtual/.test(
         input,
       ),
     );
@@ -168,7 +172,8 @@ for (const [name, limit] of Object.entries({
   Kbd: 19_500,
   Slider: 32_300,
   Timeline: 21_400,
-  QuantityInput: 20_600,
+  // New collection feedback messages also enter the shared locale catalogs.
+  QuantityInput: 20_800,
   OptionGroup: 52_000,
   JsonView: 22_000,
   // About 10% above the measured display subpath fixtures.
@@ -176,6 +181,8 @@ for (const [name, limit] of Object.entries({
   // DOMPurify plus shared class merging, with about 10% headroom.
   RichTextView: 24_000,
   Carousel: 30_300,
+  VirtualList: 34_000,
+  VirtualGrid: 34_000,
   // Fullscreen media adds Dialog focus management and image zoom controls.
   MediaGallery: 54_800,
   // Shared reorder instructions and disabled reasons are included in locale consumers.

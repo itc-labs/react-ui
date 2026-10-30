@@ -1,4 +1,12 @@
 export const enMessages = {
+  'virtualList.empty': 'No items found',
+  'virtualList.loadMore': 'Load more',
+  'virtualList.retry': 'Retry',
+  'virtualList.loaded': {
+    one: 'Loaded {count} more item',
+    other: 'Loaded {count} more items',
+  },
+
   'dnd.integrationInstructions':
     'Press Space or Enter to pick up. Use Up and Down to reorder, Left and Right to change lists, Space or Enter to drop, and Escape to cancel.',
   'table.reorder': 'Reorder rows',

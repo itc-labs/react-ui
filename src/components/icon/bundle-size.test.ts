@@ -40,5 +40,7 @@ it('keeps ordinary imports free of heavy modules and within gzip budgets', () =>
     'Transfer',
     'TransferDnd',
     'TreeSelect',
+    'VirtualGrid',
+    'VirtualList',
   ]);
 }, 60_000);
