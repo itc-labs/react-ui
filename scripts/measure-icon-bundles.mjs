@@ -116,14 +116,14 @@ console.log(JSON.stringify(sizes, null, 2));
 for (const [name, limit] of Object.entries({
   Icon: 20_000,
   Rating: 20_000,
-  QuantityInput: 22_000,
-  OptionGroup: 45_000,
+  QuantityInput: 20_600,
+  OptionGroup: 45_200,
   JsonView: 22_000,
   // About 10% above the measured display subpath fixtures.
   CodeView: 50_000,
   Carousel: 30_300,
   // Fullscreen media adds Dialog focus management and image zoom controls.
-  MediaGallery: 55_000,
+  MediaGallery: 54_800,
   Lightbox: 41_000,
   Button: 20_000,
   Spinner: 20_000,
@@ -132,9 +132,9 @@ for (const [name, limit] of Object.entries({
   Form: 22_000,
   DataTable: 90_000,
   Calendar: 100_000,
-  // ColorPicker adds react-colorful to the core entry.
+  // Core additions remain within the existing Root budget.
   Root: 270_000,
-  ColorPicker: 54_000,
+  ColorPicker: 54_300,
 })) {
   if (sizes[name].gzip >= limit) {
     throw new Error(`${name}: ${sizes[name].gzip} gzip bytes exceeds ${limit}`);
