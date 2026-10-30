@@ -1,5 +1,8 @@
 import type { UIMessages } from './types';
 export const viMessages = {
+  'quantity.label': 'Số lượng',
+  'quantity.decrease': 'Giảm số lượng',
+  'quantity.increase': 'Tăng số lượng',
   'optionGroup.selectedLabel': '{label}: {selected}',
   'optionGroup.help': 'Thông tin thêm về {label}',
   'optionGroup.expand': 'Hiện thêm {count} lựa chọn',

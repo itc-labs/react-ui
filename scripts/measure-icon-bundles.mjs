@@ -9,6 +9,7 @@ const root = fileURLToPath(new URL('../', import.meta.url));
 const entries = {
   Icon: 'components/icon/index.tsx',
   Rating: 'components/rating/index.tsx',
+  QuantityInput: 'components/quantity-input/index.tsx',
   OptionGroup: 'components/option-group/index.tsx',
   JsonView: 'components/json-view/index.tsx',
   CodeView: 'modules/code-view/index.tsx',
@@ -52,6 +53,7 @@ for (const [name, file] of Object.entries(entries)) {
       'Dialog',
       'Button',
       'Rating',
+      'QuantityInput',
       'OptionGroup',
       'JsonView',
       'CodeView',
@@ -104,6 +106,7 @@ console.log(JSON.stringify(sizes, null, 2));
 for (const [name, limit] of Object.entries({
   Icon: 20_000,
   Rating: 20_000,
+  QuantityInput: 22_000,
   OptionGroup: 45_000,
   JsonView: 22_000,
   // About 10% above the measured display subpath fixtures.

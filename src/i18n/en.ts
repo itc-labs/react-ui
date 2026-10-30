@@ -1,4 +1,7 @@
 export const enMessages = {
+  'quantity.label': 'Quantity',
+  'quantity.decrease': 'Decrease quantity',
+  'quantity.increase': 'Increase quantity',
   'optionGroup.selectedLabel': '{label}: {selected}',
   'optionGroup.help': 'More information about {label}',
   'optionGroup.expand': 'Show {count} more options',
