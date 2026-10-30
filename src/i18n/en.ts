@@ -1,4 +1,7 @@
 export const enMessages = {
+  'rating.label': 'Rating',
+  'rating.score': '{value} out of {max}',
+  'rating.value': '{value}/{max}',
   'progress.label': 'Progress',
   'progress.listLabel': 'Progress overview',
   'progress.segmentsLabel': 'Distribution',

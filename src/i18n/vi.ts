@@ -1,5 +1,8 @@
 import type { UIMessages } from './types';
 export const viMessages = {
+  'rating.label': 'Đánh giá',
+  'rating.score': '{value} trên {max}',
+  'rating.value': '{value}/{max}',
   'progress.label': 'Tiến độ',
   'progress.listLabel': 'Tổng quan tiến độ',
   'progress.segmentsLabel': 'Phân bố',
