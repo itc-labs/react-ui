@@ -1,61 +1,102 @@
 import { Meta, Canvas } from '@storybook/addon-docs/blocks';
 import * as Localization from './localization.stories';
 
-<Meta title="Overview/Localization" />
+<Meta title="Guides/Localization" />
 
 # Localization
 
-UI kit sở hữu text mặc định của control, gồm visible labels, loading, empty/error, validation file và ARIA/screen reader. Ứng dụng sở hữu nội dung màn hình, tên cột/options, error từ backend và schema nghiệp vụ.
+The kit translates default control text: visible labels, loading and empty/error states, file validation, and accessible labels. Your application owns screen content, column and option names, backend errors, and business validation.
 
-```json
-[
-  { "locale": "vi-VN", "messages": { "button.processing": "Đang lưu" } },
-  { "locale": "en-US", "messages": { "button.processing": "Saving changes" } },
-  { "locale": "ja-JP", "messages": { "button.processing": "保存中" } }
-]
-```
+## Select a locale
 
-```tsx snippet
+Pass a locale code and a JSON-compatible catalog to `UIProvider`. Each catalog entry uses `UITranslation`; the array uses `UITranslations`. `UIMessages` describes the complete message dictionary.
+
+```tsx
 'use client';
-import { UIProvider, type UITranslations } from '@itclabs/react-ui';
-import catalog from './translations.json';
-const translations = catalog satisfies UITranslations;
+import { Button, UIProvider, type UITranslations } from '@itclabs/react-ui';
 
-export function App({ locale }: { locale: string }) {
+const translations = [
+  { locale: 'en-US', messages: { 'button.processing': 'Saving changes' } },
+  { locale: 'vi-VN', messages: { 'button.processing': 'Đang lưu' } },
+] satisfies UITranslations;
+
+export function Example({ locale = 'en-US' }: { locale?: string }) {
   return (
     <UIProvider locale={locale} translations={translations} fallbackLocale="en-US">
-      {/* application */}
+      <Button loading>Save changes</Button>
     </UIProvider>
   );
 }
 ```
 
-UITranslation là type cho một entry, UITranslations là mảng JSON; UIMessages là type dictionary đầy đủ. Thêm ngôn ngữ bằng entry/file mới, provider tự chọn theo mã locale, không viết điều kiện cho từng message. calendarLocales nhận map date-library locale riêng vì function không nằm trong JSON. messages chỉ dùng khi cần override riêng một control/subtree.
+The catalog can live in a JSON file. Add entries to support more languages; the provider selects messages by locale code. Keep date-library functions in `calendarLocales`, outside JSON. Use `messages` for local overrides.
 
-Ưu tiên: prop cụ thể của component → messages của provider gần nhất → dictionary locale → fallbackLocale → English fallback cho locale tự khai báo. Mặc định viVN để giữ hành vi hiện tại. UIProvider vẫn nhận theme cho icons; locale tách riêng để đổi khi app đang chạy.
+Explicit component text props take priority over provider messages. For a string locale, catalog resolution merges the fallback dictionary/catalog and then the selected dictionary/catalog; English supplies remaining defaults. A locale created with `defineLocale` fills missing keys directly from English. The default locale is `viVN`; set `locale="en-US"` explicitly for English. Locale settings are independent of the icon theme and can change at runtime.
 
 <Canvas of={Localization.SwitchLanguage} />
 
-Không đổi key/remount UI khi đổi locale. Story trên kiểm tra draft, lựa chọn Select, row IDs và trang của Table được giữ nguyên. Nội dung editor/file không được dịch tự động.
+Do not change React keys or remount the UI when switching languages. The story preserves drafts, Select selections, row IDs, and Table pagination. Editor and file content is not translated automatically.
 
-## Message overrides
+## Override messages
 
 <Canvas of={Localization.MessageOverrides} />
 
-Button có loadingLabel, Spinner có label, DialogContent/DrawerContent có closeLabel. Các prop label, placeholder, aria-label, error, emptyState… đang có vẫn được ưu tiên. Những text nội bộ khác override bằng messages, có autocomplete theo UIMessageKey; bọc một component bằng UIProvider khi chỉ muốn override riêng chỗ đó.
+`Button` accepts `loadingLabel`, `Spinner` accepts `label`, and `DialogContent` / `DrawerContent` accept `closeLabel`. Existing `label`, `placeholder`, `aria-label`, `error`, and `emptyState` props also take priority. Override other internal text with `messages`, using `UIMessageKey` autocomplete. Wrap a single control in a provider to limit an override to that subtree.
 
-## Locale mới và thư viện i18n của ứng dụng
+```tsx
+import { Button, UIProvider } from '@itclabs/react-ui';
 
-Dùng defineLocale với code BCP 47 và messages. Key thiếu fallback về English. Dictionary hỗ trợ template như `{count}`, `{name}` và plural forms one/other/few… theo Intl.PluralRules. Interpolation chỉ trả string; không render HTML.
+export function Example() {
+  return (
+    <UIProvider locale="en-US" messages={{ 'button.processing': 'Submitting' }}>
+      <Button loading>Submit</Button>
+    </UIProvider>
+  );
+}
+```
 
-Có thể nối next-intl/i18next bằng cách đưa message đã dịch vào provider; kit không áp đặt thư viện/router/storage của app. Khi thêm ngôn ngữ mới cho lịch, truyền calendarLocale tương ứng từ react-day-picker/locale. calendarLocale là override tùy chọn; locale ngày chỉ được nạp trong component lịch. Thứ tự: calendarLocales[selected] → locale.calendarLocale → vi/en của selected → calendarLocales[fallback] → vi/en của fallback → English. Header và các ngày hiển thị vẫn dùng Intl theo code.
+Nested providers inherit message overrides while the selected locale remains the same; selecting a different locale clears inherited overrides before applying the new provider's messages.
+
+## Custom locales and application i18n
+
+Use `defineLocale` with a BCP 47 code and messages. Missing keys fall back to English. Dictionaries support templates such as `{count}` and `{name}`, plus plural forms such as `one`, `other`, and `few` selected with `Intl.PluralRules`. Plural messages require `other`. Interpolation returns strings and does not render HTML.
+
+You can connect next-intl or i18next by passing translated messages to the provider. The kit does not prescribe an i18n library, router, or storage mechanism.
 
 <Canvas of={Localization.PartialLocaleFallback} />
 
-## Date, number, validation và SSR
+## Calendar locales in 0.4
 
-DatePicker hiển thị theo locale nhưng value/submitted hidden input vẫn YYYY-MM-DD. TimePicker vẫn HH:mm; chế độ 12h đổi nhãn AM/PM theo dictionary. Pagination/index/IDs dùng giá trị chuẩn, chỉ label/summary được format. Upload giữ issue key/params để lỗi đang hiện có thể đổi ngôn ngữ.
+Built-in `viVN` and `enUS` dictionaries no longer carry a date-fns locale. Date components resolve their date-library locale internally. To support another language or override calendar behavior, pass a `calendarLocales` map using locales from `react-day-picker/locale`:
 
-Provider không thêm DOM và không tự sửa html.lang/dir. Host chịu trách nhiệm đặt lang theo locale; không đoán từ navigator khi render để tránh SSR hydration mismatch. Mã locale và catalog JSON có thể truyền từ server; prebuilt UILocale/calendarLocales chứa function nên cấu hình phần đó trong client module. Hiện có dictionary vi/en; chưa cam kết layout RTL.
+```tsx
+'use client';
+import { DatePicker, UIProvider, type UITranslations } from '@itclabs/react-ui';
+import { enGB } from 'react-day-picker/locale';
 
-Schema nghiệp vụ nên trả issue code/params hoặc được tạo theo locale của app. Truyền error đã dịch vào field; UI kit không dịch lại arbitrary string từ server. Toast title/description và EmptyState title/description do consumer truyền cũng áp dụng nguyên tắc này.
+const translations = [{ locale: 'en-GB', messages: {} }] satisfies UITranslations;
+
+export function Example() {
+  return (
+    <UIProvider
+      locale="en-GB"
+      translations={translations}
+      calendarLocales={{ 'en-GB': enGB }}
+    >
+      <DatePicker label="Start date" />
+    </UIProvider>
+  );
+}
+```
+
+Calendar resolution order is `calendarLocales[selected]` → `locale.calendarLocale` → built-in Vietnamese/English for the selected code → `calendarLocales[fallback]` → built-in Vietnamese/English for the fallback code → English. Locale map keys are canonicalized. `defineLocale` still accepts an optional `calendarLocale` for custom locale objects. Calendar headers and day labels use `Intl` with the selected locale code.
+
+## Dates, numbers, validation, and SSR
+
+`DatePicker` displays localized dates while its value and submitted hidden input remain `YYYY-MM-DD`. `TimePicker` keeps `HH:mm`; 12-hour mode translates AM/PM labels through the dictionary. Pagination, indexes, and IDs keep their underlying values; labels and summaries are formatted. Upload validation retains issue keys and parameters so visible errors can change language.
+
+The locale provider adds no wrapper DOM and does not set `html.lang` or `dir`. Token configuration can add a style element; see [Theming](?path=/docs/guides-theming--docs). Set the document language in your application and use the same locale on server and client. Avoid choosing it from `navigator` during rendering, which can cause hydration mismatches.
+
+Locale codes and catalog JSON can cross server boundaries. Configure date-library locales containing functions in a client module. Since 0.4, built-in dictionaries are message-only; they do not load date-library locale functions. The kit includes Vietnamese and English dictionaries; RTL layout support is not guaranteed.
+
+Business schemas should return issue codes/parameters or use the application's current locale. Pass translated errors into fields: the kit does not translate arbitrary backend strings. Consumer-provided Toast and EmptyState titles and descriptions follow the same rule. See [Forms](?path=/docs/guides-forms--docs) and [Providers & adapters](?path=/docs/guides-providers-adapters--docs).
