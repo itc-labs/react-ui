@@ -52,6 +52,11 @@ export interface LightboxProps extends Omit<
 export const clampMediaIndex = (value: number, count: number) =>
   Math.max(0, Math.min(count - 1, Number.isFinite(value) ? Math.floor(value) : 0));
 
+// Controls sit on the dark stage, so they use inverted neutral colors.
+const controlClass =
+  'rounded-full border-0 bg-canvas/10 text-canvas hover:bg-canvas/20 disabled:bg-canvas/5 disabled:text-canvas/40';
+const navigationClass = cn(controlClass, 'absolute top-1/2 z-10 -translate-y-1/2');
+
 export function Lightbox({
   items,
   open,
@@ -98,13 +103,13 @@ export function Lightbox({
         aria-describedby={props['aria-describedby']}
         closeLabel={props.closeLabel ?? t('lightbox.close')}
         className={cn(
-          'm-0 flex h-dvh max-h-none w-full max-w-none flex-col gap-3 overflow-hidden rounded-none p-3 sm:p-6 motion-reduce:animate-none',
+          'm-0 flex h-dvh max-h-none w-full max-w-none flex-col gap-3 overflow-hidden rounded-none border-0 bg-ink p-3 text-canvas sm:p-6 motion-reduce:animate-none',
           classNames?.root,
           className,
         )}
         classNames={{
           overlay: cn('motion-reduce:animate-none', classNames?.overlay),
-          close: classNames?.close ?? '',
+          close: cn('text-canvas hover:bg-canvas/10', classNames?.close),
         }}
         onOpenAutoFocus={(event) => {
           returnFocus.current =
@@ -147,7 +152,10 @@ export function Lightbox({
         </DialogTitle>
         <div
           data-testid={partTestId(testId, 'toolbar')}
-          className={cn('flex shrink-0 items-center gap-2 pr-10', classNames?.toolbar)}
+          className={cn(
+            '-mt-1 flex h-10 shrink-0 items-center gap-2 pr-28 sm:-mt-4',
+            classNames?.toolbar,
+          )}
         >
           <KitIconButton
             icon="arrowLeft"
@@ -156,7 +164,11 @@ export function Lightbox({
             disabled={!items.length || active === 0}
             onClick={() => select(active - 1)}
             data-testid={partTestId(testId, 'previous')}
-            className={classNames?.navigationButton}
+            className={cn(
+              navigationClass,
+              'left-3 sm:left-6',
+              classNames?.navigationButton,
+            )}
           />
           <span
             role="status"
@@ -176,7 +188,11 @@ export function Lightbox({
             disabled={!items.length || active === items.length - 1}
             onClick={() => select(active + 1)}
             data-testid={partTestId(testId, 'next')}
-            className={classNames?.navigationButton}
+            className={cn(
+              navigationClass,
+              'right-3 sm:right-6',
+              classNames?.navigationButton,
+            )}
           />
         </div>
         {item && (
@@ -192,7 +208,7 @@ export function Lightbox({
           aria-label={t('mediaGallery.thumbnails')}
           data-testid={partTestId(testId, 'thumbnails')}
           className={cn(
-            'flex shrink-0 gap-2 overflow-auto p-1',
+            'flex shrink-0 justify-center gap-2 overflow-auto p-1',
             classNames?.thumbnails,
           )}
         >
@@ -219,7 +235,7 @@ export function Lightbox({
                 })}
                 data-testid={partTestId(testId, 'thumbnail', entry.id)}
                 className={cn(
-                  'size-16 shrink-0 overflow-hidden rounded-control border border-line bg-canvas aria-[current=true]:ring-2 aria-[current=true]:ring-brand-700',
+                  'size-16 shrink-0 overflow-hidden rounded-control border border-line bg-canvas aria-[current=true]:ring-2 aria-[current=true]:ring-canvas',
                   focusRingClassName,
                   classNames?.thumbnail,
                 )}
@@ -266,7 +282,7 @@ function LightboxMedia({
 
   return (
     <>
-      <div className="flex shrink-0 gap-2">
+      <div className="absolute right-14 top-2 z-10 flex gap-2">
         <KitIconButton
           icon="zoomIn"
           builtin={{ outline: ZoomInIcon, bold: ZoomInBoldIcon }}
@@ -275,7 +291,7 @@ function LightboxMedia({
           aria-pressed={zoomed}
           onClick={() => toggle(true)}
           data-testid={partTestId(testId, 'zoomIn')}
-          className={classNames?.zoomButton}
+          className={cn(controlClass, classNames?.zoomButton)}
         />
         <KitIconButton
           icon="zoomOut"
@@ -284,13 +300,13 @@ function LightboxMedia({
           disabled={!zoomed}
           onClick={() => toggle(false)}
           data-testid={partTestId(testId, 'zoomOut')}
-          className={classNames?.zoomButton}
+          className={cn(controlClass, classNames?.zoomButton)}
         />
       </div>
       <div
         data-testid={partTestId(testId, 'viewport')}
         className={cn(
-          'relative flex min-h-0 flex-1 items-center justify-center overflow-hidden bg-canvas',
+          'relative flex min-h-0 flex-1 items-center justify-center overflow-hidden',
           zoomed && 'cursor-grab touch-none active:cursor-grabbing',
           classNames?.viewport,
         )}

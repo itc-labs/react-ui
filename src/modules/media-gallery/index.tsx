@@ -40,6 +40,8 @@ export interface MediaGalleryProps extends Omit<
   /** Left on desktop and bottom on small screens when omitted. */
   thumbnails?: 'left' | 'bottom' | 'none';
   aspectRatio?: string;
+  /** How images fill the frame: `cover` crops to fill, `contain` shows the whole image. */
+  fit?: 'cover' | 'contain';
   zoom?: boolean;
   zoomScale?: number;
   lightbox?: boolean;
@@ -55,6 +57,7 @@ export function MediaGallery({
   onIndexChange,
   thumbnails,
   aspectRatio = '1 / 1',
+  fit = 'cover',
   zoom = true,
   zoomScale = 2,
   lightbox = true,
@@ -282,7 +285,11 @@ export function MediaGallery({
                       hover?.id === item.id ? `${hover.x}% ${hover.y}%` : '50% 50%',
                   }}
                   data-testid={partTestId(testId, 'media', item.id)}
-                  className={cn('h-full w-full object-contain', classNames?.media)}
+                  className={cn(
+                    'h-full w-full',
+                    fit === 'cover' ? 'object-cover' : 'object-contain',
+                    classNames?.media,
+                  )}
                 />
               </button>
             )}
