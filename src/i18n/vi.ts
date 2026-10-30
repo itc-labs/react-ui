@@ -1,5 +1,15 @@
 import type { UIMessages } from './types';
 export const viMessages = {
+  'timeline.label': 'Dòng thời gian',
+  'timeline.pending': 'Đang thực hiện',
+  'timeline.completed': 'Đã hoàn thành',
+  'timeline.upcoming': 'Sắp tới',
+  'timeline.status.default': 'Mặc định',
+  'timeline.status.success': 'Thành công',
+  'timeline.status.info': 'Thông tin',
+  'timeline.status.warning': 'Cảnh báo',
+  'timeline.status.danger': 'Nguy hiểm',
+
   'kbd.command': 'Command',
   'kbd.control': 'Control',
   'kbd.controlShort': 'Ctrl',

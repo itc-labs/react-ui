@@ -1,4 +1,14 @@
 export const enMessages = {
+  'timeline.label': 'Timeline',
+  'timeline.pending': 'In progress',
+  'timeline.completed': 'Completed',
+  'timeline.upcoming': 'Upcoming',
+  'timeline.status.default': 'Default',
+  'timeline.status.success': 'Success',
+  'timeline.status.info': 'Information',
+  'timeline.status.warning': 'Warning',
+  'timeline.status.danger': 'Danger',
+
   'kbd.command': 'Command',
   'kbd.control': 'Control',
   'kbd.controlShort': 'Ctrl',

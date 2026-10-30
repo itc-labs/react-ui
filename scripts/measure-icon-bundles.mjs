@@ -9,6 +9,7 @@ const root = fileURLToPath(new URL('../', import.meta.url));
 const entries = {
   Icon: 'components/icon/index.tsx',
   Divider: 'components/divider/index.tsx',
+  Timeline: 'components/timeline/index.tsx',
   Kbd: 'components/kbd/index.tsx',
   Rating: 'components/rating/index.tsx',
   QuantityInput: 'components/quantity-input/index.tsx',
@@ -55,6 +56,7 @@ for (const [name, file] of Object.entries(entries)) {
   });
   if (
     [
+      'Timeline',
       'Dialog',
       'Button',
       'Rating',
@@ -118,6 +120,7 @@ console.log(JSON.stringify(sizes, null, 2));
 for (const [name, limit] of Object.entries({
   Icon: 20_000,
   Rating: 20_000,
+  Timeline: 21_000,
   QuantityInput: 20_600,
   OptionGroup: 52_000,
   JsonView: 22_000,

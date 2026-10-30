@@ -31,5 +31,6 @@ it('keeps ordinary imports free of heavy modules and within gzip budgets', () =>
     'Root',
     'Select',
     'Spinner',
+    'Timeline',
   ]);
 }, 60_000);
