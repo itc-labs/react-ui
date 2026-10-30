@@ -9,10 +9,10 @@ function Controls() {
 
   return (
     <div className="flex flex-wrap gap-3">
-      <Button onClick={() => loader.start()}>Bắt đầu</Button>
+      <Button onClick={() => loader.start()}>Start</Button>
       <Button onClick={() => loader.set(0.6)}>60%</Button>
-      <Button onClick={() => loader.inc()}>Tăng</Button>
-      <Button onClick={() => loader.done()}>Hoàn tất</Button>
+      <Button onClick={() => loader.inc()}>Increase</Button>
+      <Button onClick={() => loader.done()}>Done</Button>
     </div>
   );
 }
@@ -26,7 +26,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'Thanh tiến độ mảnh ở đầu trang cho điều hướng hoặc tải dữ liệu. Host truyền currentPath để kết thúc điều hướng, hoặc gọi start/done qua useTopLoader.',
+          'A thin progress bar at the top of the page for navigation or data loading. Pass currentPath to finish navigation, or call start/done through useTopLoader.',
       },
     },
   },
@@ -60,7 +60,7 @@ function NavigationExample() {
             setTimeout(() => setPath(next), 900);
           }}
         >
-          Điều hướng
+          Navigate
         </UiLink>
       </div>
     </TopLoaderProvider>
@@ -84,7 +84,7 @@ function LoadingControls() {
     }
   }
 
-  return <Button onClick={load}>Tải dữ liệu</Button>;
+  return <Button onClick={load}>Load data</Button>;
 }
 
 export const ManualLoading: Story = {

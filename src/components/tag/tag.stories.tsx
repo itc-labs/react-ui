@@ -9,7 +9,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'Nhãn ngắn với tone và kích thước. Có thể thêm icon, thao tác xóa hoặc nút chọn bộ lọc; selected biểu thị trạng thái aria-pressed.',
+          'A short label with tone and size options. Add icons, a remove action, or selectable filters; selected sets the aria-pressed state.',
       },
     },
   },
@@ -43,7 +43,7 @@ export const Sizes: Story = {
 };
 export const WithIcon: Story = {
   tags: ['example'],
-  args: { icon: 'info', iconRight: 'chevronDown', children: 'Thông tin' },
+  args: { icon: 'info', iconRight: 'chevronDown', children: 'Information' },
 };
 
 function RemovableTags() {
@@ -76,8 +76,8 @@ function FilterTags() {
   return (
     <div className="flex gap-3">
       {[
-        { id: 'all', label: 'Tất cả' },
-        { id: 'unread', label: 'Chưa đọc' },
+        { id: 'all', label: 'All' },
+        { id: 'unread', label: 'Unread' },
       ].map((item) => (
         <Tag
           key={item.id}

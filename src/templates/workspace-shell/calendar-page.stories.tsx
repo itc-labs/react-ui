@@ -217,7 +217,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'Trang lịch với Sidebar, breadcrumb và nút tạo sự kiện. Chọn khoảng để mở Dialog; bấm sự kiện để xem chi tiết trong Drawer. Dữ liệu và đường dẫn do host quản lý.',
+          'A calendar page with a Sidebar, breadcrumbs and an event creation button. Select a range to open a Dialog; click an event to view details in a Drawer. The host manages data and routes.',
       },
     },
   },

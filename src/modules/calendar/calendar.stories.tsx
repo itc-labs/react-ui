@@ -88,7 +88,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'Khung lịch sự kiện với thanh điều hướng ngày và chuyển chế độ xem. Chế độ tháng hiển thị sự kiện nhiều ngày và sự kiện tràn; tuần/ngày hiển thị khung giờ, sự kiện chồng nhau và giờ làm việc. Import Calendar từ @itclabs/react-ui/calendar hoặc EventCalendar từ root.',
+          'An event calendar with date navigation and view switching. Month view shows multi-day events and overflow; week/day views show time slots, overlapping events, and business hours. Import Calendar from @itclabs/react-ui/calendar or EventCalendar from the root entry point.',
       },
     },
   },
@@ -232,7 +232,7 @@ export const Week: Story = {
     docs: {
       description: {
         story:
-          'Lịch tuần với sự kiện cả ngày, các khung giờ chồng nhau và cuộn đến scrollTime. Phím mũi tên di chuyển giữa các ô giờ; Enter hoặc Space kích hoạt onDateClick.',
+          'A weekly calendar with all-day events, overlapping time slots, and scrolling to scrollTime. Arrow keys move between time slots; Enter or Space triggers onDateClick.',
       },
     },
   },
@@ -265,7 +265,7 @@ export const BusinessHours: Story = {
     docs: {
       description: {
         story:
-          'Tô nền ngoài giờ làm việc, gồm giờ nghỉ và cuối tuần. businessHours chỉ thay đổi hiển thị; mọi ô giờ vẫn có thể kích hoạt.',
+          'Shade time outside business hours, including breaks and weekends. businessHours only affects appearance; all time slots remain interactive.',
       },
     },
   },
@@ -274,16 +274,14 @@ export const BusinessHours: Story = {
 export const CustomToolbar: Story = {
   tags: ['!dev', '!autodocs', 'regression'],
   play: async ({ canvasElement }) => {
-    await userEvent.click(
-      within(canvasElement).getByRole('button', { name: 'Hôm nay' }),
-    );
+    await userEvent.click(within(canvasElement).getByRole('button', { name: 'Today' }));
     await expect(within(canvasElement).getByRole('grid')).toBeInTheDocument();
   },
   args: {
     renderToolbar: ({ title, onNavigate }) => (
       <>
         <span aria-live="polite">{title}</span>
-        <Button onClick={() => onNavigate('today')}>Hôm nay</Button>
+        <Button onClick={() => onNavigate('today')}>Today</Button>
       </>
     ),
   },
@@ -300,7 +298,7 @@ export const List: Story = {
     docs: {
       description: {
         story:
-          'Danh sách nhóm theo ngày, ẩn ngày trống và hiển thị EmptyState khi không có sự kiện. responsiveView chuyển lịch sang danh sách khi chiều rộng nhỏ hơn 640px.',
+          'Group events by date, hide empty days, and show EmptyState when there are no events. responsiveView switches the calendar to a list below 640px wide.',
       },
     },
   },
@@ -330,6 +328,14 @@ export const CustomEventRender: Story = {
 };
 
 export const Locale: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Compare Vietnamese and English calendar labels. Vietnamese is intentionally retained in this locale example.',
+      },
+    },
+  },
   tags: ['!dev', '!autodocs', 'regression'],
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
@@ -380,7 +386,7 @@ function SelectableExample({
                 });
               }}
             >
-              Thêm sự kiện
+              Add event
             </Button>
           ) : (
             args.toolbarStart
@@ -393,7 +399,7 @@ function SelectableExample({
         }}
       />
       <Dialog
-        title="Tạo sự kiện"
+        title="Create event"
         open={selection !== null}
         onOpenChange={(open) => {
           if (!open) setSelection(null);
@@ -421,17 +427,17 @@ function SelectableExample({
         >
           {selection && (
             <p className="text-small text-muted">
-              {selection.start.toLocaleString('vi-VN')} –{' '}
-              {selection.end.toLocaleString('vi-VN')}
+              {selection.start.toLocaleString('en-US')} –{' '}
+              {selection.end.toLocaleString('en-US')}
             </p>
           )}
           <Input
-            label="Tên sự kiện"
+            label="Event title"
             value={title}
             onChange={(event) => setTitle(event.target.value)}
             required
           />
-          <Button type="submit">Tạo</Button>
+          <Button type="submit">Create</Button>
         </form>
       </Dialog>
     </>
@@ -451,7 +457,7 @@ export const Selectable: Story = {
     docs: {
       description: {
         story:
-          'Kéo qua các ô để chọn khoảng thời gian, hoặc nhấn Shift+Enter để chọn ô đang có tiêu điểm. Trên màn hình cảm ứng, nhấn giữ khoảng 300ms trước khi kéo; Escape hủy lựa chọn. onSelect mở Dialog để nhập tên và tạo sự kiện.',
+          'Drag across cells to select a time range, or press Shift+Enter to select the focused cell. On touch screens, hold for about 300ms before dragging; Escape cancels the selection. onSelect opens a Dialog to enter a title and create an event.',
       },
     },
   },
@@ -462,10 +468,10 @@ export const Selectable: Story = {
     await userEvent.keyboard('{Shift>}{Enter}{/Shift}');
     const dialog = within(canvasElement.ownerDocument.body).getByRole('dialog');
     await userEvent.type(
-      within(dialog).getByRole('textbox', { name: 'Tên sự kiện' }),
+      within(dialog).getByRole('textbox', { name: 'Event title' }),
       'Lorem ipsum',
     );
-    await userEvent.click(within(dialog).getByRole('button', { name: 'Tạo' }));
+    await userEvent.click(within(dialog).getByRole('button', { name: 'Create' }));
     await expect(canvas.getByText('Lorem ipsum')).toBeInTheDocument();
   },
 };
@@ -498,7 +504,7 @@ function EditableCalendar({
           const timer = setTimeout(() => {
             timers.current.delete(timer);
             revert();
-            toast.error('Không thể lưu thay đổi. Đã khôi phục sự kiện.');
+            toast.error('Could not save changes. The event has been restored.');
           }, 900);
           timers.current.add(timer);
         } else {
@@ -533,7 +539,7 @@ export const DragAndDrop: Story = {
     docs: {
       description: {
         story:
-          'Kéo sự kiện để di chuyển theo slotDuration hoặc ngày. Kéo giữa hàng cả ngày và khung giờ để đổi allDay. Trên màn hình cảm ứng, nhấn giữ 300ms trước khi kéo; Escape hủy thao tác. Alt + phím mũi tên hỗ trợ bàn phím.',
+          'Drag events to move them by slotDuration or day. Drag between the all-day row and time grid to change allDay. On touch screens, hold for 300ms before dragging; Escape cancels. Use Alt + arrow keys for keyboard editing.',
       },
     },
   },
@@ -553,7 +559,7 @@ export const Resize: Story = {
     docs: {
       description: {
         story:
-          'Kéo tay nắm dưới sự kiện giờ hoặc tay nắm cuối sự kiện cả ngày để đổi thời điểm kết thúc. startEditable=false khóa di chuyển. Đặt tiêu điểm vào tay nắm và dùng Alt + phím mũi tên để đổi độ dài bằng bàn phím.',
+          'Drag the bottom handle of a timed event or the end handle of an all-day event to change its end time. startEditable=false prevents moving. Focus the handle and use Alt + arrow keys to resize with the keyboard.',
       },
     },
   },
@@ -574,7 +580,7 @@ export const OptimisticUpdate: Story = {
     docs: {
       description: {
         story:
-          'Thay đổi được hiển thị trong khi chờ lưu. Ví dụ mô phỏng lỗi sau 900ms: gọi revert() và hiển thị toast. Host cập nhật events khi lưu thành công.',
+          'Changes appear while saving. This example simulates a failure after 900ms, calls revert(), and shows a toast. The application updates events after a successful save.',
       },
     },
   },
@@ -588,7 +594,7 @@ export const OptimisticUpdate: Story = {
     ).toHaveTextContent('9:30');
     await expect(
       within(canvasElement.ownerDocument.body).findByText(
-        'Không thể lưu thay đổi. Đã khôi phục sự kiện.',
+        'Could not save changes. The event has been restored.',
       ),
     ).resolves.toBeInTheDocument();
     await expect(
@@ -612,7 +618,7 @@ export const Keyboard: Story = {
     docs: {
       description: {
         story:
-          'Tab đến sự kiện rồi nhấn Enter để bắt đầu. Phím mũi tên di chuyển theo ô giờ/ngày; Shift + phím mũi tên đổi thời điểm kết thúc. Enter xác nhận một lần, Escape hủy. Vùng thông báo đọc khoảng thời gian mới; Tab hủy và chuyển tiêu điểm bình thường.',
+          'Tab to an event and press Enter to start editing. Arrow keys move by time slot/day; Shift + arrow keys change the end time. Enter confirms once; Escape cancels. A live region announces the new range; Tab cancels and moves focus normally.',
       },
     },
   },
@@ -622,7 +628,7 @@ export const Keyboard: Story = {
     event.focus();
     await userEvent.keyboard('{Enter}{ArrowDown}{Shift>}{ArrowDown}{/Shift}');
     await expect(canvas.getByTestId('keyboard-editingStatus')).toHaveTextContent(
-      'Đã đổi độ dài',
+      'Resized',
     );
     await expect(event).toHaveFocus();
     await userEvent.keyboard('{Enter}');
@@ -634,7 +640,7 @@ export const Keyboard: Story = {
     ).toHaveTextContent('12:00');
     await userEvent.keyboard('{Enter}{ArrowDown}{Escape}');
     await expect(canvas.getByTestId('keyboard-editingStatus')).toHaveTextContent(
-      'Đã hủy',
+      'Cancelled editing',
     );
     await expect(
       canvas.getByTestId('keyboard-event-2026-10-29-first-time'),
@@ -655,7 +661,7 @@ export const DayGridWeek: Story = {
     docs: {
       description: {
         story:
-          'Tuần dạng lưới ngày, không có trục giờ. Sự kiện nhiều ngày trải qua các cột; weekNumbers hiển thị số tuần ISO.',
+          'A weekly day grid without a time axis. Multi-day events span columns; weekNumbers shows ISO week numbers.',
       },
     },
   },
@@ -696,7 +702,7 @@ export const AsyncRange: Story = {
     docs: {
       description: {
         story:
-          'onRangeChange yêu cầu dữ liệu cho khoảng hiển thị; loading đánh dấu lịch đang tải. Ví dụ mô phỏng yêu cầu bất đồng bộ và hủy kết quả cũ khi chuyển khoảng.',
+          'Use onRangeChange to request data for the visible range and loading to indicate progress. This example simulates an asynchronous request and discards stale results when the range changes.',
       },
     },
   },

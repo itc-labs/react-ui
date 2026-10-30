@@ -4,8 +4,8 @@ import { Spinner } from './index';
 function Demo() {
   return (
     <div className="flex gap-3 text-muted">
-      <Spinner label="Đang mở dữ liệu minh họa" />
-      Đang mở…
+      <Spinner label="Loading sample data" />
+      Loading…
     </div>
   );
 }
@@ -13,12 +13,12 @@ function Demo() {
 const meta = {
   title: 'Components/Spinner',
   component: Spinner,
-  args: { label: 'Đang tải' },
+  args: { label: 'Loading' },
   parameters: {
     docs: {
       description: {
         component:
-          'Biểu thị tác vụ đang xử lý. label cung cấp nội dung cho trình đọc màn hình; size thay đổi kích thước biểu tượng.',
+          'Indicates an operation in progress. label provides screen reader text; size controls the icon size.',
       },
     },
   },
@@ -34,7 +34,7 @@ export const CustomClasses: Story = {
   tags: ['customization'],
   render: () => (
     <Spinner
-      label="Đang tải"
+      label="Loading"
       className="rounded-full bg-brand-50 p-3"
       classNames={{ icon: 'size-6 text-brand-700' }}
     />

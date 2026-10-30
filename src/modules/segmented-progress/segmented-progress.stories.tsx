@@ -5,16 +5,16 @@ const meta = {
   component: SegmentedProgress,
   args: {
     segments: [
-      { id: 'complete', label: 'Hoàn tất', value: 12 },
-      { id: 'active', label: 'Đang xử lý', value: 6 },
-      { id: 'waiting', label: 'Chờ xử lý', value: 2 },
+      { id: 'complete', label: 'Completed', value: 12 },
+      { id: 'active', label: 'In progress', value: 6 },
+      { id: 'waiting', label: 'Pending', value: 2 },
     ],
   },
   parameters: {
     docs: {
       description: {
         component:
-          'Thanh phân bố theo tỷ lệ của từng phần trong tổng, kèm chú giải và tóm tắt văn bản dành cho trình đọc màn hình. Màu mặc định dùng chart palette của theme.',
+          'Shows each segment as a proportion of the total, with a legend and a text summary for screen readers. Default colors use the theme chart palette.',
       },
     },
   },
@@ -26,9 +26,9 @@ export const Tones: Story = {
   tags: ['variants'],
   args: {
     segments: [
-      { id: 'complete', label: 'Hoàn tất', value: 12, tone: 'success' },
-      { id: 'active', label: 'Đang xử lý', value: 6, tone: 'info' },
-      { id: 'waiting', label: 'Chờ xử lý', value: 2, tone: 'warning' },
+      { id: 'complete', label: 'Completed', value: 12, tone: 'success' },
+      { id: 'active', label: 'In progress', value: 6, tone: 'info' },
+      { id: 'waiting', label: 'Pending', value: 2, tone: 'warning' },
     ],
   },
 };
@@ -37,9 +37,9 @@ export const States: Story = {
   render: () => (
     <div className="grid gap-6">
       <SegmentedProgress segments={[]} />
-      <SegmentedProgress segments={[{ id: 'zero', label: 'Chưa bắt đầu', value: 0 }]} />
+      <SegmentedProgress segments={[{ id: 'zero', label: 'Not started', value: 0 }]} />
       <SegmentedProgress
-        segments={[{ id: 'complete', label: 'Hoàn tất', value: 10 }]}
+        segments={[{ id: 'complete', label: 'Completed', value: 10 }]}
       />
     </div>
   ),
@@ -56,7 +56,7 @@ export const LongLabels: Story = {
             label: 'Lorem ipsum dolor sit amet consectetur adipiscing elit',
             value: 12,
           },
-          { id: 'b', label: 'Mục B', value: 6 },
+          { id: 'b', label: 'Dolor sit amet', value: 6 },
         ]}
       />
     </div>

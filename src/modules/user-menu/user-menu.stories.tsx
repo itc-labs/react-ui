@@ -8,9 +8,9 @@ const meta = {
     name: 'Lorem Ipsum',
     description: 'Dolor sit amet',
     items: [
-      { id: 'profile', label: 'Hồ sơ', icon: 'user', href: '/profile' },
+      { id: 'profile', label: 'Profile', icon: 'user', href: '/profile' },
       { id: 'separator', type: 'separator' },
-      { id: 'sign-out', label: 'Đăng xuất', tone: 'danger' },
+      { id: 'sign-out', label: 'Sign out', tone: 'danger' },
     ],
     'data-testid': 'user-menu',
   },
@@ -18,7 +18,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'Menu tài khoản với Avatar, tên và mô tả. Hỗ trợ bàn phím, nội dung đầu menu và chế độ compact; tự thu gọn trên màn hình nhỏ.',
+          'An account menu with an Avatar, name and description. Supports keyboard navigation, header content and compact mode; automatically collapses on small screens.',
       },
     },
   },
@@ -33,7 +33,7 @@ export const WithHeader: Story = {
     header: (
       <>
         <strong className="block text-ui-sm">Lorem Ipsum</strong>
-        <span className="text-xs text-muted">user@example.com</span>
+        <span className="text-xs text-muted">Dolor sit amet</span>
       </>
     ),
   },

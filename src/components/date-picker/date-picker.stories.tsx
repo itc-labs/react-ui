@@ -18,7 +18,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'Chọn một ngày từ lịch, xóa giá trị hoặc giới hạn khoảng ngày được chọn. value dùng định dạng YYYY-MM-DD; cách hiển thị theo locale.',
+          'Select a calendar date, clear the selection or restrict the available dates. value uses YYYY-MM-DD; the display follows the locale.',
       },
     },
   },
@@ -32,13 +32,13 @@ function DateExample() {
   return (
     <div className="grid max-w-sm gap-4">
       <DatePicker
-        label="Ngày minh họa"
+        label="Example date"
         name="date"
         value={value}
         onValueChange={setValue}
         today="2026-10-27"
       />
-      <output>Ngày đã chọn: {value ?? 'Chưa chọn'}</output>
+      <output>Selected date: {value ?? 'Not selected'}</output>
     </div>
   );
 }
@@ -47,14 +47,14 @@ function DialogDateExample() {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button>Mở dialog ngày</Button>
+        <Button>Open date dialog</Button>
       </DialogTrigger>
       <DialogContent>
-        <DialogTitle>Ngày trong dialog</DialogTitle>
+        <DialogTitle>Date in dialog</DialogTitle>
         <DialogDescription>
-          Popover chọn ngày và Select tháng/năm trong cùng luồng focus.
+          The date popover and month/year selectors share the dialog focus scope.
         </DialogDescription>
-        <DatePicker label="Ngày trong dialog" today="2026-10-27" />
+        <DatePicker label="Date in dialog" today="2026-10-27" />
       </DialogContent>
     </Dialog>
   );
@@ -67,9 +67,9 @@ export const States: Story = {
   render: () => (
     <div className="grid max-w-sm gap-5">
       <DatePicker label="Disabled" disabled defaultValue="2026-10-12" />
-      <DatePicker label="Có lỗi" error="Chọn ngày hợp lệ." />
+      <DatePicker label="Error" error="Select a valid date." />
       <DatePicker
-        label="Giá trị ngoài giới hạn"
+        label="Out-of-range value"
         value="2026-10-05"
         minDate="2026-10-10"
         maxDate="2026-10-31"
@@ -81,25 +81,25 @@ export const States: Story = {
 export const Empty: Story = {
   tags: ['example'],
   args: {
-    label: 'Ngày bắt đầu',
+    label: 'Start date',
     today: '2026-10-27',
-    hint: 'Giá trị date-only, không kèm múi giờ.',
+    hint: 'Date-only value without a time zone.',
   },
 };
 
 export const Bounds: Story = {
   tags: ['example'],
   args: {
-    label: 'Ngày trong tháng 10',
+    label: 'Date in October',
     minDate: '2026-10-12',
     maxDate: '2026-10-20',
     today: '2026-10-27',
     isDateUnavailable: (date) => date === '2026-10-15',
-    hint: 'Chỉ 12–20/10; ngày 15 bị khóa.',
+    hint: 'Only October 12–20 is available; October 15 is disabled.',
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await userEvent.click(canvas.getByRole('button', { name: 'Ngày trong tháng 10' }));
+    await userEvent.click(canvas.getByRole('button', { name: 'Date in October' }));
 
     const day = (n: string) =>
       within(document.body)
@@ -119,17 +119,15 @@ export const InDialog: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement),
       body = within(document.body);
-    const trigger = canvas.getByRole('button', { name: 'Mở dialog ngày' });
+    const trigger = canvas.getByRole('button', { name: 'Open date dialog' });
     await userEvent.click(trigger);
-    await userEvent.click(
-      await body.findByRole('button', { name: 'Ngày trong dialog' }),
-    );
+    await userEvent.click(await body.findByRole('button', { name: 'Date in dialog' }));
     await userEvent.click(
       body.getAllByRole('button').find((b) => b.textContent === '17')!,
     );
     await expect(
-      body.getByRole('button', { name: 'Ngày trong dialog' }),
-    ).toHaveTextContent('17/10/2026');
+      body.getByRole('button', { name: 'Date in dialog' }),
+    ).toHaveTextContent('10/17/2026');
     await waitFor(() => expect(body.getAllByRole('dialog')).toHaveLength(1));
     await userEvent.keyboard('{Escape}');
     await waitFor(() => expect(trigger).toHaveFocus());
@@ -140,7 +138,7 @@ export const CustomClasses: Story = {
   tags: ['customization'],
   render: () => (
     <DatePicker
-      label="Lorem ipsum"
+      label="Date"
       today="2026-10-28"
       defaultValue="2026-10-17"
       classNames={{
@@ -162,20 +160,20 @@ export const OutsideDismissal: Story = {
     <div className="grid max-w-sm gap-4">
       <DateExample />
       <div className="mt-96">
-        <Input label="Ghi chú bên ngoài" />
+        <Input label="Outside note" />
       </div>
     </div>
   ),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    const trigger = canvas.getByRole('button', { name: 'Ngày minh họa' });
+    const trigger = canvas.getByRole('button', { name: 'Example date' });
     await userEvent.click(trigger);
     await expect(trigger).toHaveAttribute('aria-expanded', 'true');
-    const note = canvas.getByRole('textbox', { name: 'Ghi chú bên ngoài' });
+    const note = canvas.getByRole('textbox', { name: 'Outside note' });
     await userEvent.click(note);
     await waitFor(() => expect(trigger).toHaveAttribute('aria-expanded', 'false'));
     await waitFor(() => expect(note).toHaveFocus());
-    await expect(canvas.getByText('Ngày đã chọn: 2026-10-12')).toBeVisible();
+    await expect(canvas.getByText('Selected date: 2026-10-12')).toBeVisible();
     await userEvent.click(trigger);
     await userEvent.keyboard('{Escape}');
     await waitFor(() => expect(trigger).toHaveFocus());
@@ -187,16 +185,16 @@ export const SelectAndClear: Story = {
   render: () => <DateExample />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    const trigger = canvas.getByRole('button', { name: 'Ngày minh họa' });
+    const trigger = canvas.getByRole('button', { name: 'Example date' });
     await userEvent.click(trigger);
     const day = within(document.body)
       .getAllByRole('button')
       .find((b) => b.textContent === '17')!;
     await userEvent.click(day);
-    await expect(canvas.getByText('Ngày đã chọn: 2026-10-17')).toBeVisible();
+    await expect(canvas.getByText('Selected date: 2026-10-17')).toBeVisible();
     await waitFor(() => expect(trigger).toHaveFocus());
-    await userEvent.click(canvas.getByRole('button', { name: 'Xóa lựa chọn ngày' }));
-    await expect(canvas.getByText('Ngày đã chọn: Chưa chọn')).toBeVisible();
+    await userEvent.click(canvas.getByRole('button', { name: 'Clear date selection' }));
+    await expect(canvas.getByText('Selected date: Not selected')).toBeVisible();
   },
 };
 
@@ -205,11 +203,11 @@ export const KeyboardSelection: Story = {
   render: () => <DateExample />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    const trigger = canvas.getByRole('button', { name: 'Ngày minh họa' });
+    const trigger = canvas.getByRole('button', { name: 'Example date' });
     await userEvent.click(trigger);
     await waitFor(() => expect(document.activeElement).toHaveTextContent('12'));
     await userEvent.keyboard('{ArrowRight}{Enter}');
-    await expect(canvas.getByText('Ngày đã chọn: 2026-10-13')).toBeVisible();
+    await expect(canvas.getByText('Selected date: 2026-10-13')).toBeVisible();
     await waitFor(() => expect(trigger).toHaveFocus());
   },
 };

@@ -5,15 +5,15 @@ const meta = {
   title: 'Components/UploadField',
   component: UploadField,
   args: {
-    label: 'Tệp đính kèm',
+    label: 'Attachments',
     accept: '.txt,.pdf',
-    hint: 'TXT hoặc PDF, tối đa 10 MB.',
+    hint: 'TXT or PDF, up to 10 MB.',
   },
   parameters: {
     docs: {
       description: {
         component:
-          'Chọn hoặc kéo thả tệp, xem trước và xóa khỏi danh sách. onValueChange trả các File đã chọn; trạng thái tải, tiến trình và lỗi được ứng dụng truyền vào.',
+          'Select or drop files, preview them, and remove them from the list. onValueChange returns the selected File objects; the application supplies loading, progress, and error states.',
       },
     },
   },
@@ -27,10 +27,13 @@ export const States: Story = {
   tags: ['states'],
   render: () => (
     <div className="grid max-w-3xl gap-5 sm:grid-cols-2">
-      <UploadField label="Sẵn sàng" />
-      <UploadField label="Không chỉnh sửa" disabled />
-      <UploadField label="Đang tải" loading progress={45} />
-      <UploadField label="Có lỗi" error="Chưa tải được tệp. Thử lại để tiếp tục." />
+      <UploadField label="Ready" />
+      <UploadField label="Disabled" disabled />
+      <UploadField label="Loading" loading progress={45} />
+      <UploadField
+        label="Error"
+        error="Could not upload the file. Try again to continue."
+      />
     </div>
   ),
 };
@@ -44,7 +47,7 @@ export const Preview: Story = {
   tags: ['example'],
   args: {
     accept: 'image/png,image/jpeg,image/webp,.txt',
-    hint: 'Chọn ảnh hoặc tệp TXT, sau đó bấm thumbnail để xem trước.',
+    hint: 'Choose an image or TXT file, then click its thumbnail to preview.',
   },
 };
 
@@ -52,8 +55,8 @@ export const CustomClasses: Story = {
   tags: ['customization'],
   render: () => (
     <UploadField
-      label="Tệp đính kèm"
-      hint="PNG, JPG hoặc TXT."
+      label="Attachments"
+      hint="PNG, JPG or TXT."
       accept="image/png,image/jpeg,.txt"
       classNames={{
         root: 'max-w-lg',
@@ -80,7 +83,7 @@ export const SelectRemoveAndReject: Story = {
       new File(['Lorem ipsum'], 'example.txt', { type: 'text/plain' }),
     );
     await expect(canvas.getByText(/example.txt/)).toBeVisible();
-    await userEvent.click(canvas.getByRole('button', { name: 'Xóa example.txt' }));
+    await userEvent.click(canvas.getByRole('button', { name: 'Remove example.txt' }));
     await expect(canvas.queryByText(/example.txt/)).not.toBeInTheDocument();
     await userEvent
       .setup({ applyAccept: false })
@@ -88,7 +91,7 @@ export const SelectRemoveAndReject: Story = {
         input,
         new File(['invalid'], 'image.exe', { type: 'application/octet-stream' }),
       );
-    await expect(canvas.getByRole('alert')).toHaveTextContent('không được hỗ trợ');
+    await expect(canvas.getByRole('alert')).toHaveTextContent('unsupported type');
   },
 };
 
@@ -102,9 +105,7 @@ export const TextPreview: Story = {
       input,
       new File(['Lorem ipsum dolor sit amet.'], 'example.txt', { type: 'text/plain' }),
     );
-    await userEvent.click(
-      canvas.getByRole('button', { name: 'Xem trước example.txt' }),
-    );
+    await userEvent.click(canvas.getByRole('button', { name: 'Preview example.txt' }));
     await expect(await body.findByText('Lorem ipsum dolor sit amet.')).toBeVisible();
     await userEvent.keyboard('{Escape}');
   },
@@ -112,7 +113,7 @@ export const TextPreview: Story = {
 
 export const ImagePreview: Story = {
   tags: ['!dev', '!autodocs', 'regression'],
-  args: { accept: 'image/png,image/jpeg,image/webp', hint: 'PNG, JPEG hoặc WebP.' },
+  args: { accept: 'image/png,image/jpeg,image/webp', hint: 'PNG, JPEG or WebP.' },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement),
       body = within(document.body),
@@ -127,9 +128,7 @@ export const ImagePreview: Story = {
       input,
       new File([png], 'example.png', { type: 'image/png' }),
     );
-    await userEvent.click(
-      canvas.getByRole('button', { name: 'Xem trước example.png' }),
-    );
+    await userEvent.click(canvas.getByRole('button', { name: 'Preview example.png' }));
     const preview = await body.findByRole('img', { name: 'example.png' });
     await waitFor(() => expect(preview).toBeVisible());
   },

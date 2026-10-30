@@ -8,20 +8,20 @@ import { expect, userEvent, within, waitFor } from 'storybook/test';
 import { DropdownMenu, type DropdownMenuEntry } from './index';
 
 const actions: DropdownMenuEntry[] = [
-  { id: 'edit', label: 'Chỉnh sửa', icon: 'edit' },
-  { id: 'duplicate', label: 'Nhân bản', icon: 'copy' },
+  { id: 'edit', label: 'Edit', icon: 'edit' },
+  { id: 'duplicate', label: 'Duplicate', icon: 'copy' },
   { id: 'separator', type: 'separator' },
-  { id: 'remove', label: 'Xóa', tone: 'danger', disabled: true },
+  { id: 'remove', label: 'Delete', tone: 'danger', disabled: true },
 ];
 const meta = {
   title: 'Components/DropdownMenu',
   component: DropdownMenu,
-  args: { trigger: 'Tác vụ', items: actions },
+  args: { trigger: 'Actions', items: actions },
   parameters: {
     docs: {
       description: {
         component:
-          'Menu hành động dùng trigger và items. Item hỗ trợ callback hoặc href, tone="danger" cho hành động phá hủy, checkbox, nhãn, nhóm và submenu. Radix quản lý focus và bàn phím; checkbox giữ giá trị ở consumer. Có prop items để dùng API dựng sẵn; bỏ prop này khi ghép các phần primitive. items có thể là mảng rỗng.',
+          'Build an action menu with trigger and items. Entries support callbacks or href, tone="danger" for destructive actions, checkboxes, labels, groups and submenus. Radix manages focus and keyboard navigation; consumers manage checkbox state. Supply items for the built-in composition, or omit it to compose primitives. items may be an empty array.',
       },
     },
   },
@@ -38,13 +38,13 @@ function SelectionExample() {
   return (
     <div className="grid gap-3">
       <DropdownMenu
-        trigger="Tùy chọn"
+        trigger="Options"
         data-testid="actions"
         items={[
           {
             id: 'columns',
             type: 'checkbox',
-            label: 'Hiện cột bổ sung',
+            label: 'Show extra columns',
             checked,
             onCheckedChange: setChecked,
             closeOnSelect: false,
@@ -52,12 +52,12 @@ function SelectionExample() {
           { id: 'separator', type: 'separator' },
           {
             id: 'edit',
-            label: 'Chỉnh sửa',
-            onSelect: () => setAction('Đã chọn chỉnh sửa'),
+            label: 'Edit',
+            onSelect: () => setAction('Edit selected'),
           },
         ]}
       />
-      <output>{action || (checked ? 'Đang hiện cột' : 'Đang ẩn cột')}</output>
+      <output>{action || (checked ? 'Columns visible' : 'Columns hidden')}</output>
     </div>
   );
 }
@@ -70,14 +70,14 @@ export const GroupsAndSubmenus: Story = {
   tags: ['example'],
   args: {
     items: [
-      { id: 'group', type: 'group', label: 'Tác vụ', items: actions },
+      { id: 'group', type: 'group', label: 'Actions', items: actions },
       {
         id: 'more',
         type: 'submenu',
-        label: 'Thêm',
-        items: [{ id: 'export', label: 'Xuất bản minh họa' }],
+        label: 'More',
+        items: [{ id: 'export', label: 'Export example' }],
       },
-      { id: 'help', label: 'Trợ giúp', href: '#menu-help' },
+      { id: 'help', label: 'Help', href: '#menu-help' },
     ],
   },
 };
@@ -104,12 +104,12 @@ export const KeyboardAndSelection: Story = {
     await userEvent.click(canvas.getByTestId('actions-trigger'));
     await userEvent.click(await body.findByTestId('actions-checkbox-columns'));
     await expect(canvas.getByRole('status', { hidden: true })).toHaveTextContent(
-      'Đang ẩn cột',
+      'Columns hidden',
     );
     await waitFor(() => expect(body.getByRole('menu')).toBeVisible());
     await userEvent.click(body.getByTestId('actions-item-edit'));
     await expect(canvas.getByRole('status', { hidden: true })).toHaveTextContent(
-      'Đã chọn chỉnh sửa',
+      'Edit selected',
     );
   },
 };
@@ -123,19 +123,19 @@ export const CustomTriggers: Story = {
   render: () => (
     <div className="flex items-center gap-5">
       <DropdownMenu
-        trigger={<Avatar alt="Tài khoản" fallback="TC" />}
-        triggerLabel="Mở menu tài khoản"
+        trigger={<Avatar alt="Account" fallback="TC" />}
+        triggerLabel="Open account menu"
         items={actions}
       />
       <DropdownMenu
         trigger={<Icon name="more" />}
-        triggerLabel="Mở menu biểu tượng"
+        triggerLabel="Open icon menu"
         items={actions}
       />
       <DropdownMenu
         trigger={
           <CustomTrigger className="rounded-control border border-line px-3 py-2">
-            Tùy chỉnh
+            Custom
           </CustomTrigger>
         }
         triggerAsChild
@@ -152,16 +152,16 @@ function TableActionsExample() {
     { id: 'second', name: 'Dolor sit amet' },
   ];
   const columns: ColumnDef<(typeof rows)[number], unknown>[] = [
-    { accessorKey: 'name', header: 'Tên' },
+    { accessorKey: 'name', header: 'Name' },
     {
       id: 'actions',
-      header: 'Tác vụ',
+      header: 'Actions',
       cell: ({ row }) => (
         <DropdownMenu
           trigger={
             <IconButton
               icon="more"
-              label={`Tác vụ cho ${row.original.name}`}
+              label={`Actions for ${row.original.name}`}
               onClick={(event) => event.stopPropagation()}
             />
           }
@@ -169,12 +169,12 @@ function TableActionsExample() {
           items={[
             {
               id: 'edit',
-              label: 'Chỉnh sửa',
+              label: 'Edit',
               onSelect: () => setSelected(row.original.id),
             },
             {
               id: 'delete',
-              label: 'Xóa',
+              label: 'Delete',
               tone: 'danger',
               onSelect: () => setSelected(`delete:${row.original.id}`),
             },
@@ -190,7 +190,7 @@ function TableActionsExample() {
         rows={rows}
         columns={columns}
         rowId={(row) => row.id}
-        caption="Danh sách minh họa"
+        caption="Lorem ipsum"
       />
       <output>{selected}</output>
     </div>

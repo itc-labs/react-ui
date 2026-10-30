@@ -6,7 +6,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'Section chứa nội dung với title/description/action/footer slots. Không chứa fetch hoặc logic nghiệp vụ.',
+          'Group content in a section with title, description, action and footer slots. Data fetching and application logic belong in the application.',
       },
     },
   },
@@ -26,7 +26,7 @@ export const Playground: Story = { tags: ['usage'] };
 export const WithSlots: Story = {
   tags: ['example'],
   args: {
-    action: <Tag tone="brand">Preview</Tag>,
+    action: <Tag tone="brand">Lorem ipsum</Tag>,
     footer: 'Ut enim ad minim veniam.',
   },
 };
@@ -45,7 +45,7 @@ export const Composition: Story = {
           dolore magna aliqua.
         </p>
       </Card>
-      <Card title="Duis aute irure" action={<Tag tone="warning">Cần review</Tag>}>
+      <Card title="Duis aute irure" action={<Tag tone="warning">Dolor sit amet</Tag>}>
         <p>
           Dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
           pariatur.

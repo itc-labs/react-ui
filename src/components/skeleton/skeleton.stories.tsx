@@ -19,7 +19,7 @@ export const LoadingCard: Story = {
       role="status"
       className="grid max-w-lg gap-4 rounded-panel border border-line bg-surface p-6"
     >
-      <span className="sr-only">Đang tải</span>
+      <span className="sr-only">Loading</span>
       <Skeleton className="h-6 w-40" />
       <Skeleton />
       <Skeleton className="w-2/3" />

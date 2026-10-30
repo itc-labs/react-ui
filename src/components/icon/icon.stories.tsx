@@ -28,7 +28,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'Đăng ký outlineCatalog/boldCatalog qua UIProvider để tra cứu toàn bộ tên; import glyph trực tiếp khi chỉ cần vài icon. 651 tên icon dùng chung cho Outline và Bold, từ Heroicons (MIT) và Lucide (ISC). Icon chỉ có Outline dùng cùng nét ở cả hai kiểu; spinner và sort giữ nét trung tính.',
+          'Register outlineCatalog/boldCatalog through UIProvider to look up all icon names, or import glyphs directly when using only a few icons. Outline and Bold share 651 icon names from Heroicons (MIT) and Lucide (ISC). Icons available only in Outline use the same strokes in both variants; spinner and sort icons keep neutral strokes.',
       },
     },
   },

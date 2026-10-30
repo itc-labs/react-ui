@@ -3,10 +3,10 @@ import { useEffect, useState } from 'react';
 import { expect, userEvent, waitFor, within } from 'storybook/test';
 import { Select } from './index';
 const options = [
-  { value: '', label: 'Không có — mục gốc' },
+  { value: '', label: 'None — root category' },
   { value: 'pets', label: 'Pets' },
   { value: 'gifts', label: 'Gifts' },
-  { value: 'later', label: 'Chưa khả dụng', disabled: true },
+  { value: 'later', label: 'Unavailable', disabled: true },
 ];
 
 function Demo() {
@@ -15,27 +15,27 @@ function Demo() {
   return (
     <div className="grid max-w-lg gap-5">
       <Select
-        label="Category cha"
+        label="Parent category"
         value={value}
         onValueChange={setValue}
         options={options}
       />
       <Select
-        label="Lựa chọn bị lỗi"
+        label="Invalid selection"
         options={options}
         required
-        error="Hãy chọn một mục."
+        error="Select an item."
       />
-      <Select label="Đang tải" options={[]} loading />
-      <Select label="Không chỉnh sửa" options={options} disabled value="pets" />
+      <Select label="Loading" options={[]} loading />
+      <Select label="Disabled" options={options} disabled value="pets" />
       <Select
-        label="Chọn nhiều"
+        label="Multiple selection"
         multiple
         options={options}
         defaultValue={['pets']}
         clearable
       />
-      <output>Đang chọn: {value || 'gốc'}</output>
+      <output>Selected: {value || 'root'}</output>
     </div>
   );
 }
@@ -43,12 +43,12 @@ function Demo() {
 const meta = {
   title: 'Components/Select',
   component: Select,
-  args: { label: 'Danh mục', options },
+  args: { label: 'Category', options },
   parameters: {
     docs: {
       description: {
         component:
-          'Chọn một hoặc nhiều giá trị; bật searchable để tìm trong danh sách. Với dữ liệu từ server, ứng dụng cung cấp options và xử lý tìm kiếm/tải thêm; nhãn của mục đã chọn được giữ khi danh sách thay đổi.',
+          'Select one or more values; enable searchable to search the list. For server data, supply options and handle search and pagination. Selected option labels are retained when the list changes.',
       },
     },
   },
@@ -95,7 +95,7 @@ function RemoteExample({
     const timer = setTimeout(
       () => {
         if (query === 'fail') {
-          setError('Không tải được lựa chọn. Thay từ khóa hoặc thử lại.');
+          setError('Could not load options. Change the search term or retry.');
           setLoading(false);
           setLoadingMore(false);
 
@@ -116,7 +116,7 @@ function RemoteExample({
   }, [inputValue, query, page, attempt]);
 
   const common = {
-    label: 'Chọn mục từ server',
+    label: 'Select a server option',
     options: rows,
     selectedOptions: [remoteRows[0]!],
     searchable: true,
@@ -143,15 +143,15 @@ function RemoteExample({
       ) : (
         <Select {...common} value={value} onValueChange={setValue} />
       )}
-      <output aria-label="Trạng thái danh sách">
-        {loading || loadingMore ? 'Đang tải' : 'Sẵn sàng'}
+      <output aria-label="List status">
+        {loading || loadingMore ? 'Loading' : 'Ready'}
       </output>
-      <output aria-label="Giá trị đã chọn">
+      <output aria-label="Selected value">
         {multiple ? values.join(',') : (value ?? 'none')}
       </output>
       <p className="text-ui-sm text-muted">
-        Mock server: 5 lựa chọn/trang. Search “Option 1”, “Option 2” hoặc “fail”. Không
-        gọi API thật.
+        Mock server: 5 options per page. Search for “Option 1”, “Option 2” or “fail”. No
+        real API requests are made.
       </p>
     </div>
   );
@@ -198,7 +198,7 @@ export const Searchable: Story = {
   tags: ['example'],
   render: () => (
     <Select
-      label="Tìm mục"
+      label="Find an option"
       searchable
       clearable
       options={[
@@ -210,7 +210,10 @@ export const Searchable: Story = {
   ),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await userEvent.type(canvas.getByRole('combobox', { name: 'Tìm mục' }), 'Dolor');
+    await userEvent.type(
+      canvas.getByRole('combobox', { name: 'Find an option' }),
+      'Dolor',
+    );
     await userEvent.click(
       await within(document.body).findByRole('option', { name: 'Dolor sit amet' }),
     );
@@ -240,7 +243,7 @@ export const CustomClasses: Story = {
   tags: ['customization'],
   render: () => (
     <Select
-      label="Lorem ipsum"
+      label="Options"
       searchable
       clearable
       options={[
@@ -248,7 +251,7 @@ export const CustomClasses: Story = {
         { value: 'b', label: 'Consectetur adipiscing' },
       ]}
       defaultValue="a"
-      hint="Gõ để tìm lựa chọn."
+      hint="Type to search for options."
       classNames={{
         root: 'max-w-sm',
         label: 'font-bold text-brand-700',
@@ -267,10 +270,10 @@ export const KeyboardSelection: Story = {
   tags: ['!dev', '!autodocs', 'regression'],
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    const select = canvas.getByRole('combobox', { name: 'Category cha' });
+    const select = canvas.getByRole('combobox', { name: 'Parent category' });
     await userEvent.click(select);
     await userEvent.keyboard('{ArrowDown}{Enter}');
-    await expect(canvas.getByText('Đang chọn: pets')).toBeVisible();
+    await expect(canvas.getByText('Selected: pets')).toBeVisible();
   },
 };
 
@@ -281,32 +284,28 @@ export const RemoteSelectionRetention: Story = {
     const canvas = within(canvasElement),
       body = within(document.body);
     await waitFor(() =>
-      expect(canvas.getByLabelText('Trạng thái danh sách')).toHaveTextContent(
-        'Sẵn sàng',
-      ),
+      expect(canvas.getByLabelText('List status')).toHaveTextContent('Ready'),
     );
-    const input = canvas.getByRole('combobox', { name: 'Chọn mục từ server' });
+    const input = canvas.getByRole('combobox', { name: 'Select a server option' });
     await userEvent.click(input);
-    await userEvent.click(body.getByRole('button', { name: 'Tải thêm lựa chọn' }));
+    await userEvent.click(body.getByRole('button', { name: 'Load more options' }));
     await waitFor(() =>
-      expect(canvas.getByLabelText('Trạng thái danh sách')).toHaveTextContent(
-        'Sẵn sàng',
-      ),
+      expect(canvas.getByLabelText('List status')).toHaveTextContent('Ready'),
     );
     await userEvent.click(input);
     await userEvent.type(input, 'Option 1');
     await userEvent.click(await body.findByRole('option', { name: 'Option 10' }));
-    await expect(canvas.getByLabelText('Giá trị đã chọn')).toHaveTextContent('10');
+    await expect(canvas.getByLabelText('Selected value')).toHaveTextContent('10');
     await userEvent.clear(input);
     await userEvent.type(input, 'Option 1');
     await body.findByRole('option', { name: 'Option 14' });
     await userEvent.keyboard('{Alt>}{End}{/Alt}');
     await body.findByRole('option', { name: 'Option 19' });
-    await expect(canvas.getByLabelText('Giá trị đã chọn')).toHaveTextContent('10');
+    await expect(canvas.getByLabelText('Selected value')).toHaveTextContent('10');
     await userEvent.clear(input);
     await userEvent.type(input, 'Option 2');
     await body.findByRole('option', { name: 'Option 20' });
-    await expect(canvas.getByLabelText('Giá trị đã chọn')).toHaveTextContent('10');
+    await expect(canvas.getByLabelText('Selected value')).toHaveTextContent('10');
     await userEvent.keyboard('{Escape}');
     await expect(canvas.getByText('Option 10', { exact: true })).toBeVisible();
   },
@@ -318,11 +317,9 @@ export const RemoteSearchRace: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement),
       body = within(document.body),
-      input = canvas.getByRole('combobox', { name: 'Chọn mục từ server' });
+      input = canvas.getByRole('combobox', { name: 'Select a server option' });
     await waitFor(() =>
-      expect(canvas.getByLabelText('Trạng thái danh sách')).toHaveTextContent(
-        'Sẵn sàng',
-      ),
+      expect(canvas.getByLabelText('List status')).toHaveTextContent('Ready'),
     );
     await userEvent.type(input, 'Option 2');
     await userEvent.clear(input);
@@ -332,7 +329,7 @@ export const RemoteSearchRace: Story = {
     await expect(
       body.queryByRole('option', { name: 'Option 20' }),
     ).not.toBeInTheDocument();
-    await expect(canvas.getByLabelText('Giá trị đã chọn')).toHaveTextContent('1');
+    await expect(canvas.getByLabelText('Selected value')).toHaveTextContent('1');
     await userEvent.keyboard('{Escape}');
   },
 };
@@ -343,17 +340,15 @@ export const RemoteMultiRetention: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement),
       body = within(document.body),
-      input = canvas.getByRole('combobox', { name: 'Chọn mục từ server' });
+      input = canvas.getByRole('combobox', { name: 'Select a server option' });
     await waitFor(() =>
-      expect(canvas.getByLabelText('Trạng thái danh sách')).toHaveTextContent(
-        'Sẵn sàng',
-      ),
+      expect(canvas.getByLabelText('List status')).toHaveTextContent('Ready'),
     );
     await userEvent.type(input, 'Option 1');
     await userEvent.click(await body.findByRole('option', { name: 'Option 10' }));
     await userEvent.type(input, 'Option 2');
     await body.findByRole('option', { name: 'Option 20' });
-    await expect(canvas.getByLabelText('Giá trị đã chọn')).toHaveTextContent('1,10');
+    await expect(canvas.getByLabelText('Selected value')).toHaveTextContent('1,10');
     await expect(canvas.getByText('Option 01', { exact: true })).toBeVisible();
     await expect(canvas.getByText('Option 10', { exact: true })).toBeVisible();
     await userEvent.keyboard('{Escape}');

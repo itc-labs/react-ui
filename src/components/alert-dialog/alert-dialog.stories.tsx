@@ -18,13 +18,13 @@ function Demo() {
   return (
     <div className="grid justify-items-start gap-3">
       <AlertDialog
-        trigger="Xác nhận minh họa"
-        title="Tiếp tục thao tác?"
-        description="Ví dụ xác nhận, không xóa hoặc gửi dữ liệu thật."
-        confirmLabel="Tiếp tục"
+        trigger="Confirm demo action"
+        title="Continue with this action?"
+        description="Confirm this demo action. No data will be deleted or sent."
+        confirmLabel="Continue"
         onConfirm={() => setDone(true)}
       />
-      {done && <p role="status">Đã xác nhận minh họa.</p>}
+      {done && <p role="status">Demo action confirmed.</p>}
     </div>
   );
 }
@@ -35,7 +35,7 @@ function AsyncConfirmDemo() {
 
   return (
     <AlertDialog
-      trigger="Mở xác nhận"
+      trigger="Open confirmation"
       title="Lorem ipsum"
       description="Dolor sit amet."
       open={open}
@@ -59,16 +59,16 @@ const meta = {
   title: 'Components/AlertDialog',
   component: AlertDialog,
   args: {
-    trigger: 'Xác nhận minh họa',
-    title: 'Tiếp tục thao tác?',
-    description: 'Ví dụ xác nhận, không xóa hoặc gửi dữ liệu thật.',
-    confirmLabel: 'Tiếp tục',
+    trigger: 'Confirm demo action',
+    title: 'Continue with this action?',
+    description: 'Confirm this demo action. No data will be deleted or sent.',
+    confirmLabel: 'Continue',
   },
   parameters: {
     docs: {
       description: {
         component:
-          'Hộp thoại xác nhận hành động. Cung cấp tiêu đề, mô tả và hai lựa chọn rõ ràng; thao tác Hủy được ưu tiên nhận focus. Có prop title để dùng API dựng sẵn; bỏ prop này khi ghép các phần primitive. title không nhận null/undefined; chuỗi rỗng và 0 vẫn dùng API dựng sẵn.',
+          'Confirm an action with a title, description and two clear choices. Cancel receives focus first. Provide title to use the built-in layout; omit it when composing primitives. title cannot be null or undefined; an empty string or 0 still uses the built-in layout.',
       },
     },
   },
@@ -83,14 +83,14 @@ export const MotionLifecycle: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     const body = within(document.body);
-    const trigger = canvas.getByRole('button', { name: 'Xác nhận minh họa' });
+    const trigger = canvas.getByRole('button', { name: 'Confirm demo action' });
     await userEvent.click(trigger);
     const panel = await body.findByRole('alertdialog');
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     await expect(getComputedStyle(panel).animationName).toBe(
       reduced ? 'none' : 'ui-fade-in',
     );
-    await userEvent.click(body.getByRole('button', { name: 'Hủy' }));
+    await userEvent.click(body.getByRole('button', { name: 'Cancel' }));
     if (!reduced) {
       await expect(panel).toHaveAttribute('data-state', 'closed');
       await expect(getComputedStyle(panel).animationName).toBe('ui-fade-out');
@@ -108,7 +108,7 @@ export const AsyncConfirm: Story = {
     docs: {
       description: {
         story:
-          'Dùng closeOnConfirm={false} và điều khiển open/confirmLoading để giữ hộp thoại trong khi chờ. Khi đang tải, không thể xác nhận lại hoặc đóng bằng Hủy/Escape; host đóng sau khi hoàn tất.',
+          'Use closeOnConfirm={false} and control open/confirmLoading to keep the dialog open while waiting. Loading prevents repeat confirmation and dismissal with Cancel or Escape; the application closes the dialog when the action completes.',
       },
     },
   },
@@ -119,7 +119,7 @@ export const CustomClasses: Story = {
   tags: ['customization'],
   render: () => (
     <AlertDialog
-      trigger="Mở xác nhận"
+      trigger="Open confirmation"
       title="Lorem ipsum"
       description="Dolor sit amet."
       classNames={{

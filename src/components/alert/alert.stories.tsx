@@ -5,16 +5,16 @@ function Demo() {
   return (
     <div className="grid max-w-xl gap-3">
       <Alert tone="neutral">Lorem ipsum dolor sit amet.</Alert>
-      <Alert title="Nguồn dữ liệu" tone="info">
-        Chỉ là ví dụ giao diện.
+      <Alert title="Lorem ipsum" tone="info">
+        Dolor sit amet.
       </Alert>
-      <Alert tone="warning" title="Cần kiểm tra lại">
-        Ngày cập nhật chưa xác định.
+      <Alert tone="warning" title="Sed do eiusmod">
+        Consectetur adipiscing elit.
       </Alert>
-      <Alert tone="danger">Chưa kết nối được máy chủ.</Alert>
-      <Alert tone="success">Đã lưu kết luận riêng.</Alert>
+      <Alert tone="danger">Could not connect to the server.</Alert>
+      <Alert tone="success">Changes saved.</Alert>
       <Alert variant="inline" tone="success">
-        Đã lưu.
+        Saved.
       </Alert>
     </div>
   );
@@ -23,12 +23,12 @@ function Demo() {
 const meta = {
   title: 'Components/Alert',
   component: Alert,
-  args: { title: 'Thông báo', children: 'Lorem ipsum dolor sit amet.' },
+  args: { title: 'Lorem ipsum', children: 'Lorem ipsum dolor sit amet.' },
   parameters: {
     docs: {
       description: {
         component:
-          'Hiển thị thông báo theo mức độ info, success, warning hoặc danger. Dùng tone="neutral" cho thông báo trung tính. Dùng variant="inline" cho phản hồi ngắn trong nội dung; action nhận nút hoặc liên kết do ứng dụng cung cấp.',
+          'Display info, success, warning or danger messages. Use tone="neutral" for neutral messages and variant="inline" for brief feedback within content. action accepts a button or link supplied by the application.',
       },
     },
   },
@@ -48,16 +48,16 @@ export const Inline: Story = {
         Lorem ipsum dolor sit amet.
       </Alert>
       <Alert variant="inline" tone="info">
-        Thông tin bổ sung.
+        Dolor sit amet.
       </Alert>
       <Alert variant="inline" tone="success">
-        Đã lưu.
+        Saved.
       </Alert>
       <Alert variant="inline" tone="warning">
-        Kiểm tra lại nội dung.
+        Review the content.
       </Alert>
       <Alert variant="inline" tone="danger">
-        Không lưu được nội dung.
+        Could not save the content.
       </Alert>
     </div>
   ),
@@ -67,7 +67,7 @@ export const CustomClasses: Story = {
   tags: ['customization'],
   render: () => (
     <Alert
-      title="Thông báo"
+      title="Lorem ipsum"
       className="max-w-lg rounded-panel"
       classNames={{
         icon: 'size-6 text-brand-700',

@@ -14,20 +14,20 @@ import { Select } from '../select';
 function Demo({ side = 'right' }: { side?: 'right' | 'left' }) {
   return (
     <Drawer
-      title="Ghi chú minh họa"
-      description="Drawer từ cạnh màn hình, có focus trap và Escape."
-      trigger="Mở editor"
+      title="Lorem ipsum"
+      description="The drawer opens from the screen edge, traps focus and closes with Escape."
+      trigger="Open editor"
       side={side}
     >
       <div className="grid gap-5">
         <Select
-          label="Trạng thái"
+          label="Status"
           options={[
-            { value: 'explore', label: 'Nghiên cứu thêm' },
-            { value: 'test', label: 'Đáng thử' },
+            { value: 'explore', label: 'Needs research' },
+            { value: 'test', label: 'Ready to test' },
           ]}
         />
-        <Textarea label="Nhận xét riêng" />
+        <Textarea label="Private notes" />
       </div>
     </Drawer>
   );
@@ -37,19 +37,20 @@ const meta = {
   title: 'Components/Drawer',
   component: Drawer,
   args: {
-    title: 'Ghi chú minh họa',
-    trigger: 'Mở editor',
-    description: 'Drawer từ cạnh màn hình, có focus trap và Escape.',
+    title: 'Lorem ipsum',
+    trigger: 'Open editor',
+    description:
+      'The drawer opens from the screen edge, traps focus and closes with Escape.',
     children: (
       <div className="grid gap-5">
         <Select
-          label="Trạng thái"
+          label="Status"
           options={[
-            { value: 'explore', label: 'Nghiên cứu thêm' },
-            { value: 'test', label: 'Đáng thử' },
+            { value: 'explore', label: 'Needs research' },
+            { value: 'test', label: 'Ready to test' },
           ]}
         />
-        <Textarea label="Nhận xét riêng" />
+        <Textarea label="Private notes" />
       </div>
     ),
   },
@@ -57,7 +58,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'Panel mở từ cạnh màn hình, phù hợp cho biểu mẫu hoặc nội dung bổ sung. Truyền trigger, title, description và nội dung; hỗ trợ đóng bằng Escape và trả focus về trigger. Có prop title để dùng API dựng sẵn; bỏ prop này khi ghép các phần primitive. title không nhận null/undefined; chuỗi rỗng và 0 vẫn dùng API dựng sẵn.',
+          'Open a panel from the screen edge for forms or supplementary content. Pass trigger, title, description and children. Escape closes the panel and focus returns to the trigger. Supply title for the built-in composition, or omit it to compose primitives. title cannot be null/undefined; an empty string or 0 still uses the built-in composition.',
       },
     },
   },
@@ -75,7 +76,7 @@ export const CustomClasses: Story = {
     <Drawer
       title="Lorem ipsum"
       description="Dolor sit amet."
-      trigger="Mở drawer tùy chỉnh"
+      trigger="Open custom drawer"
       className="max-w-md"
       classNames={{
         content: 'bg-brand-50',
@@ -86,9 +87,9 @@ export const CustomClasses: Story = {
         body: 'p-8',
         footer: 'bg-surface',
       }}
-      footer={<Button variant="secondary">Tác vụ</Button>}
+      footer={<Button variant="secondary">Actions</Button>}
     >
-      <Textarea label="Nội dung" />
+      <Textarea label="Content" />
     </Drawer>
   ),
 };
@@ -97,10 +98,10 @@ export const TopAndBottom: Story = {
   tags: ['example'],
   render: () => (
     <div className="flex gap-3">
-      <Drawer title="Lorem ipsum" trigger="Mở từ trên" side="top">
+      <Drawer title="Lorem ipsum" trigger="Open from top" side="top">
         Dolor sit amet.
       </Drawer>
-      <Drawer title="Lorem ipsum" trigger="Mở từ dưới" side="bottom">
+      <Drawer title="Lorem ipsum" trigger="Open from bottom" side="bottom">
         Dolor sit amet.
       </Drawer>
     </div>
@@ -112,7 +113,7 @@ export const MotionLifecycle: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     const body = within(document.body);
-    const trigger = canvas.getByRole('button', { name: 'Mở editor' });
+    const trigger = canvas.getByRole('button', { name: 'Open editor' });
     await userEvent.click(trigger);
     const panel = await body.findByRole('dialog');
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -121,7 +122,7 @@ export const MotionLifecycle: Story = {
     );
     await expect(getComputedStyle(panel).transform).toBe('none');
     await Promise.all(panel.getAnimations().map((animation) => animation.finished));
-    await userEvent.click(body.getByRole('button', { name: 'Đóng bảng bên' }));
+    await userEvent.click(body.getByRole('button', { name: 'Close drawer' }));
     if (!reduced) {
       await expect(panel).toHaveAttribute('data-state', 'closed');
       await expect(getComputedStyle(panel).animationName).toBe('ui-drawer-right-out');

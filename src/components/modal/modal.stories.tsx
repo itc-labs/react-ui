@@ -13,11 +13,11 @@ function ModalValueContent({ close }: { close: (value?: string) => void }) {
   return (
     <div className="grid gap-4">
       <Input
-        label="Giá trị trả về"
+        label="Return value"
         value={value}
         onChange={(event) => setValue(event.target.value)}
       />
-      <Button onClick={() => close(value)}>Chọn giá trị</Button>
+      <Button onClick={() => close(value)}>Choose value</Button>
     </div>
   );
 }
@@ -33,18 +33,18 @@ function ModalExamples({ example }: { example: Example }) {
       content: ({ close }) => <ModalValueContent close={close} />,
       actions: ({ dismiss }) => (
         <Button variant="secondary" onClick={dismiss}>
-          Hủy
+          Cancel
         </Button>
       ),
     });
-    setResult(value === undefined ? 'Đã hủy' : `Giá trị: ${value}`);
+    setResult(value === undefined ? 'Canceled' : `Value: ${value}`);
   }
 
   function queue() {
-    void modal.alert({ title: 'Bước 1', description: 'Lorem ipsum dolor sit amet.' });
-    void modal.confirm({ title: 'Bước 2', description: 'Lorem ipsum dolor sit amet.' });
+    void modal.alert({ title: 'Step 1', description: 'Lorem ipsum dolor sit amet.' });
+    void modal.confirm({ title: 'Step 2', description: 'Lorem ipsum dolor sit amet.' });
     void modal.alert({
-      title: 'Bước 3',
+      title: 'Step 3',
       description: 'Lorem ipsum dolor sit amet.',
       tone: 'success',
     });
@@ -57,14 +57,14 @@ function ModalExamples({ example }: { example: Example }) {
         <Button
           onClick={async () => {
             const confirmed = await modal.confirm({
-              title: 'Xác nhận đóng',
+              title: 'Confirm close',
               stack: true,
               tone: 'danger',
             });
             if (confirmed) close();
           }}
         >
-          Xác nhận đóng
+          Confirm close
         </Button>
       ),
     });
@@ -72,7 +72,7 @@ function ModalExamples({ example }: { example: Example }) {
 
   function asyncConfirm(fail: boolean) {
     void modal.confirm({
-      title: 'Xác nhận lưu',
+      title: 'Confirm save',
       description: 'Lorem ipsum dolor sit amet.',
       onConfirm: () =>
         new Promise<void>((resolve, reject) => {
@@ -81,14 +81,14 @@ function ModalExamples({ example }: { example: Example }) {
             1000,
           );
         }),
-      onError: () => setResult('Tác vụ thất bại; thử lại hoặc hủy.'),
+      onError: () => setResult('Action failed; retry or cancel.'),
     });
   }
 
   function dedupe() {
-    const first = modal.confirm({ id: 'same-action', title: 'Xác nhận một lần' });
-    const second = modal.confirm({ id: 'same-action', title: 'Xác nhận một lần' });
-    setResult(first === second ? 'Hai lời gọi dùng chung một Promise.' : '');
+    const first = modal.confirm({ id: 'same-action', title: 'Confirm once' });
+    const second = modal.confirm({ id: 'same-action', title: 'Confirm once' });
+    setResult(first === second ? 'Both calls share one Promise.' : '');
   }
 
   return (
@@ -100,14 +100,14 @@ function ModalExamples({ example }: { example: Example }) {
               onClick={() => {
                 void modal
                   .confirm({
-                    title: 'Xác nhận tác vụ',
+                    title: 'Confirm action',
                     description: 'Lorem ipsum dolor sit amet.',
                     classNames:
                       example === 'classes'
                         ? { confirm: 'rounded-full', title: 'text-brand-800' }
                         : {},
                   })
-                  .then((value) => setResult(value ? 'Đã xác nhận' : 'Đã hủy'));
+                  .then((value) => setResult(value ? 'Confirmed' : 'Canceled'));
               }}
             >
               Confirm
@@ -127,23 +127,23 @@ function ModalExamples({ example }: { example: Example }) {
           </>
         )}
         {example === 'queue' && (
-          <Button onClick={queue}>Mở ba hộp thoại theo thứ tự</Button>
+          <Button onClick={queue}>Open three dialogs in sequence</Button>
         )}
         {example === 'stacked' && (
-          <Button onClick={stacked}>Mở hộp thoại với xác nhận lồng</Button>
+          <Button onClick={stacked}>Open dialog with nested confirmation</Button>
         )}
         {example === 'async' && (
           <>
-            <Button onClick={() => asyncConfirm(false)}>Lưu thành công</Button>
+            <Button onClick={() => asyncConfirm(false)}>Save successfully</Button>
             <Button variant="danger" onClick={() => asyncConfirm(true)}>
-              Lưu thất bại
+              Simulate save failure
             </Button>
           </>
         )}
         {example === 'dedupe' && (
-          <Button onClick={dedupe}>Gọi confirm hai lần cùng ID</Button>
+          <Button onClick={dedupe}>Call confirm twice with the same ID</Button>
         )}
-        {example === 'custom' && <Button onClick={custom}>Nhập giá trị trả về</Button>}
+        {example === 'custom' && <Button onClick={custom}>Enter a return value</Button>}
       </div>
       <output aria-live="polite">{result}</output>
     </div>
@@ -164,7 +164,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'ModalProvider quản lý confirm, alert và nội dung tùy chỉnh theo hàng đợi. Dùng useModal trong React hoặc modal từ code trình duyệt sau khi provider mount. Dùng Dialog khai báo cho form và nội dung dài có state riêng.',
+          'ModalProvider queues confirmations, alerts and custom content. Use useModal in React or modal in browser code after the provider mounts. Use a declarative Dialog for forms and longer content with its own state.',
       },
     },
   },

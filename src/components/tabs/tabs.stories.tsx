@@ -12,7 +12,7 @@ function Example({ variant = 'segmented', size = 'md', ...props }: TabsProps) {
       variant={variant}
       size={size}
       {...props}
-      label={props.label ?? `Ví dụ ${variant} ${size}`}
+      label={props.label ?? `Example ${variant} ${size}`}
       items={
         props.items ?? [
           {
@@ -20,7 +20,7 @@ function Example({ variant = 'segmented', size = 'md', ...props }: TabsProps) {
             label: (
               <>
                 <Icon name="folder" />
-                Tổng quan
+                Overview
               </>
             ),
             content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
@@ -29,7 +29,7 @@ function Example({ variant = 'segmented', size = 'md', ...props }: TabsProps) {
             value: 'notes',
             label: (
               <>
-                Ghi chú
+                Notes
                 <span className="rounded-full bg-brand-100 px-1.5 text-ui-sm text-ink">
                   8
                 </span>
@@ -38,7 +38,7 @@ function Example({ variant = 'segmented', size = 'md', ...props }: TabsProps) {
             content:
               'Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
           },
-          { value: 'future', label: 'Chưa khả dụng', content: null, disabled: true },
+          { value: 'future', label: 'Unavailable', content: null, disabled: true },
         ]
       }
     />
@@ -53,7 +53,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'Radix Tabs: 4 variants, 3 sizes, horizontal/vertical, automatic/manual activation. Mặc định mount khi mở lần đầu, giữ panel ẩn để bảo toàn draft/DOM. React vẫn có thể render khi props/state đổi; không cam kết zero render. keepMounted=false cho panel cần reset.',
+          'Radix Tabs with 4 variants, 3 sizes, horizontal or vertical layouts, and automatic or manual activation. Panels mount on first activation and stay mounted while hidden to preserve drafts and DOM state. React may still render when props or state change. Use keepMounted=false to reset panels when leaving a tab.',
       },
     },
   },
@@ -72,12 +72,12 @@ function DraftPanel({ onMount }: { onMount: () => void }) {
   return (
     <div className="grid max-w-lg gap-4">
       <Input
-        label="Bản nháp"
+        label="Draft"
         value={draft}
         onChange={(event) => setDraft(event.target.value)}
       />
       <Button variant="secondary" onClick={() => setCount(count + 1)}>
-        Tăng {count}
+        Increment {count}
       </Button>
     </div>
   );
@@ -92,9 +92,9 @@ function RetentionDemo({ keepMounted = true }: { keepMounted?: boolean }) {
   return (
     <div className="grid gap-4">
       <Tabs defaultValue="draft" keepMounted={keepMounted}>
-        <TabsList aria-label="Giữ bản nháp">
-          <TabsTrigger value="draft">Soạn thảo</TabsTrigger>
-          <TabsTrigger value="other">Khác</TabsTrigger>
+        <TabsList aria-label="Draft retention">
+          <TabsTrigger value="draft">Editor</TabsTrigger>
+          <TabsTrigger value="other">Other</TabsTrigger>
         </TabsList>
         <TabsContent value="draft">
           <DraftPanel onMount={record} />
@@ -104,7 +104,7 @@ function RetentionDemo({ keepMounted = true }: { keepMounted?: boolean }) {
         </TabsContent>
       </Tabs>
       <p className="text-ui-sm text-muted">
-        Số lần mount: <span data-testid="draft-mounts">{mounts}</span> · panel Khác:{' '}
+        Mount count: <span data-testid="draft-mounts">{mounts}</span> · Other panel:{' '}
         <span data-testid="other-mounts">{otherMounts}</span>
       </p>
     </div>
@@ -115,7 +115,7 @@ export const Playground: Story = {
   tags: ['usage'],
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await userEvent.click(canvas.getByRole('tab', { name: /Ghi chú/ }));
+    await userEvent.click(canvas.getByRole('tab', { name: /Notes/ }));
     await expect(canvas.getByRole('tabpanel')).toHaveTextContent(
       'Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
     );
@@ -157,17 +157,17 @@ export const PreservesDraft: Story = {
   render: () => <RetentionDemo />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    const input = canvas.getByRole('textbox', { name: 'Bản nháp' });
+    const input = canvas.getByRole('textbox', { name: 'Draft' });
     await expect(canvas.getByTestId('other-mounts')).toHaveTextContent('0');
     const mounts = canvas.getByTestId('draft-mounts').textContent;
     await userEvent.type(input, 'Lorem ipsum dolor sit amet.');
-    await userEvent.click(canvas.getByRole('button', { name: 'Tăng 0' }));
-    await userEvent.click(canvas.getByRole('tab', { name: 'Khác' }));
+    await userEvent.click(canvas.getByRole('button', { name: 'Increment 0' }));
+    await userEvent.click(canvas.getByRole('tab', { name: 'Other' }));
     await expect(input).not.toBeVisible();
-    await userEvent.click(canvas.getByRole('tab', { name: 'Soạn thảo' }));
-    await expect(canvas.getByRole('textbox', { name: 'Bản nháp' })).toBe(input);
+    await userEvent.click(canvas.getByRole('tab', { name: 'Editor' }));
+    await expect(canvas.getByRole('textbox', { name: 'Draft' })).toBe(input);
     await expect(input).toHaveValue('Lorem ipsum dolor sit amet.');
-    await expect(canvas.getByRole('button', { name: 'Tăng 1' })).toBeVisible();
+    await expect(canvas.getByRole('button', { name: 'Increment 1' })).toBeVisible();
     await expect(canvas.getByTestId('draft-mounts')).toHaveTextContent(mounts ?? '');
   },
 };
@@ -178,12 +178,12 @@ export const UnmountOnExit: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await userEvent.type(
-      canvas.getByRole('textbox', { name: 'Bản nháp' }),
-      'Reset khi rời tab',
+      canvas.getByRole('textbox', { name: 'Draft' }),
+      'Lorem ipsum dolor sit amet.',
     );
-    await userEvent.click(canvas.getByRole('tab', { name: 'Khác' }));
-    await userEvent.click(canvas.getByRole('tab', { name: 'Soạn thảo' }));
-    await expect(canvas.getByRole('textbox', { name: 'Bản nháp' })).toHaveValue('');
+    await userEvent.click(canvas.getByRole('tab', { name: 'Other' }));
+    await userEvent.click(canvas.getByRole('tab', { name: 'Editor' }));
+    await expect(canvas.getByRole('textbox', { name: 'Draft' })).toHaveValue('');
   },
 };
 
@@ -192,22 +192,26 @@ export const ManualActivation: Story = {
   render: () => (
     <Tabs defaultValue="one" activationMode="manual" variant="underline">
       <TabsList aria-label="Manual tabs">
-        <TabsTrigger value="one">Một</TabsTrigger>
-        <TabsTrigger value="two">Hai</TabsTrigger>
+        <TabsTrigger value="one">One</TabsTrigger>
+        <TabsTrigger value="two">Two</TabsTrigger>
       </TabsList>
-      <TabsContent value="one">Nội dung một</TabsContent>
-      <TabsContent value="two">Nội dung hai</TabsContent>
+      <TabsContent value="one">Lorem ipsum dolor sit amet.</TabsContent>
+      <TabsContent value="two">Consectetur adipiscing elit.</TabsContent>
     </Tabs>
   ),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await userEvent.click(canvas.getByRole('tab', { name: 'Một' }));
+    await userEvent.click(canvas.getByRole('tab', { name: 'One' }));
     await userEvent.keyboard('{ArrowRight}');
-    await expect(canvas.getByRole('tab', { name: 'Hai' })).toHaveFocus();
-    await expect(canvas.getByRole('tabpanel')).toHaveTextContent('Nội dung một');
+    await expect(canvas.getByRole('tab', { name: 'Two' })).toHaveFocus();
+    await expect(canvas.getByRole('tabpanel')).toHaveTextContent(
+      'Lorem ipsum dolor sit amet.',
+    );
     await userEvent.keyboard('{Enter}');
     await waitFor(() =>
-      expect(canvas.getByRole('tabpanel')).toHaveTextContent('Nội dung hai'),
+      expect(canvas.getByRole('tabpanel')).toHaveTextContent(
+        'Consectetur adipiscing elit.',
+      ),
     );
   },
 };
@@ -223,8 +227,16 @@ export const CustomClasses: Story = {
         content: 'rounded-panel border-brand-700 bg-surface p-6',
       }}
       items={[
-        { value: 'first', label: 'Phần một', content: 'Lorem ipsum dolor sit amet.' },
-        { value: 'second', label: 'Phần hai', content: 'Consectetur adipiscing elit.' },
+        {
+          value: 'first',
+          label: 'Section one',
+          content: 'Lorem ipsum dolor sit amet.',
+        },
+        {
+          value: 'second',
+          label: 'Section two',
+          content: 'Consectetur adipiscing elit.',
+        },
       ]}
     />
   ),

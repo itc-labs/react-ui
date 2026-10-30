@@ -30,7 +30,7 @@ function Example({
         disabled={disabled}
       />
       <output>
-        Trang {page + 1} / {Math.max(1, pageCount)}
+        Page {page + 1} / {Math.max(1, pageCount)}
       </output>
     </div>
   );
@@ -52,7 +52,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'Controlled zero-based pageIndex. Nút số, đầu/cuối/trước/sau và dấu …; aria-current cho trang hiện tại. Host cập nhật state/query, component không fetch.',
+          'Controlled pagination with a zero-based pageIndex, numbered buttons, first/last/previous/next controls and ellipses. Marks the current page with aria-current. The host updates state or queries and fetches data.',
       },
     },
   },
@@ -96,14 +96,14 @@ export const NumberNavigation: Story = {
   tags: ['!dev', '!autodocs', 'regression'],
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await userEvent.click(canvas.getByRole('button', { name: 'Trang 4' }));
-    await expect(canvas.getByRole('button', { name: 'Trang 4' })).toHaveAttribute(
+    await userEvent.click(canvas.getByRole('button', { name: 'Page 4' }));
+    await expect(canvas.getByRole('button', { name: 'Page 4' })).toHaveAttribute(
       'aria-current',
       'page',
     );
-    await expect(canvas.getByText('Trang 4 / 20')).toBeVisible();
-    await userEvent.click(canvas.getByRole('button', { name: 'Trang cuối' }));
-    await expect(canvas.getByText('Trang 20 / 20')).toBeVisible();
-    await expect(canvas.getByRole('button', { name: 'Trang sau' })).toBeDisabled();
+    await expect(canvas.getByText('Page 4 / 20')).toBeVisible();
+    await userEvent.click(canvas.getByRole('button', { name: 'Last page' }));
+    await expect(canvas.getByText('Page 20 / 20')).toBeVisible();
+    await expect(canvas.getByRole('button', { name: 'Next page' })).toBeDisabled();
   },
 };

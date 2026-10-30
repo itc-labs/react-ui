@@ -4,7 +4,7 @@ const meta = {
   title: 'Components/InputPassword',
   component: InputPassword,
   tags: ['autodocs'],
-  args: { label: 'Mật khẩu', autoComplete: 'new-password', icon: 'lock' },
+  args: { label: 'Password', autoComplete: 'new-password', icon: 'lock' },
 } satisfies Meta<typeof InputPassword>;
 export default meta;
 type Story = StoryObj<typeof meta>;
@@ -16,7 +16,7 @@ export const States: Story = {
   render: () => (
     <div className="grid max-w-sm gap-4">
       <InputPassword label="Required" required autoComplete="new-password" />
-      <InputPassword label="Error" error="Nhập ít nhất 8 ký tự." />
+      <InputPassword label="Error" error="Enter at least 8 characters." />
       <InputPassword label="Disabled" disabled defaultValue="example-password" />
       <InputPassword label="Read only" readOnly defaultValue="example-password" />
     </div>

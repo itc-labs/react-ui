@@ -123,6 +123,10 @@ export const SwitchLanguage: Story = {
   tags: ['!autodocs'],
   parameters: {
     docs: {
+      description: {
+        story:
+          'Starts in Vietnamese to demonstrate locale switching while preserving field and table state.',
+      },
       source: {
         code: `import { UIProvider, type UITranslations } from '@itclabs/react-ui';
 import catalog from './translations.json';
@@ -167,6 +171,14 @@ export const English: Story = {
   ),
 };
 export const Vietnamese: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Demonstrates built-in labels, formatting and accessibility messages in Vietnamese.',
+      },
+    },
+  },
   render: () => (
     <UIProvider locale={viVN}>
       <Controls />

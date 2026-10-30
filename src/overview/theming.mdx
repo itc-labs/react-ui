@@ -1,4 +1,4 @@
-import { Meta, Canvas } from '@storybook/addon-docs/blocks';
+import { Meta, Canvas, Source } from '@storybook/addon-docs/blocks';
 import * as Board from './foundation-board.stories';
 import * as Tokens from './foundations.stories';
 import * as Motion from './motion-tokens.stories';
@@ -127,6 +127,4 @@ The unlayered provider rule wins over defaults in `@layer theme`. For unlayered 
 
 To switch themes by selector, replace `:root` with `[data-theme='name']` on `<html>`. This covers portals and recalculates derived roles and shadows. Check WCAG AA contrast for text/background pairs and control borders. Reserve `line` for decoration and `control-border` for controls.
 
-<pre>
-  <code className="language-css">{customThemeCSS}</code>
-</pre>
+<Source code={customThemeCSS} language="css" />

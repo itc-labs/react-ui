@@ -8,14 +8,14 @@ const meta = {
   title: 'Modules/EmptyState',
   component: EmptyState,
   args: {
-    title: 'Chưa có dữ liệu',
-    description: 'Các mục được tạo sẽ xuất hiện tại đây.',
+    title: 'No data yet',
+    description: 'Items you create will appear here.',
   },
   parameters: {
     docs: {
       description: {
         component:
-          'Hiển thị khi chưa có dữ liệu, không có kết quả, không tìm thấy trang hoặc gặp lỗi. Chọn variant theo ngữ cảnh và cung cấp action để người dùng tiếp tục; size="compact" phù hợp với bảng.',
+          'Display an empty state when data or results are missing, a page is not found, or an error occurs. Choose a variant for the context and provide an action to continue; size="compact" works well in tables.',
       },
     },
   },
@@ -33,14 +33,14 @@ function CreateExample() {
         Dolor sit amet, consectetur adipiscing elit.
       </p>
       <Button className="mt-4" variant="secondary" onClick={() => setCreated(false)}>
-        Đặt lại ví dụ
+        Reset example
       </Button>
     </div>
   ) : (
     <EmptyState
-      title="Chưa có mục nào"
-      description="Thêm mục đầu tiên để bắt đầu danh sách."
-      action={<Button onClick={() => setCreated(true)}>Thêm mục</Button>}
+      title="No items yet"
+      description="Add your first item to start the list."
+      action={<Button onClick={() => setCreated(true)}>Add item</Button>}
     />
   );
 }
@@ -54,7 +54,7 @@ function SearchExample() {
   return (
     <div className="grid gap-4">
       <Input
-        label="Tìm trong danh sách"
+        label="Search list"
         value={query}
         onChange={(event) => setQuery(event.target.value)}
       />
@@ -69,11 +69,11 @@ function SearchExample() {
       ) : (
         <EmptyState
           variant="no-results"
-          title="Không có kết quả phù hợp"
-          description="Thử từ khóa khác hoặc xóa nội dung tìm kiếm."
+          title="No matching results"
+          description="Try another keyword or clear the search."
           action={
             <Button variant="secondary" onClick={() => setQuery('')}>
-              Xóa tìm kiếm
+              Clear search
             </Button>
           }
         />
@@ -87,10 +87,10 @@ function NotFoundExample() {
 
   return home ? (
     <div className="grid justify-items-start gap-4 p-6">
-      <h1 className="text-heading font-semibold">Trang chủ</h1>
+      <h1 className="text-heading font-semibold">Lorem ipsum</h1>
       <p className="text-control text-muted">Lorem ipsum dolor sit amet.</p>
       <Button variant="secondary" onClick={() => setHome(false)}>
-        Mở lại ví dụ 404
+        Reopen 404 example
       </Button>
     </div>
   ) : (
@@ -98,15 +98,15 @@ function NotFoundExample() {
       variant="not-found"
       headingLevel={1}
       code="404"
-      title="Không tìm thấy trang"
-      description="Trang không tồn tại hoặc đã được chuyển. Kiểm tra đường dẫn hoặc quay về trang chủ."
-      action={<Button onClick={() => setHome(true)}>Về trang chủ</Button>}
+      title="Page not found"
+      description="The page does not exist or has moved. Check the address or go home."
+      action={<Button onClick={() => setHome(true)}>Go home</Button>}
       secondaryAction={
         <a
           href="#not-found-help"
           className="text-control font-medium text-brand-700 underline underline-offset-4"
         >
-          Xem hướng dẫn
+          View help
         </a>
       }
     />
@@ -130,16 +130,16 @@ function RetryExample() {
   return (
     <EmptyState
       variant={retried ? 'empty' : 'error'}
-      title={retried ? 'Chưa có dữ liệu' : 'Không tải được dữ liệu'}
+      title={retried ? 'No data yet' : 'Could not load data'}
       description={
         retried
-          ? 'Kết nối đã khôi phục. Danh sách hiện chưa có mục nào.'
-          : 'Kết nối bị gián đoạn. Thử tải lại để tiếp tục.'
+          ? 'Connection restored. The list is currently empty.'
+          : 'Connection interrupted. Try loading again to continue.'
       }
       action={
         !retried && (
           <Button loading={loading} onClick={() => setLoading(true)}>
-            Thử lại
+            Retry
           </Button>
         )
       }
@@ -155,30 +155,30 @@ export const Gallery: Story = {
   render: () => (
     <div className="grid gap-5 lg:grid-cols-2">
       <EmptyState
-        title="Chưa có dữ liệu"
-        description="Thêm mục đầu tiên để bắt đầu danh sách."
+        title="No data yet"
+        description="Add your first item to start the list."
       />
       <EmptyState
         variant="no-results"
-        title="Không có kết quả phù hợp"
-        description="Thử từ khóa khác hoặc bỏ bớt bộ lọc."
+        title="No matching results"
+        description="Try another keyword or remove some filters."
       />
       <EmptyState
         variant="not-found"
         code="404"
-        title="Không tìm thấy trang"
-        description="Kiểm tra đường dẫn hoặc quay về trang chủ."
+        title="Page not found"
+        description="Check the address or go home."
       />
       <EmptyState
         variant="error"
-        title="Không tải được dữ liệu"
-        description="Kiểm tra kết nối và thử tải lại."
+        title="Could not load data"
+        description="Check your connection and try loading again."
       />
       <EmptyState
         variant="forbidden"
         code="403"
-        title="Không có quyền truy cập"
-        description="Liên hệ người quản lý để được hỗ trợ."
+        title="Access denied"
+        description="Contact an administrator for help."
       />
     </div>
   ),
@@ -196,7 +196,7 @@ export const NotFound: Story = {
     <div className="grid gap-5">
       <NotFoundExample />
       <p id="not-found-help" className="text-ui-sm text-muted">
-        Kiểm tra địa chỉ trang hoặc dùng menu điều hướng để mở nội dung cần tìm.
+        Check the page address or use the navigation menu to find the content.
       </p>
     </div>
   ),
@@ -208,18 +208,18 @@ export const Layouts: Story = {
     <div className="grid max-w-3xl gap-5 sm:grid-cols-2">
       <EmptyState
         size="compact"
-        title="Chưa có dữ liệu"
-        description="Thêm mục đầu tiên để bắt đầu."
+        title="No data yet"
+        description="Add your first item to get started."
       />
       <EmptyState
         appearance="plain"
-        title="Chưa có dữ liệu"
-        description="Thêm mục đầu tiên để bắt đầu."
+        title="No data yet"
+        description="Add your first item to get started."
       />
       <EmptyState
         illustration={null}
-        title="Chưa có dữ liệu"
-        description="Thêm mục đầu tiên để bắt đầu."
+        title="No data yet"
+        description="Add your first item to get started."
       />
     </div>
   ),
@@ -229,8 +229,8 @@ export const CustomClasses: Story = {
   tags: ['customization'],
   render: () => (
     <EmptyState
-      title="Chưa có dữ liệu"
-      description="Các mục sẽ xuất hiện tại đây."
+      title="No data yet"
+      description="Items will appear here."
       classNames={{
         root: 'max-w-2xl bg-brand-50',
         illustration: 'w-40',
@@ -238,7 +238,7 @@ export const CustomClasses: Story = {
         description: 'max-w-xs',
         actions: 'flex-col',
       }}
-      action={<Button>Thêm mục</Button>}
+      action={<Button>Add item</Button>}
     />
   ),
 };
@@ -248,7 +248,7 @@ export const CreateInteraction: Story = {
   render: () => <CreateExample />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await userEvent.click(canvas.getByRole('button', { name: 'Thêm mục' }));
+    await userEvent.click(canvas.getByRole('button', { name: 'Add item' }));
     await expect(canvas.getByRole('heading', { name: 'Lorem ipsum' })).toBeVisible();
   },
 };
@@ -258,11 +258,9 @@ export const SearchInteraction: Story = {
   render: () => <SearchExample />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await userEvent.click(canvas.getByRole('button', { name: 'Xóa tìm kiếm' }));
+    await userEvent.click(canvas.getByRole('button', { name: 'Clear search' }));
     await expect(canvas.getByText('Lorem ipsum', { exact: true })).toBeVisible();
-    await expect(
-      canvas.getByRole('textbox', { name: 'Tìm trong danh sách' }),
-    ).toHaveValue('');
+    await expect(canvas.getByRole('textbox', { name: 'Search list' })).toHaveValue('');
   },
 };
 
@@ -271,9 +269,9 @@ export const RetryInteraction: Story = {
   render: () => <RetryExample />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await userEvent.click(canvas.getByRole('button', { name: 'Thử lại' }));
+    await userEvent.click(canvas.getByRole('button', { name: 'Retry' }));
     await expect(
-      await canvas.findByRole('heading', { name: 'Chưa có dữ liệu' }),
+      await canvas.findByRole('heading', { name: 'No data yet' }),
     ).toBeVisible();
   },
 };

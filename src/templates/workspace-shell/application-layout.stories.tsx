@@ -27,7 +27,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'Bố cục ứng dụng với điều hướng có thể bấm, Sidebar thu gọn, UserMenu và nội dung minh họa. Host giữ currentPath bằng state và UiLink adapter; không cần router.',
+          'An application layout with interactive navigation, a collapsible Sidebar, UserMenu and sample content. The host manages currentPath with state and a UiLink adapter; no router is required.',
       },
     },
   },
@@ -132,8 +132,8 @@ function ApplicationExample({ topNavigation = false }: { topNavigation?: boolean
   );
   const userMenu = (
     <UserMenu
-      name="Alex Morgan"
-      description="alex@example.com"
+      name="Lorem Ipsum"
+      description="lorem@example.com"
       collapseOnMobile={false}
       classNames={{
         details: 'group-data-[collapsed=true]/sidebar:hidden',
@@ -242,7 +242,7 @@ export const Playground: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     if (window.innerWidth < 1024)
-      await userEvent.click(canvas.getByRole('button', { name: 'Mở thanh bên' }));
+      await userEvent.click(canvas.getByRole('button', { name: 'Open sidebar' }));
     const scope =
       window.innerWidth < 1024
         ? within(canvasElement.ownerDocument.body).getByRole('dialog')

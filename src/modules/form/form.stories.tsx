@@ -11,7 +11,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, userEvent, waitFor, within } from 'storybook/test';
 import { useState } from 'react';
 import * as v from 'valibot';
-import { Form, FormField, FormSubmit, useAppForm } from './index';
+import { Form, FormField, useAppForm } from './index';
 import { Button } from '../../components/button';
 import { validateFiles } from '../../components/upload-field/validation';
 import type { DateRangeValue } from '../../components/date-range-picker';
@@ -27,8 +27,8 @@ function Demo() {
     defaultValues: { item: '', note: '' },
     validators: {
       onChange: v.object({
-        item: v.pipe(v.string(), v.trim(), v.minLength(1, 'Nhập item.')),
-        note: v.pipe(v.string(), v.maxLength(40, 'Tối đa 40 ký tự.')),
+        item: v.pipe(v.string(), v.trim(), v.minLength(1, 'Enter an item.')),
+        note: v.pipe(v.string(), v.maxLength(40, 'Use at most 40 characters.')),
       }),
     },
     onSubmit: async () => {
@@ -42,10 +42,10 @@ function Demo() {
         {(field) => <field.TextField label="Item" required />}
       </form.AppField>
       <form.AppField name="note">
-        {(field) => <field.TextAreaField label="Ghi chú" />}
+        {(field) => <field.TextAreaField label="Notes" />}
       </form.AppField>
-      <form.SubmitButton>Lưu form</form.SubmitButton>
-      {saved && <p role="status">Đã lưu bản minh họa.</p>}
+      <form.SubmitButton>Save form</form.SubmitButton>
+      {saved && <p role="status">Demo saved.</p>}
     </Form>
   );
 }
@@ -56,7 +56,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'Kết nối các control với giá trị và validation của TanStack Form. Dùng FormField để ghép control trực tiếp hoặc các bound field từ useAppForm. Submit hỗ trợ tác vụ bất đồng bộ và chuyển focus đến field lỗi đầu tiên.',
+          'Connect controls to TanStack Form values and validation. Compose controls with FormField or use bound fields from useAppForm. Submission supports asynchronous actions and focuses the first invalid field.',
       },
     },
   },
@@ -71,9 +71,15 @@ const requiredText = (message: string) =>
   v.pipe(v.string(), v.trim(), v.minLength(1, message));
 
 const allFieldsSchema = v.object({
-  password: v.pipe(v.string(), v.minLength(8, 'Nhập mật khẩu ít nhất 8 ký tự.')),
-  quantity: v.pipe(v.number('Nhập số lượng.'), v.minValue(1, 'Số lượng tối thiểu 1.')),
-  otp: v.pipe(v.string(), v.regex(/^\d{6}$/, 'Nhập đủ 6 chữ số.')),
+  password: v.pipe(
+    v.string(),
+    v.minLength(8, 'Enter a password with at least 8 characters.'),
+  ),
+  quantity: v.pipe(
+    v.number('Enter a quantity.'),
+    v.minValue(1, 'Quantity must be at least 1.'),
+  ),
+  otp: v.pipe(v.string(), v.regex(/^\d{6}$/, 'Enter all 6 digits.')),
   avatar: v.custom<File | null>(
     (value) =>
       typeof File !== 'undefined' &&
@@ -82,7 +88,7 @@ const allFieldsSchema = v.object({
         accept: 'image/png,image/jpeg,image/webp',
         maxBytes: 2 * 1024 * 1024,
       }),
-    'Chọn ảnh đại diện hợp lệ.',
+    'Choose a valid avatar image.',
   ),
   files: v.custom<File[]>(
     (value) =>
@@ -90,26 +96,26 @@ const allFieldsSchema = v.object({
       value.length > 0 &&
       value.every((file) => typeof File !== 'undefined' && file instanceof File) &&
       !validateFiles(value, { accept: '.txt,.pdf,.png,.jpg,.jpeg,.webp', maxFiles: 3 }),
-    'Chọn tệp đính kèm hợp lệ.',
+    'Choose valid attachments.',
   ),
-  content: requiredText('Nhập nội dung editor.'),
-  title: requiredText('Nhập tiêu đề.'),
-  note: requiredText('Nhập mô tả.'),
-  category: requiredText('Chọn danh mục.'),
-  item: requiredText('Chọn item.'),
-  tags: v.pipe(v.array(v.string()), v.minLength(1, 'Chọn ít nhất một nhãn.')),
-  consent: v.literal(true, 'Cần xác nhận đồng ý.'),
-  compact: v.literal(true, 'Cần bật chế độ minh họa.'),
-  status: requiredText('Chọn quyết định.'),
+  content: requiredText('Enter editor content.'),
+  title: requiredText('Enter a title.'),
+  note: requiredText('Enter a description.'),
+  category: requiredText('Select a category.'),
+  item: requiredText('Select an item.'),
+  tags: v.pipe(v.array(v.string()), v.minLength(1, 'Select at least one tag.')),
+  consent: v.literal(true, 'Consent is required.'),
+  compact: v.literal(true, 'Enable demo mode.'),
+  status: requiredText('Select a decision.'),
   date: v.pipe(
     v.string(),
-    v.check((value) => parseCalendarDate(value) != null, 'Chọn ngày hợp lệ.'),
+    v.check((value) => parseCalendarDate(value) != null, 'Choose a valid date.'),
   ),
   time: v.pipe(
     v.string(),
     v.check(
       (value) => timeSlots('09:00', '17:00', 15).includes(value),
-      'Chọn giờ hợp lệ.',
+      'Choose a valid time.',
     ),
   ),
   range: v.pipe(
@@ -122,7 +128,7 @@ const allFieldsSchema = v.object({
           parseCalendarDate(value.to) &&
           dateSpan(value.from, value.to) >= 1,
         ),
-      'Chọn khoảng ngày hợp lệ.',
+      'Choose a valid date range.',
     ),
   ),
 });
@@ -167,30 +173,24 @@ function ControlsDemo() {
   });
 
   return (
-    <Form
-      form={form}
-      className="grid max-w-3xl gap-6"
-      aria-label="Tất cả field bắt buộc"
-    >
+    <Form form={form} className="grid max-w-3xl gap-6" aria-label="All required fields">
       <p className="text-ui-sm text-muted">
-        Tất cả field có dấu * đều bắt buộc. Checkbox và switch phải bật trong ví dụ này;
-        form không gọi API.
+        All fields marked * are required. The checkbox and switch must be enabled in
+        this example; the form does not call an API.
       </p>
       <div className="grid gap-5 md:grid-cols-2">
         <div className="md:col-span-2">
           <form.AppField name="avatar">
-            {() => (
-              <AvatarField label="Ảnh đại diện" alt="Lorem Ipsum" size="lg" required />
-            )}
+            {() => <AvatarField label="Avatar" alt="Lorem Ipsum" size="lg" required />}
           </form.AppField>
         </div>
         <form.AppField name="title">
-          {(field) => <field.TextField label="Tiêu đề" required />}
+          {(field) => <field.TextField label="Title" required />}
         </form.AppField>
         <form.AppField name="password">
           {(field) => (
             <field.PasswordField
-              label="Mật khẩu"
+              label="Password"
               icon="lock"
               required
               autoComplete="new-password"
@@ -198,22 +198,22 @@ function ControlsDemo() {
           )}
         </form.AppField>
         <form.AppField name="quantity">
-          {(field) => <field.NumberField label="Số lượng" required min={1} max={100} />}
+          {(field) => <field.NumberField label="Quantity" required min={1} max={100} />}
         </form.AppField>
         <div className="md:col-span-2">
           <form.AppField name="otp">
-            {(field) => <field.OTPField label="Mã xác nhận" required />}
+            {(field) => <field.OTPField label="Verification code" required />}
           </form.AppField>
         </div>
         <form.AppField name="category">
           {(field) => (
             <field.SelectField
-              label="Danh mục"
+              label="Category"
               required
               clearable
               options={[
-                { value: 'pets', label: 'Pets' },
-                { value: 'gifts', label: 'Gifts' },
+                { value: 'pets', label: 'Lorem ipsum' },
+                { value: 'gifts', label: 'Dolor sit amet' },
               ]}
             />
           )}
@@ -221,13 +221,13 @@ function ControlsDemo() {
         <form.AppField name="item">
           {(field) => (
             <field.SelectField
-              label="Item (tìm kiếm)"
+              label="Item (searchable)"
               required
               searchable
               clearable
               options={[
-                { value: 'cat', label: 'Cat shirt' },
-                { value: 'dog', label: 'Dog shirt' },
+                { value: 'cat', label: 'Consectetur adipiscing' },
+                { value: 'dog', label: 'Sed do eiusmod' },
               ]}
             />
           )}
@@ -235,24 +235,24 @@ function ControlsDemo() {
         <form.AppField name="tags">
           {(field) => (
             <field.MultiSelectField
-              label="Nhãn"
+              label="Tags"
               required
               searchable
               clearable
               options={[
-                { value: 'cats', label: 'Cats' },
-                { value: 'dogs', label: 'Dogs' },
+                { value: 'cats', label: 'Tempor incididunt' },
+                { value: 'dogs', label: 'Ut labore' },
               ]}
             />
           )}
         </form.AppField>
         <form.AppField name="date">
-          {(field) => <field.DateField label="Ngày gửi" required today="2026-10-28" />}
+          {(field) => <field.DateField label="Send date" required today="2026-10-28" />}
         </form.AppField>
         <form.AppField name="time">
           {(field) => (
             <field.TimeField
-              label="Giờ gửi"
+              label="Send time"
               required
               minTime="09:00"
               maxTime="17:00"
@@ -264,7 +264,7 @@ function ControlsDemo() {
           <form.AppField name="range">
             {(field) => (
               <field.DateRangeField
-                label="Khoảng theo dõi"
+                label="Tracking range"
                 required
                 today="2026-10-28"
               />
@@ -273,51 +273,51 @@ function ControlsDemo() {
         </div>
         <div className="md:col-span-2">
           <form.AppField name="note">
-            {(field) => <field.TextAreaField label="Mô tả" required />}
+            {(field) => <field.TextAreaField label="Description" required />}
           </form.AppField>
         </div>
         <div className="md:col-span-2">
           <form.AppField name="files">
             {(field) => (
               <field.UploadField
-                label="Tệp đính kèm"
+                label="Attachments"
                 multiple
                 maxFiles={3}
                 accept=".txt,.pdf,.png,.jpg,.jpeg,.webp"
                 required
-                hint="Ảnh, TXT hoặc PDF; tối đa 3 file, 10 MB mỗi file."
+                hint="Images, TXT or PDF; up to 3 files, 10 MB each."
               />
             )}
           </form.AppField>
         </div>
         <div className="md:col-span-2">
           <form.AppField name="content">
-            {() => <EditorField label="Nội dung editor" required />}
+            {() => <EditorField label="Editor content" required />}
           </form.AppField>
         </div>
         <form.AppField name="status">
           {(field) => (
             <field.RadioGroupField
-              label="Quyết định"
+              label="Decision"
               required
               options={[
-                { value: 'explore', label: 'Nghiên cứu thêm' },
-                { value: 'test', label: 'Đáng thử' },
+                { value: 'explore', label: 'Research further' },
+                { value: 'test', label: 'Worth trying' },
               ]}
             />
           )}
         </form.AppField>
         <div className="grid content-start gap-5">
           <form.AppField name="consent">
-            {(field) => <field.CheckboxField label="Đồng ý minh họa" required />}
+            {(field) => <field.CheckboxField label="Demo consent" required />}
           </form.AppField>
           <form.AppField name="compact">
-            {(field) => <field.SwitchField label="Bật chế độ minh họa" required />}
+            {(field) => <field.SwitchField label="Enable demo mode" required />}
           </form.AppField>
         </div>
       </div>
       <div className="flex gap-3">
-        <form.SubmitButton>Lưu tất cả field</form.SubmitButton>
+        <form.SubmitButton>Save all fields</form.SubmitButton>
         <Button
           variant="secondary"
           onClick={() => {
@@ -325,12 +325,12 @@ function ControlsDemo() {
             setSaved('');
           }}
         >
-          Đặt lại
+          Reset
         </Button>
       </div>
       {saved && (
         <div role="status">
-          <p>Đã lưu đủ 14 field minh họa.</p>
+          <p>Saved all 17 demo fields.</p>
           <pre className="overflow-auto rounded-control bg-surface p-3 text-ui-sm">
             {saved}
           </pre>
@@ -343,21 +343,21 @@ function ControlsDemo() {
 const dateTimeSchema = v.object({
   date: v.pipe(
     v.string(),
-    v.check((value) => parseCalendarDate(value) != null, 'Chọn ngày hợp lệ.'),
+    v.check((value) => parseCalendarDate(value) != null, 'Choose a valid date.'),
   ),
   time: v.pipe(
     v.string(),
     v.check(
       (value) => timeSlots('09:00', '17:00', 15).includes(value),
-      'Chọn giờ trong 09:00–17:00 theo bước 15 phút.',
+      'Choose a time from 09:00–17:00 in 15-minute intervals.',
     ),
   ),
   range: v.pipe(
     v.nullable(v.object({ from: v.string(), to: v.string() })),
-    v.check((value) => Boolean(value), 'Chọn khoảng ngày.'),
+    v.check((value) => Boolean(value), 'Choose a date range.'),
     v.check(
       (value) => !value || dateSpan(value.from, value.to) >= 1,
-      'Khoảng ngày không hợp lệ.',
+      'Invalid date range.',
     ),
   ),
 });
@@ -376,18 +376,14 @@ function DateTimeFormExample() {
   });
 
   return (
-    <Form
-      form={form}
-      className="grid max-w-md gap-5"
-      aria-label="Form ngày giờ minh họa"
-    >
+    <Form form={form} className="grid max-w-md gap-5" aria-label="Date and time form">
       <form.AppField name="date">
-        {(field) => <field.DateField label="Ngày gửi" required today="2026-10-27" />}
+        {(field) => <field.DateField label="Send date" required today="2026-10-27" />}
       </form.AppField>
       <form.AppField name="time">
         {(field) => (
           <field.TimeField
-            label="Giờ gửi"
+            label="Send time"
             required
             minTime="09:00"
             maxTime="17:00"
@@ -397,11 +393,11 @@ function DateTimeFormExample() {
       </form.AppField>
       <form.AppField name="range">
         {(field) => (
-          <field.DateRangeField label="Khoảng theo dõi" required today="2026-10-27" />
+          <field.DateRangeField label="Tracking range" required today="2026-10-27" />
         )}
       </form.AppField>
-      <form.SubmitButton>Lưu ngày giờ minh họa</form.SubmitButton>
-      {saved && <p role="status">Đã lưu: {saved}</p>}
+      <form.SubmitButton>Save date and time</form.SubmitButton>
+      {saved && <p role="status">Saved: {saved}</p>}
     </Form>
   );
 }
@@ -420,24 +416,24 @@ function CustomFormExample() {
       <form.AppField name="title">
         {(field) => (
           <field.TextField
-            label="Lorem ipsum"
+            label="Title"
             required
             className="rounded-full"
             classNames={{ label: 'font-bold text-brand-700', hint: 'italic' }}
-            hint="Dolor sit amet."
+            hint="Enter a title for this item."
           />
         )}
       </form.AppField>
       <form.AppField name="category">
         {(field) => (
           <field.SelectField
-            label="Danh mục"
+            label="Category"
             options={[{ value: 'a', label: 'Lorem ipsum' }]}
             classNames={{ control: 'rounded-full bg-brand-50', option: 'rounded-full' }}
           />
         )}
       </form.AppField>
-      <form.SubmitButton className="rounded-full">Lưu nội dung</form.SubmitButton>
+      <form.SubmitButton className="rounded-full">Save content</form.SubmitButton>
     </Form>
   );
 }
@@ -458,17 +454,20 @@ function ComposedFormDemo() {
     },
   });
   const schema = {
-    name: v.pipe(v.string(), v.trim(), v.minLength(1, 'Nhập họ tên.')),
-    password: v.pipe(v.string(), v.minLength(8, 'Nhập mật khẩu ít nhất 8 ký tự.')),
-    quantity: v.pipe(
-      v.number('Nhập số lượng.'),
-      v.minValue(1, 'Số lượng tối thiểu 1.'),
+    name: v.pipe(v.string(), v.trim(), v.minLength(1, 'Enter your full name.')),
+    password: v.pipe(
+      v.string(),
+      v.minLength(8, 'Enter a password with at least 8 characters.'),
     ),
-    otp: v.pipe(v.string(), v.regex(/^\d{6}$/, 'Nhập đủ 6 chữ số.')),
-    status: v.pipe(v.string(), v.minLength(1, 'Chọn trạng thái.')),
+    quantity: v.pipe(
+      v.number('Enter a quantity.'),
+      v.minValue(1, 'Quantity must be at least 1.'),
+    ),
+    otp: v.pipe(v.string(), v.regex(/^\d{6}$/, 'Enter all 6 digits.')),
+    status: v.pipe(v.string(), v.minLength(1, 'Select a status.')),
     agree: v.pipe(
       v.boolean(),
-      v.check((value) => value, 'Cần xác nhận.'),
+      v.check((value) => value, 'Confirmation is required.'),
     ),
   };
 
@@ -480,16 +479,16 @@ function ComposedFormDemo() {
       aria-label="Form composition"
     >
       <div className="grid gap-5 sm:grid-cols-2">
-        <FormField name="name" label="Họ tên" required>
+        <FormField name="name" label="Full name" required>
           <Input icon="user" placeholder="Lorem ipsum" />
         </FormField>
-        <FormField name="password" label="Mật khẩu" required>
+        <FormField name="password" label="Password" required>
           <InputPassword icon="lock" autoComplete="new-password" />
         </FormField>
-        <FormField name="quantity" label="Số lượng" required>
+        <FormField name="quantity" label="Quantity" required>
           <NumberInput min={1} max={100} />
         </FormField>
-        <FormField name="status" label="Trạng thái" required>
+        <FormField name="status" label="Status" required>
           <Select
             options={[
               { value: 'draft', label: 'Draft' },
@@ -498,20 +497,14 @@ function ComposedFormDemo() {
           />
         </FormField>
       </div>
-      <FormField name="otp" label="Mã xác nhận" required>
+      <FormField name="otp" label="Verification code" required>
         <InputOTP />
       </FormField>
       <FormField name="agree" required>
-        <Checkbox label="Xác nhận thông tin" />
+        <Checkbox label="Confirm information" />
       </FormField>
-      <FormSubmit form={form}>
-        {(submitting) => (
-          <Button type="submit" loading={submitting}>
-            Lưu thông tin
-          </Button>
-        )}
-      </FormSubmit>
-      {saved && <p role="status">Đã lưu bản minh họa.</p>}
+      <Button type="submit">Save information</Button>
+      {saved && <p role="status">Demo saved.</p>}
     </Form>
   );
 }
@@ -523,7 +516,7 @@ function ComposedCustomDemo() {
     <Form form={form}>
       <FormField
         name="name"
-        label="Lorem ipsum"
+        label="Title"
         required
         className="max-w-md"
         classNames={{ root: 'rounded-panel bg-brand-50 p-4' }}
@@ -544,32 +537,32 @@ function FieldAlignmentDemo() {
   return (
     <div className="grid max-w-3xl gap-6">
       <Button variant="secondary" onClick={() => setErrors((current) => !current)}>
-        Bật/tắt lỗi để kiểm tra căn hàng
+        Toggle errors to check alignment
       </Button>
       {(['sm', 'md', 'lg'] as const).map((size) => (
         <div key={size} className="grid gap-5 sm:grid-cols-2">
           <Select
-            label={`Nhãn · ${size}`}
+            label={`Tags · ${size}`}
             size={size}
             multiple
             required
             options={[{ value: 'one', label: 'Lorem ipsum' }]}
-            {...(errors ? { error: 'Chọn ít nhất một nhãn.' } : {})}
+            {...(errors ? { error: 'Select at least one tag.' } : {})}
           />
           <DatePicker
-            label={`Ngày gửi · ${size}`}
+            label={`Send date · ${size}`}
             size={size}
             required
             defaultValue="2026-10-17"
           />
           <NumberInput
-            label={`Số lượng · ${size}`}
+            label={`Quantity · ${size}`}
             size={size}
             defaultValue={3233232}
             iconRight="info"
           />
           <Input
-            label={`Tiêu đề · ${size}`}
+            label={`Title · ${size}`}
             size={size}
             icon="search"
             {...(errors
@@ -592,7 +585,7 @@ export const ComposedFields: Story = {
     docs: {
       description: {
         story:
-          'Dùng FormField để nối control với giá trị, validation và trạng thái touched của form. Ví dụ này yêu cầu nhập tất cả các field; bấm Lưu để kiểm tra lỗi và xem giá trị được submit.',
+          'Use FormField to connect controls to form values, validation, and touched state. All fields in this example are required; click Save to check errors and submit the values.',
       },
     },
   },
@@ -603,11 +596,11 @@ export const ValidatedSubmit: Story = {
   name: 'Validation',
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await userEvent.click(canvas.getByRole('button', { name: 'Lưu form' }));
-    await expect(canvas.getByText('Nhập item.')).toBeVisible();
-    await userEvent.type(canvas.getByRole('textbox', { name: /Item/ }), 'example item');
-    await userEvent.click(canvas.getByRole('button', { name: 'Lưu form' }));
-    await expect(canvas.getByRole('status')).toHaveTextContent('Đã lưu bản minh họa.');
+    await userEvent.click(canvas.getByRole('button', { name: 'Save form' }));
+    await expect(canvas.getByText('Enter an item.')).toBeVisible();
+    await userEvent.type(canvas.getByRole('textbox', { name: /Item/ }), 'Lorem ipsum');
+    await userEvent.click(canvas.getByRole('button', { name: 'Save form' }));
+    await expect(canvas.getByRole('status')).toHaveTextContent('Demo saved.');
   },
 };
 
@@ -619,7 +612,7 @@ export const AllBoundControls: Story = {
     docs: {
       description: {
         story:
-          '17 field, mặc định trống và required: Text, Password, Number, OTP, Textarea, Select, Select có tìm kiếm, MultiSelect, Date, Time, DateRange, Radio, Checkbox, Switch, Avatar, Upload và Editor. Required được thực thi bằng Valibot, không chỉ dấu sao. Switch/Checkbox phải true riêng trong ví dụ này.',
+          '17 fields, initially empty and required: Text, Password, Number, OTP, Textarea, Select, searchable Select, MultiSelect, Date, Time, DateRange, Radio, Checkbox, Switch, Avatar, Upload, and Editor. Valibot enforces required values. Switch and Checkbox must be true in this example.',
       },
     },
   },
@@ -632,31 +625,27 @@ export const DateAndTimeFields: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement),
       body = within(document.body);
-    await userEvent.click(
-      canvas.getByRole('button', { name: 'Lưu ngày giờ minh họa' }),
-    );
-    await expect(canvas.getByText('Chọn ngày hợp lệ.')).toBeVisible();
-    const date = canvas.getByRole('button', { name: /Ngày gửi/ });
+    await userEvent.click(canvas.getByRole('button', { name: 'Save date and time' }));
+    await expect(canvas.getByText('Choose a valid date.')).toBeVisible();
+    const date = canvas.getByRole('button', { name: /Send date/ });
     await waitFor(() => expect(date).toHaveFocus());
     await userEvent.click(date);
     await userEvent.click(
       body.getAllByRole('button').find((b) => b.textContent === '17')!,
     );
-    await userEvent.type(canvas.getByRole('combobox', { name: /Giờ gửi/ }), '09:30');
+    await userEvent.type(canvas.getByRole('combobox', { name: /Send time/ }), '09:30');
     await userEvent.click(await body.findByRole('option', { name: '09:30' }));
-    await userEvent.click(canvas.getByRole('button', { name: /Khoảng theo dõi/ }));
+    await userEvent.click(canvas.getByRole('button', { name: /Tracking range/ }));
     await userEvent.click(
       body.getAllByRole('button').find((b) => b.textContent === '20')!,
     );
     await userEvent.click(
       body.getAllByRole('button').find((b) => b.textContent === '22')!,
     );
-    await userEvent.click(body.getByRole('button', { name: 'Áp dụng' }));
-    await userEvent.click(
-      canvas.getByRole('button', { name: 'Lưu ngày giờ minh họa' }),
-    );
+    await userEvent.click(body.getByRole('button', { name: 'Apply' }));
+    await userEvent.click(canvas.getByRole('button', { name: 'Save date and time' }));
     await expect(canvas.getByRole('status')).toHaveTextContent(
-      'Đã lưu: 2026-10-17 · 09:30 · 2026-10-20 — 2026-10-22',
+      'Saved: 2026-10-17 · 09:30 · 2026-10-20 — 2026-10-22',
     );
   },
 };
@@ -678,30 +667,30 @@ export const RequiredValidation: Story = {
   render: () => <ControlsDemo />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await userEvent.click(canvas.getByRole('button', { name: 'Lưu tất cả field' }));
+    await userEvent.click(canvas.getByRole('button', { name: 'Save all fields' }));
     for (const message of [
-      'Chọn ảnh đại diện hợp lệ.',
-      'Chọn tệp đính kèm hợp lệ.',
-      'Nhập nội dung editor.',
-      'Nhập tiêu đề.',
-      'Nhập mật khẩu ít nhất 8 ký tự.',
-      'Nhập số lượng.',
-      'Nhập đủ 6 chữ số.',
-      'Nhập mô tả.',
-      'Chọn danh mục.',
-      'Chọn item.',
-      'Chọn ít nhất một nhãn.',
-      'Cần xác nhận đồng ý.',
-      'Cần bật chế độ minh họa.',
-      'Chọn quyết định.',
-      'Chọn ngày hợp lệ.',
-      'Chọn giờ hợp lệ.',
-      'Chọn khoảng ngày hợp lệ.',
+      'Choose a valid avatar image.',
+      'Choose valid attachments.',
+      'Enter editor content.',
+      'Enter a title.',
+      'Enter a password with at least 8 characters.',
+      'Enter a quantity.',
+      'Enter all 6 digits.',
+      'Enter a description.',
+      'Select a category.',
+      'Select an item.',
+      'Select at least one tag.',
+      'Consent is required.',
+      'Enable demo mode.',
+      'Select a decision.',
+      'Choose a valid date.',
+      'Choose a valid time.',
+      'Choose a valid date range.',
     ]) {
       await expect(canvas.getByText(message, { exact: true })).toBeVisible();
     }
     await waitFor(() =>
-      expect(canvas.getByRole('button', { name: 'Ảnh đại diện' })).toHaveFocus(),
+      expect(canvas.getByRole('button', { name: 'Avatar' })).toHaveFocus(),
     );
     await expect(canvas.queryByRole('status')).not.toBeInTheDocument();
   },
@@ -726,69 +715,73 @@ export const CompleteSubmit: Story = {
       new File([png], 'avatar.png', { type: 'image/png' }),
     );
     await waitFor(() =>
-      expect(body.getByRole('button', { name: 'Dùng ảnh' })).toBeEnabled(),
+      expect(body.getByRole('button', { name: 'Use image' })).toBeEnabled(),
     );
-    await userEvent.click(body.getByRole('button', { name: 'Dùng ảnh' }));
+    await userEvent.click(body.getByRole('button', { name: 'Use image' }));
     await userEvent.upload(
       inputs[1]!,
       new File(['Lorem ipsum'], 'example.txt', { type: 'text/plain' }),
     );
-    await userEvent.type(canvas.getByLabelText('Mật khẩu'), 'example-password');
-    await userEvent.type(canvas.getByRole('spinbutton', { name: 'Số lượng' }), '10');
+    await userEvent.type(canvas.getByLabelText('Password'), 'example-password');
+    await userEvent.type(canvas.getByRole('spinbutton', { name: 'Quantity' }), '10');
     await userEvent.type(
-      canvas.getByRole('textbox', { name: 'Mã xác nhận' }),
+      canvas.getByRole('textbox', { name: 'Verification code' }),
       '123456',
     );
+    await userEvent.type(canvas.getByRole('textbox', { name: 'Title' }), 'Lorem ipsum');
     await userEvent.type(
-      canvas.getByRole('textbox', { name: 'Tiêu đề' }),
-      'Lorem ipsum',
-    );
-    await userEvent.type(
-      canvas.getByRole('textbox', { name: 'Mô tả' }),
+      canvas.getByRole('textbox', { name: 'Description' }),
       'Dolor sit amet.',
     );
-    await userEvent.click(canvas.getByRole('combobox', { name: 'Danh mục' }));
+    await userEvent.click(canvas.getByRole('combobox', { name: 'Category' }));
     await userEvent.keyboard('{ArrowDown}{Enter}');
     await userEvent.type(
-      canvas.getByRole('combobox', { name: 'Item (tìm kiếm)' }),
-      'Cat',
-    );
-    await userEvent.click(await body.findByRole('option', { name: 'Cat shirt' }));
-    await userEvent.type(canvas.getByRole('combobox', { name: 'Nhãn' }), 'Cats');
-    await userEvent.click(await body.findByRole('option', { name: 'Cats' }));
-    await userEvent.type(canvas.getByRole('combobox', { name: 'Giờ gửi' }), '09:30');
-    await userEvent.click(await body.findByRole('option', { name: '09:30' }));
-    await userEvent.click(canvas.getByRole('button', { name: /Ngày gửi/ }));
-    await userEvent.click(
-      body.getByRole('button', { name: 'Thứ Bảy, ngày 17 tháng 10 năm 2026' }),
-    );
-    await userEvent.click(canvas.getByRole('button', { name: /Khoảng theo dõi/ }));
-    const rangePopup = within(body.getByRole('dialog', { name: 'Khoảng theo dõi' }));
-    await userEvent.click(
-      rangePopup.getByRole('button', { name: 'Thứ Ba, ngày 20 tháng 10 năm 2026' }),
+      canvas.getByRole('combobox', { name: 'Item (searchable)' }),
+      'Consectetur',
     );
     await userEvent.click(
-      rangePopup.getByRole('button', { name: 'Thứ Năm, ngày 22 tháng 10 năm 2026' }),
+      await body.findByRole('option', { name: 'Consectetur adipiscing' }),
     );
-    await userEvent.click(body.getByRole('button', { name: 'Áp dụng' }));
     await userEvent.type(
-      await canvas.findByRole('textbox', { name: 'Nội dung editor' }),
+      canvas.getByRole('combobox', { name: 'Tags' }),
+      'Tempor incididunt',
+    );
+    await userEvent.click(
+      await body.findByRole('option', { name: 'Tempor incididunt' }),
+    );
+    await userEvent.type(canvas.getByRole('combobox', { name: 'Send time' }), '09:30');
+    await userEvent.click(await body.findByRole('option', { name: '09:30' }));
+    await userEvent.click(canvas.getByRole('button', { name: /Send date/ }));
+    await userEvent.click(
+      body.getByRole('button', { name: 'Saturday, October 17, 2026' }),
+    );
+    await userEvent.click(canvas.getByRole('button', { name: /Tracking range/ }));
+    const rangePopup = within(body.getByRole('dialog', { name: 'Tracking range' }));
+    await userEvent.click(
+      rangePopup.getByRole('button', { name: 'Tuesday, October 20, 2026' }),
+    );
+    await userEvent.click(
+      rangePopup.getByRole('button', { name: 'Thursday, October 22, 2026' }),
+    );
+    await userEvent.click(body.getByRole('button', { name: 'Apply' }));
+    await userEvent.type(
+      await canvas.findByRole('textbox', { name: 'Editor content' }),
       'Lorem ipsum dolor sit amet.',
     );
-    await userEvent.click(canvas.getByRole('radio', { name: 'Đáng thử' }));
-    await userEvent.click(canvas.getByRole('checkbox', { name: 'Đồng ý minh họa' }));
-    await userEvent.click(canvas.getByRole('switch', { name: 'Bật chế độ minh họa' }));
-    await userEvent.click(canvas.getByRole('button', { name: 'Lưu tất cả field' }));
+    await userEvent.click(canvas.getByRole('radio', { name: 'Worth trying' }));
+    await userEvent.click(canvas.getByRole('checkbox', { name: 'Demo consent' }));
+    await userEvent.click(canvas.getByRole('switch', { name: 'Enable demo mode' }));
+    await userEvent.click(canvas.getByRole('button', { name: 'Save all fields' }));
     await expect(canvas.getByRole('status')).toHaveTextContent(
-      'Đã lưu đủ 17 field minh họa.',
+      'Saved all 17 demo fields.',
     );
     await expect(canvas.getByRole('status')).toHaveTextContent('avatar-cropped.png');
-    await userEvent.click(canvas.getByRole('button', { name: 'Đặt lại' }));
+    await userEvent.click(canvas.getByRole('button', { name: 'Reset' }));
     await expect(canvas.queryByRole('status')).not.toBeInTheDocument();
     await waitFor(() =>
-      expect(
-        canvas.getByRole('textbox', { name: 'Nội dung editor' }),
-      ).toHaveTextContent(/^$/),
+      expect(canvas.getByRole('textbox', { name: 'Editor content' })).toHaveTextContent(
+        /^$/,
+      ),
     );
   },
 };

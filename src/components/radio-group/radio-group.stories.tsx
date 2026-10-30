@@ -9,19 +9,19 @@ function Demo() {
   return (
     <div className="grid gap-4">
       <RadioGroup
-        label="Đánh giá"
+        label="Evaluation"
         value={value}
         onValueChange={setValue}
         options={[
-          { value: 'explore', label: 'Nghiên cứu thêm' },
-          { value: 'test', label: 'Đáng thử' },
-          { value: 'skip', label: 'Bỏ qua', disabled: true },
+          { value: 'explore', label: 'Research further' },
+          { value: 'test', label: 'Worth trying' },
+          { value: 'skip', label: 'Skip', disabled: true },
         ]}
       />
       <RadioGroup
-        label="Thiếu lựa chọn"
-        error="Hãy chọn một trạng thái."
-        options={[{ value: 'a', label: 'Mục A' }]}
+        label="Missing selection"
+        error="Select a status."
+        options={[{ value: 'a', label: 'Option A' }]}
       />
     </div>
   );
@@ -31,17 +31,17 @@ const meta = {
   title: 'Components/RadioGroup',
   component: RadioGroup,
   args: {
-    label: 'Lựa chọn',
+    label: 'Options',
     options: [
-      { value: 'a', label: 'Mục A' },
-      { value: 'b', label: 'Mục B' },
+      { value: 'a', label: 'Option A' },
+      { value: 'b', label: 'Option B' },
     ],
   },
   parameters: {
     docs: {
       description: {
         component:
-          'Chọn một giá trị trong danh sách options. Hỗ trợ điều hướng bằng bàn phím, tùy chọn disabled và thông báo lỗi cho cả nhóm.',
+          'Select one value from a list of options. Supports keyboard navigation, disabled options and a group error message.',
       },
     },
   },
@@ -58,19 +58,18 @@ export const LongLabels: Story = {
   render: () => (
     <div className="w-48">
       <RadioGroup
-        label="Nhãn dài trong vùng hẹp"
+        label="Long labels in a narrow container"
         required
         defaultValue="review"
         options={[
           {
             value: 'review',
-            label:
-              'Nghiên cứu thêm trước khi đưa ra quyết định với nội dung nhiều dòng',
+            label: 'Research further before making a decision with a multiline label',
           },
-          { value: 'test', label: 'Đáng thử với một sản phẩm minh họa' },
+          { value: 'test', label: 'Worth trying with an example item' },
           {
             value: 'disabled',
-            label: 'Lựa chọn bị khóa có nội dung dài',
+            label: 'Disabled option with a long label',
             disabled: true,
           },
         ]}
@@ -84,12 +83,12 @@ export const LongLabels: Story = {
       await expect(bounds.width).toBe(16);
       await expect(bounds.height).toBe(16);
     }
-    await userEvent.click(canvas.getByText('Đáng thử với một sản phẩm minh họa'));
+    await userEvent.click(canvas.getByText('Worth trying with an example item'));
     await expect(
-      canvas.getByRole('radio', { name: 'Đáng thử với một sản phẩm minh họa' }),
+      canvas.getByRole('radio', { name: 'Worth trying with an example item' }),
     ).toBeChecked();
     await expect(
-      canvas.getByRole('radio', { name: 'Lựa chọn bị khóa có nội dung dài' }),
+      canvas.getByRole('radio', { name: 'Disabled option with a long label' }),
     ).toBeDisabled();
   },
 };
@@ -98,11 +97,11 @@ export const CustomClasses: Story = {
   tags: ['customization'],
   render: () => (
     <RadioGroup
-      label="Lorem ipsum"
+      label="Options"
       defaultValue="a"
       options={[
-        { value: 'a', label: 'Dolor sit amet' },
-        { value: 'b', label: 'Consectetur adipiscing' },
+        { value: 'a', label: 'Option A' },
+        { value: 'b', label: 'Option B' },
       ]}
       classNames={{
         root: 'max-w-lg',

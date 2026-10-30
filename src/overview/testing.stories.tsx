@@ -22,7 +22,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'Truyền data-testid ở nơi sử dụng. Control đơn đặt trên input/button; phần ghép có suffix ổn định, không phụ thuộc label/ngôn ngữ. Không truyền thì không sinh selector. Ưu tiên getByRole/getByLabel khi rõ nghĩa; xem docs/UI_TESTING.md để tra suffix.',
+          'Pass data-testid where you use the component. Simple controls apply it to the input or button; composite controls use stable suffixes independent of labels and locale. No test IDs are generated unless provided. Prefer queries by role or label when meaningful; see docs/UI_TESTING.md for suffixes.',
       },
     },
   },
@@ -33,12 +33,12 @@ type Story = StoryObj<typeof meta>;
 export const Controls: Story = {
   render: () => (
     <div className="grid max-w-lg gap-5">
-      <Input data-testid="profile-name" label="Tên" />
-      <InputPassword data-testid="profile-password" label="Mật khẩu" />
-      <NumberInput data-testid="profile-quantity" label="Số lượng" />
+      <Input data-testid="profile-name" label="Name" />
+      <InputPassword data-testid="profile-password" label="Password" />
+      <NumberInput data-testid="profile-quantity" label="Quantity" />
       <Select
         data-testid="profile-category"
-        label="Danh mục"
+        label="Category"
         searchable
         clearable
         options={[
@@ -46,7 +46,7 @@ export const Controls: Story = {
           { value: 'beta', label: 'Dolor sit amet' },
         ]}
       />
-      <DatePicker data-testid="profile-date" label="Ngày" defaultValue="2026-10-17" />
+      <DatePicker data-testid="profile-date" label="Date" defaultValue="2026-10-17" />
       <AvatarUpload data-testid="profile-avatar" alt="Lorem Ipsum" size="lg" />
     </div>
   ),
@@ -56,7 +56,7 @@ export const Portal: Story = {
   render: () => (
     <Dialog>
       <DialogTrigger asChild>
-        <Button data-testid="confirm-trigger">Mở dialog</Button>
+        <Button data-testid="confirm-trigger">Open dialog</Button>
       </DialogTrigger>
       <DialogContent data-testid="confirm-dialog">
         <DialogTitle>Lorem ipsum</DialogTitle>
@@ -71,7 +71,7 @@ export const StableRows: Story = {
     <DataTable
       data-testid="example-table"
       caption="Lorem ipsum"
-      columns={[{ accessorKey: 'title', header: 'Tên' }]}
+      columns={[{ accessorKey: 'title', header: 'Name' }]}
       rows={Array.from({ length: 24 }, (_, index) => ({
         id: `item-${index + 1}`,
         title: `Lorem ipsum ${index + 1}`,

@@ -5,14 +5,14 @@ const meta = {
   title: 'Modules/Editor',
   component: Editor,
   args: {
-    label: 'Nội dung',
+    label: 'Content',
     defaultValue: '<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>',
   },
   parameters: {
     docs: {
       description: {
         component:
-          'Soạn nội dung có định dạng với thanh công cụ in đậm, in nghiêng, tiêu đề và danh sách. value/onValueChange dùng HTML; readOnly cho phép đọc/copy, disabled ngăn chỉnh sửa.',
+          'Edit rich text with toolbar controls for bold, italic, headings, and lists. value/onValueChange use HTML; readOnly allows reading and copying, while disabled prevents editing.',
       },
     },
   },
@@ -26,18 +26,18 @@ export const States: Story = {
   tags: ['states'],
   render: () => (
     <div className="grid max-w-3xl gap-5 sm:grid-cols-2">
-      <Editor label="Trống" />
+      <Editor label="Empty" />
       <Editor
-        label="Chỉ đọc"
+        label="Read only"
         defaultValue="<p>Lorem ipsum dolor sit amet.</p>"
         readOnly
       />
       <Editor
-        label="Không chỉnh sửa"
+        label="Disabled"
         defaultValue="<p>Lorem ipsum dolor sit amet.</p>"
         disabled
       />
-      <Editor label="Có lỗi" required error="Nhập nội dung." />
+      <Editor label="Error" required error="Enter content." />
     </div>
   ),
 };
@@ -46,7 +46,7 @@ export const CustomClasses: Story = {
   tags: ['customization'],
   render: () => (
     <Editor
-      label="Lorem ipsum"
+      label="Content"
       defaultValue="<p>Dolor sit amet.</p>"
       classNames={{
         root: 'max-w-2xl',
@@ -65,12 +65,12 @@ export const Formatting: Story = {
   args: { defaultValue: '' },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement),
-      input = await canvas.findByRole('textbox', { name: 'Nội dung' });
+      input = await canvas.findByRole('textbox', { name: 'Content' });
     await userEvent.click(input);
-    await userEvent.click(canvas.getByRole('button', { name: 'In đậm' }));
+    await userEvent.click(canvas.getByRole('button', { name: 'Bold' }));
     await userEvent.type(input, 'Lorem ipsum');
     await expect(input.querySelector('strong')).toHaveTextContent('Lorem ipsum');
-    await expect(canvas.getByRole('button', { name: 'In đậm' })).toHaveAttribute(
+    await expect(canvas.getByRole('button', { name: 'Bold' })).toHaveAttribute(
       'aria-pressed',
       'true',
     );

@@ -5,27 +5,27 @@ import { DataTable, type ColumnDef, type DataTableState } from './index';
 
 type Example = { id: string; label: string; state: string };
 const columns: ColumnDef<Example, unknown>[] = [
-  { accessorKey: 'label', header: 'Tên' },
-  { accessorKey: 'state', header: 'Trạng thái' },
+  { accessorKey: 'label', header: 'Name' },
+  { accessorKey: 'state', header: 'Status' },
 ];
 const meta = {
   parameters: {
     docs: {
       description: {
         component:
-          'Bảng dữ liệu có sắp xếp, phân trang, chọn dòng và tùy chỉnh cột. Dùng mode="server" với state, onStateChange và rowCount khi ứng dụng quản lý dữ liệu từ server; mặc định bảng xử lý dữ liệu tại client. ',
+          'A data table with sorting, pagination, row selection, and column customization. Use mode="server" with state, onStateChange, and rowCount when the application manages server data; by default, the table processes data on the client.',
       },
     },
   },
   title: 'Modules/DataTable',
   component: DataTable,
   args: {
-    caption: 'Danh sách',
+    caption: 'List',
     rowId: (row: Example) => row.id,
     columns,
     rows: [
-      { id: 'a', label: 'Lorem ipsum', state: 'Mục A' },
-      { id: 'b', label: 'Dolor sit amet', state: 'Mục B' },
+      { id: 'a', label: 'Lorem ipsum', state: 'Lorem ipsum' },
+      { id: 'b', label: 'Dolor sit amet', state: 'Dolor sit amet' },
     ],
   },
 } satisfies Meta;
@@ -34,23 +34,23 @@ type Story = StoryObj;
 
 type MetricFixture = { id: string; item: string; value: number | null };
 const metricColumns: ColumnDef<MetricFixture, unknown>[] = [
-  { accessorKey: 'item', header: 'Item minh họa' },
+  { accessorKey: 'item', header: 'Sample item' },
   {
     id: 'value',
     accessorFn: (row) => row.value ?? undefined,
-    header: 'Giá trị giả lập',
+    header: 'Sample value',
     sortUndefined: 'last',
     cell: ({ row }) =>
       row.original.value === null
-        ? 'Chưa có'
-        : row.original.value.toLocaleString('vi-VN'),
+        ? 'Not available'
+        : row.original.value.toLocaleString('en-US'),
   },
 ];
 
 const pageRows: Example[] = Array.from({ length: 57 }, (_, index) => ({
   id: String(index + 1),
-  label: `Mẫu ${String(index + 1).padStart(2, '0')}`,
-  state: index % 2 ? 'Đáng thử' : 'Đang nghiên cứu',
+  label: `Lorem ipsum ${String(index + 1).padStart(2, '0')}`,
+  state: index % 2 ? 'Dolor sit amet' : 'Consectetur adipiscing',
 }));
 
 function ServerExample() {
@@ -97,11 +97,11 @@ function ServerExample() {
   return (
     <div className="grid gap-4">
       <p className="text-ui-sm text-muted">
-        Ví dụ gồm 57 dòng và mô phỏng độ trễ để kiểm tra trạng thái tải.
+        This example has 57 rows and simulates latency to demonstrate loading states.
       </p>
       <DataTable
         mode="server"
-        caption="Phân trang từ server minh họa"
+        caption="Server pagination example"
         rows={page}
         columns={columns}
         rowId={(row) => row.id}
@@ -111,7 +111,7 @@ function ServerExample() {
         loading={loading}
       />
       <output
-        aria-label="Tham số request minh họa"
+        aria-label="Sample request parameters"
         className="min-w-0 break-all rounded-control bg-canvas p-3 font-mono text-ui-sm text-muted"
       >
         page={state.pagination.pageIndex + 1}&amp;pageSize={state.pagination.pageSize}
@@ -127,13 +127,13 @@ function RetryExample() {
 
   return (
     <DataTable<Example>
-      caption="Lỗi tải danh sách — fixture"
+      caption="List loading error example"
       rows={failed ? [] : pageRows.slice(0, 3)}
       columns={columns}
       rowId={(row) => row.id}
       {...(failed
         ? {
-            error: 'Chưa kết nối được máy chủ. Thử lại bằng dữ liệu minh họa.',
+            error: 'Could not connect to the server. Retry with sample data.',
             onRetry: () => setFailed(false),
           }
         : {})}
@@ -166,18 +166,18 @@ function RefreshExample() {
           className="rounded-control border border-line bg-surface px-4 py-2 text-control disabled:opacity-50"
           onClick={() => setLoading(true)}
         >
-          Mô phỏng tải lại
+          Simulate refresh
         </button>
       </div>
       <DataTable
-        caption="Cập nhật không nhảy layout"
+        caption="Refresh without layout shift"
         rows={pageRows.slice(0, 5)}
         columns={columns}
         rowId={(row) => row.id}
         pagination
         loading={loading}
       />
-      <output>Lần cập nhật: {revision}</output>
+      <output>Revision: {revision}</output>
     </div>
   );
 }
@@ -198,7 +198,7 @@ function SelectionPages({ server = false }: { server?: boolean }) {
       {server ? (
         <DataTable
           mode="server"
-          caption="Chọn qua nhiều trang"
+          caption="Selection across pages"
           rows={page}
           rowCount={pageRows.length}
           columns={columns}
@@ -209,7 +209,7 @@ function SelectionPages({ server = false }: { server?: boolean }) {
         />
       ) : (
         <DataTable
-          caption="Chọn qua nhiều trang"
+          caption="Selection across pages"
           rows={pageRows}
           columns={columns}
           rowId={(row) => row.id}
@@ -237,13 +237,13 @@ export const States: Story = {
   render: () => (
     <div className="grid gap-6">
       <DataTable<Example>
-        caption="Trống"
+        caption="Empty"
         rows={[]}
         columns={columns}
         rowId={(row) => row.id}
       />
       <DataTable<Example>
-        caption="Đang tải"
+        caption="Loading"
         rows={[]}
         columns={columns}
         rowId={(row) => row.id}
@@ -261,10 +261,10 @@ export const MissingValues: Story = {
   render: () => (
     <div className="grid gap-3">
       <p className="text-ui-sm text-muted">
-        Fixture minh họa, không phải dữ liệu thị trường. Bấm sort để so sánh 0 và null.
+        Sample data. Click a column header to compare sorting of 0 and null.
       </p>
       <DataTable<MetricFixture>
-        caption="Giá trị trống và số 0"
+        caption="Missing and zero values"
         columns={metricColumns}
         rowId={(row) => row.id}
         rows={[
@@ -281,7 +281,7 @@ export const ClientPagination: Story = {
   tags: ['example'],
   render: () => (
     <DataTable
-      caption="Danh sách minh họa"
+      caption="Sample list"
       rows={pageRows}
       columns={columns}
       rowId={(row) => row.id}
@@ -290,14 +290,14 @@ export const ClientPagination: Story = {
   ),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await userEvent.click(canvas.getByRole('button', { name: 'Trang 3' }));
-    await expect(canvas.getByText('Mẫu 21')).toBeVisible();
-    await userEvent.click(canvas.getByRole('button', { name: 'Số dòng' }));
+    await userEvent.click(canvas.getByRole('button', { name: 'Page 3' }));
+    await expect(canvas.getByText('Lorem ipsum 21')).toBeVisible();
+    await userEvent.click(canvas.getByRole('button', { name: 'Rows per page' }));
     await userEvent.click(
-      within(document.body).getByRole('menuitemradio', { name: '20 dòng' }),
+      within(document.body).getByRole('menuitemradio', { name: '20 rows' }),
     );
-    await expect(canvas.getByText('Trang 1 / 3')).toBeVisible();
-    await expect(canvas.getByText('Mẫu 01')).toBeVisible();
+    await expect(canvas.getByText('Page 1 / 3')).toBeVisible();
+    await expect(canvas.getByText('Lorem ipsum 01')).toBeVisible();
   },
 };
 
@@ -306,28 +306,28 @@ export const ServerPagination: Story = {
   render: () => <ServerExample />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    const next = canvas.getByRole('button', { name: 'Trang sau' });
+    const next = canvas.getByRole('button', { name: 'Next page' });
     await waitFor(() => expect(next).toBeEnabled());
     await userEvent.click(next);
-    await expect(await canvas.findByText('Mẫu 11')).toBeVisible();
+    await expect(await canvas.findByText('Lorem ipsum 11')).toBeVisible();
     await waitFor(() =>
-      expect(canvas.getByRole('button', { name: 'Trang 4' })).toBeEnabled(),
+      expect(canvas.getByRole('button', { name: 'Page 4' })).toBeEnabled(),
     );
-    await userEvent.click(canvas.getByRole('button', { name: 'Trang 4' }));
-    await expect(await canvas.findByText('Mẫu 31')).toBeVisible();
-    await expect(canvas.getByLabelText('Tham số request minh họa')).toHaveTextContent(
+    await userEvent.click(canvas.getByRole('button', { name: 'Page 4' }));
+    await expect(await canvas.findByText('Lorem ipsum 31')).toBeVisible();
+    await expect(canvas.getByLabelText('Sample request parameters')).toHaveTextContent(
       'page=4&pageSize=10',
     );
     await waitFor(() =>
-      expect(canvas.getByRole('button', { name: 'Tên' })).toBeEnabled(),
+      expect(canvas.getByRole('button', { name: 'Name' })).toBeEnabled(),
     );
-    await userEvent.click(canvas.getByRole('button', { name: 'Tên' }));
+    await userEvent.click(canvas.getByRole('button', { name: 'Name' }));
     await waitFor(() =>
-      expect(canvas.getByLabelText('Tham số request minh họa')).toHaveTextContent(
+      expect(canvas.getByLabelText('Sample request parameters')).toHaveTextContent(
         'page=1&pageSize=10&sort=label&direction=asc',
       ),
     );
-    await expect(await canvas.findByText('Mẫu 01')).toBeVisible();
+    await expect(await canvas.findByText('Lorem ipsum 01')).toBeVisible();
   },
 };
 
@@ -336,7 +336,7 @@ export const Advanced: Story = {
   name: 'Column controls',
   render: () => (
     <DataTable
-      caption="Danh sách đầy đủ tính năng"
+      caption="Full-featured list"
       rows={pageRows}
       columns={columns}
       rowId={(row) => row.id}
@@ -352,31 +352,31 @@ export const Advanced: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await userEvent.click(
-      canvas.getByRole('checkbox', { name: 'Chọn tất cả dòng trên trang' }),
+      canvas.getByRole('checkbox', { name: 'Select all rows on this page' }),
     );
-    await expect(canvas.getByRole('status')).toHaveTextContent('10 dòng đã chọn');
+    await expect(canvas.getByRole('status')).toHaveTextContent('10 rows selected');
     await userEvent.type(
-      canvas.getByRole('textbox', { name: 'Tìm trong Danh sách đầy đủ tính năng' }),
-      'Mẫu 57',
+      canvas.getByRole('textbox', { name: 'Search Full-featured list' }),
+      'Lorem ipsum 57',
     );
     await expect(canvas.getByRole('status')).toHaveTextContent(
-      '10 dòng đã chọn · 0 trên trang này',
+      '10 rows selected · 0 on this page',
     );
-    await expect(canvas.getByText('1–1 / 1 kết quả')).toBeVisible();
-    const resize = canvas.getByRole('separator', { name: 'Đổi độ rộng cột label' });
+    await expect(canvas.getByText('1–1 / 1 result')).toBeVisible();
+    const resize = canvas.getByRole('separator', { name: 'Resize column label' });
     const width = Number(resize.getAttribute('aria-valuenow'));
     await userEvent.click(resize);
     await userEvent.keyboard('{ArrowRight}');
     await expect(resize).toHaveAttribute('aria-valuenow', String(width + 10));
-    await userEvent.click(canvas.getByRole('button', { name: 'Cột hiển thị' }));
+    await userEvent.click(canvas.getByRole('button', { name: 'Show columns' }));
     await userEvent.click(
       await within(document.body).findByRole('menuitemcheckbox', {
-        name: 'Trạng thái',
+        name: 'Status',
       }),
     );
     await userEvent.keyboard('{Escape}');
     await expect(
-      canvas.queryByRole('button', { name: 'Trạng thái' }),
+      canvas.queryByRole('button', { name: 'Status' }),
     ).not.toBeInTheDocument();
   },
 };
@@ -387,17 +387,23 @@ export const ResponsiveLongContent: Story = {
   render: () => (
     <div className="grid gap-4">
       <DataTable
-        caption="Dữ liệu dài giữ scroll trong bảng"
+        caption="Long content scrolls within the table"
         columns={columns}
         rowId={(row) => row.id}
-        rows={[{ id: 'long', label: 'LongItem'.repeat(30), state: 'Đang nghiên cứu' }]}
+        rows={[
+          {
+            id: 'long',
+            label: 'LoremIpsum'.repeat(30),
+            state: 'Consectetur adipiscing',
+          },
+        ]}
         pagination
       />
     </div>
   ),
   play: async ({ canvasElement }) => {
     const region = within(canvasElement).getByRole('region', {
-      name: 'Dữ liệu dài giữ scroll trong bảng',
+      name: 'Long content scrolls within the table',
     });
     await expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(
       document.documentElement.clientWidth,
@@ -420,7 +426,7 @@ export const Selection: Story = {
     docs: {
       description: {
         story:
-          'Selection dùng row ID ổn định nên được giữ khi chuyển trang. Hai ví dụ lần lượt phân trang tại client và server; checkbox tiêu đề chỉ chọn trang hiện tại.',
+          'Selection persists across pages using stable row IDs. These examples show client and server pagination; the header checkbox selects only the current page.',
       },
     },
   },
@@ -459,16 +465,16 @@ export const Refreshing: Story = {
     const canvas = within(canvasElement);
     const table = canvas.getByRole('table');
     const height = table.getBoundingClientRect().height;
-    await userEvent.click(canvas.getByRole('button', { name: 'Mô phỏng tải lại' }));
+    await userEvent.click(canvas.getByRole('button', { name: 'Simulate refresh' }));
     await expect(table).toHaveAttribute('aria-busy', 'true');
-    await expect(canvas.getByText('Mẫu 01')).toBeVisible();
+    await expect(canvas.getByText('Lorem ipsum 01')).toBeVisible();
     await expect(table.getBoundingClientRect().height).toBe(height);
     await expect(table.querySelector('tbody')).toHaveAttribute('inert');
-    await expect(canvas.getByRole('button', { name: 'Trang sau' })).toBeDisabled();
+    await expect(canvas.getByRole('button', { name: 'Next page' })).toBeDisabled();
     await waitFor(() => expect(table).toHaveAttribute('aria-busy', 'false'), {
       timeout: 2500,
     });
-    await expect(canvas.getByText('Lần cập nhật: 1')).toBeVisible();
+    await expect(canvas.getByText('Revision: 1')).toBeVisible();
   },
 };
 
@@ -476,7 +482,7 @@ export const NoResults: Story = {
   tags: ['!dev', '!autodocs', 'regression'],
   render: () => (
     <DataTable
-      caption="Tìm trong danh sách"
+      caption="Items"
       rows={pageRows}
       columns={columns}
       rowId={(row) => row.id}
@@ -486,14 +492,14 @@ export const NoResults: Story = {
   ),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement),
-      input = canvas.getByRole('textbox', { name: 'Tìm trong Tìm trong danh sách' });
+      input = canvas.getByRole('textbox', { name: 'Search Items' });
     await userEvent.type(input, 'no-match-example');
     await expect(
-      canvas.getByRole('heading', { name: 'Không có kết quả phù hợp' }),
+      canvas.getByRole('heading', { name: 'No matching results' }),
     ).toBeVisible();
-    await expect(canvas.getByText('0 kết quả')).toBeVisible();
+    await expect(canvas.getByText('0 results')).toBeVisible();
     await userEvent.clear(input);
-    await expect(canvas.getByText('Mẫu 01')).toBeVisible();
+    await expect(canvas.getByText('Lorem ipsum 01')).toBeVisible();
   },
 };
 
@@ -502,31 +508,31 @@ export const ServerCrossPageSelection: Story = {
   render: () => <SelectionPages server />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await userEvent.click(canvas.getByRole('checkbox', { name: 'Chọn dòng 1' }));
-    await userEvent.click(canvas.getByRole('button', { name: 'Trang 2' }));
-    await userEvent.click(canvas.getByRole('checkbox', { name: 'Chọn dòng 11' }));
-    await userEvent.click(canvas.getByRole('button', { name: 'Trang 3' }));
-    await userEvent.click(canvas.getByRole('checkbox', { name: 'Chọn dòng 21' }));
-    await userEvent.click(canvas.getByRole('button', { name: 'Trang 1' }));
-    await expect(canvas.getByRole('checkbox', { name: 'Chọn dòng 1' })).toBeChecked();
+    await userEvent.click(canvas.getByRole('checkbox', { name: 'Select row 1' }));
+    await userEvent.click(canvas.getByRole('button', { name: 'Page 2' }));
+    await userEvent.click(canvas.getByRole('checkbox', { name: 'Select row 11' }));
+    await userEvent.click(canvas.getByRole('button', { name: 'Page 3' }));
+    await userEvent.click(canvas.getByRole('checkbox', { name: 'Select row 21' }));
+    await userEvent.click(canvas.getByRole('button', { name: 'Page 1' }));
+    await expect(canvas.getByRole('checkbox', { name: 'Select row 1' })).toBeChecked();
     await expect(
-      canvas.getByRole('status', { name: 'Trạng thái lựa chọn' }),
-    ).toHaveTextContent('3 dòng đã chọn · 1 trên trang này');
+      canvas.getByRole('status', { name: 'Selection status' }),
+    ).toHaveTextContent('3 rows selected · 1 on this page');
     await userEvent.click(
-      canvas.getByRole('checkbox', { name: 'Chọn tất cả dòng trên trang' }),
+      canvas.getByRole('checkbox', { name: 'Select all rows on this page' }),
     );
     await expect(
-      canvas.getByRole('status', { name: 'Trạng thái lựa chọn' }),
-    ).toHaveTextContent('12 dòng đã chọn · 10 trên trang này');
+      canvas.getByRole('status', { name: 'Selection status' }),
+    ).toHaveTextContent('12 rows selected · 10 on this page');
     await userEvent.click(
-      canvas.getByRole('checkbox', { name: 'Chọn tất cả dòng trên trang' }),
+      canvas.getByRole('checkbox', { name: 'Select all rows on this page' }),
     );
     await expect(
-      canvas.getByRole('status', { name: 'Trạng thái lựa chọn' }),
-    ).toHaveTextContent('2 dòng đã chọn · 0 trên trang này');
-    await userEvent.click(canvas.getByRole('button', { name: 'Trang 2' }));
-    await expect(canvas.getByRole('checkbox', { name: 'Chọn dòng 11' })).toBeChecked();
-    await userEvent.click(canvas.getByRole('button', { name: 'Bỏ chọn tất cả' }));
+      canvas.getByRole('status', { name: 'Selection status' }),
+    ).toHaveTextContent('2 rows selected · 0 on this page');
+    await userEvent.click(canvas.getByRole('button', { name: 'Page 2' }));
+    await expect(canvas.getByRole('checkbox', { name: 'Select row 11' })).toBeChecked();
+    await userEvent.click(canvas.getByRole('button', { name: 'Clear selection' }));
     await expect(canvas.getByLabelText('Selected IDs')).toHaveTextContent('none');
   },
 };

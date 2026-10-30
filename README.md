@@ -14,16 +14,18 @@ A reusable React 19 UI kit built on Tailwind CSS v4 tokens and Radix primitives:
 ## Install
 
 ```bash
-pnpm add @itclabs/react-ui valibot date-fns @date-fns/tz @tanstack/react-form @tanstack/react-table
-# peer dependencies
-pnpm add react@^19 react-dom@^19
+pnpm add @itclabs/react-ui
 ```
 
-Requires Node.js >= 22.12.
+Requires React 19 and Node.js >= 22.12.
 
-These five data/form/date libraries are required peers so the app and the kit share a single copy, and the app can import them directly (for example, Valibot schemas shared with server code). `useAppForm` builds on TanStack Form, `createValibotFieldValidators` adapts Valibot schemas, DataTable extends TanStack Table column meta with `align`, and calendar helpers build on date-fns with date-fns time-zone support. Import the libraries from their own packages; the kit does not re-export them.
+pnpm and npm (v7+) install the required peers automatically: `valibot`, `date-fns`, `@date-fns/tz`, `@tanstack/react-form` and `@tanstack/react-table`. Add them to your own `package.json` only if your app imports them directly (for example, Valibot schemas shared with server code) or your package manager does not auto-install peers (Yarn, or pnpm with `auto-install-peers=false`):
 
-All five remain required at package level because the core entries expose forms, tables and date controls; importing a narrower subpath does not change that peer contract.
+```bash
+pnpm add valibot date-fns @date-fns/tz @tanstack/react-form @tanstack/react-table
+```
+
+They are peers so the app and the kit share a single copy. `useAppForm` builds on TanStack Form, `createValibotFieldValidators` adapts Valibot schemas, DataTable extends TanStack Table column meta with `align`, and calendar helpers build on date-fns with date-fns time-zone support. Import the libraries from their own packages; the kit does not re-export them.
 
 ## Styles
 
@@ -148,35 +150,35 @@ import { Button, Input, Select } from '@itclabs/react-ui';
 
 ### Forms
 
-Forms use TanStack Form with Valibot schemas. Bound fields from `useAppForm` render label, control and error together; `FormField` wraps any other control.
+Wrap ordinary controls in `FormField` inside `Form`. `Form schema` takes Valibot rules per field; `FormField` binds the value, blur, label and error, and a `Button type="submit"` inside `Form` shows loading and stays disabled while the form submits.
 
 ```tsx
 'use client';
 
 import * as v from 'valibot';
-import { Form, FormField, Select, useAppForm } from '@itclabs/react-ui';
+import { Button, Form, FormField, Input, Select, useAppForm } from '@itclabs/react-ui';
 
-const profileSchema = v.object({
+// Field rules can live in a shared module and validate the request on the server too.
+export const profileSchema = {
   name: v.pipe(v.string(), v.trim(), v.minLength(1, 'Enter a name.')),
   role: v.pipe(v.string(), v.minLength(1, 'Choose a role.')),
-});
+};
 
 export function ProfileForm({
   onSave,
 }: {
-  onSave: (value: v.InferOutput<typeof profileSchema>) => Promise<void>;
+  onSave: (value: { name: string; role: string }) => Promise<void>;
 }) {
   const form = useAppForm({
     defaultValues: { name: '', role: '' },
-    validators: { onChange: profileSchema },
     onSubmit: async ({ value }) => onSave(value),
   });
 
   return (
-    <Form form={form} className="grid max-w-md gap-4">
-      <form.AppField name="name">
-        {(field) => <field.TextField label="Name" required />}
-      </form.AppField>
+    <Form form={form} schema={profileSchema} className="grid max-w-md gap-4">
+      <FormField name="name" label="Name" required>
+        <Input icon="user" placeholder="Jane Doe" />
+      </FormField>
       <FormField name="role" label="Role" required>
         <Select
           options={[
@@ -185,13 +187,13 @@ export function ProfileForm({
           ]}
         />
       </FormField>
-      <form.SubmitButton>Save</form.SubmitButton>
+      <Button type="submit">Save</Button>
     </Form>
   );
 }
 ```
 
-The same `profileSchema` can validate the request on the server. See [forms and inputs](docs/UI_INPUTS_FORM.md) for every bound field, custom bindings and async submit.
+Kit value controls (`Select`, `NumberInput`, `DatePicker`, …) bind automatically; `NumberInput` uses `number | null`, where `null` means empty. See [Guides/Forms](https://react-ui-one-rose.vercel.app/?path=/docs/guides-forms--docs) for custom wrappers, async submit and the optional `form.AppField` bound fields.
 
 ### Menus and dialogs
 

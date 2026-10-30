@@ -17,13 +17,7 @@ New UI-owned strings password.show/password.hide/otp.label are in typed vi/en di
 
 ## Form composition
 
-Install the kit and its required shared peers:
-
-```bash
-pnpm add @itclabs/react-ui valibot date-fns @date-fns/tz @tanstack/react-form @tanstack/react-table
-```
-
-The app and kit share a single copy of these peers, and the app can import them directly, including Valibot schemas shared with server code. `useAppForm` builds on TanStack Form and `createValibotFieldValidators` adapts Valibot schemas; DataTable adds `align` to TanStack Table column meta, and calendar helpers use date-fns with date-fns time-zone support. Import these libraries from their own packages; the kit does not re-export them.
+`pnpm add @itclabs/react-ui` also installs the required peers (Valibot, TanStack Form/Table, date-fns). Add `valibot` to your own dependencies when the app imports it directly, for example for schemas shared with server code. The app and kit share a single copy of these peers, and the app can import them directly, including Valibot schemas shared with server code. `useAppForm` builds on TanStack Form and `createValibotFieldValidators` adapts Valibot schemas; DataTable adds `align` to TanStack Table column meta, and calendar helpers use date-fns with date-fns time-zone support. Import these libraries from their own packages; the kit does not re-export them.
 
 ```tsx
 'use client';
@@ -32,7 +26,6 @@ import {
   Button,
   Form,
   FormField,
-  FormSubmit,
   Input,
   InputPassword,
   NumberInput,
@@ -63,13 +56,7 @@ export function Example() {
       <FormField name="quantity" label="Quantity" required>
         <NumberInput min={1} />
       </FormField>
-      <FormSubmit form={form}>
-        {(submitting) => (
-          <Button type="submit" loading={submitting}>
-            Save
-          </Button>
-        )}
-      </FormSubmit>
+      <Button type="submit">Save</Button>
     </Form>
   );
 }

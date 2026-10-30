@@ -54,12 +54,17 @@ function ElevationPreview() {
       <div>
         <h2 className="text-section font-semibold text-ink">Elevation</h2>
         <p className="mt-2 text-control text-muted">
-          Shadow phân biệt độ nổi của bề mặt; z-index quyết định thứ tự xếp lớp.
+          Shadows show surface elevation; z-index controls stacking order.
         </p>
       </div>
       <div className="grid gap-6 rounded-panel bg-canvas p-6 sm:grid-cols-2 lg:grid-cols-4">
         {[
-          { name: 'Flat', token: 'none', usage: 'Nền trang', shadow: 'shadow-none' },
+          {
+            name: 'Flat',
+            token: 'none',
+            usage: 'Page background',
+            shadow: 'shadow-none',
+          },
           {
             name: 'Panel',
             token: '--shadow-panel',
@@ -127,34 +132,35 @@ function Demo() {
   return (
     <div className="grid max-w-5xl gap-6">
       <p className="text-control text-muted">
-        Giá trị đọc từ CSS theme đang chạy, không phải bảng số sao chép. Đổi token trong
-        theme để áp dụng toàn bộ kit.
+        Values come from the active CSS theme. Change theme tokens to update the entire
+        kit.
       </p>
       <div className="flex gap-3">
         <Button size="sm" variant="ghost" onClick={readTokens}>
-          Đọc lại token
+          Refresh tokens
         </Button>
         <Dialog>
           <DialogTrigger asChild>
-            <Button size="sm">Thử dialog</Button>
+            <Button size="sm">Open dialog</Button>
           </DialogTrigger>
           <DialogContent>
-            <DialogTitle>Motion chung</DialogTitle>
+            <DialogTitle>Shared motion</DialogTitle>
             <DialogDescription>
-              Fade nhẹ, giữ nguyên hệ tọa độ cho menu Select.
+              A subtle fade preserves the coordinate system for Select menus.
             </DialogDescription>
           </DialogContent>
         </Dialog>
         <Drawer>
           <DrawerTrigger asChild>
             <Button variant="secondary" size="sm">
-              Thử drawer
+              Open drawer
             </Button>
           </DrawerTrigger>
           <DrawerContent>
-            <DrawerTitle>Motion drawer</DrawerTitle>
+            <DrawerTitle>Drawer motion</DrawerTitle>
             <DrawerDescription>
-              Trượt từ cạnh; đóng xong mới unmount. Reduced motion tắt animation.
+              Slides in from the edge and unmounts after closing. Reduced motion
+              disables animation.
             </DrawerDescription>
           </DrawerContent>
         </Drawer>

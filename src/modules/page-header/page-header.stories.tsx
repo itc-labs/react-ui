@@ -9,12 +9,12 @@ const meta = {
     docs: {
       description: {
         component:
-          'PageHeader là khối tiêu đề h1 của từng trang, có các slot breadcrumb, eyebrow, description và action. Dùng Navbar cho thanh điều hướng chung của ứng dụng.',
+          'PageHeader provides a page h1 with breadcrumb, eyebrow, description and action slots. Use Navbar for application navigation.',
       },
     },
   },
   args: {
-    eyebrow: 'Example',
+    eyebrow: 'Lorem ipsum',
     title: 'Lorem ipsum dolor sit amet',
     description:
       'Consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
@@ -27,7 +27,7 @@ export const Default: Story = { name: 'Playground', tags: ['example'] };
 
 export const WithAction: Story = {
   tags: ['example'],
-  args: { action: <Button>Thêm mục</Button> },
+  args: { action: <Button>Add item</Button> },
 };
 
 export const WithBreadcrumb: Story = {
@@ -36,8 +36,8 @@ export const WithBreadcrumb: Story = {
     breadcrumb: (
       <Breadcrumb
         items={[
-          { key: 'home', title: 'Trang chủ', href: '/' },
-          { key: 'current', title: 'Trang hiện tại' },
+          { key: 'home', title: 'Home', href: '/' },
+          { key: 'current', title: 'Current page' },
         ]}
       />
     ),
@@ -49,9 +49,9 @@ export const CustomClasses: Story = {
   render: () => (
     <PageHeader
       title="Lorem ipsum"
-      eyebrow="Example"
+      eyebrow="Lorem ipsum"
       description="Dolor sit amet."
-      breadcrumb={<Breadcrumb items={[{ key: 'current', title: 'Trang hiện tại' }]} />}
+      breadcrumb={<Breadcrumb items={[{ key: 'current', title: 'Current page' }]} />}
       classNames={{
         breadcrumb: 'mb-3',
         root: 'rounded-panel bg-brand-50 p-6',
