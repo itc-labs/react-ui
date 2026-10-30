@@ -427,7 +427,7 @@ export function Carousel<T>({
                 aria-current={selected === dot ? 'true' : undefined}
                 data-testid={partTestId(testId, 'dot', dot)}
                 className={cn(
-                  'flex size-8 items-center justify-center rounded-full after:size-2 after:rounded-full after:bg-muted aria-[current=true]:after:bg-ink',
+                  'flex size-8 items-center justify-center rounded-full after:h-2 after:w-2 after:rounded-full after:bg-line after:transition-all motion-reduce:after:transition-none aria-[current=true]:after:w-5 aria-[current=true]:after:bg-brand-700',
                   focusRingClassName,
                   classNames?.dot,
                 )}
