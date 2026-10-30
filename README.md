@@ -150,35 +150,43 @@ import { Button, Input, Select } from '@itclabs/react-ui';
 
 ### Forms
 
-Forms use TanStack Form with Valibot schemas. Bound fields from `useAppForm` render label, control and error together; `FormField` wraps any other control.
+Wrap ordinary controls in `FormField` inside `Form`. `Form schema` takes Valibot rules per field; `FormField` binds the value, blur, label and error, and `FormSubmit` exposes the submitting state for your own button.
 
 ```tsx
 'use client';
 
 import * as v from 'valibot';
-import { Form, FormField, Select, useAppForm } from '@itclabs/react-ui';
+import {
+  Button,
+  Form,
+  FormField,
+  FormSubmit,
+  Input,
+  Select,
+  useAppForm,
+} from '@itclabs/react-ui';
 
-const profileSchema = v.object({
+// Field rules can live in a shared module and validate the request on the server too.
+export const profileSchema = {
   name: v.pipe(v.string(), v.trim(), v.minLength(1, 'Enter a name.')),
   role: v.pipe(v.string(), v.minLength(1, 'Choose a role.')),
-});
+};
 
 export function ProfileForm({
   onSave,
 }: {
-  onSave: (value: v.InferOutput<typeof profileSchema>) => Promise<void>;
+  onSave: (value: { name: string; role: string }) => Promise<void>;
 }) {
   const form = useAppForm({
     defaultValues: { name: '', role: '' },
-    validators: { onChange: profileSchema },
     onSubmit: async ({ value }) => onSave(value),
   });
 
   return (
-    <Form form={form} className="grid max-w-md gap-4">
-      <form.AppField name="name">
-        {(field) => <field.TextField label="Name" required />}
-      </form.AppField>
+    <Form form={form} schema={profileSchema} className="grid max-w-md gap-4">
+      <FormField name="name" label="Name" required>
+        <Input icon="user" placeholder="Jane Doe" />
+      </FormField>
       <FormField name="role" label="Role" required>
         <Select
           options={[
@@ -187,13 +195,19 @@ export function ProfileForm({
           ]}
         />
       </FormField>
-      <form.SubmitButton>Save</form.SubmitButton>
+      <FormSubmit form={form}>
+        {(submitting) => (
+          <Button type="submit" loading={submitting}>
+            Save
+          </Button>
+        )}
+      </FormSubmit>
     </Form>
   );
 }
 ```
 
-The same `profileSchema` can validate the request on the server. See [forms and inputs](docs/UI_INPUTS_FORM.md) for every bound field, custom bindings and async submit.
+Kit value controls (`Select`, `NumberInput`, `DatePicker`, …) bind automatically; `NumberInput` uses `number | null`, where `null` means empty. See [Guides/Forms](https://react-ui-one-rose.vercel.app/?path=/docs/guides-forms--docs) for custom wrappers, async submit and the optional `form.AppField` bound fields.
 
 ### Menus and dialogs
 

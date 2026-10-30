@@ -4,68 +4,9 @@ import { Meta } from '@storybook/addon-docs/blocks';
 
 # Forms
 
-`useAppForm` connects TanStack Form state to the kit's controls. Use bound fields for standard inputs, or wrap a control in `FormField` to compose your own layout. `Form` supplies context, prevents native submission, and focuses the first element marked `aria-invalid="true"` after submission completes.
+`useAppForm` creates the TanStack Form state. The recommended pattern, used throughout the Form stories, wraps ordinary kit controls in `FormField` inside `Form`, passes per-field Valibot rules through `Form schema` and submits with `FormSubmit`. `form.AppField` bound fields are a shorter alternative. `Form` supplies context, prevents native submission, and focuses the first element marked `aria-invalid="true"` after submission completes.
 
-## Bound fields and shared schemas
-
-Render bound controls inside `form.AppField`. Each field handles its value, blur state, and error message. Available fields include text, textarea, password, number, OTP, select, multi-select, checkbox, switch, radio group, date, time, date range, and upload. Editor and avatar fields have separate module entry points; see the [catalog](?path=/docs/reference-catalog--docs).
-
-Keep Valibot rules in a shared module without browser dependencies. Export both the field map for `Form schema` and an object schema for parsing the submitted payload on the server. Client validation improves feedback; the server must validate incoming data again. `required` adds the control's required semantics and indicator; encode validation rules in the schema.
-
-```tsx
-import { useState } from 'react';
-import * as v from 'valibot';
-import { Form, useAppForm } from '@itclabs/react-ui';
-
-// These exports can live in a shared schema module imported by client and server.
-export const profileFields = {
-  name: v.pipe(v.string(), v.trim(), v.minLength(1, 'Enter a name.')),
-  email: v.pipe(v.string(), v.email('Enter a valid email address.')),
-};
-export const profileSchema = v.object(profileFields);
-
-export function parseProfileOnServer(payload: unknown) {
-  return v.parse(profileSchema, payload);
-}
-
-export function ProfileForm({
-  save,
-}: {
-  save: (profile: v.InferOutput<typeof profileSchema>) => Promise<void>;
-}) {
-  const [status, setStatus] = useState('');
-  const form = useAppForm({
-    defaultValues: { name: '', email: '' },
-    validators: { onChange: profileSchema },
-    onSubmit: async ({ value }) => {
-      setStatus('');
-      try {
-        await save(v.parse(profileSchema, value));
-        setStatus('Saved.');
-      } catch {
-        setStatus('Could not save. Try again.');
-      }
-    },
-  });
-
-  return (
-    <Form form={form} aria-label="Profile">
-      <form.AppField name="name">
-        {(field) => <field.TextField label="Name" required />}
-      </form.AppField>
-      <form.AppField name="email">
-        {(field) => <field.TextField label="Email" type="email" required />}
-      </form.AppField>
-      <form.SubmitButton>Save profile</form.SubmitButton>
-      <p role="status">{status}</p>
-    </Form>
-  );
-}
-```
-
-`Form schema` installs per-field `onChange` validators for `FormField name`, which also run on submit. Bound `form.AppField` controls use validators passed to `useAppForm` or to the field itself, as in the example above. For whole-form or cross-field validation, use TanStack Form's `validators` option on `useAppForm`. Schema parsing can transform values, so use the parsed output when saving.
-
-## Compose any control
+## Compose controls with FormField (recommended)
 
 `FormField name` uses the surrounding `Form` context. Alternatively, pass `field` from a field render callback. Native inputs and event-based kit inputs use `onChange`; kit value controls such as `Select` and `NumberInput` automatically use `onValueChange`. Boolean values use checked binding. The wrapper also connects blur, labels, and errors.
 
@@ -158,6 +99,65 @@ export function ItemForm({
 Return or await the save promise inside `onSubmit` so submitting state covers the entire operation. `form.SubmitButton` sets `type="submit"`, shows loading state, and disables submission when `canSubmit` is false. `FormSubmit` exposes `(isSubmitting, canSubmit)` for custom buttons; it also accepts `form={form}` outside form context. A plain `Button` needs `type="submit"`.
 
 Keep validation errors next to controls; use persistent feedback for submission failures. See [Overlays & feedback](?path=/docs/guides-overlays-feedback--docs) for optional success notifications.
+
+## Bound fields (alternative)
+
+As an alternative for simple forms, render bound controls inside `form.AppField`. Each field handles its value, blur state, and error message. Available fields include text, textarea, password, number, OTP, select, multi-select, checkbox, switch, radio group, date, time, date range, and upload. Editor and avatar fields have separate module entry points; see the [catalog](?path=/docs/reference-catalog--docs).
+
+Keep Valibot rules in a shared module without browser dependencies. Export both the field map for `Form schema` and an object schema for parsing the submitted payload on the server. Client validation improves feedback; the server must validate incoming data again. `required` adds the control's required semantics and indicator; encode validation rules in the schema.
+
+```tsx
+import { useState } from 'react';
+import * as v from 'valibot';
+import { Form, useAppForm } from '@itclabs/react-ui';
+
+// These exports can live in a shared schema module imported by client and server.
+export const profileFields = {
+  name: v.pipe(v.string(), v.trim(), v.minLength(1, 'Enter a name.')),
+  email: v.pipe(v.string(), v.email('Enter a valid email address.')),
+};
+export const profileSchema = v.object(profileFields);
+
+export function parseProfileOnServer(payload: unknown) {
+  return v.parse(profileSchema, payload);
+}
+
+export function ProfileForm({
+  save,
+}: {
+  save: (profile: v.InferOutput<typeof profileSchema>) => Promise<void>;
+}) {
+  const [status, setStatus] = useState('');
+  const form = useAppForm({
+    defaultValues: { name: '', email: '' },
+    validators: { onChange: profileSchema },
+    onSubmit: async ({ value }) => {
+      setStatus('');
+      try {
+        await save(v.parse(profileSchema, value));
+        setStatus('Saved.');
+      } catch {
+        setStatus('Could not save. Try again.');
+      }
+    },
+  });
+
+  return (
+    <Form form={form} aria-label="Profile">
+      <form.AppField name="name">
+        {(field) => <field.TextField label="Name" required />}
+      </form.AppField>
+      <form.AppField name="email">
+        {(field) => <field.TextField label="Email" type="email" required />}
+      </form.AppField>
+      <form.SubmitButton>Save profile</form.SubmitButton>
+      <p role="status">{status}</p>
+    </Form>
+  );
+}
+```
+
+`Form schema` installs per-field `onChange` validators for `FormField name`, which also run on submit. Bound `form.AppField` controls use validators passed to `useAppForm` or to the field itself, as in the example above. For whole-form or cross-field validation, use TanStack Form's `validators` option on `useAppForm`. Schema parsing can transform values, so use the parsed output when saving.
 
 ## Custom wrappers
 

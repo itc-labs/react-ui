@@ -90,37 +90,48 @@ Native adapters are also the defaults. Replace them with framework adapters when
 
 ## 4. Build a first screen
 
-Render `FirstScreen` inside `UIRoot`. This complete module validates a required name with Valibot, submits through TanStack Form, and shows feedback using the mounted toast provider. Saving is a local demonstration; connect your own persistence in `onSubmit`.
+Render `FirstScreen` inside `UIRoot`. Wrap ordinary controls in `FormField` inside `Form`; `schema` holds the Valibot rule for each field, and `FormSubmit` gives your button the submitting state. Saving here is a local demonstration that shows a toast; connect your own persistence in `onSubmit`.
 
 ```tsx
 'use client';
 
 import * as v from 'valibot';
-import { Button, toast } from '@itclabs/react-ui/components';
-import { Form, useAppForm } from '@itclabs/react-ui/modules';
+import {
+  Button,
+  Form,
+  FormField,
+  FormSubmit,
+  Input,
+  toast,
+  useAppForm,
+} from '@itclabs/react-ui';
 
-const schema = v.object({
+const schema = {
   name: v.pipe(v.string(), v.trim(), v.minLength(1, 'Enter a name.')),
-});
+};
 
 export function FirstScreen() {
   const form = useAppForm({
     defaultValues: { name: '' },
-    validators: { onChange: schema },
     onSubmit: async () => {
       toast.success('Demo saved.');
     },
   });
 
   return (
-    <main>
+    <main className="grid max-w-md gap-4">
       <h1>Lorem ipsum</h1>
-      <Button onClick={() => toast.info('Ready to begin.')}>Show notification</Button>
-      <Form form={form} aria-label="Profile">
-        <form.AppField name="name">
-          {(field) => <field.TextField label="Name" required />}
-        </form.AppField>
-        <form.SubmitButton>Save</form.SubmitButton>
+      <Form form={form} schema={schema} aria-label="Profile" className="grid gap-4">
+        <FormField name="name" label="Name" required>
+          <Input placeholder="Lorem ipsum" />
+        </FormField>
+        <FormSubmit form={form}>
+          {(submitting) => (
+            <Button type="submit" loading={submitting}>
+              Save
+            </Button>
+          )}
+        </FormSubmit>
       </Form>
     </main>
   );
