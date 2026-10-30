@@ -23,7 +23,8 @@ const defaults = {
   onReorder,
 };
 
-const part = (id: string) => host.querySelector<HTMLElement>(`[data-testid="${id}"]`)!;
+const part = (id: string) =>
+  document.querySelector<HTMLElement>(`[data-testid="${id}"]`)!;
 
 const activator = (id: string) =>
   part(`list-item-${id}`).querySelector<HTMLElement>('[data-dnd-activator]')!;

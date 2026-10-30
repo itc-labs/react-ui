@@ -42,7 +42,8 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-const part = (id: string) => host.querySelector<HTMLElement>(`[data-testid="${id}"]`)!;
+const part = (id: string) =>
+  document.querySelector<HTMLElement>(`[data-testid="${id}"]`)!;
 
 const key = async (target: EventTarget, value: string) => {
   await act(async () => {
@@ -345,7 +346,7 @@ it('moves a pointer-dragged row to an empty panel and keeps an inert overlay', a
 
   await pointer(part('transfer-source-dragHandle-a'), 'pointerdown', 10);
   await pointer(document, 'pointermove', 20);
-  const overlay = host.querySelector<HTMLElement>('[inert][aria-hidden="true"]');
+  const overlay = document.querySelector<HTMLElement>('[inert][aria-hidden="true"]');
   expect(overlay?.textContent).toBe('Alpha');
   await pointer(document, 'pointermove', 400);
   await pointer(document, 'pointerup', 400);
