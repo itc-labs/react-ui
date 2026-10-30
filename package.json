@@ -1,6 +1,6 @@
 {
   "name": "@itclabs/react-ui",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "description": "Reusable React 19 UI kit: Tailwind v4 tokens, Radix-based components, data-driven overlays, forms, tables and theming.",
   "license": "MIT",
   "type": "module",
