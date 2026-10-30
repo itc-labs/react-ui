@@ -169,7 +169,7 @@ async function checkLeanGraph(path) {
   ];
   for (const [, specifier] of imports) {
     assert.ok(
-      !/^(?:@tiptap\/|recharts(?:\/|$)|react-easy-crop(?:\/|$)|react-is(?:\/|$))/.test(
+      !/^(?:@tiptap\/|recharts(?:\/|$)|react-easy-crop(?:\/|$)|react-is(?:\/|$)|prism-react-renderer(?:\/|$))/.test(
         specifier,
       ),
       `Optional dependency in core: ${specifier} (${relative(root, path)})`,
@@ -186,6 +186,7 @@ for (const subpath of [
   './modules',
   './navigation',
   './calendar',
+  './code-view',
   './templates',
   './theme',
   './theme/provider',
@@ -298,3 +299,10 @@ async function checkCalendarGraph(path) {
 
 assert.equal(typeof calendar.Calendar, 'function');
 await checkCalendarGraph(resolve(root, 'dist/modules/calendar/engine/index.js'));
+
+const codeView = await import(
+  pathToFileURL(resolve(root, packed.exports['./code-view'].import)).href
+);
+assert.equal(typeof codeView.CodeView, 'function');
+for (const barrel of ['components', 'modules'])
+  await checkLeanGraph(`${root}/dist/${barrel}/index.js`);

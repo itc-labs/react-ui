@@ -1,4 +1,5 @@
 export const enMessages = {
+  'codeView.label': 'Code sample',
   'jsonView.label': 'JSON viewer',
   'jsonView.expand': 'Expand {label}',
   'jsonView.collapse': 'Collapse {label}',

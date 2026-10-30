@@ -13,6 +13,7 @@ it('keeps ordinary imports free of heavy modules and within gzip budgets', () =>
   expect(Object.keys(sizes).sort()).toEqual([
     'Button',
     'Calendar',
+    'CodeView',
     'DataTable',
     'Dialog',
     'Form',

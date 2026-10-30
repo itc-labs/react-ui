@@ -10,6 +10,7 @@ const entries = {
   Icon: 'components/icon/index.tsx',
   Rating: 'components/rating/index.tsx',
   JsonView: 'components/json-view/index.tsx',
+  CodeView: 'modules/code-view/index.tsx',
   Button: 'components/button/index.tsx',
   Spinner: 'components/spinner/index.tsx',
   Dialog: 'components/dialog/index.tsx',
@@ -44,7 +45,7 @@ for (const [name, file] of Object.entries(entries)) {
     metafile: true,
     logLevel: 'silent',
   });
-  if (['Dialog', 'Button', 'Rating', 'JsonView'].includes(name)) {
+  if (['Dialog', 'Button', 'Rating', 'JsonView', 'CodeView'].includes(name)) {
     const registries = Object.keys(metafile.inputs).filter((input) =>
       /components\/icon\/kit-icons\.(?:ts|tsx)$/.test(input),
     );
@@ -66,6 +67,12 @@ for (const [name, file] of Object.entries(entries)) {
     if (forbidden.length)
       throw new Error(`Calendar imports optional features: ${forbidden}`);
   }
+  if (name === 'Root') {
+    const prism = Object.keys(metafile.inputs).filter((input) =>
+      /(?:prism-react-renderer|modules\/code-view\/)/.test(input),
+    );
+    if (prism.length) throw new Error(`Root imports Prism: ${prism}`);
+  }
   const bytes = outputFiles[0].contents;
   const gzip = gzipSync(bytes).length;
   sizes[name] = { minified: bytes.length, gzip };
@@ -82,6 +89,7 @@ for (const [name, limit] of Object.entries({
   Icon: 20_000,
   Rating: 20_000,
   JsonView: 22_000,
+  CodeView: 50_000,
   Button: 20_000,
   Spinner: 20_000,
   Dialog: 38_000,

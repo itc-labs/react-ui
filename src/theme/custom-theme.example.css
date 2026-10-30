@@ -13,6 +13,15 @@
  */
 :root {
   /* Palette */
+  /* CodeView: semantic syntax colors follow the host palette in light and dark themes. */
+  --color-code-surface: var(--color-surface);
+  --color-code-ink: var(--color-ink);
+  --color-code-comment: var(--color-muted);
+  --color-code-keyword: var(--color-accent);
+  --color-code-string: var(--color-success-700);
+  --color-code-number: var(--color-warning-700);
+  --color-code-function: var(--color-info-700);
+  --color-code-highlight: var(--color-selected);
   --color-canvas: #f5f5ef;
   --color-surface: #fcfcf8;
   --color-sidebar: #e9eddf;

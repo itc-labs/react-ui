@@ -1,5 +1,6 @@
 import type { UIMessages } from './types';
 export const viMessages = {
+  'codeView.label': 'Mẫu mã nguồn',
   'jsonView.label': 'Trình xem JSON',
   'jsonView.expand': 'Mở rộng {label}',
   'jsonView.collapse': 'Thu gọn {label}',

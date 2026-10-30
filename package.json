@@ -54,7 +54,8 @@
     "./avatar-upload": "./src/modules/avatar-upload/index.tsx",
     "./ui.css": "./dist/ui.css",
     "./navigation": "./src/modules/navigation/index.ts",
-    "./calendar": "./src/modules/calendar/index.tsx"
+    "./calendar": "./src/modules/calendar/index.tsx",
+    "./code-view": "./src/modules/code-view/index.tsx"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
@@ -272,6 +273,10 @@
       "./calendar": {
         "types": "./dist/modules/calendar/index.d.ts",
         "import": "./dist/modules/calendar/index.js"
+      },
+      "./code-view": {
+        "types": "./dist/modules/code-view/index.d.ts",
+        "import": "./dist/modules/code-view/index.js"
       }
     },
     "access": "public"

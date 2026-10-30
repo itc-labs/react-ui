@@ -272,24 +272,25 @@ Browse every component, prop and state in the [Storybook](https://react-ui-one-r
 
 ### Entry points
 
-| Import                                                 | Contents                                                                                                                          |
-| ------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------- |
-| `@itclabs/react-ui`                                    | Everything in the core kit: components, modules, templates, providers and helpers                                                 |
-| `@itclabs/react-ui/components`                         | Controls: Button, IconButton, Input, Select, Tag, Badge, Dialog, Drawer, DropdownMenu, Tabs, Tooltip, Progress (linear/circular)… |
-| `@itclabs/react-ui/modules`                            | Compositions: Form, DataTable, Sidebar, Navbar, Pagination, EmptyState, PageHeader, ProgressList…                                 |
-| `@itclabs/react-ui/templates`                          | Page layouts with slots (WorkspaceShell)                                                                                          |
-| `@itclabs/react-ui/navigation`                         | Router-agnostic `matchPath`, `resolveActiveNav`, `filterNavByAccess` (no React)                                                   |
-| `@itclabs/react-ui/calendar`                           | Event Calendar shell plus pure date, layout, filtering and interaction helpers                                                    |
-| `@itclabs/react-ui/hooks`                              | Shared hooks: click outside, debounced values and callbacks                                                                       |
-| `@itclabs/react-ui/theme`                              | `defineTheme`, theme types and typed colour references                                                                            |
-| `@itclabs/react-ui/i18n`                               | Locales, message types and `defineLocale` for custom languages                                                                    |
-| `@itclabs/react-ui/toast`                              | Hook-free `toast.success/error/info/warning`                                                                                      |
-| `@itclabs/react-ui/modal`                              | Hook-free `modal.confirm/alert/open`                                                                                              |
-| `@itclabs/react-ui/icons/outline/*`, `/icons/bold/*`   | Single icon glyphs, e.g. `@itclabs/react-ui/icons/outline/search` (lightest)                                                      |
-| `@itclabs/react-ui/icons/catalog`                      | Full icon catalog for `<Icon name="…">` beyond the kit's own icons                                                                |
-| `@itclabs/react-ui/editor`, `/chart`, `/avatar-upload` | Optional features with optional peer dependencies                                                                                 |
-| `@itclabs/react-ui/theme/styles.css`                   | Full theme for Tailwind v4 hosts (`tokens`, `fonts`, `base`, `vendor`, `motion` entries also available)                           |
-| `@itclabs/react-ui/ui.css`                             | Precompiled stylesheet for hosts without Tailwind                                                                                 |
+| Import                                                 | Contents                                                                                                                              |
+| ------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `@itclabs/react-ui`                                    | Everything in the core kit: components, modules, templates, providers and helpers                                                     |
+| `@itclabs/react-ui/components`                         | Controls: Button, IconButton, Input, Select, Tag, Badge, Dialog, Drawer, DropdownMenu, Tabs, Tooltip, Progress (linear/circular)…     |
+| `@itclabs/react-ui/modules`                            | Compositions: Form, DataTable, Sidebar, Navbar, Pagination, EmptyState, PageHeader, ProgressList…                                     |
+| `@itclabs/react-ui/templates`                          | Page layouts with slots (WorkspaceShell)                                                                                              |
+| `@itclabs/react-ui/navigation`                         | Router-agnostic `matchPath`, `resolveActiveNav`, `filterNavByAccess` (no React)                                                       |
+| `@itclabs/react-ui/calendar`                           | Event Calendar shell plus pure date, layout, filtering and interaction helpers                                                        |
+| `@itclabs/react-ui/code-view`                          | Read-only syntax-highlighted CodeView with line numbers, highlighted lines, wrapping and clipboard copying; isolated from all barrels |
+| `@itclabs/react-ui/hooks`                              | Shared hooks: click outside, debounced values and callbacks                                                                           |
+| `@itclabs/react-ui/theme`                              | `defineTheme`, theme types and typed colour references                                                                                |
+| `@itclabs/react-ui/i18n`                               | Locales, message types and `defineLocale` for custom languages                                                                        |
+| `@itclabs/react-ui/toast`                              | Hook-free `toast.success/error/info/warning`                                                                                          |
+| `@itclabs/react-ui/modal`                              | Hook-free `modal.confirm/alert/open`                                                                                                  |
+| `@itclabs/react-ui/icons/outline/*`, `/icons/bold/*`   | Single icon glyphs, e.g. `@itclabs/react-ui/icons/outline/search` (lightest)                                                          |
+| `@itclabs/react-ui/icons/catalog`                      | Full icon catalog for `<Icon name="…">` beyond the kit's own icons                                                                    |
+| `@itclabs/react-ui/editor`, `/chart`, `/avatar-upload` | Optional features with optional peer dependencies                                                                                     |
+| `@itclabs/react-ui/theme/styles.css`                   | Full theme for Tailwind v4 hosts (`tokens`, `fonts`, `base`, `vendor`, `motion` entries also available)                               |
+| `@itclabs/react-ui/ui.css`                             | Precompiled stylesheet for hosts without Tailwind                                                                                     |
 
 ## Optional features
 
