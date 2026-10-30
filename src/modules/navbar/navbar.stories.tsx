@@ -8,15 +8,15 @@ import { WorkspaceShell } from '../../templates/workspace-shell';
 import { Navbar, type NavbarItem, type NavbarProps } from './index';
 
 const items: NavbarItem<string>[] = [
-  { id: 'home', label: 'Tổng quan', icon: 'home', href: '/', exact: true },
+  { id: 'home', label: 'Overview', icon: 'home', href: '/', exact: true },
   {
     id: 'settings',
     type: 'dropdown',
-    label: 'Cài đặt',
+    label: 'Settings',
     icon: 'settings',
     children: [
-      { id: 'profile', label: 'Hồ sơ', href: '/settings/profile', icon: 'user' },
-      { id: 'team', label: 'Nhóm', href: '/settings/team', access: 'team:read' },
+      { id: 'profile', label: 'Profile', href: '/settings/profile', icon: 'user' },
+      { id: 'team', label: 'Team', href: '/settings/team', access: 'team:read' },
     ],
   },
 ];
@@ -25,30 +25,30 @@ const megaItems: NavbarItem<string>[] = [
   {
     id: 'resources',
     type: 'mega',
-    label: 'Tài nguyên',
+    label: 'Resources',
     icon: 'bookOpen',
     sections: [
       {
         id: 'guides',
-        title: 'Hướng dẫn',
+        title: 'Guides',
         items: [
           {
             id: 'start',
-            label: 'Bắt đầu',
+            label: 'Get started',
             href: '/guides/start',
             description: 'Lorem ipsum dolor sit amet.',
             icon: 'bookOpen',
           },
-          { id: 'examples', label: 'Ví dụ', href: '/guides/examples' },
+          { id: 'examples', label: 'Examples', href: '/guides/examples' },
         ],
       },
       {
         id: 'support',
-        title: 'Hỗ trợ',
+        title: 'Support',
         items: [
           {
             id: 'help',
-            label: 'Trợ giúp',
+            label: 'Help',
             href: '/help',
             description: 'Consectetur adipiscing elit.',
             icon: 'info',
@@ -80,7 +80,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'Thanh điều hướng ngang với dropdown và mega menu trên desktop; Drawer trên màn hình nhỏ hơn lg. Host truyền currentPath và canAccess; liên kết dùng UiLink. Hỗ trợ brand, actions và hàng secondary.',
+          'Horizontal navigation with dropdowns and mega menus on desktop, and a Drawer below lg. The host supplies currentPath and canAccess; links use UiLink. Supports brand, actions and a secondary row.',
       },
     },
   },
@@ -96,7 +96,7 @@ export const RouteActive: Story = {
     docs: {
       description: {
         story:
-          'Đổi currentPath trong Controls để làm nổi bật mục cha và liên kết hiện tại.',
+          'Change currentPath in Controls to highlight the parent item and current link.',
       },
     },
   },
@@ -107,15 +107,15 @@ export const PermissionFiltered: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await userEvent.click(canvas.getByTestId('navbar-item-settings-trigger'));
-    await expect(canvas.queryByRole('link', { name: 'Nhóm' })).not.toBeInTheDocument();
-    await expect(canvas.getByRole('link', { name: 'Hồ sơ' })).toBeVisible();
+    await expect(canvas.queryByRole('link', { name: 'Team' })).not.toBeInTheDocument();
+    await expect(canvas.getByRole('link', { name: 'Profile' })).toBeVisible();
     await userEvent.keyboard('{Escape}');
   },
   parameters: {
     docs: {
       description: {
         story:
-          'Ẩn liên kết bị từ chối và bỏ nhóm rỗng. Host quản lý quyền truy cập route và dữ liệu.',
+          'Hides denied links and removes empty groups. The host manages route and data access.',
       },
     },
   },
@@ -129,13 +129,13 @@ export const WithActions: Story = {
   args: {
     actions: (
       <>
-        <IconButton icon="bell" label="Thông báo" variant="secondary" badge={3} />
+        <IconButton icon="bell" label="Notifications" variant="secondary" badge={3} />
         <UserMenu
           name="Lorem Ipsum"
           description="Dolor sit amet"
           items={[
-            { id: 'profile', label: 'Hồ sơ', href: '/settings/profile' },
-            { id: 'sign-out', label: 'Đăng xuất' },
+            { id: 'profile', label: 'Profile', href: '/settings/profile' },
+            { id: 'sign-out', label: 'Sign out' },
           ]}
         />
       </>
@@ -155,7 +155,7 @@ export const Mobile: Story = {
     await userEvent.click(canvas.getByTestId('navbar-mobileTrigger'));
     const page = within(canvasElement.ownerDocument.body);
     await expect(page.getByRole('dialog')).toBeVisible();
-    await expect(page.getByRole('link', { name: /Bắt đầu/ })).toHaveAttribute(
+    await expect(page.getByRole('link', { name: /Get started/ })).toHaveAttribute(
       'aria-current',
       'page',
     );
@@ -195,9 +195,9 @@ export const Switcher: Story = {
   args: {
     switcher: (
       <Tabs defaultValue="personal" variant="segmented" size="sm">
-        <TabsList aria-label="Không gian">
-          <TabsTrigger value="personal">Cá nhân</TabsTrigger>
-          <TabsTrigger value="team">Nhóm</TabsTrigger>
+        <TabsList aria-label="Workspace">
+          <TabsTrigger value="personal">Personal</TabsTrigger>
+          <TabsTrigger value="team">Team</TabsTrigger>
         </TabsList>
       </Tabs>
     ),

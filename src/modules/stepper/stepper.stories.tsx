@@ -2,9 +2,9 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, within } from 'storybook/test';
 import { Stepper } from './index';
 const steps = [
-  { id: 'entry', label: 'Nhập thông tin' },
-  { id: 'review', label: 'Kiểm tra' },
-  { id: 'finish', label: 'Hoàn tất' },
+  { id: 'entry', label: 'Enter details' },
+  { id: 'review', label: 'Review' },
+  { id: 'finish', label: 'Finish' },
 ];
 const meta = {
   title: 'Modules/Stepper',
@@ -14,7 +14,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'Tiến trình read-only: host truyền steps/currentStep. Một aria-current=step; các bước trước có text Đã hoàn tất cho screen reader. Không thay Tabs, không tự chuyển bước hoặc gọi API.',
+          'Read-only progress: the host supplies steps/currentStep. One step has aria-current=step; earlier steps include Completed text for screen readers. Use Tabs for tab navigation. The host handles step changes and API calls.',
       },
     },
   },
@@ -29,12 +29,12 @@ export const SecondStep: Story = {
   args: { currentStep: 'review' },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    const list = canvas.getByRole('list', { name: 'Các bước' });
+    const list = canvas.getByRole('list', { name: 'Steps' });
     await expect(list.querySelectorAll('[aria-current="step"]')).toHaveLength(1);
     await expect(list.querySelector('[aria-current="step"]')).toHaveTextContent(
-      'Kiểm tra',
+      'Review',
     );
-    await expect(canvas.getByText('— Đã hoàn tất')).toBeInTheDocument();
+    await expect(canvas.getByText('— Completed')).toBeInTheDocument();
   },
 };
 
@@ -42,8 +42,8 @@ export const LongLabels: Story = {
   tags: ['example'],
   args: {
     steps: [
-      { id: 'entry', label: 'Nhập một danh sách ý tưởng rất dài để kiểm tra mobile' },
-      { id: 'review', label: 'Kiểm tra và xác nhận thông tin' },
+      { id: 'entry', label: 'Lorem ipsum dolor sit amet consectetur adipiscing elit' },
+      { id: 'review', label: 'Review and confirm details' },
     ],
     currentStep: 'review',
   },
@@ -55,9 +55,9 @@ export const CustomClasses: Story = {
     <Stepper
       currentStep="b"
       steps={[
-        { id: 'a', label: 'Bước 1' },
-        { id: 'b', label: 'Bước 2' },
-        { id: 'c', label: 'Bước 3' },
+        { id: 'a', label: 'Step 1' },
+        { id: 'b', label: 'Step 2' },
+        { id: 'c', label: 'Step 3' },
       ]}
       classNames={{
         root: 'gap-4 rounded-panel bg-surface p-5',

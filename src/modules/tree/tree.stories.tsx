@@ -9,7 +9,7 @@ function Demo() {
   return (
     <div className="grid max-w-md gap-4">
       <Tree
-        label="Cây danh mục minh họa"
+        label="Example category tree"
         value={value}
         onValueChange={setValue}
         nodes={[
@@ -22,10 +22,10 @@ function Demo() {
             ],
           },
           { id: 'gifts', label: 'Gifts' },
-          { id: 'disabled', label: 'Không khả dụng', disabled: true },
+          { id: 'disabled', label: 'Unavailable', disabled: true },
         ]}
       />
-      <output>Đang chọn: {value || 'chưa có'}</output>
+      <output>Selected: {value || 'none'}</output>
     </div>
   );
 }
@@ -34,17 +34,21 @@ const meta = {
   title: 'Modules/Tree',
   component: Tree,
   args: {
-    label: 'Danh mục',
+    label: 'Categories',
     nodes: [
-      { id: 'a', label: 'Nhóm A', children: [{ id: 'a1', label: 'Mục A1' }] },
-      { id: 'b', label: 'Nhóm B' },
+      {
+        id: 'a',
+        label: 'Lorem ipsum',
+        children: [{ id: 'a1', label: 'Dolor sit amet' }],
+      },
+      { id: 'b', label: 'Consectetur' },
     ],
   },
   parameters: {
     docs: {
       description: {
         component:
-          'Danh sách phân cấp có thể mở/đóng từng nhánh và chọn một mục. nodes cung cấp ID ổn định; hỗ trợ phím mũi tên, Home/End và các mục disabled.',
+          'A hierarchical list with expandable branches and single selection. Supply stable IDs in nodes. Supports arrow keys, Home/End and disabled items.',
       },
     },
   },
@@ -58,7 +62,7 @@ export const CustomClasses: Story = {
   tags: ['customization'],
   render: () => (
     <Tree
-      label="Danh mục"
+      label="Categories"
       nodes={[
         {
           id: 'a',
@@ -85,6 +89,6 @@ export const KeyboardNavigation: Story = {
     const canvas = within(canvasElement);
     await userEvent.click(canvas.getByText('Pets'));
     await userEvent.keyboard('{ArrowRight}{ArrowDown}{Enter}');
-    await expect(canvas.getByText('Đang chọn: cats')).toBeVisible();
+    await expect(canvas.getByText('Selected: cats')).toBeVisible();
   },
 };

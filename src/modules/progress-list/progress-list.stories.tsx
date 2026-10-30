@@ -5,11 +5,11 @@ const meta = {
   component: ProgressList,
   args: {
     items: [
-      { id: 'a', label: 'Mục A', value: 6, max: 10 },
-      { id: 'b', label: 'Mục B', percent: 85 },
+      { id: 'a', label: 'Lorem ipsum', value: 6, max: 10 },
+      { id: 'b', label: 'Dolor sit amet', percent: 85 },
       {
         id: 'c',
-        label: 'Mục C',
+        label: 'Consectetur adipiscing',
         percent: 20,
         secondaryText: 'Lorem ipsum dolor sit amet.',
       },
@@ -19,7 +19,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'Biểu đồ thanh tiến độ từ danh sách dữ liệu, sắp xếp theo phần trăm và chọn màu theo ngưỡng. Ứng dụng cung cấp nhãn và giá trị.',
+          'Displays progress bars from a data list, with percentage sorting and threshold colors. The application supplies labels and values.',
       },
     },
   },
@@ -41,8 +41,8 @@ export const Tones: Story = {
   tags: ['variants'],
   args: {
     items: [
-      { id: 'a', label: 'Mục A', percent: 30, tone: 'info' },
-      { id: 'b', label: 'Mục B', percent: 70, tone: 'success' },
+      { id: 'a', label: 'Lorem ipsum', percent: 30, tone: 'info' },
+      { id: 'b', label: 'Dolor sit amet', percent: 70, tone: 'success' },
     ],
   },
 };
@@ -60,8 +60,8 @@ export const States: Story = {
       <ProgressList items={[]} />
       <ProgressList
         items={[
-          { id: 'zero', label: 'Chưa bắt đầu', percent: 0 },
-          { id: 'complete', label: 'Hoàn tất', percent: 100 },
+          { id: 'zero', label: 'Not started', percent: 0 },
+          { id: 'complete', label: 'Completed', percent: 100 },
         ]}
       />
     </div>
