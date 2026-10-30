@@ -1,59 +1,208 @@
-import { Meta, Canvas } from '@storybook/addon-docs/blocks';
-import * as Buttons from '../components/button/button.stories';
-import * as Inputs from '../components/input/input.stories';
-import * as Textareas from '../components/textarea/textarea.stories';
-import * as Forms from '../modules/form/form.stories';
+import { Meta } from '@storybook/addon-docs/blocks';
 
-<Meta title="Overview/Forms" />
+<Meta title="Guides/Forms" />
 
 # Forms
 
-Control nhập liệu theo một nhịp kích thước và typography. Form dùng TanStack Form + Valibot, có submit thật, field state và lỗi liên kết với control.
+`useAppForm` connects TanStack Form state to the kit's controls. Use bound fields for standard inputs, or wrap a control in `FormField` to compose your own layout. `Form` supplies context, prevents native submission, and focuses the first element marked `aria-invalid="true"` after submission completes.
 
-## Button variants
+## Bound fields and shared schemas
 
-<Canvas of={Buttons.Variants} />
+Render bound controls inside `form.AppField`. Each field handles its value, blur state, and error message. Available fields include text, textarea, password, number, OTP, select, multi-select, checkbox, switch, radio group, date, time, date range, and upload. Editor and avatar fields have separate module entry points; see the [catalog](?path=/docs/reference-catalog--docs).
 
-Primary cho hành động chính; secondary cho tác vụ phụ; ghost cho quay lại; danger chỉ cho thao tác có tính phá hủy. Không dùng Button mặc định như submit: cần `type="submit"` hoặc Form.SubmitButton.
+Keep Valibot rules in a shared module without browser dependencies. Export both the field map for `Form schema` and an object schema for parsing the submitted payload on the server. Client validation improves feedback; the server must validate incoming data again. `required` adds the control's required semantics and indicator; encode validation rules in the schema.
 
-## Button sizes
+```tsx
+import { useState } from 'react';
+import * as v from 'valibot';
+import { Form, useAppForm } from '@itclabs/react-ui';
 
-<Canvas of={Buttons.Sizes} />
+// These exports can live in a shared schema module imported by client and server.
+export const profileFields = {
+  name: v.pipe(v.string(), v.trim(), v.minLength(1, 'Enter a name.')),
+  email: v.pipe(v.string(), v.email('Enter a valid email address.')),
+};
+export const profileSchema = v.object(profileFields);
 
-## Button states
+export function parseProfileOnServer(payload: unknown) {
+  return v.parse(profileSchema, payload);
+}
 
-<Canvas of={Buttons.States} />
+export function ProfileForm({
+  save,
+}: {
+  save: (profile: v.InferOutput<typeof profileSchema>) => Promise<void>;
+}) {
+  const [status, setStatus] = useState('');
+  const form = useAppForm({
+    defaultValues: { name: '', email: '' },
+    validators: { onChange: profileSchema },
+    onSubmit: async ({ value }) => {
+      setStatus('');
+      try {
+        await save(v.parse(profileSchema, value));
+        setStatus('Saved.');
+      } catch {
+        setStatus('Could not save. Try again.');
+      }
+    },
+  });
 
-Loading ngăn gửi lại và có aria-busy. Luôn có chữ mô tả; không dùng spinner đơn độc.
+  return (
+    <Form form={form} aria-label="Profile">
+      <form.AppField name="name">
+        {(field) => <field.TextField label="Name" required />}
+      </form.AppField>
+      <form.AppField name="email">
+        {(field) => <field.TextField label="Email" type="email" required />}
+      </form.AppField>
+      <form.SubmitButton>Save profile</form.SubmitButton>
+      <p role="status">{status}</p>
+    </Form>
+  );
+}
+```
 
-## Input sizes
+`Form schema` installs per-field `onChange` validators for `FormField name`, which also run on submit. Bound `form.AppField` controls use validators passed to `useAppForm` or to the field itself, as in the example above. For whole-form or cross-field validation, use TanStack Form's `validators` option on `useAppForm`. Schema parsing can transform values, so use the parsed output when saving.
 
-<Canvas of={Inputs.Sizes} />
+## Compose any control
 
-## Input states
+`FormField name` uses the surrounding `Form` context. Alternatively, pass `field` from a field render callback. Native inputs and event-based kit inputs use `onChange`; kit value controls such as `Select` and `NumberInput` automatically use `onValueChange`. Boolean values use checked binding. The wrapper also connects blur, labels, and errors.
 
-<Canvas of={Inputs.States} />
+`NumberInput` and `NumberField` use `number | null`: `null` means empty, while `0` is a real value. Preserve that distinction in defaults, validation, and payloads. Do not replace an empty value with zero using a truthiness fallback. NumberInput displays dot thousands separators and a comma decimal separator; form state remains numeric.
 
-Label tồn tại độc lập với placeholder. Hint giải thích cách nhập; error thay hint và nối qua aria-describedby. Lỗi không chỉ dùng màu đỏ.
+```tsx
+import { useState } from 'react';
+import * as v from 'valibot';
+import {
+  Button,
+  Checkbox,
+  Form,
+  FormField,
+  FormSubmit,
+  Input,
+  NumberInput,
+  Select,
+  useAppForm,
+} from '@itclabs/react-ui';
 
-## Textarea
+export function ItemForm({
+  save,
+}: {
+  save: (value: {
+    title: string;
+    quantity: number | null;
+    status: string;
+    enabled: boolean;
+  }) => Promise<void>;
+}) {
+  const [error, setError] = useState('');
+  const form = useAppForm({
+    defaultValues: {
+      title: '',
+      quantity: null as number | null,
+      status: 'draft',
+      enabled: false,
+    },
+    onSubmit: async ({ value }) => {
+      setError('');
+      try {
+        await save(value);
+      } catch {
+        setError('Could not save. Try again.');
+      }
+    },
+  });
 
-<Canvas of={Textareas.States} />
+  return (
+    <Form
+      form={form}
+      schema={{
+        title: v.pipe(v.string(), v.minLength(1, 'Enter a title.')),
+        quantity: v.pipe(
+          v.number('Enter a quantity.'),
+          v.minValue(0, 'Use zero or more.'),
+        ),
+      }}
+    >
+      <FormField name="title" label="Title" required>
+        <Input />
+      </FormField>
+      <FormField name="quantity" label="Quantity" required>
+        <NumberInput min={0} />
+      </FormField>
+      <FormField name="status" label="Status">
+        <Select
+          options={[
+            { value: 'draft', label: 'Draft' },
+            { value: 'published', label: 'Published' },
+          ]}
+        />
+      </FormField>
+      <FormField name="enabled">
+        <Checkbox label="Enable item" />
+      </FormField>
+      <FormSubmit>
+        {(isSubmitting, canSubmit) => (
+          <Button type="submit" loading={isSubmitting} disabled={!canSubmit}>
+            Save item
+          </Button>
+        )}
+      </FormSubmit>
+      {error && <p role="alert">{error}</p>}
+    </Form>
+  );
+}
+```
 
-## Form theo composition
+Return or await the save promise inside `onSubmit` so submitting state covers the entire operation. `form.SubmitButton` sets `type="submit"`, shows loading state, and disables submission when `canSubmit` is false. `FormSubmit` exposes `(isSubmitting, canSubmit)` for custom buttons; it also accepts `form={form}` outside form context. A plain `Button` needs `type="submit"`.
 
-<Canvas of={Forms.ComposedFields} />
+Keep validation errors next to controls; use persistent feedback for submission failures. See [Overlays & feedback](?path=/docs/guides-overlays-feedback--docs) for optional success notifications.
 
-Form nhận schema theo field. FormField bọc control thông thường, tự bind value/checked, blur và lỗi; FormSubmit cho phép tự bố trí nút submit. Giá trị và validation được quản lý bằng TanStack Form + Valibot. Không cần dùng field.TextField nếu muốn viết control trực tiếp. Với custom wrapper, dùng binding hoặc mapValue/mapOnChange.
+## Custom wrappers
 
-## Bound fields
+An opaque wrapper does not inherit a kit control's auto-binding marker. Set `binding="value"` for `value`/`onValueChange`, `binding="checked"` for `checked`/`onCheckedChange`, or `binding="native"` for event-based `onChange`. Use `mapValue` and `mapOnChange` when display and stored values differ. `mapOnChange` receives the extracted value, after native event handling.
 
-<Canvas of={Forms.ValidatedSubmit} />
+Forward the injected ID, name, blur handler, label, error, and ref to the actual control so accessibility and error focus keep working. For other callback shapes, use a `FormField` render function and bind the field manually.
 
-Bấm Lưu khi field trống để xem validation; nhập giá trị hợp lệ để xem kết quả submit.
+```tsx
+import * as v from 'valibot';
+import {
+  Form,
+  FormField,
+  NumberInput,
+  useAppForm,
+  type NumberInputProps,
+} from '@itclabs/react-ui';
 
-Select dùng React Select cho toàn bộ kit. SelectField/MultiSelectField bind value/blur/error trực tiếp vào TanStack Form; CheckboxField/SwitchField/RadioGroupField cũng bind thật. Xem Overview/Controls & Overlays cho các control độc lập. Ứng dụng cung cấp options và xử lý việc tải dữ liệu.
+function PercentageInput(props: NumberInputProps) {
+  return <NumberInput {...props} min={0} max={100} />;
+}
 
-## Toàn bộ bound controls
+export function RateForm({ save }: { save: (rate: number | null) => Promise<void> }) {
+  const form = useAppForm({
+    defaultValues: { rate: null as number | null },
+    onSubmit: async ({ value }) => {
+      await save(value.rate);
+    },
+  });
 
-<Canvas of={Forms.AllBoundControls} />
+  return (
+    <Form
+      form={form}
+      schema={{ rate: v.nullable(v.pipe(v.number(), v.minValue(0), v.maxValue(1))) }}
+    >
+      <FormField
+        name="rate"
+        label="Rate (%)"
+        binding="value"
+        mapValue={(value) => (typeof value === 'number' ? value * 100 : null)}
+        mapOnChange={(value) => (typeof value === 'number' ? value / 100 : null)}
+      >
+        <PercentageInput />
+      </FormField>
+      <form.SubmitButton>Save rate</form.SubmitButton>
+    </Form>
+  );
+}
+```

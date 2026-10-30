@@ -1,35 +1,120 @@
-import { Meta, Canvas } from '@storybook/addon-docs/blocks';
-import * as Hooks from '../hooks/hooks.stories';
-import * as Selects from '../components/select/select.stories';
+import { Meta } from '@storybook/addon-docs/blocks';
 
-<Meta title="Overview/Hooks" />
+<Meta title="Reference/Hooks" />
 
 # Hooks
 
-Import từ `@itclabs/react-ui/hooks`. Hook không gọi API, không lưu dữ liệu và không thay thế interaction/focus handling của Radix.
+Import these utilities from `@itclabs/react-ui/hooks`. They manage browser interaction and timing; applications own requests and persistence. Use the kit's overlay components for focus management, keyboard interaction, and accessible dismissal.
 
-## Click outside
+## useClickOutside
 
-`useClickOutside(refOrRefs, handler, enabled)` hỗ trợ nhiều vùng, portal, pointerdown capture và shadow composedPath. Đưa cả trigger/portal refs vào danh sách vùng bên trong. Unmount hoặc disabled sẽ gỡ listener.
+`useClickOutside(refOrRefs, handler, enabled = true)` listens for `pointerdown` in the capture phase. Pass one ref or an array of refs, including portal content and its trigger, to treat multiple regions as inside. It checks both containment and the event's composed path for shadow DOM support. Disabling the hook or unmounting removes listeners.
 
-<Canvas of={Hooks.ClickOutside} />
+```tsx
+import { useRef, useState } from 'react';
+import { useClickOutside } from '@itclabs/react-ui/hooks';
 
-## Debounce value
+export function OutsidePointerExample() {
+  const region = useRef<HTMLDivElement>(null);
+  const [outside, setOutside] = useState(false);
+  useClickOutside(region, () => setOutside(true));
 
-`useDebounce(value, delay)` giữ raw input cập nhật ngay và trả giá trị đã debounce cho xử lý tốn chi phí.
+  return (
+    <>
+      <div ref={region}>
+        <button type="button" onClick={() => setOutside(false)}>
+          Reset
+        </button>
+        <p>Lorem ipsum dolor sit amet.</p>
+      </div>
+      <p role="status">
+        {outside ? 'Pointer pressed outside.' : 'Press outside the region.'}
+      </p>
+    </>
+  );
+}
+```
 
-<Canvas of={Hooks.DebouncedValue} />
+This hook detects an outside pointer press; it does not add Escape handling, trap focus, or restore focus. Use [Dialog, Drawer, or Popover](?path=/docs/guides-overlays-feedback--docs) for those interactions.
 
-## Debounce callback
+## useDebounce
 
-`useDebouncedCallback(fn, delay)` có cancel/flush/isPending, dùng callback và arguments mới nhất. Delay đổi/unmount sẽ hủy timer. isPending là hàm đọc trạng thái, không tự kích hoạt render.
+`useDebounce(value, delay = 300)` returns a value after it settles for the given delay in milliseconds. Keep raw input state separate so typing stays responsive. Pending updates are canceled when the value or delay changes or the component unmounts.
 
-<Canvas of={Hooks.DebouncedCallback} />
+```tsx
+import { useState } from 'react';
+import { useDebounce } from '@itclabs/react-ui/hooks';
 
-## Select search
+export function FilterExample() {
+  const [query, setQuery] = useState('');
+  const settledQuery = useDebounce(query, 300);
+  const items = ['Lorem ipsum', 'Dolor sit amet'];
+  const matches = items.filter((item) =>
+    item.toLowerCase().includes(settledQuery.toLowerCase()),
+  );
 
-Select có onInputChange tức thời và onSearchChange debounce 300 ms, chỉnh bằng searchDebounceMs. Search local vẫn lọc ngay. Clear/select/close hủy query đang chờ; IME chỉ gửi sau compositionend. Load-more bị chặn khi query mới chưa settle.
+  return (
+    <>
+      <label>
+        Filter items
+        <input value={query} onChange={(event) => setQuery(event.target.value)} />
+      </label>
+      <ul>
+        {matches.map((item) => (
+          <li key={item}>{item}</li>
+        ))}
+      </ul>
+    </>
+  );
+}
+```
 
-<Canvas of={Selects.DebouncedSearch} />
+## useDebouncedCallback
 
-Host cần cancel/ignore request cũ ngay khi raw input đổi; callback debounce không tự hủy HTTP đã gửi. Khi host đã debounce, đặt searchDebounceMs=0 để tránh debounce hai lần. Giá trị đã chọn vẫn được giữ qua search/phân trang.
+`useDebouncedCallback(callback, delay = 300)` returns a trailing debounced function that uses the latest callback and the latest scheduled arguments. The delay must be finite and non-negative; zero invokes immediately. Delay changes and unmount cancel pending calls.
+
+- `cancel()` discards a pending call.
+- `flush()` executes a pending call immediately and returns its result, or `undefined` if none is pending.
+- `isPending()` reads timer state; it does not trigger a React render.
+
+```tsx
+import { useState } from 'react';
+import { useDebouncedCallback } from '@itclabs/react-ui/hooks';
+
+export function DebouncedPreview() {
+  const [draft, setDraft] = useState('');
+  const [preview, setPreview] = useState('');
+  const updatePreview = useDebouncedCallback((text: string) => setPreview(text), 300);
+
+  return (
+    <>
+      <label>
+        Preview text
+        <input
+          value={draft}
+          onChange={(event) => {
+            const text = event.target.value;
+            setDraft(text);
+            updatePreview(text);
+          }}
+        />
+      </label>
+      <button type="button" onClick={() => updatePreview.flush()}>
+        Update now
+      </button>
+      <button type="button" onClick={() => updatePreview.cancel()}>
+        Cancel pending update
+      </button>
+      <p aria-live="polite">{preview}</p>
+    </>
+  );
+}
+```
+
+Canceling a timer does not cancel work that has already started. Applications must abort or ignore stale network requests themselves.
+
+## Select search timing
+
+`Select` reports raw input immediately through `onInputChange`. `onSearchChange` is debounced by 300 ms by default; configure `searchDebounceMs` or set it to zero when the host already debounces. Local filtering remains immediate. Clear, selection, and menu close cancel pending search notifications; IME search waits until composition ends. Load-more is blocked while a new query is pending.
+
+Cancel or invalidate old requests as soon as raw input changes so stale results cannot replace newer results. The debounce callback does not cancel HTTP requests. Selected values remain available across searches and pagination. See [Forms](?path=/docs/guides-forms--docs) for bound Select fields.
