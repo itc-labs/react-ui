@@ -1,5 +1,6 @@
 'use client';
 
+import { KitIcon } from '../../components/icon/kit-icon';
 import { KitIconButton } from '../../components/icon-button/kit-icon-button';
 import { ChevronLeftIcon } from '../../components/icon/outline/chevron-left';
 import { ChevronLeftIcon as ChevronLeftBoldIcon } from '../../components/icon/bold/chevron-left';
@@ -8,7 +9,15 @@ import { ChevronRightIcon as ChevronRightBoldIcon } from '../../components/icon/
 
 import { useId, useRef, useImperativeHandle } from 'react';
 import { Button } from '../../components/button';
-import { Select } from '../../components/select';
+import { DropdownMenu as DropdownMenuPrimitive } from 'radix-ui';
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+} from '../../components/dropdown-menu';
+import { menuItemClass } from '../../components/dropdown-menu/classes';
+import { ChevronDownIcon } from '../../components/icon/outline/chevron-down';
+import { ChevronDownIcon as ChevronDownBoldIcon } from '../../components/icon/bold/chevron-down';
 import { Spinner } from '../../components/spinner';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../components/tabs';
 import { cn, partTestId } from '../../components/common';
@@ -341,18 +350,44 @@ export function Calendar<TData = unknown>(props: CalendarProps<TData>) {
                   </TabsList>
                 </div>
                 <div className={cn('w-40 sm:hidden', classNames?.viewSelect)}>
-                  <Select
-                    aria-label={t('calendar.views')}
-                    value={state.view}
-                    options={state.views.map((item) => ({
-                      value: item,
-                      label: t(`calendar.views.${item}`),
-                    }))}
-                    onValueChange={(next) => {
-                      if (next) state.onViewChange(next as CalendarView);
-                    }}
-                    data-testid={partTestId(testId, 'viewSelect')}
-                  />
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        aria-label={t('calendar.views')}
+                        data-testid={partTestId(testId, 'viewSelect')}
+                        variant="secondary"
+                        className="w-full justify-between"
+                      >
+                        {t(`calendar.views.${state.view}`)}
+                        <KitIcon
+                          name="chevronDown"
+                          builtin={{
+                            outline: ChevronDownIcon,
+                            bold: ChevronDownBoldIcon,
+                          }}
+                        />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent aria-label={t('calendar.views')}>
+                      <DropdownMenuPrimitive.RadioGroup
+                        value={state.view}
+                        onValueChange={(next) => {
+                          if (next) state.onViewChange(next as CalendarView);
+                        }}
+                      >
+                        {state.views.map((item) => (
+                          <DropdownMenuPrimitive.RadioItem
+                            key={item}
+                            value={item}
+                            className={cn(menuItemClass, 'relative pl-8')}
+                          >
+                            <DropdownMenuPrimitive.ItemIndicator className="absolute left-3 size-2 rounded-full bg-current" />
+                            {t(`calendar.views.${item}`)}
+                          </DropdownMenuPrimitive.RadioItem>
+                        ))}
+                      </DropdownMenuPrimitive.RadioGroup>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
               </>
             )}

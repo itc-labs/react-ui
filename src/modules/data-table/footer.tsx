@@ -8,7 +8,16 @@ import { partTestId } from '../../components/common/testing';
 import { useUILocale } from '../../i18n/provider';
 import { cn } from '../../components/common';
 import type { DataTableView } from './use-data-table';
-import { Select } from '../../components/select';
+import { DropdownMenu as DropdownMenuPrimitive } from 'radix-ui';
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+} from '../../components/dropdown-menu';
+import { menuItemClass } from '../../components/dropdown-menu/classes';
+import { ChevronDownIcon } from '../../components/icon/outline/chevron-down';
+import { ChevronDownIcon as ChevronDownBoldIcon } from '../../components/icon/bold/chevron-down';
+import { Button } from '../../components/button';
 import { Pagination } from '../pagination';
 
 export function DataTableFooter<T>({
@@ -67,27 +76,47 @@ export function DataTableFooter<T>({
         )}
       </div>
       <div className="flex flex-wrap items-center gap-4">
-        <Select
-          data-testid={partTestId(view.testId, 'pageSize')}
-          aria-label={t('table.pageSize')}
-          size="sm"
-          searchable={false}
-          rootClassName={cn('min-w-20', classNames?.pageSize)}
-          disabled={loading}
-          value={String(state.pagination.pageSize)}
-          options={sizes.map((size) => ({
-            value: String(size),
-            label: t('table.rows', { count: size }),
-          }))}
-          onValueChange={(value) => {
-            if (value)
-              change({
-                ...state,
-                pagination: { pageIndex: 0, pageSize: Number(value) },
-              });
-          }}
-          menuPlacement="auto"
-        />
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              data-testid={partTestId(view.testId, 'pageSize')}
+              aria-label={t('table.pageSize')}
+              variant="secondary"
+              size="sm"
+              className={cn('min-w-20', classNames?.pageSize)}
+              disabled={loading}
+            >
+              {t('table.rows', { count: state.pagination.pageSize })}
+              <KitIcon
+                name="chevronDown"
+                builtin={{ outline: ChevronDownIcon, bold: ChevronDownBoldIcon }}
+              />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" aria-label={t('table.pageSize')}>
+            <DropdownMenuPrimitive.RadioGroup
+              value={String(state.pagination.pageSize)}
+              onValueChange={(value) => {
+                if (value)
+                  change({
+                    ...state,
+                    pagination: { pageIndex: 0, pageSize: Number(value) },
+                  });
+              }}
+            >
+              {sizes.map((size) => (
+                <DropdownMenuPrimitive.RadioItem
+                  key={size}
+                  value={String(size)}
+                  className={cn(menuItemClass, 'relative pl-8')}
+                >
+                  <DropdownMenuPrimitive.ItemIndicator className="absolute left-3 size-2 rounded-full bg-current" />
+                  {t('table.rows', { count: size })}
+                </DropdownMenuPrimitive.RadioItem>
+              ))}
+            </DropdownMenuPrimitive.RadioGroup>
+          </DropdownMenuContent>
+        </DropdownMenu>
         <span
           data-testid={partTestId(view.testId, 'pageStatus')}
           className={cn('tabular-nums', classNames?.pageStatus)}

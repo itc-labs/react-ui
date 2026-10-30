@@ -55,6 +55,12 @@ for (const [name, file] of Object.entries(entries)) {
     if (registries.length)
       throw new Error(`${name} imports the built-in icon registry: ${registries}`);
   }
+  if (['DataTable', 'Calendar'].includes(name)) {
+    const forbidden = Object.keys(metafile.inputs).filter((input) =>
+      /node_modules\/react-select\//.test(input),
+    );
+    if (forbidden.length) throw new Error(`${name} imports react-select: ${forbidden}`);
+  }
   if (name === 'Calendar') {
     const forbidden = Object.keys(metafile.inputs).filter((input) =>
       /(?:modules\/(?:editor|chart|avatar-upload)\/|node_modules\/.*(?:tiptap|recharts|react-easy-crop))/.test(
