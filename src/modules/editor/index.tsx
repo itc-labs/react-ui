@@ -9,6 +9,8 @@ import { cn, fieldDescription } from '../../components/common';
 export type { EditorProps } from './types';
 import type { EditorProps } from './types';
 import { EditorToolbar } from './toolbar';
+import { isEditorUrl } from './link-url';
+import { valueControl } from '../../components/common/form-control';
 
 export function Editor({
   'data-testid': testId,
@@ -33,7 +35,18 @@ export function Editor({
     controlId = id ?? generated;
   const blocked = Boolean(disabled || readOnly);
   const editor = useEditor({
-    extensions: [StarterKit.configure({ link: false, heading: { levels: [2, 3] } })],
+    extensions: [
+      StarterKit.configure({
+        link: {
+          openOnClick: false,
+          autolink: true,
+          protocols: ['http', 'https', 'mailto'],
+          isAllowedUri: isEditorUrl,
+          HTMLAttributes: { rel: 'noopener noreferrer nofollow', target: '_blank' },
+        },
+        heading: { levels: [2, 3] },
+      }),
+    ],
     immediatelyRender: false,
     shouldRerenderOnTransaction: true,
     content: value ?? defaultValue,
@@ -50,7 +63,7 @@ export function Editor({
         'aria-describedby':
           fieldDescription(controlId, Boolean(error), Boolean(hint)) ?? '',
         class: cn(
-          'pod-editor-content min-h-40 px-3 py-3 text-control outline-none',
+          'pod-editor-content pod-rich-text min-h-40 px-3 py-3 text-control outline-none',
           classNames?.content,
         ),
       },
@@ -88,7 +101,7 @@ export function Editor({
           'aria-describedby':
             fieldDescription(controlId, Boolean(error), Boolean(hint)) ?? '',
           class: cn(
-            'pod-editor-content min-h-40 px-3 py-3 text-control outline-none',
+            'pod-editor-content pod-rich-text min-h-40 px-3 py-3 text-control outline-none',
             classNames?.content,
           ),
         },
@@ -183,3 +196,5 @@ export function Editor({
 }
 
 export { EditorField } from './form-field';
+
+Editor[valueControl] = true;

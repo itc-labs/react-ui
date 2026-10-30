@@ -20,7 +20,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'A layout shell with sidebar, body, header and main slots. The host controls navigation and routing; the desktop grid adapts to the collapsed state of the Sidebar.',
+          'A layout shell with sidebar, body, header and main slots. The host controls navigation and routing; the desktop grid adapts to the collapsed state of the Sidebar. variant="inset" (default) shows the page as a rounded card; variant="classic" uses a dividing rule.',
       },
     },
   },

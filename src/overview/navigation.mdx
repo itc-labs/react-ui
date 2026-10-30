@@ -14,15 +14,20 @@ For provider setup, see [Providers & adapters](?path=/docs/guides-providers-adap
 ## Sidebar and application layout
 
 `Sidebar.header` accepts `{ logo, title, subtitle, href }` or a React node such as a
-workspace switcher. Use `UserMenu` in `footer`. Item `badge` accepts a number or
-Badge props without `children`; it becomes a dot in the collapsed rail.
+workspace switcher; the collapse toggle sits in the same row. Use `UserMenu` in
+`footer` (give its trigger `w-full` to span the sidebar). Item `badge` accepts a
+number, shown as a quiet count, or Badge props without `children` when the count
+needs a tone such as `danger`; both become a dot in the collapsed rail.
 Control collapse with `collapsed` and `onCollapsedChange`, or initialize it with
 `defaultCollapsed`. The `toggleShortcut="mod+b"` shortcut is opt-in.
 
 The rail keeps label tooltips and opens submenus as side flyouts. Below `lg`, a
 menu button opens a Drawer with the same permission-filtered tree and active path.
 `WorkspaceShell` adjusts its columns from the Sidebar's `data-collapsed` attribute;
-pass Sidebar directly to its `sidebar` slot.
+pass Sidebar directly to its `sidebar` slot. `variant="inset"` (default) raises the
+header and page into a rounded card beside the sidebar; `variant="classic"` keeps a
+flat page divided from the sidebar by a rule. The sidebar width comes from the
+`--container-sidebar` token (15rem).
 
 Try [Collapsible](?path=/story/modules-sidebar--collapsible),
 [CollapsedFlyout](?path=/story/modules-sidebar--collapsed-flyout), and

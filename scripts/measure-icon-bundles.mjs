@@ -8,16 +8,23 @@ const { build } = createRequire(require.resolve('vite/package.json'))('esbuild')
 const root = fileURLToPath(new URL('../', import.meta.url));
 const entries = {
   Icon: 'components/icon/index.tsx',
+  Divider: 'components/divider/index.tsx',
+  Timeline: 'components/timeline/index.tsx',
+  Kbd: 'components/kbd/index.tsx',
   Rating: 'components/rating/index.tsx',
+  Slider: 'components/slider/index.tsx',
   QuantityInput: 'components/quantity-input/index.tsx',
   ColorPicker: 'components/color-picker/index.tsx',
   OptionGroup: 'components/option-group/index.tsx',
   JsonView: 'components/json-view/index.tsx',
   CodeView: 'modules/code-view/index.tsx',
+  RichTextView: 'modules/rich-text-view/index.tsx',
   Button: 'components/button/index.tsx',
   Spinner: 'components/spinner/index.tsx',
   Dialog: 'components/dialog/index.tsx',
   Select: 'components/select/index.tsx',
+  TreeSelect: 'modules/tree-select/index.tsx',
+  Transfer: 'modules/transfer/index.tsx',
   DataTable: 'modules/data-table/index.tsx',
   Root: 'index.ts',
   Calendar: 'modules/calendar/index.tsx',
@@ -53,9 +60,13 @@ for (const [name, file] of Object.entries(entries)) {
   });
   if (
     [
+      'TreeSelect',
+      'Transfer',
+      'Timeline',
       'Dialog',
       'Button',
       'Rating',
+      'Slider',
       'QuantityInput',
       'ColorPicker',
       'OptionGroup',
@@ -72,7 +83,7 @@ for (const [name, file] of Object.entries(entries)) {
     if (registries.length)
       throw new Error(`${name} imports the built-in icon registry: ${registries}`);
   }
-  if (['DataTable', 'Calendar'].includes(name)) {
+  if (['DataTable', 'Calendar', 'TreeSelect', 'Transfer'].includes(name)) {
     const forbidden = Object.keys(metafile.inputs).filter((input) =>
       /node_modules\/react-select\//.test(input),
     );
@@ -88,6 +99,11 @@ for (const [name, file] of Object.entries(entries)) {
       throw new Error(`Calendar imports optional features: ${forbidden}`);
   }
   if (name === 'Root') {
+    const isolatedSelection = Object.keys(metafile.inputs).filter((input) =>
+      /modules\/(?:tree-select|transfer)\/|@tanstack\/.*virtual/.test(input),
+    );
+    if (isolatedSelection.length)
+      throw new Error(`Root imports isolated selection modules: ${isolatedSelection}`);
     const galleries = Object.keys(metafile.inputs).filter((input) =>
       /modules\/media-gallery\//.test(input),
     );
@@ -96,6 +112,10 @@ for (const [name, file] of Object.entries(entries)) {
       /embla-carousel|modules\/carousel\//.test(input),
     );
     if (embla.length) throw new Error(`Root imports Embla: ${embla}`);
+    const sanitizer = Object.keys(metafile.inputs).filter((input) =>
+      /dompurify|modules\/rich-text-view\//.test(input),
+    );
+    if (sanitizer.length) throw new Error(`Root imports RichTextView: ${sanitizer}`);
     const prism = Object.keys(metafile.inputs).filter((input) =>
       /(?:prism-react-renderer|modules\/code-view\/)/.test(input),
     );
@@ -116,11 +136,17 @@ console.log(JSON.stringify(sizes, null, 2));
 for (const [name, limit] of Object.entries({
   Icon: 20_000,
   Rating: 20_000,
+  Divider: 10_600,
+  Kbd: 19_500,
+  Slider: 32_300,
+  Timeline: 21_400,
   QuantityInput: 20_600,
   OptionGroup: 52_000,
   JsonView: 22_000,
   // About 10% above the measured display subpath fixtures.
   CodeView: 50_000,
+  // DOMPurify plus shared class merging, with about 10% headroom.
+  RichTextView: 24_000,
   Carousel: 30_300,
   // Fullscreen media adds Dialog focus management and image zoom controls.
   MediaGallery: 54_800,
@@ -129,11 +155,13 @@ for (const [name, limit] of Object.entries({
   Spinner: 20_000,
   Dialog: 38_000,
   Select: 58_000,
+  TreeSelect: 65_800,
+  Transfer: 42_000,
   Form: 22_000,
   DataTable: 90_000,
   Calendar: 100_000,
-  // Core additions remain within the existing Root budget.
-  Root: 270_000,
+  // Slider adds the Radix pointer and keyboard interaction primitive to core.
+  Root: 275_000,
   ColorPicker: 54_300,
 })) {
   if (sizes[name].gzip >= limit) {

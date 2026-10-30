@@ -101,18 +101,28 @@ export function UserMenu({
           />
           <span
             data-testid={partTestId(testId, 'details')}
-            className={cn('min-w-0 text-left', detailsClass, classNames?.details)}
+            className={cn(
+              'min-w-0 flex-1 text-left',
+              detailsClass,
+              classNames?.details,
+            )}
           >
             <span
               data-testid={partTestId(testId, 'name')}
-              className={cn('block text-ui-sm font-semibold', classNames?.name)}
+              className={cn(
+                'block truncate text-ui-sm font-semibold',
+                classNames?.name,
+              )}
             >
               {name}
             </span>
             {description != null && (
               <span
                 data-testid={partTestId(testId, 'description')}
-                className={cn('block text-xs text-muted', classNames?.description)}
+                className={cn(
+                  'block truncate text-xs text-muted',
+                  classNames?.description,
+                )}
               >
                 {description}
               </span>
@@ -124,7 +134,7 @@ export function UserMenu({
             size={16}
             data-testid={partTestId(testId, 'chevron')}
             className={cn(
-              'mr-1 shrink-0 text-muted',
+              'ml-auto mr-1 shrink-0 text-muted',
               detailsClass,
               classNames?.chevron,
             )}

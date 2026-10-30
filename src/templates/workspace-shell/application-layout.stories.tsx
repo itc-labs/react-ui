@@ -47,7 +47,7 @@ const sidebarItems: SidebarEntry[] = [
         label: 'Settings',
         href: '/settings',
         icon: SettingsIcon,
-        badge: { count: 3, tone: 'info' },
+        badge: 3,
         items: [
           { id: 'profile', label: 'Profile', href: '/settings/profile' },
           { id: 'team', label: 'Team', href: '/settings/team' },
@@ -134,6 +134,8 @@ function ApplicationExample({ topNavigation = false }: { topNavigation?: boolean
       description="lorem@example.com"
       collapseOnMobile={false}
       classNames={{
+        trigger:
+          'w-full border-transparent bg-transparent hover:bg-surface/60 group-data-[collapsed=true]/sidebar:justify-center',
         details: 'group-data-[collapsed=true]/sidebar:hidden',
         chevron: 'group-data-[collapsed=true]/sidebar:hidden',
       }}

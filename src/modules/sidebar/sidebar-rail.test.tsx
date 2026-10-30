@@ -69,8 +69,10 @@ it('renders standalone counts, respects Badge visibility and replaces counts wit
     );
 
   await act(async () => render(false));
-  expect(byId('item-home-badge-indicator').textContent).toBe('12');
-  expect(byId('item-zero-badge-indicator')).toBeNull();
+  // Plain numbers render as a quiet count; Badge objects keep their tone.
+  expect(byId('item-home-badge').textContent).toBe('12');
+  expect(byId('item-home-badge').classList.contains('custom-badge')).toBe(true);
+  expect(byId('item-zero-badge')).toBeNull();
   expect(byId('item-shown-badge-indicator').textContent).toBe('0');
   expect(byId('item-hidden-badge-indicator')).toBeNull();
   await act(async () => render(true));
@@ -283,7 +285,7 @@ it('uses a mobile trigger slot, the same filtered active tree, closes on selecti
   expect(drawer.textContent).toContain('Dolor sit amet');
   expect(drawer.textContent).not.toContain('Private');
   expect(drawer.querySelector('[aria-current="page"]')?.textContent).toBe('Profile');
-  expect(byId('drawer-item-home-badge-indicator').textContent).toBe('12');
+  expect(byId('drawer-item-home-badge').textContent).toBe('12');
   await act(async () => {
     byId('drawer-submenu-settings-item-profile').addEventListener('click', (event) =>
       event.preventDefault(),

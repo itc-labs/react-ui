@@ -1,6 +1,7 @@
 @layer theme, base, toastify, components, utilities;
 @import './crop.css' layer(components);
 @import 'react-toastify/ReactToastify.css' layer(toastify);
+@import '../modules/rich-text-view/typography.css';
 @import '../modules/editor/editor.css';
 @import '../modules/calendar/calendar.css';
 

@@ -27,7 +27,7 @@ export function SidebarHeader({
         <span
           data-testid={partTestId(testId, 'brandLogo')}
           className={cn(
-            'grid size-10 shrink-0 place-items-center rounded-control bg-accent text-on-brand [&>svg]:size-5',
+            'grid size-8 shrink-0 place-items-center rounded-control bg-accent text-on-brand [&>svg]:size-4',
             classNames?.brandLogo,
           )}
         >
@@ -37,7 +37,10 @@ export function SidebarHeader({
       <span className={collapsed ? 'sr-only' : 'min-w-0'}>
         <strong
           data-testid={partTestId(testId, 'brandTitle')}
-          className={cn('block truncate font-bold', classNames?.brandTitle)}
+          className={cn(
+            'block truncate text-control font-semibold leading-tight',
+            classNames?.brandTitle,
+          )}
         >
           {header.title}
         </strong>
@@ -45,7 +48,7 @@ export function SidebarHeader({
           <span
             data-testid={partTestId(testId, 'brandSubtitle')}
             className={cn(
-              'block truncate text-xs uppercase tracking-wide text-muted',
+              'block truncate text-ui-sm leading-tight text-muted',
               classNames?.brandSubtitle,
             )}
           >
@@ -57,7 +60,9 @@ export function SidebarHeader({
   );
   const props = {
     className: cn(
-      'flex min-w-0 items-center gap-3',
+      'flex min-w-0 items-center gap-2.5 rounded-control p-1.5',
+      header.href &&
+        'motion-safe:transition-colors hover:bg-surface/60 focus-visible:outline-2 focus-visible:outline-focus',
       collapsed && 'justify-center',
       classNames?.brand,
     ),

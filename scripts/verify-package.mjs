@@ -169,7 +169,7 @@ async function checkLeanGraph(path) {
   ];
   for (const [, specifier] of imports) {
     assert.ok(
-      !/^(?:@tiptap\/|recharts(?:\/|$)|react-easy-crop(?:\/|$)|react-is(?:\/|$)|prism-react-renderer(?:\/|$)|embla-carousel(?:-react|-autoplay)?(?:\/|$))/.test(
+      !/^(?:@tiptap\/|recharts(?:\/|$)|react-easy-crop(?:\/|$)|react-is(?:\/|$)|prism-react-renderer(?:\/|$)|embla-carousel(?:-react|-autoplay)?(?:\/|$)|dompurify(?:\/|$))/.test(
         specifier,
       ),
       `Optional dependency in core: ${specifier} (${relative(root, path)})`,
@@ -189,6 +189,9 @@ for (const subpath of [
   './carousel',
   './media-gallery',
   './code-view',
+  './rich-text-view',
+  './tree-select',
+  './transfer',
   './templates',
   './theme',
   './theme/provider',
@@ -211,8 +214,11 @@ for (const subpath of [
   );
   if (['.', './components', './modules'].includes(subpath))
     assert.ok(
-      !('MediaGallery' in api),
-      `MediaGallery must remain isolated from ${subpath}`,
+      !('MediaGallery' in api) &&
+        !('RichTextView' in api) &&
+        !('TreeSelect' in api) &&
+        !('Transfer' in api),
+      `MediaGallery, RichTextView, TreeSelect and Transfer must remain isolated from ${subpath}`,
     );
   for (const name of [
     'LinkImageProvider',
@@ -244,6 +250,7 @@ for (const selector of [
   '.bg-surface',
   '.rounded-control',
   '.pod-toast',
+  '.pod-rich-text',
   '.reactEasyCrop_Container',
   '@font-face',
 ])
@@ -256,6 +263,19 @@ for (const [, asset] of css.matchAll(/url\((?:["']?)([^)"']+)(?:["']?)\)/g)) {
   );
 }
 assert.ok(files.has('THIRD_PARTY_NOTICES.md'));
+const notices = tarball
+  ? execFileSync('tar', ['-xOf', resolve(tarball), 'package/THIRD_PARTY_NOTICES.md'], {
+      encoding: 'utf8',
+    })
+  : await readFile(`${root}/THIRD_PARTY_NOTICES.md`, 'utf8');
+for (const notice of [
+  /@tanstack\/react-virtual 3\.14\.19[^\n]*MIT/,
+  /DOMPurify \/ dompurify 3\.4\.17[^\n]*Apache-2\.0 OR MPL-2\.0/,
+  /Copyright \(c\) 2021-present Tanner Linsley/,
+  /Apache License\s+Version 2\.0, January 2004/,
+])
+  assert.match(notices, notice, 'Missing selection or sanitizer dependency notice');
+
 for (const license of await readdir(`${root}/src/components/icon/licenses`))
   assert.ok(
     files.has(`src/components/icon/licenses/${license}`),
@@ -348,3 +368,18 @@ const codeView = await import(
 assert.equal(typeof codeView.CodeView, 'function');
 for (const barrel of ['components', 'modules'])
   await checkLeanGraph(`${root}/dist/${barrel}/index.js`);
+
+const richTextView = await import(
+  pathToFileURL(resolve(root, packed.exports['./rich-text-view'].import)).href
+);
+assert.equal(typeof richTextView.RichTextView, 'function');
+
+const treeSelect = await import(
+  pathToFileURL(resolve(root, packed.exports['./tree-select'].import)).href
+);
+assert.equal(typeof treeSelect.TreeSelect, 'function');
+
+const transfer = await import(
+  pathToFileURL(resolve(root, packed.exports['./transfer'].import)).href
+);
+assert.equal(typeof transfer.Transfer, 'function');

@@ -69,13 +69,25 @@ export function SidebarEntryLabel({
       >
         {item.label}
       </span>
-      {badge && (
-        <Badge
-          {...badge}
-          data-testid={partTestId(testId, 'badge')}
-          className={cn('ml-auto shrink-0', classNames?.badge)}
-        />
-      )}
+      {typeof item.badge === 'number'
+        ? item.badge > 0 && (
+            <span
+              data-testid={partTestId(testId, 'badge')}
+              className={cn(
+                'ml-auto shrink-0 text-ui-sm tabular-nums text-muted',
+                classNames?.badge,
+              )}
+            >
+              {item.badge > 99 ? '99+' : item.badge}
+            </span>
+          )
+        : badge && (
+            <Badge
+              {...badge}
+              data-testid={partTestId(testId, 'badge')}
+              className={cn('ml-auto shrink-0', classNames?.badge)}
+            />
+          )}
     </span>
   );
 }
@@ -92,6 +104,8 @@ export function SidebarRailEntry({
   classNames?: SidebarClassNames | undefined;
 }) {
   const contentRef = useRef<HTMLDivElement>(null);
+  // Pointer-opened flyouts focus the panel, so no focus ring flashes on the first link.
+  const openedByPointer = useRef(false);
   const [localOpen, setLocalOpen] = useState(
     item.type === 'submenu' ? (item.defaultOpen ?? false) : false,
   );
@@ -109,8 +123,8 @@ export function SidebarRailEntry({
   );
   const label = <span className="sr-only">{item.label}</span>;
   const rowClass = cn(
-    'relative mx-auto flex size-10 shrink-0 items-center justify-center rounded-control p-2 text-muted hover:bg-hover hover:text-ink focus-visible:outline-2 focus-visible:outline-focus disabled:opacity-50',
-    active && 'bg-selected text-selected-ink',
+    'relative mx-auto flex size-9 shrink-0 items-center justify-center rounded-control p-2 text-muted hover:bg-surface/60 hover:text-ink focus-visible:outline-2 focus-visible:outline-focus disabled:opacity-50',
+    active && 'bg-surface text-accent shadow-panel ring-1 ring-line',
     classNames?.item,
     item.className,
   );
@@ -169,7 +183,11 @@ export function SidebarRailEntry({
             data-active={active}
             aria-label={item.toggleLabel}
             className={cn(rowClass, classNames?.submenuTrigger)}
+            onPointerDown={() => {
+              openedByPointer.current = true;
+            }}
             onKeyDown={(event) => {
+              openedByPointer.current = false;
               if (event.key === 'ArrowRight' || event.key === 'ArrowDown') {
                 event.preventDefault();
                 changeOpen(true);
@@ -186,9 +204,12 @@ export function SidebarRailEntry({
           ref={contentRef}
           onOpenAutoFocus={(event) => {
             event.preventDefault();
-            const first = contentRef.current?.querySelector<HTMLElement>(
-              'a[href], button:not(:disabled)',
-            );
+            const first = openedByPointer.current
+              ? null
+              : contentRef.current?.querySelector<HTMLElement>(
+                  'a[href], button:not(:disabled)',
+                );
+            openedByPointer.current = false;
             (first ?? contentRef.current)?.focus();
           }}
           side="right"
@@ -197,7 +218,7 @@ export function SidebarRailEntry({
           aria-label={typeof item.label === 'string' ? item.label : item.toggleLabel}
           data-testid={partTestId(testId, 'content')}
           className={cn(
-            'ui-floating-motion z-[var(--z-index-popover)] max-h-[80dvh] w-sidebar overflow-y-auto rounded-panel border border-line bg-surface p-2 text-ink shadow-floating focus:outline-none',
+            'ui-floating-motion z-[var(--z-index-popover)] grid max-h-[80dvh] w-sidebar gap-0.5 overflow-y-auto rounded-panel border border-line bg-surface p-1.5 text-ink shadow-floating focus:outline-none [&_[aria-current=page]]:bg-hover [&_[aria-current=page]]:shadow-none [&_[aria-current=page]]:ring-0',
             classNames?.submenuContent,
             classNames?.flyout,
           )}

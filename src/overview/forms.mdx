@@ -220,6 +220,188 @@ export function VariantForm({
 
 See [OptionGroup](?path=/docs/components-optiongroup--docs), [QuantityInput](?path=/docs/components-quantityinput--docs), and [ColorPicker](?path=/docs/components-colorpicker--docs) for focused examples and customization slots.
 
+## Slider, TreeSelect, and Transfer with FormField
+
+All three controls bind automatically through `value` and `onValueChange`. Slider stores a number, or a `[number, number]` tuple with `range`. Arrow keys adjust a thumb by `step`; Home/End move to the bounds. `onValueCommit` reports completed pointer or keyboard changes, while `onValueChange` keeps form state current. `minStepsBetweenThumbs` sets the minimum range gap in steps.
+
+TreeSelect stores `string | null` in single mode and string IDs in `multiple` mode. `cascade` checks enabled descendants: `checkedStrategy="parent"` emits compressed parent IDs, `"child"` emits leaves, and `"all"` emits all checked selectable nodes. Child strategy remembers unloaded descendant intent during the mounted selection session; persist parent intent in the host when restoring a selection. With `searchable`, users type directly in the field, as in Select; Backspace in an empty field removes the last tag in `multiple` mode. Arrow keys navigate and expand branches, Space/Enter selects, and Escape clears the search, then closes the popup.
+
+Transfer stores selected item IDs; checked rows are temporary move candidates, separate from the submitted value. Clicking or pressing Space checks a row, Enter moves the focused row, arrows and Home/End navigate rows, and the move buttons apply the checked selection. Keep the complete item inventory available, including selected items. `order="source"` follows inventory order; `order="selection"` preserves insertion order. `maxSelected`, `oneWay`, and `showMoveAll` configure movement.
+
+```tsx
+import { Button, Form, FormField, Slider, useAppForm } from '@itclabs/react-ui';
+import { TreeSelect } from '@itclabs/react-ui/tree-select';
+import { Transfer } from '@itclabs/react-ui/transfer';
+
+type Selection = {
+  range: [number, number];
+  categories: string[];
+  items: string[];
+};
+
+export function SelectionForm({ save }: { save: (value: Selection) => Promise<void> }) {
+  const form = useAppForm({
+    defaultValues: {
+      range: [20, 80] as [number, number],
+      categories: [] as string[],
+      items: [] as string[],
+    },
+    onSubmit: async ({ value }) => {
+      await save(value);
+    },
+  });
+
+  return (
+    <Form form={form} className="grid gap-6">
+      <FormField name="range" label="Range">
+        <Slider
+          range
+          min={0}
+          max={100}
+          step={5}
+          minStepsBetweenThumbs={1}
+          showValue="always"
+        />
+      </FormField>
+      <FormField name="categories" label="Categories">
+        <TreeSelect
+          multiple
+          cascade
+          checkedStrategy="parent"
+          searchable
+          nodes={[
+            {
+              id: 'lorem',
+              label: 'Lorem',
+              children: [
+                { id: 'ipsum', label: 'Ipsum' },
+                { id: 'dolor', label: 'Dolor' },
+              ],
+            },
+          ]}
+        />
+      </FormField>
+      <FormField name="items" label="Items">
+        <Transfer
+          searchable
+          showMoveAll
+          items={[
+            { id: 'first', label: 'Lorem ipsum' },
+            { id: 'second', label: 'Dolor sit amet' },
+          ]}
+        />
+      </FormField>
+      <Button type="submit">Save selection</Button>
+    </Form>
+  );
+}
+```
+
+See [Slider](?path=/docs/components-slider--docs), [TreeSelect](?path=/docs/modules-treeselect--docs), and [Transfer](?path=/docs/modules-transfer--docs) for states and typed `classNames` slots.
+
+## TreeSelect lazy loading, paging, and remote search
+
+Requests and node updates belong to the host. Mark an unloaded branch with `hasChildren`; expanding it calls `loadChildren(node)`. Resolve after updating `nodes`, or reject to expose the inline retry action. Loaded children can carry `hasMore`; root paging uses the control's `hasMore`. `onLoadMore(parentId)` receives a branch ID or `null` for roots; append results and update the relevant `hasMore`. Include pending parent IDs (including `null`) in `loadingIds` to prevent duplicate page requests. Root paging can also request more as the list scrolls.
+
+This wrapper accepts host loaders that update the supplied tree. The application owns cursors, errors for page requests, and request deduplication.
+
+```tsx
+import { TreeSelect, type TreeSelectNode } from '@itclabs/react-ui/tree-select';
+
+export function PagedCategories({
+  nodes,
+  hasMore,
+  loadingIds,
+  loadChildren,
+  loadMore,
+}: {
+  nodes: readonly TreeSelectNode[];
+  hasMore: boolean;
+  loadingIds: readonly (string | null)[];
+  loadChildren: (node: TreeSelectNode) => Promise<void>;
+  loadMore: (parentId: string | null) => void;
+}) {
+  return (
+    <TreeSelect
+      label="Category"
+      nodes={nodes}
+      hasMore={hasMore}
+      loadingIds={loadingIds}
+      loadChildren={loadChildren}
+      onLoadMore={loadMore}
+    />
+  );
+}
+```
+
+Without `onSearchChange`, `searchable` filters loaded nodes locally and retains matching ancestor paths. Supplying `onSearchChange` switches to host-owned remote results; callbacks are debounced by `searchDebounceMs` (default 300 ms). Use `searchLoading` during requests and cancel or ignore stale responses. An empty query should restore the browse tree.
+
+Hydrate persisted IDs with `selectedOptions` when their nodes are absent from the current page or search results. Supply stable IDs, labels, and optional ancestor-label `path` values; `showPath` displays those paths. This keeps selected labels readable before their nodes load. The example accepts a search function that returns the browse tree for an empty query and respects an abort signal.
+
+```tsx
+import { useEffect, useState } from 'react';
+import {
+  TreeSelect,
+  type TreeSelectNode,
+  type TreeSelectOption,
+} from '@itclabs/react-ui/tree-select';
+
+export function RemoteCategories({
+  search,
+  selectedOptions,
+}: {
+  search: (query: string, signal: AbortSignal) => Promise<TreeSelectNode[]>;
+  selectedOptions: readonly TreeSelectOption[];
+}) {
+  const [nodes, setNodes] = useState<TreeSelectNode[]>([]);
+  const [value, setValue] = useState<string[]>(() =>
+    selectedOptions.map((option) => option.id),
+  );
+  const [query, setQuery] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    const controller = new AbortController();
+    setLoading(true);
+    setError('');
+    void search(query, controller.signal)
+      .then(
+        (results) => {
+          if (!controller.signal.aborted) setNodes(results);
+        },
+        () => {
+          if (!controller.signal.aborted) setError('Could not load categories.');
+        },
+      )
+      .finally(() => {
+        if (!controller.signal.aborted) setLoading(false);
+      });
+
+    return () => controller.abort();
+  }, [query, search]);
+
+  return (
+    <TreeSelect
+      label="Categories"
+      multiple
+      searchable
+      clearable
+      showPath
+      nodes={nodes}
+      value={value}
+      onValueChange={setValue}
+      selectedOptions={selectedOptions}
+      onSearchChange={setQuery}
+      searchLoading={loading}
+      error={error || undefined}
+    />
+  );
+}
+```
+
+Keep the `search` function stable across renders. Hydration supplies display metadata; it does not load descendants or recreate cascade intent. For remote cascade selection, retain the complete browse model and parent intent in the host rather than deriving them from a partial result page.
+
 ## Bound fields (alternative)
 
 As an alternative for simple forms, render bound controls inside `form.AppField`. Each field handles its value, blur state, and error message. Available fields include text, textarea, password, number, OTP, select, multi-select, checkbox, switch, radio group, date, time, date range, and upload. Editor and avatar fields have separate module entry points; see the [catalog](?path=/docs/reference-catalog--docs).

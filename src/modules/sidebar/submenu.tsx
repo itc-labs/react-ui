@@ -125,12 +125,12 @@ export function SidebarSubmenuTrigger({
       {...props}
       ref={composedRef}
       className={cn(
-        'group flex min-w-0 items-center gap-3 rounded-control text-control font-medium transition-colors focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-50',
+        'group flex min-w-0 items-center gap-2.5 rounded-control text-control motion-safe:transition-colors focus-visible:-outline-offset-2 disabled:cursor-not-allowed disabled:opacity-50',
         focusRingClassName,
-        iconOnly ? 'size-9 shrink-0 justify-center' : 'w-full px-3 py-2.5 text-left',
-        context.active
-          ? 'bg-selected text-selected-ink'
-          : 'text-muted hover:bg-hover hover:text-ink',
+        iconOnly
+          ? 'size-9 shrink-0 justify-center'
+          : 'min-h-9 w-full px-2.5 py-1.5 text-left',
+        context.active ? 'text-ink' : 'text-muted hover:bg-surface/60 hover:text-ink',
         className,
       )}
     >
@@ -148,7 +148,7 @@ export function SidebarSubmenuTrigger({
         name="chevronDown"
         builtin={{ outline: ChevronDownIcon, bold: ChevronDownBoldIcon }}
         className={cn(
-          'shrink-0 motion-safe:transition-transform duration-[var(--motion-duration-control)] group-data-[state=open]:rotate-180',
+          'size-4 shrink-0 text-muted motion-safe:transition-transform duration-[var(--motion-duration-control)] group-data-[state=open]:rotate-180',
           !iconOnly && 'ml-auto',
           classNames?.chevron,
         )}
@@ -181,7 +181,7 @@ export function SidebarSubmenuContent({
     >
       <div
         className={cn(
-          'ml-4 mt-1 grid min-w-0 gap-1 border-l border-line pl-2 pb-1',
+          'ml-[1.125rem] mt-0.5 grid min-w-0 gap-0.5 border-l border-line pb-1 pl-2.5',
           contentClassName,
         )}
       >
