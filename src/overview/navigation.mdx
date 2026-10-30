@@ -1,37 +1,43 @@
 import { Meta } from '@storybook/addon-docs/blocks';
 
-<Meta title="Overview/Navigation" />
+<Meta title="Guides/Navigation" />
 
 # Navigation
 
-Host quản lý router, đường dẫn hiện tại và quyền truy cập. Kit nhận dữ liệu qua props;
-không đọc session hay import framework. Các đoạn dưới đây chỉ đặt trong ứng dụng host.
-Xem [Modules/Navbar](?path=/docs/modules-navbar--docs),
-[Modules/Sidebar](?path=/docs/modules-sidebar--docs) và
-[Components/TopLoader](?path=/docs/components-toploader--docs) để thử từng API.
+The host owns routing, the current path, and authorization. The kit receives these
+through props; it does not read sessions or import a router. Keep framework
+integration in the host application. See [Navbar](?path=/docs/modules-navbar--docs),
+[Sidebar](?path=/docs/modules-sidebar--docs), and
+[TopLoader](?path=/docs/components-toploader--docs) for interactive API examples.
+For provider setup, see [Providers & adapters](?path=/docs/guides-providers-adapters--docs).
 
-## Sidebar và bố cục ứng dụng
+## Sidebar and application layout
 
-Sidebar nhận `header` dạng `{ logo, title, subtitle, href }` hoặc slot switcher;
-`footer` có thể là UserMenu. `badge` dùng số hoặc Badge props, chuyển thành chấm khi
-thu gọn. Dùng `collapsed/onCollapsedChange` hoặc `defaultCollapsed`; shortcut
-`toggleShortcut="mod+b"` chỉ bật khi host yêu cầu. Rail giữ tooltip và mở submenu
-bên cạnh; dưới `lg`, nút menu mở Drawer với cùng cây quyền và trang hiện tại.
-WorkspaceShell tự đổi cột theo `data-collapsed` của Sidebar.
+`Sidebar.header` accepts `{ logo, title, subtitle, href }` or a React node such as a
+workspace switcher. Use `UserMenu` in `footer`. Item `badge` accepts a number or
+Badge props without `children`; it becomes a dot in the collapsed rail.
+Control collapse with `collapsed` and `onCollapsedChange`, or initialize it with
+`defaultCollapsed`. The `toggleShortcut="mod+b"` shortcut is opt-in.
 
-Thử [Collapsible](?path=/story/modules-sidebar--collapsible),
-[CollapsedFlyout](?path=/story/modules-sidebar--collapsed-flyout) và
-[Mobile](?path=/story/modules-sidebar--mobile) ở chiều rộng dưới `lg`.
-[ApplicationLayout](?path=/story/templates-applicationlayout--playground) là demo
-ứng dụng có thể bấm; [TopNavigationLayout](?path=/story/templates-applicationlayout--top-navigation-layout)
-dùng Navbar mega menu, underline và UserMenu. Ví dụ dùng state và UiLink adapter
-của host, không gắn framework.
+The rail keeps label tooltips and opens submenus as side flyouts. Below `lg`, a
+menu button opens a Drawer with the same permission-filtered tree and active path.
+`WorkspaceShell` adjusts its columns from the Sidebar's `data-collapsed` attribute;
+pass Sidebar directly to its `sidebar` slot.
 
-## Một menu dùng chung
+Try [Collapsible](?path=/story/modules-sidebar--collapsible),
+[CollapsedFlyout](?path=/story/modules-sidebar--collapsed-flyout), and
+[Mobile](?path=/story/modules-sidebar--mobile) below `lg`.
+[ApplicationLayout](?path=/story/templates-applicationlayout--playground) is a
+clickable application demo; [TopNavigationLayout](?path=/story/templates-applicationlayout--top-navigation-layout)
+combines a Navbar mega menu, underline indicator, and UserMenu. These demos use
+host state and a UiLink adapter without a framework dependency.
 
-Khai báo menu một lần trong `navigation.ts`. Mở rộng `NavItem` bằng nhãn và kiểu nhóm
-của host, rồi chuyển sang `NavbarItem` và `SidebarEntry`. Giữ nguyên `id`, `href`,
-`exact` và `access` khi chuyển; không dùng nhãn dịch hoặc vị trí làm ID.
+## One shared menu
+
+Define the menu once in a host module such as `navigation.ts`. Extend `NavItem`
+with labels and grouping, then map it to `NavbarItem` and `SidebarEntry`.
+Preserve `id`, `href`, `exact`, and `access`. Keep IDs stable and unique among
+siblings, including sections; do not derive them from translated labels or positions.
 
 ```tsx
 // navigation.ts — host-owned data, no framework imports.
@@ -143,30 +149,35 @@ export const sidebarItems: SidebarEntry<Permission>[] = menu.map((item) => {
 });
 ```
 
-Navbar chuyển nhóm thành dropdown và giữ các section của mega menu. Sidebar dùng
-nhóm có nhãn và submenu cho cùng dữ liệu. Cả hai lọc quyền trước khi chọn mục active;
-nhóm và section rỗng được bỏ đi.
+Navbar renders groups as dropdowns and preserves mega-menu sections. Sidebar
+renders labeled groups and submenus from the same data. Both filter permissions
+before resolving active state and remove empty groups and sections. Without a
+`canAccess` callback, access is unrestricted.
 
 ## Next.js App Router: client root
 
-Đặt root này trong layout tồn tại qua các lần chuyển route, bên trong `UIProvider`
-của host. Server truyền `permissions` dạng mảng serializable sau khi xác thực session.
-Định nghĩa adapter ngay trong file client để giữ ref và mọi thuộc tính native.
+Mount this client root in a persistent layout, inside the host's `UIProvider`.
+After verifying the session, the server supplies permissions as a serializable
+array. Import menu data and define adapters in the client module so functions do
+not cross the server/client boundary.
 
-```tsx snippet
-// navigation-root.tsx
+This complete module accepts `items` and `pathname` as props. In the host's client
+wrapper, import `navbarItems` from your menu module and pass
+`pathname={usePathname() ?? ''}` using `usePathname` from `next/navigation`.
+See [usePathname](https://nextjs.org/docs/app/api-reference/functions/use-pathname).
+
+```tsx
 'use client';
 
 import type { ReactNode } from 'react';
 import NextLink from 'next/link';
-import { usePathname } from 'next/navigation';
 import {
   LinkImageProvider,
   Navbar,
   TopLoaderProvider,
+  type NavbarItem,
   type UiLinkProps,
 } from '@itclabs/react-ui';
-import { navbarItems } from './navigation';
 
 function AppLink(props: UiLinkProps) {
   return <NextLink {...props} />;
@@ -174,81 +185,22 @@ function AppLink(props: UiLinkProps) {
 
 export function NavigationRoot({
   children,
+  items,
+  pathname,
   permissions,
 }: {
   children: ReactNode;
+  items: readonly NavbarItem<string>[];
+  pathname: string;
   permissions: readonly string[];
 }) {
-  const currentPath = usePathname() ?? '';
-  const canAccess = (access: string) => permissions.includes(access);
-
   return (
     <LinkImageProvider Link={AppLink}>
-      <TopLoaderProvider trackLinks currentPath={currentPath}>
+      <TopLoaderProvider trackLinks currentPath={pathname}>
         <Navbar
           brand="Lorem ipsum"
           brandHref="/"
-          items={navbarItems}
-          currentPath={currentPath}
-          canAccess={canAccess}
-          data-testid="primary-navbar"
-        />
-        {children}
-      </TopLoaderProvider>
-    </LinkImageProvider>
-  );
-}
-```
-
-Có thể import `Sidebar` và `sidebarItems` từ menu trên rồi thêm
-`<Sidebar items={sidebarItems} currentPath={currentPath} canAccess={canAccess} />`
-trong cùng root. `LinkImageProvider` dùng ảnh native khi không truyền `Image`.
-Xem [usePathname](https://nextjs.org/docs/app/api-reference/functions/use-pathname).
-Nếu cần theo dõi thay đổi query, ghép pathname với `useSearchParams()` và tuân theo
-quy tắc Suspense của host.
-
-## React Router: root tương đương
-
-Mount bên trong router của host, bên ngoài các route element bị unmount. Adapter
-chuyển `href` thành `to`; ref, sự kiện và `data-testid` được truyền tiếp.
-Với URL ngoài ứng dụng, giữ anchor native.
-
-```tsx snippet
-// navigation-root.tsx
-import type { ReactNode } from 'react';
-import { Link as RouterLink, useLocation } from 'react-router';
-import {
-  LinkImageProvider,
-  Navbar,
-  TopLoaderProvider,
-  type UiLinkProps,
-} from '@itclabs/react-ui';
-import { navbarItems } from './navigation';
-
-function AppLink({ href, ...props }: UiLinkProps) {
-  if (!href.startsWith('/') || href.startsWith('//')) {
-    return <a {...props} href={href} />;
-  }
-
-  return <RouterLink {...props} to={href} />;
-}
-
-export function NavigationRoot({
-  children,
-  permissions,
-}: {
-  children: ReactNode;
-  permissions: readonly string[];
-}) {
-  const { pathname, search } = useLocation();
-
-  return (
-    <LinkImageProvider Link={AppLink}>
-      <TopLoaderProvider trackLinks currentPath={pathname + search}>
-        <Navbar
-          brand="Lorem ipsum"
-          brandHref="/"
-          items={navbarItems}
+          items={items}
           currentPath={pathname}
           canAccess={(access) => permissions.includes(access)}
           data-testid="primary-navbar"
@@ -260,19 +212,98 @@ export function NavigationRoot({
 }
 ```
 
-Sidebar dùng `sidebarItems` với cùng `pathname` và callback quyền.
-Tham khảo [React Router Link](https://reactrouter.com/api/components/Link).
+To add Sidebar, import `Sidebar` and `sidebarItems` in that client module, then pass
+`items={sidebarItems}`, `currentPath={pathname}`, and the same permission callback.
+If no ancestor supplies an image adapter, omitting `Image` keeps native images;
+otherwise the adapter inherits from the nearest `LinkImageProvider`.
 
-## Lọc menu và bảo vệ route
+For query-only navigation, combine pathname with `useSearchParams()` for
+TopLoaderProvider's `currentPath`; keep Navbar's path as the pathname. Follow the
+host framework's Suspense requirements.
 
-**Hiding a menu item is not security.** Người dùng có thể nhập URL hoặc gọi API
-trực tiếp. `canAccess` chỉ điều khiển hiển thị. Host phải xác thực session và kiểm
-tra quyền ở server khi đọc dữ liệu và thực hiện hành động.
+## React Router: equivalent root
 
-Ví dụ `middleware.ts` cho Next.js 15 bên dưới dùng `verifySession` do host cung cấp;
-hàm này phải xác minh session, không tin giá trị cookie chưa kiểm chứng. Trên
-Next.js 16+, đổi file thành `proxy.ts` và tên hàm thành `proxy` theo
-[tài liệu Proxy](https://nextjs.org/docs/app/api-reference/file-conventions/proxy).
+Mount inside the host router, outside route elements that unmount on navigation.
+Pass the host's `Link` as `RouterLink`, and pass `pathname` and `search` from
+`useLocation()`. Both are exported by `react-router` in current versions.
+The adapter maps `href` to `to` and forwards native attributes, events, React 19
+refs, and `data-testid`. External and non-root-relative URLs keep native anchors.
+Memoizing the adapter keeps its identity stable across route changes.
+
+```tsx
+'use client';
+
+import { useMemo, type ComponentType, type ReactNode } from 'react';
+import {
+  LinkImageProvider,
+  Navbar,
+  TopLoaderProvider,
+  type NavbarItem,
+  type UiLinkProps,
+} from '@itclabs/react-ui';
+
+type RouterLinkProps = Omit<UiLinkProps, 'href'> & { to: string };
+
+export function NavigationRoot({
+  children,
+  RouterLink,
+  items,
+  pathname,
+  search,
+  permissions,
+}: {
+  children: ReactNode;
+  RouterLink: ComponentType<RouterLinkProps>;
+  items: readonly NavbarItem<string>[];
+  pathname: string;
+  search: string;
+  permissions: readonly string[];
+}) {
+  const AppLink = useMemo(() => {
+    function Adapter({ href, ...props }: UiLinkProps) {
+      if (!href.startsWith('/') || href.startsWith('//')) {
+        return <a {...props} href={href} />;
+      }
+
+      return <RouterLink {...props} to={href} />;
+    }
+
+    return Adapter;
+  }, [RouterLink]);
+
+  return (
+    <LinkImageProvider Link={AppLink}>
+      <TopLoaderProvider trackLinks currentPath={pathname + search}>
+        <Navbar
+          brand="Lorem ipsum"
+          brandHref="/"
+          items={items}
+          currentPath={pathname}
+          canAccess={(access) => permissions.includes(access)}
+          data-testid="primary-navbar"
+        />
+        {children}
+      </TopLoaderProvider>
+    </LinkImageProvider>
+  );
+}
+```
+
+Pass `navbarItems` from the shared menu as `items`. Sidebar uses `sidebarItems`
+with the same pathname and permission callback.
+See [React Router Link](https://reactrouter.com/api/components/Link).
+
+## Menu filtering and route protection
+
+**Hiding a menu item is not security.** Users can enter a URL or call an API
+directly. `canAccess` controls presentation. The host must verify sessions and
+permissions on the server when reading data and performing actions.
+
+This Next.js 15 `middleware.ts` recipe calls the host's `verifySession` function,
+which must validate the session rather than trust an unverified cookie. It should
+return a session with a `permissions` array, or no session. On Next.js 16+, rename
+the file to `proxy.ts` and the exported function to `proxy`; see the
+[Proxy documentation](https://nextjs.org/docs/app/api-reference/file-conventions/proxy).
 
 ```ts
 // middleware.ts — host application, Next.js 15.
@@ -299,29 +330,38 @@ export const config = {
 };
 ```
 
-Matcher chỉ là ví dụ cho cây route trên. Kiểm tra lại quyền trong Server Component,
-route handler và tầng truy cập dữ liệu; middleware/proxy không thay thế các kiểm tra
-đó. Với React Router, loader có thể redirect trước khi render, nhưng API/server
-vẫn phải tự xác thực và kiểm tra quyền.
+The matcher covers only the routes in this example. Check permissions again in
+Server Components, route handlers, and the data access layer; middleware/proxy
+does not replace those checks. A React Router loader can redirect before rendering,
+but the API/server must still authenticate and authorize requests independently.
 
-## Điều hướng bằng code và tải dữ liệu
+## Programmatic navigation and data loading
 
-`trackLinks` bắt các anchor nội bộ phù hợp và kết thúc khi `currentPath` thay đổi.
-Điều hướng bằng code và back/forward cần gọi `start()` thủ công. Next `router.push()`
-không trả promise hoàn tất route: để provider kết thúc khi đường dẫn đổi, gọi
-`done()` khi lỗi hoặc hủy, kể cả redirect quay về URL cũ. Không gọi `done()` ngay
-sau `push()` thành công.
+`trackLinks` observes eligible same-origin HTTP(S) anchor clicks and completes
+progress when `currentPath` changes. It ignores modified clicks, downloads,
+non-self targets, external URLs, the current URL, and hash-only changes.
+Programmatic navigation and browser back/forward require a manual `start()`.
 
-```tsx snippet
+Next.js `router.push()` does not return a route-completion promise. Let the provider
+finish when the path changes. Call `done()` for errors, cancellations, or redirects
+back to the same URL; do not call it immediately after a successful `push()`.
+
+This complete module accepts the current pathname and the host router. In a Next.js
+client wrapper, pass `pathname={usePathname() ?? ''}` and `router={useRouter()}`
+using hooks from `next/navigation`.
+
+```tsx
 'use client';
 
-import { usePathname, useRouter } from 'next/navigation';
 import { Button, topLoader } from '@itclabs/react-ui';
 
-export function OpenProfile() {
-  const router = useRouter();
-  const pathname = usePathname();
-
+export function OpenProfile({
+  pathname,
+  router,
+}: {
+  pathname: string;
+  router: { push: (href: string) => void };
+}) {
   function openProfile() {
     if (pathname === '/settings/profile') return;
 
@@ -338,9 +378,10 @@ export function OpenProfile() {
 }
 ```
 
-Chỉ gọi facade sau khi provider mount. Bên trong component, `useTopLoader()` cung cấp
-controller của provider gần nhất. Ví dụ dưới đây nhận callback tải dữ liệu từ host,
-bảo đảm kết thúc cả khi fetch thất bại:
+Call the facade only after its provider mounts. Inside components,
+`useTopLoader()` returns the nearest provider's controller. Render this refresh
+control below `TopLoaderProvider` and pass the host's data-loading callback; the
+`finally` block completes progress even if loading fails:
 
 ```tsx
 'use client';
@@ -363,67 +404,31 @@ export function Refresh({ loadData }: { loadData: () => Promise<unknown> }) {
 }
 ```
 
-Các controller dùng chung một hoạt động, không đếm số request. Với nhiều tác vụ
-đồng thời, host chỉ gọi `done()` khi tất cả hoàn tất. Các click bị hủy hoặc lỗi route
-cũng cần `done()`; thanh tiến trình không xác định được chúng từ sự kiện anchor.
+The controller methods share one activity rather than counting requests. For
+concurrent tasks, call `done()` only after all tasks finish. Canceled clicks and
+route errors also need `done()`; anchor events cannot reveal their outcome.
 
-## Quy tắc active
+## Active matching rules
 
-<table>
-  <thead>
-    <tr>
-      <th>Quy tắc</th>
-      <th>Kết quả</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>Ranh giới segment</td>
-      <td>
-        <code>/admin</code> khớp <code>/admin/users</code>, không khớp{' '}
-        <code>/administrator</code>.
-      </td>
-    </tr>
-    <tr>
-      <td>Longest match wins</td>
-      <td>
-        Href khớp dài nhất thắng; nếu bằng nhau, chọn mục sâu hơn rồi mục đầu tiên.
-      </td>
-    </tr>
-    <tr>
-      <td>Root</td>
-      <td>
-        <code>/</code> chỉ khớp chính nó mặc định; dùng <code>exact: false</code> để
-        đổi.
-      </td>
-    </tr>
-    <tr>
-      <td>Override</td>
-      <td>
-        <code>exact</code> thắng alias <code>end</code>.{' '}
-        <code>isActive(item, currentPath)</code> thay khớp đường dẫn;{' '}
-        <code>active</code> tường minh thắng predicate.
-      </td>
-    </tr>
-    <tr>
-      <td>Chuẩn hóa</td>
-      <td>
-        Bỏ query, hash và slash cuối; phân biệt hoa thường. Không khớp URL ngoài hoặc
-        đường dẫn tương đối.
-      </td>
-    </tr>
-  </tbody>
-</table>
+| Rule               | Result                                                                                                                                                                                                  |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Segment boundaries | `/admin` matches `/admin/users`, but not `/administrator`.                                                                                                                                              |
+| Longest match wins | The longest matching normalized href wins; ties prefer the deeper item, then the first item.                                                                                                            |
+| Root               | `/` matches only itself by default; set `exact: false` to allow prefix matching.                                                                                                                        |
+| Overrides          | `exact` takes precedence over its `end` alias. `isActive(item, currentPath)` replaces path matching. An explicit `active` overrides the predicate; `active: true` takes priority over inferred matches. |
+| Normalization      | Query strings, hashes, and trailing slashes are ignored. Matching is case-sensitive. External URLs and relative paths do not match.                                                                     |
 
-Chỉ liên kết thắng nhận `aria-current="page"`; mục cha được đánh dấu nhánh active.
-Xem đầy đủ tại [docs/UI_NAVIGATION.md](https://github.com/itc-labs/react-ui/blob/main/docs/UI_NAVIGATION.md).
+Only the winning link receives `aria-current="page"`; its ancestors are marked as
+the active branch. See the full contract in
+[UI_NAVIGATION.md](https://github.com/itc-labs/react-ui/blob/main/docs/UI_NAVIGATION.md).
 
-## Brand, switcher và UserMenu
+## Brand, switcher, and UserMenu
 
-Navbar có nền surface, viền dưới và chiều cao tối thiểu 64px. `brand` nhận ReactNode
-hoặc `{ logo, title, subtitle, href }`; `switcher` nhận Tabs segmented hoặc Select
-và xuất hiện cùng brand trong Drawer. `activeIndicator` mặc định là `underline`;
-dùng `pill` để chọn nền active. Host truyền `currentPath` và callback quyền.
+Navbar has a surface background, bottom border, and minimum height of 64px.
+`brand` accepts a React node or `{ logo, title, subtitle, href }`.
+`switcher` accepts controls such as segmented Tabs or Select and appears beside
+the brand in the mobile Drawer. `activeIndicator` defaults to `underline`; use
+`pill` for a selected background. The host supplies `currentPath` and permissions.
 
 ```tsx
 import {
@@ -438,46 +443,57 @@ import {
 import { HomeIcon } from '@itclabs/react-ui/icons/outline/home';
 import { BellIcon } from '@itclabs/react-ui/icons/outline/bell';
 
-<Navbar
-  brand={{
-    logo: <Icon glyph={HomeIcon} />,
-    title: 'Lorem ipsum',
-    subtitle: 'Dolor sit amet',
-    href: '/',
-  }}
-  switcher={
-    <Tabs defaultValue="personal" variant="segmented" size="sm">
-      <TabsList aria-label="Workspace">
-        <TabsTrigger value="personal">Personal</TabsTrigger>
-        <TabsTrigger value="team">Team</TabsTrigger>
-      </TabsList>
-    </Tabs>
-  }
-  items={[{ id: 'home', label: 'Home', href: '/', icon: HomeIcon }]}
-  currentPath="/"
-  actions={
-    <>
-      <IconButton icon={BellIcon} label="Notifications" variant="secondary" badge={3} />
-      <UserMenu
-        name="Lorem Ipsum"
-        description="Dolor sit amet"
-        header={<span>user@example.com</span>}
-        items={[{ id: 'profile', label: 'Profile', href: '/profile' }]}
-      />
-    </>
-  }
-/>;
+export function NavigationBar() {
+  return (
+    <Navbar
+      brand={{
+        logo: <Icon glyph={HomeIcon} />,
+        title: 'Lorem ipsum',
+        subtitle: 'Dolor sit amet',
+        href: '/',
+      }}
+      switcher={
+        <Tabs defaultValue="personal" variant="segmented" size="sm">
+          <TabsList aria-label="Workspace">
+            <TabsTrigger value="personal">Personal</TabsTrigger>
+            <TabsTrigger value="team">Team</TabsTrigger>
+          </TabsList>
+        </Tabs>
+      }
+      items={[{ id: 'home', label: 'Home', href: '/', icon: HomeIcon }]}
+      currentPath="/"
+      actions={
+        <>
+          <IconButton
+            icon={BellIcon}
+            label="Notifications"
+            variant="secondary"
+            badge={3}
+          />
+          <UserMenu
+            name="Lorem Ipsum"
+            description="Dolor sit amet"
+            header={<span>user@example.com</span>}
+            items={[{ id: 'profile', label: 'Profile', href: '/profile' }]}
+          />
+        </>
+      }
+    />
+  );
+}
 ```
 
-UserMenu tự thu gọn thành avatar dưới breakpoint sm; `compact` luôn thu gọn,
-`collapseOnMobile={false}` giữ tên ở mọi kích thước. `items` dùng DropdownMenuEntry,
-`header` nhận nội dung tên/email. Xem [Navbar](?path=/docs/modules-navbar--docs) và
-[UserMenu](?path=/docs/modules-usermenu--docs) để thử các trạng thái và classNames.
+UserMenu collapses to an avatar below `sm` by default. Set `compact` to always
+collapse it, or `collapseOnMobile={false}` to keep the name visible at every size.
+`items` accepts DropdownMenuEntry data; `header` accepts content such as a name or
+email. See [Navbar](?path=/docs/modules-navbar--docs) and
+[UserMenu](?path=/docs/modules-usermenu--docs) for states and `classNames` slots.
 
-## PageHeader và Navbar
+## PageHeader and Navbar
 
-`Navbar` là thanh điều hướng toàn ứng dụng. `PageHeader` giữ tên hiện tại và dùng
-cho tiêu đề từng trang, với breadcrumb do host truyền rõ ràng:
+`Navbar` provides application-wide navigation. `PageHeader` provides the title
+block for each page. The host supplies breadcrumbs explicitly; PageHeader does
+not infer them from routes.
 
 ```tsx
 import { Breadcrumb, PageHeader } from '@itclabs/react-ui';
