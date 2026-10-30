@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.8.0
+
+### Minor Changes
+
+- [#24](https://github.com/itc-labs/react-ui/pull/24) [`6316e3c`](https://github.com/itc-labs/react-ui/commit/6316e3ca20df7761ae067d486abaf024e47b2d9f) Thanks [@vungbt](https://github.com/vungbt)! - Add OptionGroup for chip and color/image swatch selection, QuantityInput for bounded quantity editing, and ColorPicker for hex/alpha colors, presets, and supported screen sampling. All three core controls support automatic FormField binding.
+
+  Add the isolated `@itclabs/react-ui/media-gallery` subpath with MediaGallery and Lightbox for images and videos, responsive thumbnails, keyboard navigation, hover zoom, fullscreen image zoom, and drag panning. Include usage guides, catalog links, and bundle budgets.
+
+  Rating stars sit closer together and use the new `--color-rating` / `--color-rating-empty` tokens (amber by default).
+
+  OptionGroup `maxVisible` now lists the remaining options in a "+N" dropdown instead of expanding them inline. ColorPicker and Rating show the required marker on their labels.
+
 ## 0.7.0
 
 ### Minor Changes
