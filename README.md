@@ -150,21 +150,13 @@ import { Button, Input, Select } from '@itclabs/react-ui';
 
 ### Forms
 
-Wrap ordinary controls in `FormField` inside `Form`. `Form schema` takes Valibot rules per field; `FormField` binds the value, blur, label and error, and `FormSubmit` exposes the submitting state for your own button.
+Wrap ordinary controls in `FormField` inside `Form`. `Form schema` takes Valibot rules per field; `FormField` binds the value, blur, label and error, and a `Button type="submit"` inside `Form` shows loading and stays disabled while the form submits.
 
 ```tsx
 'use client';
 
 import * as v from 'valibot';
-import {
-  Button,
-  Form,
-  FormField,
-  FormSubmit,
-  Input,
-  Select,
-  useAppForm,
-} from '@itclabs/react-ui';
+import { Button, Form, FormField, Input, Select, useAppForm } from '@itclabs/react-ui';
 
 // Field rules can live in a shared module and validate the request on the server too.
 export const profileSchema = {
@@ -195,13 +187,7 @@ export function ProfileForm({
           ]}
         />
       </FormField>
-      <FormSubmit form={form}>
-        {(submitting) => (
-          <Button type="submit" loading={submitting}>
-            Save
-          </Button>
-        )}
-      </FormSubmit>
+      <Button type="submit">Save</Button>
     </Form>
   );
 }

@@ -90,21 +90,13 @@ Native adapters are also the defaults. Replace them with framework adapters when
 
 ## 4. Build a first screen
 
-Render `FirstScreen` inside `UIRoot`. Wrap ordinary controls in `FormField` inside `Form`; `schema` holds the Valibot rule for each field, and `FormSubmit` gives your button the submitting state. Saving here is a local demonstration that shows a toast; connect your own persistence in `onSubmit`.
+Render `FirstScreen` inside `UIRoot`. Wrap ordinary controls in `FormField` inside `Form`; `schema` holds the Valibot rule for each field, and a `Button type="submit"` shows loading while the form submits. Saving here is a local demonstration that shows a toast; connect your own persistence in `onSubmit`.
 
 ```tsx
 'use client';
 
 import * as v from 'valibot';
-import {
-  Button,
-  Form,
-  FormField,
-  FormSubmit,
-  Input,
-  toast,
-  useAppForm,
-} from '@itclabs/react-ui';
+import { Button, Form, FormField, Input, toast, useAppForm } from '@itclabs/react-ui';
 
 const schema = {
   name: v.pipe(v.string(), v.trim(), v.minLength(1, 'Enter a name.')),
@@ -125,13 +117,7 @@ export function FirstScreen() {
         <FormField name="name" label="Name" required>
           <Input placeholder="Lorem ipsum" />
         </FormField>
-        <FormSubmit form={form}>
-          {(submitting) => (
-            <Button type="submit" loading={submitting}>
-              Save
-            </Button>
-          )}
-        </FormSubmit>
+        <Button type="submit">Save</Button>
       </Form>
     </main>
   );

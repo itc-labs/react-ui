@@ -26,7 +26,6 @@ import {
   Button,
   Form,
   FormField,
-  FormSubmit,
   Input,
   InputPassword,
   NumberInput,
@@ -57,13 +56,7 @@ export function Example() {
       <FormField name="quantity" label="Quantity" required>
         <NumberInput min={1} />
       </FormField>
-      <FormSubmit form={form}>
-        {(submitting) => (
-          <Button type="submit" loading={submitting}>
-            Save
-          </Button>
-        )}
-      </FormSubmit>
+      <Button type="submit">Save</Button>
     </Form>
   );
 }

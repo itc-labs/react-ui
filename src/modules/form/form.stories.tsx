@@ -11,7 +11,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, userEvent, waitFor, within } from 'storybook/test';
 import { useState } from 'react';
 import * as v from 'valibot';
-import { Form, FormField, FormSubmit, useAppForm } from './index';
+import { Form, FormField, useAppForm } from './index';
 import { Button } from '../../components/button';
 import { validateFiles } from '../../components/upload-field/validation';
 import type { DateRangeValue } from '../../components/date-range-picker';
@@ -503,13 +503,7 @@ function ComposedFormDemo() {
       <FormField name="agree" required>
         <Checkbox label="Confirm information" />
       </FormField>
-      <FormSubmit form={form}>
-        {(submitting) => (
-          <Button type="submit" loading={submitting}>
-            Save information
-          </Button>
-        )}
-      </FormSubmit>
+      <Button type="submit">Save information</Button>
       {saved && <p role="status">Demo saved.</p>}
     </Form>
   );

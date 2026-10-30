@@ -4,7 +4,7 @@ import { Meta } from '@storybook/addon-docs/blocks';
 
 # Forms
 
-`useAppForm` creates the TanStack Form state. The recommended pattern, used throughout the Form stories, wraps ordinary kit controls in `FormField` inside `Form`, passes per-field Valibot rules through `Form schema` and submits with `FormSubmit`. `form.AppField` bound fields are a shorter alternative. `Form` supplies context, prevents native submission, and focuses the first element marked `aria-invalid="true"` after submission completes.
+`useAppForm` creates the TanStack Form state. The recommended pattern, used throughout the Form stories, wraps ordinary kit controls in `FormField` inside `Form`, passes per-field Valibot rules through `Form schema` and submits with a plain `Button type="submit"`, which shows loading and stays disabled while the form submits. `form.AppField` bound fields are a shorter alternative. `Form` supplies context, prevents native submission, and focuses the first element marked `aria-invalid="true"` after submission completes.
 
 ## Compose controls with FormField (recommended)
 
@@ -20,7 +20,6 @@ import {
   Checkbox,
   Form,
   FormField,
-  FormSubmit,
   Input,
   NumberInput,
   Select,
@@ -83,20 +82,14 @@ export function ItemForm({
       <FormField name="enabled">
         <Checkbox label="Enable item" />
       </FormField>
-      <FormSubmit>
-        {(isSubmitting, canSubmit) => (
-          <Button type="submit" loading={isSubmitting} disabled={!canSubmit}>
-            Save item
-          </Button>
-        )}
-      </FormSubmit>
+      <Button type="submit">Save item</Button>
       {error && <p role="alert">{error}</p>}
     </Form>
   );
 }
 ```
 
-Return or await the save promise inside `onSubmit` so submitting state covers the entire operation. `form.SubmitButton` sets `type="submit"`, shows loading state, and disables submission when `canSubmit` is false. `FormSubmit` exposes `(isSubmitting, canSubmit)` for custom buttons; it also accepts `form={form}` outside form context. A plain `Button` needs `type="submit"`.
+Return or await the save promise inside `onSubmit` so submitting state covers the entire operation. `form.SubmitButton` sets `type="submit"`, shows loading state, and disables submission when `canSubmit` is false. A `Button type="submit"` inside `Form` shows the same loading state automatically; pass `loading` to control it yourself. Use `FormSubmit`, which exposes `(isSubmitting, canSubmit)`, when the button also depends on `canSubmit` or lives outside `Form` (`form={form}`).
 
 Keep validation errors next to controls; use persistent feedback for submission failures. See [Overlays & feedback](?path=/docs/guides-overlays-feedback--docs) for optional success notifications.
 
