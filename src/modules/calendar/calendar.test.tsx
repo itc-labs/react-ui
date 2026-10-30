@@ -4,6 +4,7 @@ import { createRoot, type Root } from 'react-dom/client';
 import { userEvent } from 'storybook/test';
 import { beforeEach, afterEach, it, expect, vi } from 'vitest';
 import { UILocaleProvider } from '../../i18n/provider';
+import { enUS } from 'react-day-picker/locale';
 import { Calendar, type CalendarProps } from './index';
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
@@ -60,6 +61,33 @@ it('navigates uncontrolled dates, reports exclusive ranges on mount and each nav
   click('today');
   expect(onDateChange).toHaveBeenLastCalledWith(date);
   expect(onRangeChange).toHaveBeenCalledTimes(6);
+});
+
+it('uses calendar map week defaults and lets the explicit weekStartsOn prop override them', () => {
+  const onRangeChange = vi.fn();
+  const calendarLocale = {
+    ...enUS,
+    options: { ...enUS.options, weekStartsOn: 6 as const },
+  };
+
+  const renderCalendar = (weekStartsOn?: 1) =>
+    act(() =>
+      root.render(
+        <UILocaleProvider locale="vi-VN" calendarLocales={{ 'vi-vn': calendarLocale }}>
+          <Calendar
+            defaultDate={date}
+            defaultView="week"
+            onRangeChange={onRangeChange}
+            {...(weekStartsOn === undefined ? {} : { weekStartsOn })}
+          />
+        </UILocaleProvider>,
+      ),
+    );
+
+  renderCalendar();
+  expect(onRangeChange.mock.lastCall?.[0].start).toEqual(new Date(2026, 9, 24));
+  renderCalendar(1);
+  expect(onRangeChange.mock.lastCall?.[0].start).toEqual(new Date(2026, 9, 26));
 });
 
 it('keeps controlled navigation and view changes pending until the host supplies new values', () => {

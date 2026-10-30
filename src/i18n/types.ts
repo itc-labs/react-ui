@@ -9,7 +9,7 @@ export type UITranslate = (key: UIMessageKey, values?: UIMessageValues) => strin
 export interface UILocale {
   readonly code: string;
   readonly messages: Readonly<UIMessages>;
-  readonly calendarLocale: NonNullable<DayPickerProps['locale']>;
+  readonly calendarLocale?: NonNullable<DayPickerProps['locale']>;
 }
 
 /** JSON-serializable catalog entry. Keep date-library functions in calendarLocales. */
@@ -18,4 +18,6 @@ export interface UITranslation {
   readonly messages: Readonly<Partial<UIMessages>>;
 }
 export type UITranslations = readonly UITranslation[];
-export type UICalendarLocales = Readonly<Record<string, UILocale['calendarLocale']>>;
+export type UICalendarLocales = Readonly<
+  Record<string, NonNullable<UILocale['calendarLocale']>>
+>;

@@ -24,6 +24,11 @@ it('formats plurals/numbers and falls back to English for an added locale', () =
     code: 'fr-FR',
     messages: { 'button.processing': 'Traitement' },
   });
+  expect(fr.calendarLocale).toBeUndefined();
+  expect(viVN.calendarLocale).toBeUndefined();
+  expect(enUS.calendarLocale).toBeUndefined();
+  const calendarLocale = { code: 'fr' };
+  expect(defineLocale({ ...fr, calendarLocale }).calendarLocale).toBe(calendarLocale);
   expect(createTranslator(fr)('button.processing')).toBe('Traitement');
   expect(createTranslator(fr)('dialog.close')).toBe('Close dialog');
   expect(() => defineLocale({ code: 'not_a_locale', messages: {} })).toThrow(
@@ -212,11 +217,15 @@ it('accepts a typed JSON array and resolves many languages without per-message b
   expect(resolveUILocale('de-DE', dictionaries, { fallbackLocale: 'vi-VN' }).code).toBe(
     'vi-VN',
   );
+  const calendarLocale = { code: 'ja' };
   expect(
     resolveUILocale('ja-JP', dictionaries, {
-      calendarLocales: { 'ja-jp': viVN.calendarLocale },
+      calendarLocales: { 'ja-jp': calendarLocale },
     }).calendarLocale,
-  ).toBe(viVN.calendarLocale);
+  ).toBe(calendarLocale);
+  expect(
+    resolveUILocale('ja-JP', dictionaries, { fallbackLocale: 'vi-VN' }).calendarLocale,
+  ).toBeUndefined();
   expect(
     createTranslator(
       resolveUILocale('ja-JP', dictionaries, { fallbackLocale: 'vi-VN' }),

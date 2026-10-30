@@ -8,6 +8,7 @@ import { Spinner } from '../../components/spinner';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../components/tabs';
 import { cn, partTestId } from '../../components/common';
 import { useUILocale } from '../../i18n/provider';
+import { useCalendarLocale } from '../../components/calendar/locale';
 import { viewTitle } from './engine/dates';
 import type { CalendarView } from './engine/types';
 import { CalendarList } from './list';
@@ -83,14 +84,8 @@ export function Calendar<TData = unknown>(props: CalendarProps<TData>) {
   } = props;
   const { locale, t } = useUILocale();
   const titleId = useId();
-  const language = new Intl.Locale(locale.code).language;
-  const startOfWeek =
-    weekStartsOn ??
-    (language === 'vi'
-      ? 1
-      : language === 'en'
-        ? 0
-        : (locale.calendarLocale.options?.weekStartsOn ?? 0));
+  const calendarLocale = useCalendarLocale();
+  const startOfWeek = weekStartsOn ?? calendarLocale.options?.weekStartsOn ?? 0;
   const rootRef = useRef<HTMLDivElement>(null);
 
   useImperativeHandle(ref, () => rootRef.current!, []);
