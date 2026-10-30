@@ -1,5 +1,5 @@
 import { UIProvider } from '../../theme/provider';
-import { useCallback, useState } from 'react';
+import { useCallback, useState, type ComponentProps } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, userEvent, within } from 'storybook/test';
 import { WorkspaceShell } from './index';
@@ -101,7 +101,13 @@ const pageLabels: Record<string, string> = {
   '/guides/start': 'Getting started',
 };
 
-function ApplicationExample({ topNavigation = false }: { topNavigation?: boolean }) {
+function ApplicationExample({
+  topNavigation = false,
+  variant = 'inset',
+}: {
+  topNavigation?: boolean;
+  variant?: NonNullable<ComponentProps<typeof WorkspaceShell>['variant']>;
+}) {
   const [currentPath, setCurrentPath] = useState('/overview');
   const [collapsed, setCollapsed] = useState(false);
   const [notice, setNotice] = useState('');
@@ -155,11 +161,13 @@ function ApplicationExample({ topNavigation = false }: { topNavigation?: boolean
   return (
     <UIProvider link={DemoLink}>
       <WorkspaceShell
+        variant={variant}
         {...(topNavigation
           ? {}
           : {
               sidebar: (
                 <Sidebar
+                  variant={variant === 'floating' ? 'floating' : 'sidebar'}
                   collapsed={collapsed}
                   onCollapsedChange={setCollapsed}
                   toggleShortcut="mod+b"
@@ -238,7 +246,13 @@ function ApplicationExample({ topNavigation = false }: { topNavigation?: boolean
 export const Playground: Story = {
   tags: ['usage'],
   name: 'ApplicationLayout',
-  render: () => <ApplicationExample />,
+  args: { variant: 'inset' },
+  argTypes: {
+    variant: { control: 'select', options: ['inset', 'classic', 'floating'] },
+  },
+  render: (args: ComponentProps<typeof WorkspaceShell>) => (
+    <ApplicationExample variant={args.variant ?? 'inset'} />
+  ),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     if (window.innerWidth < 1024)

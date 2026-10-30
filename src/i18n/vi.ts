@@ -1,5 +1,29 @@
 import type { UIMessages } from './types';
 export const viMessages = {
+  'virtualList.empty': 'Không có mục nào',
+  'virtualList.loadMore': 'Tải thêm',
+  'virtualList.retry': 'Thử lại',
+  'virtualList.loadingMore': 'Đang tải thêm…',
+  'virtualList.loaded': { other: 'Đã tải thêm {count} mục' },
+
+  'dnd.integrationInstructions':
+    'Nhấn Space hoặc Enter để nhấc mục. Dùng mũi tên lên xuống để sắp xếp, trái phải để đổi danh sách, Space hoặc Enter để thả và Escape để hủy.',
+  'table.reorder': 'Sắp xếp dòng',
+  'table.reorderSorted': 'Xóa sắp xếp để đổi thứ tự dòng.',
+  'table.reorderServer':
+    'Không thể đổi thứ tự dòng trong trang hoặc nhóm do máy chủ quản lý.',
+  'dnd.handle': 'Kéo để sắp xếp lại {label}',
+  'dnd.instructions':
+    'Nhấn Space hoặc Enter để chọn mục. Dùng phím mũi tên để di chuyển. Nhấn Space hoặc Enter để thả, hoặc Escape để hủy.',
+  'dnd.pickedUp': 'Đã nhấc {label}.',
+  'dnd.over': 'Đang di chuyển {label} đến {target}.',
+  'dnd.outside': '{label} ở ngoài vùng thả.',
+  'dnd.dropped': 'Đã thả {label} vào {target}.',
+  'dnd.cancelled': 'Đã hủy kéo {label}.',
+  'dnd.empty': 'Thả mục vào đây',
+  'dnd.list': 'Danh sách sắp xếp',
+  'dnd.board': 'Bảng sắp xếp',
+
   'transfer.label': 'Chuyển lựa chọn',
   'transfer.available': 'Có sẵn',
   'transfer.selected': 'Đã chọn',
@@ -143,6 +167,11 @@ export const viMessages = {
   'userMenu.open': 'Mở menu tài khoản của {name}',
   'navbar.navigation': 'Điều hướng chính',
   'navbar.openMenu': 'Mở menu điều hướng',
+  'sidebar.sections': 'Các mục điều hướng',
+  'sidebar.sectionCount': '{count} thông báo',
+  'sidebar.search': 'Tìm kiếm…',
+  'sidebar.moreActions': 'Thêm tác vụ cho {label}',
+  'sidebar.add': 'Thêm vào {label}',
   'sidebar.collapse': 'Thu gọn thanh bên',
   'sidebar.expand': 'Mở rộng thanh bên',
   'sidebar.open': 'Mở thanh bên',

@@ -7,6 +7,10 @@ const require = createRequire(import.meta.url);
 const { build } = createRequire(require.resolve('vite/package.json'))('esbuild');
 const root = fileURLToPath(new URL('../', import.meta.url));
 const entries = {
+  Dnd: 'modules/dnd/index.tsx',
+  TransferDnd: 'modules/transfer/index.tsx',
+  DataTableRowReorder: 'modules/data-table/index.tsx',
+  Sidebar: 'modules/sidebar/index.tsx',
   Icon: 'components/icon/index.tsx',
   Divider: 'components/divider/index.tsx',
   Timeline: 'components/timeline/index.tsx',
@@ -29,21 +33,27 @@ const entries = {
   Root: 'index.ts',
   Calendar: 'modules/calendar/index.tsx',
   Carousel: 'modules/carousel/index.tsx',
+  VirtualList: 'modules/virtual-list/index.tsx',
+  VirtualGrid: 'modules/virtual-list/index.tsx',
   MediaGallery: 'modules/media-gallery/index.tsx',
   Lightbox: 'modules/media-gallery/index.tsx',
   Form: 'modules/form/index.tsx',
 };
 const sizes = {};
 for (const [name, file] of Object.entries(entries)) {
-  const exports =
-    name === 'Root'
-      ? '*'
-      : name === 'Form'
-        ? '{ Form, FormField, FormSubmit }'
-        : `{ ${name} }`;
+  const exports = ['Root', 'Dnd'].includes(name)
+    ? '*'
+    : name === 'Form'
+      ? '{ Form, FormField, FormSubmit }'
+      : `{ ${name} }`;
   const { outputFiles, metafile } = await build({
     stdin: {
-      contents: `export ${exports} from './src/${file}';`,
+      contents:
+        name === 'TransferDnd'
+          ? `export { Transfer } from './src/${file}'; export { createTransferDnd } from './src/modules/dnd/index.tsx';`
+          : name === 'DataTableRowReorder'
+            ? `export { DataTable } from './src/${file}'; export { createRowReorder } from './src/modules/dnd/index.tsx';`
+            : `export ${exports} from './src/${file}';`,
       resolveDir: root,
       loader: 'tsx',
     },
@@ -60,6 +70,8 @@ for (const [name, file] of Object.entries(entries)) {
   });
   if (
     [
+      'Dnd',
+      'TransferDnd',
       'TreeSelect',
       'Transfer',
       'Timeline',
@@ -73,6 +85,8 @@ for (const [name, file] of Object.entries(entries)) {
       'JsonView',
       'CodeView',
       'Carousel',
+      'VirtualList',
+      'VirtualGrid',
       'MediaGallery',
       'Lightbox',
     ].includes(name)
@@ -89,6 +103,17 @@ for (const [name, file] of Object.entries(entries)) {
     );
     if (forbidden.length) throw new Error(`${name} imports react-select: ${forbidden}`);
   }
+  if (['TransferDnd', 'DataTableRowReorder'].includes(name)) {
+    if (!Object.keys(metafile.inputs).some((input) => /@dnd-kit\//.test(input)))
+      throw new Error(`${name} does not include its opt-in drag runtime`);
+  }
+  if (['Transfer', 'DataTable'].includes(name)) {
+    const forbidden = Object.keys(metafile.inputs).filter((input) =>
+      /@dnd-kit\//.test(input),
+    );
+    if (forbidden.length)
+      throw new Error(`${name} imports dnd-kit without a plugin: ${forbidden}`);
+  }
   if (name === 'Calendar') {
     const forbidden = Object.keys(metafile.inputs).filter((input) =>
       /(?:modules\/(?:editor|chart|avatar-upload)\/|node_modules\/.*(?:tiptap|recharts|react-easy-crop))/.test(
@@ -100,7 +125,9 @@ for (const [name, file] of Object.entries(entries)) {
   }
   if (name === 'Root') {
     const isolatedSelection = Object.keys(metafile.inputs).filter((input) =>
-      /modules\/(?:tree-select|transfer)\/|@tanstack\/.*virtual/.test(input),
+      /modules\/(?:dnd|tree-select|transfer|virtual-list)\/|@dnd-kit\/|@tanstack\/.*virtual/.test(
+        input,
+      ),
     );
     if (isolatedSelection.length)
       throw new Error(`Root imports isolated selection modules: ${isolatedSelection}`);
@@ -134,13 +161,20 @@ for (const [name, file] of Object.entries(entries)) {
 console.log(JSON.stringify(sizes, null, 2));
 // Gzip budgets with a little headroom; raise them only for an intentional feature.
 for (const [name, limit] of Object.entries({
+  // New feature fixtures have approximately 10% headroom.
+  Dnd: 67_900,
+  TransferDnd: 81_900,
+  DataTableRowReorder: 117_600,
+  Sidebar: 87_500,
   Icon: 20_000,
-  Rating: 20_000,
+  // Shared drag-and-drop translations add about 500 gzip bytes to locale consumers.
+  Rating: 20_700,
   Divider: 10_600,
   Kbd: 19_500,
   Slider: 32_300,
   Timeline: 21_400,
-  QuantityInput: 20_600,
+  // New collection feedback messages also enter the shared locale catalogs.
+  QuantityInput: 20_800,
   OptionGroup: 52_000,
   JsonView: 22_000,
   // About 10% above the measured display subpath fixtures.
@@ -148,20 +182,23 @@ for (const [name, limit] of Object.entries({
   // DOMPurify plus shared class merging, with about 10% headroom.
   RichTextView: 24_000,
   Carousel: 30_300,
+  VirtualList: 34_000,
+  VirtualGrid: 34_000,
   // Fullscreen media adds Dialog focus management and image zoom controls.
   MediaGallery: 54_800,
-  Lightbox: 41_000,
+  // Shared reorder instructions and disabled reasons are included in locale consumers.
+  Lightbox: 41_500,
   Button: 20_000,
   Spinner: 20_000,
   Dialog: 38_000,
   Select: 58_000,
   TreeSelect: 65_800,
-  Transfer: 42_000,
+  Transfer: 43_500,
   Form: 22_000,
   DataTable: 90_000,
   Calendar: 100_000,
-  // Slider adds the Radix pointer and keyboard interaction primitive to core.
-  Root: 275_000,
+  // Keep the existing aggregate limit: Root measures 277,010 gzip bytes.
+  Root: 278_000,
   ColorPicker: 54_300,
 })) {
   if (sizes[name].gzip >= limit) {

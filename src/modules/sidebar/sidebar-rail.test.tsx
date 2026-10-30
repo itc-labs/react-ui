@@ -302,3 +302,33 @@ it('uses a mobile trigger slot, the same filtered active tree, closes on selecti
   await act(async () => userEvent.keyboard('{Escape}'));
   expect(byId('drawer')).toBeNull();
 });
+
+it.each(['dark', 'brand'] as const)(
+  'keeps %s rail flyouts on normal portalled surfaces',
+  async (tone) => {
+    await act(async () =>
+      root.render(
+        <Sidebar
+          tone={tone}
+          itemVariant="solid"
+          collapsed
+          items={items}
+          data-testid="side"
+          currentPath="/settings/profile"
+        />,
+      ),
+    );
+    await act(async () => byId('submenu-settings').click());
+    const flyout = byId('submenu-settings-content');
+    expect(flyout.classList.contains('bg-surface')).toBe(true);
+    expect(flyout.closest('aside')).toBeNull();
+    expect(flyout.style.getPropertyValue('--sidebar-bg')).toBe('');
+    expect(byId('').style.getPropertyValue('--sidebar-bg')).not.toBe('');
+    const current = flyout.querySelector('[aria-current="page"]')!;
+    expect(current.className).toContain(
+      'var(--sidebar-solid-fg,var(--color-on-brand))',
+    );
+    await act(async () => userEvent.keyboard('{Escape}'));
+    expect(byId('submenu-settings-content')).toBeNull();
+  },
+);

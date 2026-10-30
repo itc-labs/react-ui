@@ -1,3 +1,5 @@
+import type { DataTableRowReorderPlugin } from '../dnd/integration-types';
+export type { DataTableRowReorderPlugin } from '../dnd/integration-types';
 import type { TestIdProps } from '../../components/common/testing';
 import type { ReactNode } from 'react';
 import type { ColumnDef } from '@tanstack/react-table';
@@ -11,6 +13,19 @@ type BaseProps<T> = {
   rows: readonly T[];
   columns: ColumnDef<T, unknown>[];
   rowId: (row: T) => string;
+  rowReorder?: {
+    plugin: DataTableRowReorderPlugin;
+    onReorder: (
+      orderedIds: string[],
+      move: { id: string; from: number; to: number },
+    ) => void;
+    /** Human-readable row name for the drag preview and announcements. Defaults to the row ID. */
+    getLabel?: (row: T) => string;
+    handle?: boolean;
+    disabled?: boolean;
+    /** Explicitly permit reordering the supplied server page/group. Sorting still blocks reorder. */
+    allowServerReorder?: boolean;
+  };
   classNames?: SlotClasses<
     | 'root'
     | 'toolbar'
@@ -29,6 +44,9 @@ type BaseProps<T> = {
     | 'sortButton'
     | 'sortIcon'
     | 'resizeHandle'
+    | 'dragHandle'
+    | 'dragOverlay'
+    | 'reorderCell'
     | 'tbody'
     | 'row'
     | 'selectedRow'

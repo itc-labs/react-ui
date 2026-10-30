@@ -1,3 +1,4 @@
+import { createRowReorder } from '@itclabs/react-ui/dnd';
 import { useEffect, useState } from 'react';
 import { expect, userEvent, waitFor, within } from 'storybook/test';
 import type { Meta, StoryObj } from '@storybook/react-vite';
@@ -232,6 +233,26 @@ function SelectionPages({ server = false }: { server?: boolean }) {
 
 export const Sortable: Story = { tags: ['usage'], name: 'Playground' };
 
+function MissingValuesExample() {
+  return (
+    <div className="grid gap-3">
+      <p className="text-ui-sm text-muted">
+        Sample data. Click a column header to compare sorting of 0 and null.
+      </p>
+      <DataTable<MetricFixture>
+        caption="Missing and zero values"
+        columns={metricColumns}
+        rowId={(row) => row.id}
+        rows={[
+          { id: 'zero', item: 'Fixture Zero', value: 0 },
+          { id: 'known', item: 'Fixture Known', value: 42 },
+          { id: 'unknown', item: 'Fixture Missing', value: null },
+        ]}
+      />
+    </div>
+  );
+}
+
 export const States: Story = {
   tags: ['states'],
   render: () => (
@@ -252,29 +273,14 @@ export const States: Story = {
       />
       <RetryExample />
       <RefreshExample />
+      <MissingValuesExample />
     </div>
   ),
 };
 
 export const MissingValues: Story = {
-  tags: ['example'],
-  render: () => (
-    <div className="grid gap-3">
-      <p className="text-ui-sm text-muted">
-        Sample data. Click a column header to compare sorting of 0 and null.
-      </p>
-      <DataTable<MetricFixture>
-        caption="Missing and zero values"
-        columns={metricColumns}
-        rowId={(row) => row.id}
-        rows={[
-          { id: 'zero', item: 'Fixture Zero', value: 0 },
-          { id: 'known', item: 'Fixture Known', value: 42 },
-          { id: 'unknown', item: 'Fixture Missing', value: null },
-        ]}
-      />
-    </div>
-  ),
+  tags: ['!dev', '!autodocs', 'example'],
+  render: () => <MissingValuesExample />,
 };
 
 export const ClientPagination: Story = {
@@ -427,6 +433,43 @@ export const Selection: Story = {
       description: {
         story:
           'Selection persists across pages using stable row IDs. These examples show client and server pagination; the header checkbox selects only the current page.',
+      },
+    },
+  },
+};
+
+function RowReorderExample() {
+  const [rows, setRows] = useState<Example[]>([
+    { id: 'a', label: 'Lorem ipsum', state: 'Dolor sit amet' },
+    { id: 'b', label: 'Dolor sit amet', state: 'Lorem ipsum' },
+    { id: 'c', label: 'Consectetur adipiscing', state: 'Lorem ipsum' },
+  ]);
+
+  return (
+    <DataTable
+      rows={rows}
+      columns={columns}
+      rowId={(row) => row.id}
+      caption="Reorder rows"
+      rowReorder={{
+        plugin: createRowReorder(),
+        getLabel: (row) => row.label,
+        onReorder: (ids) =>
+          setRows(ids.map((id) => rows.find((row) => row.id === id)!)),
+      }}
+    />
+  );
+}
+
+export const RowReorder: Story = {
+  name: 'Row reorder',
+  tags: ['example'],
+  render: () => <RowReorderExample />,
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Inject createRowReorder() from @itclabs/react-ui/dnd and persist ordered IDs in onReorder. rowId supplies stable identity through getRowId. Space/Enter picks up and drops; Up/Down changes position and Escape cancels. Sorting disables reorder. Server pages and server groups require allowServerReorder: true; the host owns persistence across pages. handle defaults to true; handle: false makes the row the keyboard and pointer activator. The callback returns every supplied ID with zero-based from/to positions.',
       },
     },
   },

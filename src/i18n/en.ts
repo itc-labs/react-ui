@@ -1,4 +1,31 @@
 export const enMessages = {
+  'virtualList.empty': 'No items found',
+  'virtualList.loadMore': 'Load more',
+  'virtualList.retry': 'Retry',
+  'virtualList.loadingMore': 'Loading more…',
+  'virtualList.loaded': {
+    one: 'Loaded {count} more item',
+    other: 'Loaded {count} more items',
+  },
+
+  'dnd.integrationInstructions':
+    'Press Space or Enter to pick up. Use Up and Down to reorder, Left and Right to change lists, Space or Enter to drop, and Escape to cancel.',
+  'table.reorder': 'Reorder rows',
+  'table.reorderSorted': 'Clear sorting to reorder rows.',
+  'table.reorderServer':
+    'Row reordering is unavailable for server-managed pages or groups.',
+  'dnd.handle': 'Drag to reorder {label}',
+  'dnd.instructions':
+    'To pick up an item, press Space or Enter. Use the arrow keys to move. Press Space or Enter to drop, or Escape to cancel.',
+  'dnd.pickedUp': 'Picked up {label}.',
+  'dnd.over': 'Moving {label} over {target}.',
+  'dnd.outside': '{label} is outside a drop zone.',
+  'dnd.dropped': 'Dropped {label} over {target}.',
+  'dnd.cancelled': 'Cancelled dragging {label}.',
+  'dnd.empty': 'Drop items here',
+  'dnd.list': 'Sortable list',
+  'dnd.board': 'Sortable board',
+
   'transfer.label': 'Transfer selection',
   'transfer.available': 'Available',
   'transfer.selected': 'Selected',
@@ -145,6 +172,14 @@ export const enMessages = {
   'userMenu.open': 'Open user menu for {name}',
   'navbar.navigation': 'Main navigation',
   'navbar.openMenu': 'Open navigation menu',
+  'sidebar.sections': 'Navigation sections',
+  'sidebar.sectionCount': {
+    one: '{count} notification',
+    other: '{count} notifications',
+  },
+  'sidebar.search': 'Search…',
+  'sidebar.moreActions': 'More actions for {label}',
+  'sidebar.add': 'Add to {label}',
   'sidebar.collapse': 'Collapse sidebar',
   'sidebar.expand': 'Expand sidebar',
   'sidebar.open': 'Open sidebar',

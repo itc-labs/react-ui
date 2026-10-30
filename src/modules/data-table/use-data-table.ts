@@ -99,7 +99,10 @@ export function useDataTable<T>(props: DataTableProps<T>) {
     )
       return;
     const visible = table.getVisibleLeafColumns();
-    const available = scrollRef.current.clientWidth - (selectable ? 44 : 0);
+    const available =
+      scrollRef.current.clientWidth -
+      (selectable ? 44 : 0) -
+      (props.rowReorder && props.rowReorder.handle !== false ? 44 : 0);
     if (available <= 0 || !visible.length) return;
     change({
       ...state,
@@ -145,7 +148,20 @@ export function useDataTable<T>(props: DataTableProps<T>) {
     Math.floor(skeletonRows ?? (paginated ? state.pagination.pageSize : 5)),
   );
 
+  const rowReorder = props.rowReorder;
+  const reorderReason = state.sorting.length
+    ? t('table.reorderSorted')
+    : mode === 'server' && !rowReorder?.allowServerReorder
+      ? t('table.reorderServer')
+      : undefined;
+  const reorderDisabled = Boolean(loading || rowReorder?.disabled || reorderReason);
+  const reorderHandle = Boolean(rowReorder && rowReorder.handle !== false);
+
   return {
+    rowReorder,
+    reorderDisabled,
+    reorderHandle,
+    reorderReason,
     testId: props['data-testid'],
     table,
     state,

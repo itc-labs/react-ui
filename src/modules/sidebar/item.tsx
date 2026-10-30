@@ -1,9 +1,12 @@
 'use client';
-import type { ComponentProps, ReactNode } from 'react';
+import { useContext, type ComponentProps, type ReactNode } from 'react';
 import { UiLink } from '../../components/link-image-provider';
 import { Slot } from 'radix-ui';
 import { cn } from '../../components/common';
 import { focusRingClassName } from '../../components/common/focus-ring';
+
+import { SidebarAppearanceContext } from './context';
+import { sidebarItemClasses } from './appearance';
 
 export function SidebarItem({
   active = false,
@@ -19,13 +22,12 @@ export function SidebarItem({
   icon?: ReactNode;
   iconClassName?: string;
 }) {
+  const variant = useContext(SidebarAppearanceContext);
   const Component = asChild ? Slot.Root : 'span';
   const classes = cn(
     'flex min-h-9 min-w-0 items-center gap-2.5 rounded-control px-2.5 py-1.5 text-control [overflow-wrap:anywhere] motion-safe:transition-colors focus-visible:-outline-offset-2',
     focusRingClassName,
-    active
-      ? 'bg-surface font-medium text-ink shadow-panel ring-1 ring-line [&_svg]:text-accent'
-      : 'text-muted hover:bg-surface/60 hover:text-ink',
+    sidebarItemClasses(variant, active),
     className,
   );
 

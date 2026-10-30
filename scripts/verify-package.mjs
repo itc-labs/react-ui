@@ -169,7 +169,7 @@ async function checkLeanGraph(path) {
   ];
   for (const [, specifier] of imports) {
     assert.ok(
-      !/^(?:@tiptap\/|recharts(?:\/|$)|react-easy-crop(?:\/|$)|react-is(?:\/|$)|prism-react-renderer(?:\/|$)|embla-carousel(?:-react|-autoplay)?(?:\/|$)|dompurify(?:\/|$))/.test(
+      !/^(?:@dnd-kit\/|@tiptap\/|recharts(?:\/|$)|react-easy-crop(?:\/|$)|react-is(?:\/|$)|prism-react-renderer(?:\/|$)|embla-carousel(?:-react|-autoplay)?(?:\/|$)|dompurify(?:\/|$))/.test(
         specifier,
       ),
       `Optional dependency in core: ${specifier} (${relative(root, path)})`,
@@ -187,11 +187,13 @@ for (const subpath of [
   './navigation',
   './calendar',
   './carousel',
+  './dnd',
   './media-gallery',
   './code-view',
   './rich-text-view',
   './tree-select',
   './transfer',
+  './virtual-list',
   './templates',
   './theme',
   './theme/provider',
@@ -217,8 +219,9 @@ for (const subpath of [
       !('MediaGallery' in api) &&
         !('RichTextView' in api) &&
         !('TreeSelect' in api) &&
-        !('Transfer' in api),
-      `MediaGallery, RichTextView, TreeSelect and Transfer must remain isolated from ${subpath}`,
+        !('Transfer' in api) &&
+        !('SortableGroup' in api),
+      `MediaGallery, RichTextView, TreeSelect, Transfer and Dnd must remain isolated from ${subpath}`,
     );
   for (const name of [
     'LinkImageProvider',
@@ -273,8 +276,14 @@ for (const notice of [
   /DOMPurify \/ dompurify 3\.4\.17[^\n]*Apache-2\.0 OR MPL-2\.0/,
   /Copyright \(c\) 2021-present Tanner Linsley/,
   /Apache License\s+Version 2\.0, January 2004/,
+  /@dnd-kit\/core 6\.3\.1/,
+  /@dnd-kit\/sortable 10\.0\.0/,
+  /@dnd-kit\/utilities 3\.2\.2/,
+  /@dnd-kit\/modifiers 9\.0\.0/,
+  /@dnd-kit\/accessibility 3\.1\.1/,
+  /MIT License\s+Copyright \(c\) 2021, Claudéric Demers/,
 ])
-  assert.match(notices, notice, 'Missing selection or sanitizer dependency notice');
+  assert.match(notices, notice, 'Missing third-party dependency notice');
 
 for (const license of await readdir(`${root}/src/components/icon/licenses`))
   assert.ok(
@@ -379,7 +388,34 @@ const treeSelect = await import(
 );
 assert.equal(typeof treeSelect.TreeSelect, 'function');
 
+const virtualList = await import(
+  pathToFileURL(resolve(root, packed.exports['./virtual-list'].import)).href
+);
+assert.equal(typeof virtualList.VirtualList, 'function');
+assert.equal(typeof virtualList.VirtualGrid, 'function');
+
 const transfer = await import(
   pathToFileURL(resolve(root, packed.exports['./transfer'].import)).href
 );
 assert.equal(typeof transfer.Transfer, 'function');
+
+const dnd = await import(
+  pathToFileURL(resolve(root, packed.exports['./dnd'].import)).href
+);
+for (const name of [
+  'Sortable',
+  'SortableGroup',
+  'SortableItem',
+  'SortableHandle',
+  'SortableOverlay',
+  'DragHandle',
+  'DndProvider',
+  'useSortableItem',
+  'createTransferDnd',
+  'createRowReorder',
+])
+  assert.equal(typeof dnd[name], 'function', `Missing dnd API: ${name}`);
+assert.match(
+  await readFile(resolve(root, packed.exports['./dnd'].import), 'utf8'),
+  /['"]use client['"]/,
+);

@@ -1,5 +1,5 @@
 'use client';
-import { useRef, useState, type ReactElement } from 'react';
+import { useContext, useRef, useState, type ReactElement } from 'react';
 import { UiLink } from '../../components/link-image-provider';
 import { Popover } from 'radix-ui';
 import { cn, partTestId } from '../../components/common';
@@ -10,6 +10,10 @@ import { Tooltip } from '../../components/tooltip';
 import { SidebarItem } from './item';
 import { SidebarEntries } from './entries';
 import type { SidebarClassNames, SidebarEntry } from './types';
+
+import { SidebarAppearanceContext } from './context';
+import { sidebarItemClasses } from './appearance';
+import { focusRingClassName } from '../../components/common/focus-ring';
 
 type NavigableEntry = Exclude<SidebarEntry, { type: 'group' }>;
 
@@ -39,6 +43,13 @@ export function SidebarEntryIcon({
     <Badge
       {...badge}
       dot
+      classNames={{
+        ...badge.classNames,
+        indicator: cn(
+          'ring-[var(--sidebar-badge-ring,var(--color-surface))]',
+          badge.classNames?.indicator,
+        ),
+      }}
       size="sm"
       data-testid={partTestId(testId, 'badge')}
       className={classNames?.badge}
@@ -74,7 +85,7 @@ export function SidebarEntryLabel({
             <span
               data-testid={partTestId(testId, 'badge')}
               className={cn(
-                'ml-auto shrink-0 text-ui-sm tabular-nums text-muted',
+                'ml-auto shrink-0 text-ui-sm tabular-nums text-[var(--sidebar-count,var(--sidebar-muted,var(--color-muted)))]',
                 classNames?.badge,
               )}
             >
@@ -103,6 +114,7 @@ export function SidebarRailEntry({
   testId?: string | undefined;
   classNames?: SidebarClassNames | undefined;
 }) {
+  const variant = useContext(SidebarAppearanceContext);
   const contentRef = useRef<HTMLDivElement>(null);
   // Pointer-opened flyouts focus the panel, so no focus ring flashes on the first link.
   const openedByPointer = useRef(false);
@@ -123,8 +135,9 @@ export function SidebarRailEntry({
   );
   const label = <span className="sr-only">{item.label}</span>;
   const rowClass = cn(
-    'relative mx-auto flex size-9 shrink-0 items-center justify-center rounded-control p-2 text-muted hover:bg-surface/60 hover:text-ink focus-visible:outline-2 focus-visible:outline-focus disabled:opacity-50',
-    active && 'bg-surface text-accent shadow-panel ring-1 ring-line',
+    'relative mx-auto flex size-9 shrink-0 items-center justify-center rounded-control p-2 disabled:opacity-50',
+    focusRingClassName,
+    sidebarItemClasses(variant, active),
     classNames?.item,
     item.className,
   );
@@ -218,7 +231,9 @@ export function SidebarRailEntry({
           aria-label={typeof item.label === 'string' ? item.label : item.toggleLabel}
           data-testid={partTestId(testId, 'content')}
           className={cn(
-            'ui-floating-motion z-[var(--z-index-popover)] grid max-h-[80dvh] w-sidebar gap-0.5 overflow-y-auto rounded-panel border border-line bg-surface p-1.5 text-ink shadow-floating focus:outline-none [&_[aria-current=page]]:bg-hover [&_[aria-current=page]]:shadow-none [&_[aria-current=page]]:ring-0',
+            'ui-floating-motion z-[var(--z-index-popover)] grid max-h-[80dvh] w-sidebar gap-0.5 overflow-y-auto rounded-panel border border-line bg-surface p-1.5 text-ink shadow-floating focus:outline-none',
+            variant === 'raised' &&
+              '[&_[aria-current=page]]:bg-hover [&_[aria-current=page]]:shadow-none [&_[aria-current=page]]:ring-0',
             classNames?.submenuContent,
             classNames?.flyout,
           )}

@@ -62,10 +62,38 @@ const menu: SidebarEntry<Permission>[] = [
 
 `SidebarProps<TAccess>` and `SidebarEntry<TAccess>` preserve the host's permission type. Sidebar filters before matching; `canAccess` is optional and omitting it leaves all entries visible. `isActive` receives `(entry, currentPath)` and follows the same precedence as the helper. Omitting `currentPath` keeps explicit active flags working; predicates then receive an empty path. Only the winning row receives `aria-current="page"`; its ancestors receive branch highlighting. Active descendants reveal uncontrolled branches when they become active. A host-controlled `open` remains authoritative, and users can manually collapse an active branch. Existing className/classNames slots, refs, localized labels and stable partTestId selectors remain available. Permission/path changes are processed on each render.
 
+### Sidebar header and item tools
+
+A structured `header` accepts `switcher: { items, value, onValueChange, footer? }`.
+Each workspace has a stable `id`, ReactNode `label`, optional `description` and
+optional `logo`. The brand becomes a menu button, including its logo in the rail;
+`href` is used only when no switcher is supplied. Selection stays controlled by the
+host, which also supplies the current brand title/logo and any footer action.
+
+`search` accepts a ReactNode or `{ placeholder?, shortcut?, onOpen }`. The default
+launcher displays localized search copy and platform-aware Kbd caps. Shortcuts use
+the same chord syntax as `toggleShortcut` (for example `mod+k`) and ignore editable
+fields, repeats, composing input and already handled events. One listener serves
+both desktop and mobile launchers. The host owns the search dialog and results.
+
+Group entries accept `collapsible`, `defaultOpen` (defaults to true), `open` and
+`onOpenChange`. Enter/Space toggles the label. An initially active uncontrolled
+group opens even with `defaultOpen: false`; entering a different active child opens
+it again. A controlled `open` remains authoritative, with route-driven opening
+reported through `onOpenChange(true)`. Rail groups show their items without group
+controls.
+
+Items and submenus accept `actions: { id, label, icon?, onSelect, danger?, disabled? }[]`
+and `onAdd` with optional `addLabel`. Buttons sit beside the navigation control and
+do not navigate or toggle submenus. Hover/focus reveals them; touch devices keep
+them visible. Rail rows omit these buttons. Generated accessible names include the
+item label. New styling slots are `search`, `workspaceMenu`, `workspaceItem`,
+`groupContent`, `itemActions` and `actionButton`.
+
 ### Sidebar rail and mobile navigation
 
 `Sidebar` also exports `SidebarBrand` and `SidebarClassNames`. `header` accepts
-any ReactNode (for example a workspace switcher) or `{ logo?, title, subtitle?, href? }`.
+any ReactNode (for example a workspace switcher) or `{ logo?, title, subtitle?, href?, switcher? }`.
 Structured brands use UiLink when `href` is supplied; title/subtitle become
 screen-reader-only in the rail. Header and footer remain in view while the middle
 scrolls inside a viewport-height, sticky desktop sidebar. Custom header/footer nodes
@@ -314,7 +342,7 @@ mobile entries are scoped under `-drawer`. Drawer also derives its standard part
 ### Brand, switcher and active indicator
 
 The surface bar is at least 64px tall with a bottom border. `brand` accepts a
-ReactNode or `{ logo?, title, subtitle?, href? }`. Structured brands render a
+ReactNode or `{ logo?, title, subtitle?, href?, switcher? }`. Structured brands render a
 rounded accent logo tile, bold title and muted uppercase subtitle. Supply an
 `Icon` glyph or image node as `logo`; override `classNames.brandLogo` for image
 backgrounds. `href` uses UiLink and takes precedence over legacy `brandHref`.
@@ -519,3 +547,58 @@ PageHeader is the per-page title block: it renders an h1 with optional eyebrow, 
 ```
 
 The breadcrumb renders above the eyebrow/title inside the content column. `classNames.breadcrumb` styles its wrapper; a base `data-testid` derives `-breadcrumb`, `-content`, `-eyebrow`, `-title`, `-description` and `-actions`. Breadcrumb retains its own navigation semantics and UiLink adapter support. PageHeader forwards the React 19 ref and native div props to its root.
+
+### Sidebar appearance and offcanvas
+
+Sidebar keeps its existing appearance by default: `variant="sidebar"`,
+`collapsible="icon"`, `tone="default"` and `itemVariant="raised"`.
+Use `variant="floating"` on both Sidebar and WorkspaceShell for an inset sidebar
+card beside a flat page. Shell variants `inset` (default) and `classic` remain available.
+The tones `dark` and `brand` scope sidebar colors to the navigation; portalled
+tooltips and flyouts retain normal surface colors. Item styles `raised`, `subtle`,
+`bar` and `solid` apply to links, submenu triggers and rail buttons.
+
+For `collapsible="offcanvas"`, wrap WorkspaceShell in SidebarProvider and place a
+SidebarTrigger in its header slot (or inside WorkspaceHeader). The provider owns
+shared desktop collapse state; its optional `collapsed`, `defaultCollapsed` and
+`onCollapsedChange` props support controlled and uncontrolled use. Keep the header
+trigger visible on desktop with `className="hidden lg:inline-flex"`. The mobile
+Drawer retains its menu trigger and independent open state.
+
+Alternatively, pass the same `collapsed` and `onCollapsedChange` to Sidebar and
+SidebarTrigger, give Sidebar an `id`, and set the trigger's `aria-controls` to that
+ID. Avoid overriding Sidebar's state when using provider-owned triggers.
+`collapsible="none"` always shows expanded navigation and removes the internal
+collapse toggle and shortcut. Caller-supplied header and footer content can use
+`--sidebar-fg`, `--sidebar-muted`, `--sidebar-hover` and `--sidebar-border` to match
+the selected tone; caller classes and inline styles continue to take precedence.
+
+### Sidebar hover previews and sections
+
+`expandOnHover` previews a collapsed `collapsible="icon"` sidebar on devices
+with a fine pointer and hover support. Pointer entry opens after 150 ms; leaving
+closes after 250 ms unless focus remains inside. Keyboard focus opens immediately
+and Escape dismisses the preview, returning focus to the collapse toggle. The
+layout column retains its collapsed width, while an elevated surface uses the
+expanded sidebar width. `data-hover-expanded` exposes the preview state. Motion
+uses the existing reduced-motion-aware sidebar styles.
+
+Pass `sections: readonly SidebarSection[]` to render a section rail and an active
+panel instead of top-level `items`. Each section supplies `id`, `label`, `icon`,
+optional numeric `badge`, and `items` using the existing group/submenu contract.
+The rail keeps the collapsed brand/logo, section buttons, collapse toggle and
+footer slot; pass an avatar or compact account control as the footer. Collapsing
+hides the panel while retaining the rail. The mobile drawer displays labeled
+section buttons above the active section's items.
+
+`section` and `onSectionChange` control selection. Uncontrolled selection derives
+from the deepest active route after permission filtering, falling back to
+`defaultSection` and then the first section. A manual selection persists until
+`currentPath` changes. Section changes do not navigate or dismiss the mobile
+drawer; choosing a navigation entry retains the existing dismissal behavior.
+Section buttons support Tab, Enter/Space, arrow keys and Home/End.
+
+The additive `classNames` slots are `overlay`, `sectionRail`, `sections`,
+`section`, `sectionPanel` and `sectionTitle`. Part test IDs use the same suffixes;
+section buttons use `-section-{id}` and mobile parts retain the `-drawer` scope.
+`tone`, `itemVariant` and `variant` apply to the rail and panel.

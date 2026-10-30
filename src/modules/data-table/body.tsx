@@ -1,4 +1,5 @@
 'use client';
+import type { ReactNode } from 'react';
 import { partTestId } from '../../components/common/testing';
 
 import { useUILocale } from '../../i18n/provider';
@@ -9,6 +10,8 @@ import { Checkbox } from '../../components/checkbox';
 import { Skeleton } from '../../components/skeleton';
 import { EmptyState } from '../empty-state';
 import { columnAlign } from './align';
+
+const PassThrough = ({ children }: { children: ReactNode }) => children;
 
 export function DataTableBody<T>({
   view,
@@ -33,6 +36,9 @@ export function DataTableBody<T>({
     classNames,
   } = view;
 
+  const Row = view.rowReorder?.plugin.Row ?? PassThrough;
+  const Handle = view.rowReorder?.plugin.Handle;
+
   return (
     <tbody
       data-testid={partTestId(view.testId, 'tbody')}
@@ -42,6 +48,11 @@ export function DataTableBody<T>({
       {initialLoading &&
         Array.from({ length: placeholders }, (_, index) => (
           <tr key={`skeleton-${index}`} aria-hidden="true" className="h-12">
+            {view.reorderHandle && (
+              <td>
+                <Skeleton className="size-4 rounded" />
+              </td>
+            )}
             {selectable && (
               <td className="w-11 px-4 py-3.5">
                 <Skeleton className="size-4 rounded" />
@@ -71,49 +82,64 @@ export function DataTableBody<T>({
           </tr>
         ))}
       {visibleRows.map((row) => (
-        <tr
-          data-testid={partTestId(view.testId, 'row', row.id)}
-          data-row-id={row.id}
-          key={row.id}
-          data-selected={row.getIsSelected()}
-          className={cn(
-            'transition-colors hover:bg-hover/70 data-[selected=true]:bg-hover',
-            classNames?.row,
-            row.getIsSelected() && classNames?.selectedRow,
-          )}
-        >
-          {selectable && (
-            <td
-              data-testid={partTestId(view.testId, 'selectionCell', row.id)}
-              className={cn('w-11 px-4 py-3.5 align-top', classNames?.selectionCell)}
-            >
-              <Checkbox
-                data-testid={partTestId(view.testId, 'checkbox', row.id)}
-                className={classNames?.checkbox}
-                // One text line tall so the box centers on the row's first line.
-                classNames={{ row: 'h-[1.6em]' }}
-                aria-label={t('table.selectRow', { id: row.id })}
-                checked={row.getIsSelected()}
-                disabled={loading}
-                onCheckedChange={(checked) => row.toggleSelected(checked === true)}
-              />
-            </td>
-          )}
-          {row.getVisibleCells().map((cell) => (
-            <td
-              data-testid={partTestId(view.testId, 'cell', row.id, cell.column.id)}
-              key={cell.id}
-              className={cn(
-                'px-4 py-3.5 align-top',
-                columnAlign(table, cell.column).text,
-                resizable && 'overflow-hidden text-ellipsis',
-                classNames?.cell,
-              )}
-            >
-              {flexRender(cell.column.columnDef.cell, cell.getContext())}
-            </td>
-          ))}
-        </tr>
+        <Row key={row.id} id={row.id} handle={view.rowReorder?.handle !== false}>
+          <tr
+            data-testid={partTestId(view.testId, 'row', row.id)}
+            data-row-id={row.id}
+            key={row.id}
+            data-selected={row.getIsSelected()}
+            className={cn(
+              'transition-colors hover:bg-hover/70 data-[selected=true]:bg-hover',
+              classNames?.row,
+              row.getIsSelected() && classNames?.selectedRow,
+            )}
+          >
+            {view.reorderHandle && Handle && (
+              <td
+                className={cn('w-11 px-4 py-3.5 align-top', classNames?.reorderCell)}
+                data-testid={partTestId(view.testId, 'reorderCell', row.id)}
+              >
+                <Handle
+                  id={row.id}
+                  disabledReason={view.reorderReason}
+                  className={classNames?.dragHandle}
+                  data-testid={partTestId(view.testId, 'dragHandle', row.id)}
+                />
+              </td>
+            )}
+            {selectable && (
+              <td
+                data-testid={partTestId(view.testId, 'selectionCell', row.id)}
+                className={cn('w-11 px-4 py-3.5 align-top', classNames?.selectionCell)}
+              >
+                <Checkbox
+                  data-testid={partTestId(view.testId, 'checkbox', row.id)}
+                  className={classNames?.checkbox}
+                  // One text line tall so the box centers on the row's first line.
+                  classNames={{ row: 'h-[1.6em]' }}
+                  aria-label={t('table.selectRow', { id: row.id })}
+                  checked={row.getIsSelected()}
+                  disabled={loading}
+                  onCheckedChange={(checked) => row.toggleSelected(checked === true)}
+                />
+              </td>
+            )}
+            {row.getVisibleCells().map((cell) => (
+              <td
+                data-testid={partTestId(view.testId, 'cell', row.id, cell.column.id)}
+                key={cell.id}
+                className={cn(
+                  'px-4 py-3.5 align-top',
+                  columnAlign(table, cell.column).text,
+                  resizable && 'overflow-hidden text-ellipsis',
+                  classNames?.cell,
+                )}
+              >
+                {flexRender(cell.column.columnDef.cell, cell.getContext())}
+              </td>
+            ))}
+          </tr>
+        </Row>
       ))}
       {!loading && !visibleRows.length && (
         <tr>
@@ -121,7 +147,9 @@ export function DataTableBody<T>({
             data-testid={partTestId(view.testId, 'emptyCell')}
             colSpan={Math.max(
               1,
-              table.getVisibleLeafColumns().length + (selectable ? 1 : 0),
+              table.getVisibleLeafColumns().length +
+                (selectable ? 1 : 0) +
+                (view.reorderHandle ? 1 : 0),
             )}
             className={cn('p-0', classNames?.emptyCell)}
           >

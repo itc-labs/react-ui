@@ -263,3 +263,139 @@ The Editor link popover accepts absolute http, https, and mailto URLs. Enter app
 RichTextView accepts `as="div"` (default) or `as="article"`, `emptyFallback`, native props and ref, `data-testid`, `className`, and `classNames.root`. With default `sanitize={true}`, content is sanitized in a client effect: SSR and the first hydration render show the fallback, with no hydration mismatch. For SEO, sanitize on the server and pass `sanitize={false}`. This bypasses all sanitization: the host must guarantee the HTML is trusted and sanitized. Empty or fully stripped HTML uses the fallback.
 
 See [Editor](?path=/docs/modules-editor--docs) and [RichTextView](?path=/docs/modules-richtextview--docs) for live preview and sanitization examples.
+
+## VirtualList and VirtualGrid
+
+Import these measured collections from `@itclabs/react-ui/virtual-list`.
+They mount visible rows plus `overscan`, keeping TanStack Virtual out of core
+imports. Supply stable `getItemKey` values and a useful `estimateSize` in pixels;
+actual row sizes are measured after mounting. Container scrolling needs `height`,
+`maxHeight`, or equivalent class sizing. Arrow keys and Home/End move item focus;
+nested controls retain their own keys. Default semantics are list/listitem with
+item positions and total count; `role` and `itemRole` support custom semantics.
+
+### Infinite loading in a container
+
+The host owns items, requests, loading and errors. Automatic loading requests once
+per item count near the end; append the next page and update `hasMore`. Use
+`loadMore="button"` for explicit loading. After a failed request, `onRetry` must
+retry it; the collection does not repeat failed requests automatically. This
+example accepts a host loader and guards concurrent requests. Remount it when
+switching to a different dataset.
+
+While a later page loads, `loadingIndicator` picks the feedback below existing
+items: `"spinner"` (default) shows a spinner with "Loading more…", `"skeleton"`
+appends placeholder rows or one row of cards (using `renderSkeleton` when given),
+and `"bar"` pins a slim indeterminate bar to the bottom of the viewport so it stays
+visible while the user keeps scrolling. `renderLoadingMore` replaces all three.
+
+```tsx
+'use client';
+
+import { useRef, useState } from 'react';
+import { VirtualList } from '@itclabs/react-ui/virtual-list';
+
+type Item = { id: string; label: string };
+type Page = { items: Item[]; nextCursor?: string };
+
+export function InfiniteList({
+  initialPage,
+  loadPage,
+}: {
+  initialPage: Page;
+  loadPage: (cursor: string) => Promise<Page>;
+}) {
+  const [items, setItems] = useState(initialPage.items);
+  const [cursor, setCursor] = useState(initialPage.nextCursor);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string>();
+  const pending = useRef(false);
+
+  async function loadMore() {
+    if (pending.current || cursor === undefined) return;
+    pending.current = true;
+    setLoading(true);
+    setError(undefined);
+    try {
+      const page = await loadPage(cursor);
+      setItems((previous) => [...previous, ...page.items]);
+      setCursor(page.nextCursor);
+    } catch {
+      setError('Unable to load items. Try again.');
+    } finally {
+      pending.current = false;
+      setLoading(false);
+    }
+  }
+
+  return (
+    <VirtualList
+      aria-label="Items"
+      height={400}
+      items={items}
+      getItemKey={(item) => item.id}
+      renderItem={(item) => (
+        <div className="border-b border-line p-4">{item.label}</div>
+      )}
+      estimateSize={56}
+      hasMore={cursor !== undefined}
+      loading={loading}
+      error={error}
+      onLoadMore={loadMore}
+      onRetry={loadMore}
+    />
+  );
+}
+```
+
+A page should advance its cursor and append new, unique IDs or finish with no next
+cursor. For a grid, replace `VirtualList` with `VirtualGrid` and add `columns` or
+`minItemWidth`; loading, error, retry and skeleton props are shared.
+
+### Window scrolling and responsive grids
+
+Set `scroll="window"` to use page scrolling, including a collection below an
+introduction. Omit container height constraints. `columns` accepts a count or
+viewport breakpoints (`base`, `sm`, `md`, `lg`, `xl`); `minItemWidth` instead derives
+the count from the collection's measured width and takes precedence. `gap` is in
+pixels. `aspectRatio` estimates card height when `estimateSize` is omitted.
+
+```tsx
+import { VirtualGrid } from '@itclabs/react-ui/virtual-list';
+
+const items = Array.from({ length: 1000 }, (_, index) => ({
+  id: String(index),
+  label: `Lorem ipsum ${index + 1}`,
+}));
+
+export function WindowGrid() {
+  return (
+    <main className="p-6">
+      <h1 className="mb-8 text-title">Lorem ipsum</h1>
+      <VirtualGrid
+        aria-label="Items"
+        scroll="window"
+        items={items}
+        getItemKey={(item) => item.id}
+        minItemWidth={220}
+        gap={16}
+        estimateSize={160}
+        renderItem={(item) => (
+          <article className="min-h-40 rounded-panel border border-line bg-surface p-4">
+            <h2>{item.label}</h2>
+            <p>Dolor sit amet, consectetur adipiscing elit.</p>
+          </article>
+        )}
+      />
+    </main>
+  );
+}
+```
+
+`VirtualList` accepts the same `scroll="window"` mode. Optional `restoreKey` stores
+scroll offsets in sessionStorage; use a distinct key per dataset. `className`
+and React 19 `ref` target the viewport; typed `classNames` reach rows, items,
+loaders, retry and empty states. Built-in loading, retry and empty copy follows
+the locale. See [VirtualList stories](?path=/docs/modules-virtuallist--docs),
+[Product grid](?path=/story/modules-virtuallist--product-grid), and
+[Window scrolling](?path=/story/modules-virtuallist--window-scrolling-page).

@@ -18,9 +18,15 @@ export function useSidebarState({
     onCollapsedChange?.(!collapsed);
   }, [collapsed, controlled, onCollapsedChange]);
 
+  useSidebarShortcut(toggleShortcut, toggle);
+
+  return { collapsed, toggle };
+}
+
+export function useSidebarShortcut(shortcut: string | undefined, onOpen: () => void) {
   useEffect(() => {
-    if (!toggleShortcut) return;
-    const keys = toggleShortcut
+    if (!shortcut) return;
+    const keys = shortcut
       .toLowerCase()
       .split('+')
       .map((key) => key.trim());
@@ -50,13 +56,11 @@ export function useSidebarState({
       )
         return;
       event.preventDefault();
-      toggle();
+      onOpen();
     };
 
     document.addEventListener('keydown', listen);
 
     return () => document.removeEventListener('keydown', listen);
-  }, [toggleShortcut, toggle]);
-
-  return { collapsed, toggle };
+  }, [shortcut, onOpen]);
 }

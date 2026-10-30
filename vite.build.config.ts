@@ -3,7 +3,7 @@ import { resolve } from 'node:path';
 import { defineConfig } from 'vite';
 
 const source = resolve(import.meta.dirname, 'src');
-// Discover every source entry, including isolated subpaths such as calendar, carousel and code-view.
+// Discover every source entry, including isolated subpaths such as calendar, carousel, code-view and dnd.
 const entries = readdirSync(source, { recursive: true, withFileTypes: true })
   .filter(
     (entry) =>

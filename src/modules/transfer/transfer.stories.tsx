@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Transfer, type TransferItem } from '@itclabs/react-ui/transfer';
+import { createTransferDnd } from '@itclabs/react-ui/dnd';
 import { Button, Form, FormField, useAppForm } from '@itclabs/react-ui';
 
 const items: TransferItem[] = [
@@ -87,6 +88,20 @@ function FormDemo() {
 }
 
 export const InForm: Story = { tags: ['example'], render: () => <FormDemo /> };
+export const DragAndDrop: Story = {
+  name: 'Drag and drop',
+  tags: ['example'],
+  args: { dnd: createTransferDnd(), defaultValue: ['ipsum', 'amet'], searchable: true },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Inject createTransferDnd() from @itclabs/react-ui/dnd to enable handles. Space or Enter picks up and drops; Up/Down changes position and Left/Right changes panel. A checked row moves the checked rows of its side. Disabled rows, maxSelected and oneWay constrain moves. Dragging implies order="selection": value order follows the target list. Virtual lists retain a drag overlay while rows scroll.',
+      },
+    },
+  },
+};
+
 export const CustomClasses: Story = {
   tags: ['customization'],
   args: {

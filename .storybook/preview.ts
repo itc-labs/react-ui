@@ -85,6 +85,8 @@ const preview: Preview = {
             'Forms',
             'Overlays & feedback',
             'Navigation',
+            'Drag & drop',
+            'Data display',
             'Event calendar',
             'Customization',
           ],
