@@ -18,6 +18,7 @@ const entries = {
   DataTable: 'modules/data-table/index.tsx',
   Root: 'index.ts',
   Calendar: 'modules/calendar/index.tsx',
+  Carousel: 'modules/carousel/index.tsx',
   Form: 'modules/form/index.tsx',
 };
 const sizes = {};
@@ -45,7 +46,9 @@ for (const [name, file] of Object.entries(entries)) {
     metafile: true,
     logLevel: 'silent',
   });
-  if (['Dialog', 'Button', 'Rating', 'JsonView', 'CodeView'].includes(name)) {
+  if (
+    ['Dialog', 'Button', 'Rating', 'JsonView', 'CodeView', 'Carousel'].includes(name)
+  ) {
     const registries = Object.keys(metafile.inputs).filter((input) =>
       /components\/icon\/kit-icons\.(?:ts|tsx)$/.test(input),
     );
@@ -68,6 +71,10 @@ for (const [name, file] of Object.entries(entries)) {
       throw new Error(`Calendar imports optional features: ${forbidden}`);
   }
   if (name === 'Root') {
+    const embla = Object.keys(metafile.inputs).filter((input) =>
+      /embla-carousel|modules\/carousel\//.test(input),
+    );
+    if (embla.length) throw new Error(`Root imports Embla: ${embla}`);
     const prism = Object.keys(metafile.inputs).filter((input) =>
       /(?:prism-react-renderer|modules\/code-view\/)/.test(input),
     );
@@ -90,6 +97,7 @@ for (const [name, limit] of Object.entries({
   Rating: 20_000,
   JsonView: 22_000,
   CodeView: 50_000,
+  Carousel: 40_000,
   Button: 20_000,
   Spinner: 20_000,
   Dialog: 38_000,

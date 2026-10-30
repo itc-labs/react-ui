@@ -279,6 +279,7 @@ Browse every component, prop and state in the [Storybook](https://react-ui-one-r
 | `@itclabs/react-ui/modules`                            | Compositions: Form, DataTable, Sidebar, Navbar, Pagination, EmptyState, PageHeader, ProgressList…                                     |
 | `@itclabs/react-ui/templates`                          | Page layouts with slots (WorkspaceShell)                                                                                              |
 | `@itclabs/react-ui/navigation`                         | Router-agnostic `matchPath`, `resolveActiveNav`, `filterNavByAccess` (no React)                                                       |
+| `@itclabs/react-ui/carousel`                           | Responsive Carousel with multi-row items, hero slides, autoplay and drag scrolling; isolated from all barrels                         |
 | `@itclabs/react-ui/calendar`                           | Event Calendar shell plus pure date, layout, filtering and interaction helpers                                                        |
 | `@itclabs/react-ui/code-view`                          | Read-only syntax-highlighted CodeView with line numbers, highlighted lines, wrapping and clipboard copying; isolated from all barrels |
 | `@itclabs/react-ui/hooks`                              | Shared hooks: click outside, debounced values and callbacks                                                                           |

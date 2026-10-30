@@ -1,4 +1,11 @@
 export const enMessages = {
+  'carousel.label': 'Carousel',
+  'carousel.previous': 'Previous slide',
+  'carousel.next': 'Next slide',
+  'carousel.goTo': 'Go to slide {index}',
+  'carousel.pause': 'Pause autoplay',
+  'carousel.play': 'Play autoplay',
+  'carousel.slide': '{index} of {count}',
   'codeView.label': 'Code sample',
   'jsonView.label': 'JSON viewer',
   'jsonView.expand': 'Expand {label}',
