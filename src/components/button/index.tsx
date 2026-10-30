@@ -3,7 +3,8 @@ import { interactiveTrigger } from '../common/interactive-trigger';
 import type { TestIdProps } from '../common/testing';
 
 import { useUILocale } from '../../i18n/provider';
-import type { ComponentProps } from 'react';
+import { useContext, type ComponentProps } from 'react';
+import { FormStatusContext } from '../common/form-status';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { Spinner } from '../spinner';
 import { type SlotClasses, cn } from '../common';
@@ -34,6 +35,7 @@ const button = cva(
 
 export type ButtonProps = (ComponentProps<'button'> &
   VariantProps<typeof button> & {
+    /** Defaults to the surrounding `Form` submission state for `type="submit"`. */
     loading?: boolean;
     loadingLabel?: string;
     classNames?: SlotClasses<'root' | 'spinner'>;
@@ -43,7 +45,7 @@ export type ButtonProps = (ComponentProps<'button'> &
 export function Button({
   variant,
   size,
-  loading = false,
+  loading: loadingProp,
   disabled,
   type = 'button',
   className,
@@ -53,6 +55,8 @@ export function Button({
   ...props
 }: ButtonProps) {
   const { t } = useUILocale();
+  const formStatus = useContext(FormStatusContext);
+  const loading = loadingProp ?? (type === 'submit' && Boolean(formStatus?.submitting));
 
   return (
     <button

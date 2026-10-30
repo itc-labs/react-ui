@@ -235,3 +235,47 @@ it('binds a marked Select through onValueChange without a child handler', async 
   });
   expect(saved).toHaveBeenCalledWith({ choice: 'lorem' });
 });
+
+it('shows loading on a plain submit Button while the form submits', async () => {
+  let finish!: () => void;
+  const saved = new Promise<void>((resolve) => {
+    finish = resolve;
+  });
+
+  function Demo() {
+    const form = useAppForm({
+      defaultValues: { name: 'Lorem' },
+      onSubmit: () => saved,
+    });
+
+    return (
+      <Form form={form}>
+        <Button type="submit">Save</Button>
+        <Button>Cancel</Button>
+        <Button type="submit" loading={false}>
+          Save draft
+        </Button>
+      </Form>
+    );
+  }
+
+  await act(async () => root.render(<Demo />));
+  const [save, cancel, draft] = Array.from(host.querySelectorAll('button'));
+  await act(async () => {
+    host
+      .querySelector('form')!
+      .dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+  });
+
+  expect(save!.getAttribute('aria-busy')).toBe('true');
+  expect(save!.disabled).toBe(true);
+  expect(cancel!.getAttribute('aria-busy')).toBeNull();
+  expect(draft!.getAttribute('aria-busy')).toBeNull();
+
+  await act(async () => {
+    finish();
+    await saved;
+  });
+  expect(save!.getAttribute('aria-busy')).toBeNull();
+  expect(save!.disabled).toBe(false);
+});
