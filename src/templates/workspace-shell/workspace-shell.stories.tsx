@@ -20,7 +20,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'Shell dùng slot sidebar/body/header/main. Không gắn Next, registry hay nội dung Explore. Host quyết định navigation và route; lưới desktop tự theo trạng thái thu gọn của Sidebar.',
+          'A layout shell with sidebar, body, header and main slots. The host controls navigation and routing; the desktop grid adapts to the collapsed state of the Sidebar.',
       },
     },
   },
@@ -35,8 +35,8 @@ function ShellExample({ withSidebar = true }: { withSidebar?: boolean }) {
         ? {
             sidebar: (
               <Sidebar
-                header={<strong>Workspace demo</strong>}
-                footer="Footer từ app"
+                header={<strong>Lorem ipsum</strong>}
+                footer="Dolor sit amet"
                 items={[
                   {
                     id: 'workspace',
@@ -47,7 +47,7 @@ function ShellExample({ withSidebar = true }: { withSidebar?: boolean }) {
                         id: 'current',
                         active: true,
                         href: '#shell-current',
-                        label: 'Trang hiện tại',
+                        label: 'Current page',
                       },
                     ],
                   },
@@ -61,7 +61,7 @@ function ShellExample({ withSidebar = true }: { withSidebar?: boolean }) {
           <Breadcrumb
             items={[
               { key: 'home', title: 'Workspace', href: '#shell-current' },
-              { key: 'current', title: 'Trang hiện tại' },
+              { key: 'current', title: 'Current page' },
             ]}
           />
           <Tag>Local demo</Tag>
@@ -93,14 +93,14 @@ export const HeaderSlots: Story = {
   tags: ['example'],
   render: () => (
     <WorkspaceHeader
-      breadcrumb={<Breadcrumb items={[{ key: 'current', title: 'Trang hiện tại' }]} />}
+      breadcrumb={<Breadcrumb items={[{ key: 'current', title: 'Current page' }]} />}
       actions={
         <Button variant="secondary" onClick={() => {}}>
-          Hành động minh họa
+          Example action
         </Button>
       }
     >
-      <span className="text-muted">Nội dung phụ của host</span>
+      <span className="text-muted">Lorem ipsum dolor sit amet.</span>
     </WorkspaceHeader>
   ),
 };

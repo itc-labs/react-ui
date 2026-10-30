@@ -13,7 +13,7 @@ export const ProposalV1: Story = {
     <div className="mx-auto grid max-w-6xl gap-8 p-6 sm:p-10">
       <header className="grid gap-4 border-b border-line pb-8">
         <div>
-          <Tag tone="warning">Đề xuất v1 · chưa duyệt</Tag>
+          <Tag tone="warning">Proposal v1 · pending review</Tag>
         </div>
         <p className="text-eyebrow font-semibold uppercase text-muted">
           @itclabs/react-ui / Foundations / 01
@@ -28,39 +28,43 @@ export const ProposalV1: Story = {
           incididunt ut labore et dolore magna aliqua.
         </p>
       </header>
-      <section className="grid gap-4" aria-label="Palette đề xuất">
-        <h2 className="text-section font-semibold">01 / Màu có vai trò</h2>
+      <section className="grid gap-4" aria-label="Proposed palette">
+        <h2 className="text-section font-semibold">01 / Semantic colors</h2>
         <div className="grid gap-3 sm:grid-cols-3">
           {[
-            { title: 'Canvas', role: 'Nền workspace', classes: 'bg-canvas text-ink' },
+            {
+              title: 'Canvas',
+              role: 'Workspace background',
+              classes: 'bg-canvas text-ink',
+            },
             {
               title: 'Surface',
-              role: 'Card và control',
+              role: 'Cards and controls',
               classes: 'bg-surface text-ink',
             },
             {
               title: 'Brand',
-              role: 'Hành động chính',
+              role: 'Primary action',
               classes: 'bg-brand-700 text-on-brand',
             },
             {
               title: 'Info',
-              role: 'Thông tin bổ sung',
+              role: 'Additional information',
               classes: 'bg-info-50 text-info-700',
             },
             {
               title: 'Success',
-              role: 'Đã lưu / hoàn tất',
+              role: 'Saved / complete',
               classes: 'bg-success-50 text-success-700',
             },
             {
               title: 'Warning',
-              role: 'Cần kiểm tra thêm',
+              role: 'Needs review',
               classes: 'bg-warning-50 text-warning-700',
             },
             {
               title: 'Danger',
-              role: 'Không thực hiện được',
+              role: 'Action failed',
               classes: 'bg-danger-50 text-danger-700',
             },
           ].map((item) => (
@@ -75,28 +79,28 @@ export const ProposalV1: Story = {
         </div>
       </section>
       <div className="grid gap-6 lg:grid-cols-2">
-        <Card title="02 / Chữ và phân cấp">
+        <Card title="02 / Typography and hierarchy">
           <div className="grid gap-5">
             <p className="text-section font-semibold text-ink">Section · 18px / 1.4</p>
             <p className="text-body text-ink">
               Body · 16px — Lorem ipsum dolor sit amet.
             </p>
             <p className="text-control text-ink">
-              Control · 14px — Nội dung nhập và hành động.
+              Control · 14px — Inputs and actions.
             </p>
             <p className="text-ui-sm text-muted">
-              UI small · 13px — Nguồn, thời gian và giải thích.
+              UI small · 13px — Sources, timestamps and explanations.
             </p>
             <p className="text-eyebrow uppercase text-muted">
-              Eyebrow · 11px — chỉ nhãn phụ
+              Eyebrow · 11px — secondary labels only
             </p>
           </div>
         </Card>
-        <Card title="03 / Khoảng cách và hình khối">
+        <Card title="03 / Spacing and shape">
           <div className="grid gap-4">
             <p>
-              Nhịp 4px: 4 / 8 / 12 / 16 / 24 / 32 / 48. Nhóm nội dung gần nhau, tăng
-              khoảng trống giữa các bước.
+              Use a 4px scale: 4 / 8 / 12 / 16 / 24 / 32 / 48. Keep related content
+              close together and add space between steps.
             </p>
             <div className="flex flex-wrap items-end gap-4">
               {[
@@ -115,47 +119,49 @@ export const ProposalV1: Story = {
               ))}
             </div>
             <p>
-              Control: radius 8px · Panel: radius 14px · shadow nhẹ, border phân nhóm.
+              Control: 8px radius · Panel: 14px radius · Subtle shadows and borders
+              group content.
             </p>
           </div>
         </Card>
       </div>
-      <section className="grid gap-4" aria-label="Trạng thái tương tác">
-        <h2 className="text-section font-semibold">04 / Tương tác và feedback</h2>
+      <section className="grid gap-4" aria-label="Interaction states">
+        <h2 className="text-section font-semibold">04 / Interaction and feedback</h2>
         <div className="flex flex-wrap gap-3">
-          <Button>Hành động chính</Button>
-          <Button variant="secondary">Hành động phụ</Button>
-          <Button variant="ghost">Quay lại</Button>
-          <Button loading>Đang xử lý</Button>
-          <Button disabled>Chưa sẵn sàng</Button>
+          <Button>Primary action</Button>
+          <Button variant="secondary">Secondary action</Button>
+          <Button variant="ghost">Go back</Button>
+          <Button loading>Processing</Button>
+          <Button disabled>Not ready</Button>
         </div>
         <p className="text-ui-sm text-muted">
-          Dùng Tab để xem focus. Hover là bổ trợ; loading có chữ và ngăn thao tác lặp.
+          Press Tab to check focus. Hover adds feedback; loading includes a label and
+          prevents repeated actions.
         </p>
         <div className="grid gap-5 md:grid-cols-2">
           <Input
-            label="Item minh họa"
-            placeholder="Nhập ý tưởng"
-            hint="Label và hint luôn gắn với control."
+            label="Example item"
+            placeholder="Enter an idea"
+            hint="The label and hint are associated with the control."
           />
           <Input
-            label="Trường có lỗi"
+            label="Field with an error"
             defaultValue=""
-            error="Nhập nội dung trước khi tiếp tục."
+            error="Enter a value before continuing."
             aria-invalid="true"
           />
         </div>
         <Textarea
-          label="Ghi chú minh họa"
+          label="Example notes"
           defaultValue="Lorem ipsum dolor sit amet, consectetur adipiscing elit."
-          hint="Be Vietnam Pro hỗ trợ tiếng Việt, font được phục vụ từ ứng dụng."
+          hint="Be Vietnam Pro supports Vietnamese and is served by the application."
         />
         <div className="flex flex-wrap gap-3">
-          <Tag tone="info">Thông tin bổ sung</Tag>
-          <Tag tone="success">Đã lưu</Tag>
-          <Tag tone="warning">Cần kiểm tra độ mới</Tag>
-          <Tag tone="danger">Chưa kết nối được</Tag>
-          <Tag>Chưa có dữ liệu</Tag>
+          <Tag tone="info">Additional information</Tag>
+          <Tag tone="success">Saved</Tag>
+          <Tag tone="warning">Check freshness</Tag>
+          <Tag tone="danger">Unable to connect</Tag>
+          <Tag>No data yet</Tag>
         </div>
       </section>
     </div>

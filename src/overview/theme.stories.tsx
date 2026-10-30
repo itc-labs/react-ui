@@ -14,7 +14,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'useTheme cung cấp icon configuration theo UIProvider và các màu có tên. Màu là tham chiếu đến CSS tokens; UIProvider nhận theme.tokens để đổi token tại :root, bao gồm overlay portal.',
+          'useTheme exposes icon configuration from UIProvider and named colors. Colors reference CSS tokens; pass theme.tokens to UIProvider to override tokens at :root, including overlay portals.',
       },
     },
   },
@@ -100,7 +100,7 @@ export const InteractionRoles: Story = {
     docs: {
       description: {
         story:
-          'Override các CSS role trong một scope để đổi màu hover, selected và focus. Dùng Tab để kiểm tra focus; portal cần nhận cùng override tại portal root.',
+          'Override semantic CSS tokens within a scope to change hover, selected and focus colors. Press Tab to check focus; apply the same overrides at the portal root for portal content.',
       },
     },
   },
@@ -134,7 +134,7 @@ export const ThemeTokens: Story = {
       story: { inline: false, height: '320px' },
       description: {
         story:
-          'theme.tokens áp dụng tại :root, kể cả dialog portal ra body. Mở dialog để kiểm tra font, brand và bo góc. Style inline được gỡ khi rời story; Docs dùng iframe riêng để không đổi token của ví dụ khác.',
+          'theme.tokens applies at :root, including dialogs rendered through a portal into body. Open the dialog to check the font, brand color and border radius. Inline styles are removed when leaving the story; Docs uses a separate iframe to isolate the example.',
       },
     },
   },
@@ -153,16 +153,16 @@ export const ThemeTokens: Story = {
       })}
     >
       <div className="grid max-w-lg gap-4">
-        <Input label="Ghi chú" placeholder="Lorem ipsum" />
+        <Input label="Notes" placeholder="Lorem ipsum" />
         <InteractionPreview />
         <Dialog
           title="Lorem ipsum"
-          description="Kiểm tra token trên nội dung portal."
-          trigger="Mở dialog"
-          actions={[{ id: 'close', label: 'Đóng', close: true }]}
+          description="Check theme tokens in portal content."
+          trigger="Open dialog"
+          actions={[{ id: 'close', label: 'Close', close: true }]}
         >
-          <Input label="Ghi chú trong dialog" />
-          <Button className="mt-4">Lưu</Button>
+          <Input label="Dialog notes" />
+          <Button className="mt-4">Save</Button>
         </Dialog>
       </div>
     </UIProvider>

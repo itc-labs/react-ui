@@ -32,12 +32,12 @@ export const Typography: Story = {
     <div className="grid gap-6">
       <p className="text-display text-ink">Lorem ipsum dolor sit amet.</p>
       <p className="text-control text-ink">
-        Control / 14px — Vietnamese: Nghiên cứu sản phẩm
+        Control / 14px — Lorem ipsum dolor sit amet.
       </p>
       <p className="text-ui-sm text-muted">
-        UI small / 13px — nguồn, thời gian, ghi chú
+        UI small / 13px — Lorem ipsum dolor sit amet.
       </p>
-      <p className="text-eyebrow text-muted">EYEBROW / MODULE</p>
+      <p className="text-eyebrow text-muted">Eyebrow / Lorem ipsum</p>
     </div>
   ),
 };
