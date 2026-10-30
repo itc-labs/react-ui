@@ -12,7 +12,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'Hiển thị số lượng hoặc dấu chấm trên nội dung con, hoặc đứng độc lập. Nhãn dành cho trình đọc màn hình theo ngôn ngữ của UIProvider; label cho phép tùy chỉnh ngữ nghĩa.',
+          'Display a count or dot over child content or on its own. Screen reader labels follow the UIProvider locale; use label to customize their meaning.',
       },
     },
   },
@@ -55,7 +55,7 @@ export const Placements: Story = {
         {(['top-end', 'top-start', 'bottom-end', 'bottom-start'] as const).map(
           (placement) => (
             <Badge key={placement} placement={placement} overlap="circular" count={3}>
-              <Avatar alt="Tài khoản" fallback="AB" />
+              <Avatar alt="Account" fallback="AB" />
             </Badge>
           ),
         )}
@@ -64,7 +64,7 @@ export const Placements: Story = {
         {(['top-end', 'top-start', 'bottom-end', 'bottom-start'] as const).map(
           (placement) => (
             <Badge key={placement} placement={placement} count={3}>
-              <IconButton icon={BellIcon} label="Thông báo" variant="secondary" />
+              <IconButton icon={BellIcon} label="Notifications" variant="secondary" />
             </Badge>
           ),
         )}
@@ -78,22 +78,22 @@ export const OnAvatar: Story = {
     dot: true,
     tone: 'success',
     overlap: 'circular',
-    children: <Avatar alt="Tài khoản" fallback="AB" />,
+    children: <Avatar alt="Account" fallback="AB" />,
   },
 };
 export const OnIconButton: Story = {
   tags: ['example'],
   render: () => (
     <div className="flex items-center gap-6 p-4">
-      <IconButton icon={BellIcon} label="Thông báo" variant="ghost" badge={5} />
-      <IconButton icon={BellIcon} label="Thông báo" variant="ghost" badge={128} />
+      <IconButton icon={BellIcon} label="Notifications" variant="ghost" badge={5} />
+      <IconButton icon={BellIcon} label="Notifications" variant="ghost" badge={128} />
       <IconButton
         icon={BellIcon}
-        label="Thông báo"
+        label="Notifications"
         variant="ghost"
         badge={{ dot: true }}
       />
-      <IconButton icon={BellIcon} label="Thông báo" variant="secondary" badge={3} />
+      <IconButton icon={BellIcon} label="Notifications" variant="secondary" badge={3} />
     </div>
   ),
 };
@@ -101,7 +101,7 @@ export const Standalone: Story = {
   tags: ['example'],
   render: () => (
     <span className="inline-flex items-center gap-2">
-      Thông báo <Badge count={5} />
+      Notifications <Badge count={5} />
     </span>
   ),
 };
@@ -114,6 +114,6 @@ export const CustomClasses: Story = {
       indicator: 'rounded-md ring-canvas',
       label: 'sr-only',
     },
-    children: <IconButton icon={BellIcon} label="Thông báo" variant="secondary" />,
+    children: <IconButton icon={BellIcon} label="Notifications" variant="secondary" />,
   },
 };

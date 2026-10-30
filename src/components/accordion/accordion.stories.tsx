@@ -36,7 +36,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'Thu/mở các phần nội dung bằng heading và nút có hỗ trợ bàn phím. type="single" mở một mục; type="multiple" mở nhiều mục. Dùng collapsible với single để cho phép đóng hết. Chọn variant="divided", "bordered" hoặc "separated"; một mục dùng cho section thu gọn đơn lẻ.',
+          'Expand or collapse content sections using headings and keyboard-accessible buttons. type="single" opens one item; type="multiple" opens several. Use collapsible with single to allow all items to close. Choose variant="divided", "bordered" or "separated"; use one item for a standalone collapsible section.',
       },
     },
   },
@@ -102,7 +102,7 @@ function ControlledExample() {
   return (
     <div className="grid max-w-xl gap-4">
       <Button variant="secondary" onClick={() => setValue(value ? '' : 'first')}>
-        Đóng/mở mục đầu
+        Toggle first item
       </Button>
       <Accordion
         type="single"
@@ -111,7 +111,7 @@ function ControlledExample() {
         onValueChange={setValue}
         items={items}
       />
-      <output>{value || 'Không có mục đang mở'}</output>
+      <output>{value || 'No open items'}</output>
     </div>
   );
 }
@@ -128,7 +128,7 @@ export const SingleSection: Story = {
         <AccordionTrigger headingLevel={2}>Lorem ipsum</AccordionTrigger>
         <AccordionContent>
           <p className="mb-4">Dolor sit amet, consectetur adipiscing elit.</p>
-          <Input label="Nội dung" placeholder="Lorem ipsum" />
+          <Input label="Content" placeholder="Enter content" />
         </AccordionContent>
       </AccordionItem>
     </Accordion>

@@ -9,7 +9,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'Lịch chọn một ngày hoặc khoảng ngày. Hỗ trợ điều hướng bàn phím, chuyển tháng/năm, giới hạn ngày và ngày không khả dụng.',
+          'Select a single date or date range. Supports keyboard navigation, month and year selection, date bounds and unavailable dates.',
       },
     },
   },
@@ -23,7 +23,7 @@ function SingleExample() {
   return (
     <div className="grid justify-items-start gap-4">
       <Calendar value={value} onValueChange={setValue} today="2026-10-27" />
-      <output>Ngày: {value ?? 'Chưa chọn'}</output>
+      <output>Date: {value ?? 'No date selected'}</output>
     </div>
   );
 }
@@ -47,7 +47,7 @@ export const Single: Story = {
       getComputedStyle(root).getPropertyValue('--rdp-accent-color').trim(),
     ).toBe(getComputedStyle(calendar).getPropertyValue('--color-brand-700').trim());
     await expect(root.scrollWidth).toBeLessThanOrEqual(calendar.clientWidth);
-    for (const name of ['Tháng', 'Năm']) {
+    for (const name of ['Month', 'Year']) {
       await expect(within(calendar).getByRole('combobox', { name })).toBeVisible();
     }
   },

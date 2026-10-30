@@ -13,7 +13,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'Avatar hiển thị ảnh, initials khi trống/lỗi và loading. Không hỗ trợ upload; dùng Modules/AvatarUpload khi cần chọn ảnh.',
+          'Display an image, initials when the image is missing or fails to load, and a loading state. Use Modules/AvatarUpload to let users choose an image.',
       },
     },
   },
@@ -61,7 +61,7 @@ export const States: Story = {
     docs: {
       description: {
         story:
-          'Ảnh trống hoặc ảnh lỗi hiển thị chữ từ alt. Truyền fallback để đặt nội dung thay thế; loading hiển thị spinner.',
+          'Missing or failed images show initials from alt. Provide fallback to customize the replacement content; loading shows a spinner.',
       },
     },
   },

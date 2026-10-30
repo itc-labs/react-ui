@@ -6,13 +6,13 @@ const meta = {
     docs: {
       description: {
         component:
-          'Native button có variants, kích thước và loading; mặc định type=button. Dùng Form.SubmitButton cho submit được bind với form state.',
+          'A native button with variants, sizes and a loading state. Defaults to type=button. Use Form.SubmitButton for submission tied to form state.',
       },
     },
   },
   title: 'Components/Button',
   component: Button,
-  args: { children: 'Lưu', onClick: fn() },
+  args: { children: 'Save', onClick: fn() },
   argTypes: {
     variant: {
       control: 'select',
@@ -56,10 +56,10 @@ export const States: Story = {
   tags: ['states'],
   render: () => (
     <div className="flex flex-wrap gap-3">
-      <Button>Sẵn sàng</Button>
-      <Button loading>Đang lưu</Button>
-      <Button disabled>Chưa sẵn sàng</Button>
-      <Button variant="danger">Xóa bản minh họa</Button>
+      <Button>Ready</Button>
+      <Button loading>Saving</Button>
+      <Button disabled>Unavailable</Button>
+      <Button variant="danger">Delete demo</Button>
     </div>
   ),
 };
@@ -68,7 +68,7 @@ export const CustomClasses: Story = {
   tags: ['customization'],
   render: () => (
     <Button loading className="rounded-full" classNames={{ spinner: 'text-brand-100' }}>
-      Lưu nội dung
+      Save content
     </Button>
   ),
 };
@@ -83,7 +83,7 @@ export const Primary: Story = {
 
 export const Loading: Story = {
   tags: ['!dev', '!autodocs', 'regression'],
-  args: { loading: true, children: 'Đang lấy dữ liệu' },
+  args: { loading: true, children: 'Loading data' },
   play: async ({ canvasElement }) => {
     await expect(within(canvasElement).getByRole('button')).toBeDisabled();
   },

@@ -3,9 +3,9 @@ import { expect, userEvent, within } from 'storybook/test';
 import { Breadcrumb } from './index';
 
 const items = [
-  { key: 'home', href: '#breadcrumb-home', title: 'Workspace' },
-  { key: 'parent', href: '#breadcrumb-parent', title: 'Danh mục' },
-  { key: 'current', title: 'Trang hiện tại' },
+  { key: 'home', href: '#breadcrumb-home', title: 'Home' },
+  { key: 'parent', href: '#breadcrumb-parent', title: 'Category' },
+  { key: 'current', title: 'Current page' },
 ];
 const meta = {
   title: 'Components/Breadcrumb',
@@ -15,7 +15,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'Đường dẫn gọn bằng items; mỗi mục có key ổn định, title và href hoặc callback. Mục cuối là trang hiện tại, không phải link. Link có href dùng UiLink theo adapter của host. Separator mặc định là dấu /; không có heading hoặc panel bao quanh.',
+          'Build a compact navigation path from items, each with a stable key, title and href or callback. The last item represents the current page and is not a link. Items with href use UiLink and the application adapter. The default separator is /; no heading or panel is added.',
       },
     },
   },
@@ -32,7 +32,10 @@ export const LongPath: Story = {
   args: {
     items: [
       ...items.slice(0, 1),
-      { key: 'parent', title: 'Nhóm có tên dài để kiểm tra xuống dòng trong vùng hẹp' },
+      {
+        key: 'parent',
+        title: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit',
+      },
       { key: 'current', title: 'LoremIpsum'.repeat(8) },
     ],
   },
@@ -63,17 +66,17 @@ export const LinkComposition: Story = {
   tags: ['!dev', '!autodocs', 'regression'],
   args: {
     items: [
-      { key: 'parent', title: 'Đường dẫn cha', href: '#breadcrumb-current' },
-      { key: 'current', title: 'Trang hiện tại' },
+      { key: 'parent', title: 'Parent page', href: '#breadcrumb-current' },
+      { key: 'current', title: 'Current page' },
     ],
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    const link = canvas.getByRole('link', { name: 'Đường dẫn cha' });
+    const link = canvas.getByRole('link', { name: 'Parent page' });
     await userEvent.tab();
     await expect(link).toHaveFocus();
-    await expect(canvas.getByRole('navigation', { name: 'Đường dẫn' })).toBeVisible();
-    await expect(canvas.getByText('Trang hiện tại')).toHaveAttribute(
+    await expect(canvas.getByRole('navigation', { name: 'Breadcrumb' })).toBeVisible();
+    await expect(canvas.getByText('Current page')).toHaveAttribute(
       'aria-current',
       'page',
     );
