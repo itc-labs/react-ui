@@ -6,7 +6,6 @@ import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { UIProvider, useTheme } from './provider';
 import {
-  LinkImageProvider,
   UiLink,
   UiImage,
   type UiLinkProps,
@@ -224,18 +223,3 @@ it.each([
     expect(host.querySelector('section img')?.getAttribute('data-adapter')).toBe('app');
   },
 );
-
-it('allows LinkImageProvider to override UIProvider adapters in a local scope', () => {
-  act(() =>
-    root.render(
-      <UIProvider link={AppLink} image={AppImage}>
-        <LinkImageProvider Link={ScopedLink}>
-          <AdapterConsumers />
-        </LinkImageProvider>
-      </UIProvider>,
-    ),
-  );
-
-  expect(host.querySelector('a')?.getAttribute('data-adapter')).toBe('scoped');
-  expect(host.querySelector('img')?.getAttribute('data-adapter')).toBe('app');
-});

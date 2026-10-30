@@ -4,11 +4,11 @@ import type { UITheme, ResolvedUITheme } from './index';
 import { themeColors } from './colors';
 import { themeTokenRule, validateThemeTokens } from './tokens';
 
-import {
-  LinkImageProvider,
-  type UiLinkComponent,
-  type UiImageComponent,
+import type {
+  UiLinkComponent,
+  UiImageComponent,
 } from '../components/link-image-provider';
+import { AdapterProvider } from '../components/link-image-provider/context';
 import { UILocaleProvider } from '../i18n/provider';
 import type { UILocale, UIMessages, UITranslations, UICalendarLocales } from '../i18n';
 const emptyTheme: UITheme = {};
@@ -81,12 +81,12 @@ export function UIProvider({
           <style>{themeTokenRule(tokens)}</style>
         )}
         {link || image ? (
-          <LinkImageProvider
+          <AdapterProvider
             {...(link ? { Link: link } : {})}
             {...(image ? { Image: image } : {})}
           >
             {children}
-          </LinkImageProvider>
+          </AdapterProvider>
         ) : (
           children
         )}

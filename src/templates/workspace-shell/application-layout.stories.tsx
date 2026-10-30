@@ -1,3 +1,4 @@
+import { UIProvider } from '../../theme/provider';
 import { useCallback, useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, userEvent, within } from 'storybook/test';
@@ -11,10 +12,7 @@ import { Progress } from '../../components/progress';
 import { Tag } from '../../components/tag';
 import { Card } from '../../components/card';
 import { Breadcrumb } from '../../components/breadcrumb';
-import {
-  LinkImageProvider,
-  type UiLinkProps,
-} from '../../components/link-image-provider';
+import { type UiLinkProps } from '../../components/link-image-provider';
 import { HomeIcon } from '../../components/icon/outline/home';
 import { FolderIcon } from '../../components/icon/outline/folder';
 import { SettingsIcon } from '../../components/icon/outline/settings';
@@ -153,7 +151,7 @@ function ApplicationExample({ topNavigation = false }: { topNavigation?: boolean
   const title = pageLabels[currentPath] ?? 'Overview';
 
   return (
-    <LinkImageProvider Link={DemoLink}>
+    <UIProvider link={DemoLink}>
       <WorkspaceShell
         {...(topNavigation
           ? {}
@@ -231,7 +229,7 @@ function ApplicationExample({ topNavigation = false }: { topNavigation?: boolean
           </>
         }
       />
-    </LinkImageProvider>
+    </UIProvider>
   );
 }
 

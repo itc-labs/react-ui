@@ -1,17 +1,12 @@
 // @vitest-environment jsdom
+import { UIProvider } from '../../theme/provider';
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { readFileSync, readdirSync } from 'node:fs';
 import { resolve } from 'node:path';
 import ts from 'typescript';
-import {
-  LinkImageProvider,
-  UiLink,
-  UiImage,
-  type UiLinkProps,
-  type UiImageProps,
-} from './index';
+import { UiLink, UiImage, type UiLinkProps, type UiImageProps } from './index';
 import { Breadcrumb } from '../breadcrumb';
 import { Sidebar } from '../../modules/sidebar';
 
@@ -105,7 +100,7 @@ function NestedLink(props: UiLinkProps) {
 it('inherits unspecified nested adapters without global mutation and routes generated consumers through them', async () => {
   await act(async () =>
     root.render(
-      <LinkImageProvider Link={ProjectLink} Image={ProjectImage}>
+      <UIProvider link={ProjectLink} image={ProjectImage}>
         <Breadcrumb
           data-testid="path"
           items={[
@@ -114,12 +109,12 @@ it('inherits unspecified nested adapters without global mutation and routes gene
           ]}
         />
         <Sidebar items={[{ id: 'page', label: 'Page', href: '/page', active: true }]} />
-        <LinkImageProvider Link={NestedLink}>
+        <UIProvider link={NestedLink}>
           <UiLink href="/nested">Nested</UiLink>
           <UiImage src="a.png" alt="Nested image" />
-        </LinkImageProvider>
+        </UIProvider>
         <UiLink href="/after">After</UiLink>
-      </LinkImageProvider>,
+      </UIProvider>,
     ),
   );
   expect(
@@ -157,7 +152,7 @@ it('keeps runtime UI link/image rendering centralized in the native adapter boun
     (file) =>
       file.endsWith('.tsx') &&
       !/\.(stories|test)\.tsx$/.test(file) &&
-      !file.endsWith('/link-image-provider/index.tsx'),
+      !file.endsWith('/link-image-provider/context.tsx'),
   )) {
     const source = ts.createSourceFile(
       file,
@@ -195,9 +190,9 @@ it('lets the image adapter own Avatar source loading and keeps fallback/error be
 
   await act(async () =>
     root.render(
-      <LinkImageProvider Image={RewrittenImage}>
+      <UIProvider image={RewrittenImage}>
         <Avatar src="adapter-owned-source" alt="Example User" data-testid="avatar" />
-      </LinkImageProvider>,
+      </UIProvider>,
     ),
   );
   expect(host.querySelector('img')?.getAttribute('src')).toBe('rewritten.png');
@@ -212,9 +207,9 @@ it('lets the image adapter own Avatar source loading and keeps fallback/error be
   expect(host.querySelector('[data-testid="avatar-fallback"]')?.textContent).toBe('EU');
   await act(async () =>
     root.render(
-      <LinkImageProvider Image={RewrittenImage}>
+      <UIProvider image={RewrittenImage}>
         <Avatar src="next-source" alt="Example User" data-testid="avatar" />
-      </LinkImageProvider>,
+      </UIProvider>,
     ),
   );
   expect(host.querySelector('img')).not.toBeNull();

@@ -1,12 +1,10 @@
 // @vitest-environment jsdom
+import { UIProvider } from '../../theme/provider';
 import { userEvent } from 'storybook/test';
 import { act, createRef } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
-import {
-  LinkImageProvider,
-  type UiLinkProps,
-} from '../../components/link-image-provider';
+import { type UiLinkProps } from '../../components/link-image-provider';
 import { Icon } from '../../components/icon';
 import { HomeIcon } from '../../components/icon/outline/home';
 import { UILocaleProvider } from '../../i18n/provider';
@@ -178,9 +176,9 @@ it('uses localized labels, toggles the drawer and closes after following an adap
   await act(async () =>
     root.render(
       <UILocaleProvider locale="en-US">
-        <LinkImageProvider Link={Link}>
+        <UIProvider link={Link}>
           <Navbar brand="Brand" brandHref="/" items={items} data-testid="navbar" />
-        </LinkImageProvider>
+        </UIProvider>
       </UILocaleProvider>,
     ),
   );

@@ -85,12 +85,11 @@ export function UIRoot({ children }: { children: ReactNode }) {
 }
 ```
 
-| Provider            | Purpose                                              |
-| ------------------- | ---------------------------------------------------- |
-| `UIProvider`        | Locale, theme, router link and image adapters        |
-| `LinkImageProvider` | Advanced/scoped link and image adapter overrides     |
-| `ToastProvider`     | Enables `toast.success/error/info/warning` anywhere  |
-| `ModalProvider`     | Enables `modal.confirm/alert/open` with a FIFO queue |
+| Provider        | Purpose                                              |
+| --------------- | ---------------------------------------------------- |
+| `UIProvider`    | Locale, theme, router link and image adapters        |
+| `ToastProvider` | Enables `toast.success/error/info/warning` anywhere  |
+| `ModalProvider` | Enables `modal.confirm/alert/open` with a FIFO queue |
 
 `UIProvider` props:
 
@@ -128,7 +127,7 @@ export function AppImage({ width, height, ...props }: UiImageProps) {
 }
 ```
 
-`LinkImageProvider` remains available for advanced/scoped overrides: `<LinkImageProvider Link={ScopedLink}>` replaces the link adapter while inheriting the image adapter. Nested `UIProvider` scopes also inherit each omitted adapter. Define adapters in a client module; do not pass adapter functions across a server/client boundary.
+Use `<UIProvider link={ScopedLink}>` for scoped overrides: it replaces the link adapter while inheriting the image adapter. Each omitted adapter inherits from the parent. Define adapters in a client module; do not pass adapter functions across a server/client boundary.
 
 ## Usage
 

@@ -114,7 +114,7 @@ DataTable aligns the first visible data column left and the last visible column 
 
 ## Link and image boundary
 
-UiLink and UiImage default to native a/img elements and forward native attributes, React 19 refs, events, className and optional data-testid. UIProvider accepts link and image host adapters directly and inherits unspecified adapters through nested scopes. LinkImageProvider remains available for advanced/scoped overrides through its Link and Image props. The UI package imports no Next/router/image framework.
+UiLink and UiImage default to native a/img elements and forward native attributes, React 19 refs, events, className and optional data-testid. UIProvider accepts link and image host adapters directly and inherits unspecified adapters through nested scopes. Use a nested UIProvider for scoped adapter overrides. The UI package imports no Next/router/image framework.
 
 A Next.js host can configure its adapters in a client composition root. Server components pass normal children/data rather than adapter functions across the server/client boundary. NextLink and NextImage imports are centralized in that file. Routing links in the app, generated Breadcrumb/Sidebar/menu links, Avatar images and file preview/download links use UiLink/UiImage.
 

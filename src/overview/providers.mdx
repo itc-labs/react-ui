@@ -4,7 +4,7 @@ import { Meta } from '@storybook/addon-docs/blocks';
 
 # Providers & adapters
 
-`UIProvider` configures theme, language, host routing, and image rendering. `LinkImageProvider` provides advanced/scoped adapter overrides. `ToastProvider` and `ModalProvider` mount imperative feedback services. The application owns data fetching and business behavior.
+`UIProvider` configures theme, language, host routing, and image rendering. Nested `UIProvider` scopes provide adapter overrides. `ToastProvider` and `ModalProvider` mount imperative feedback services. The application owns data fetching and business behavior.
 
 Without configuration, controls use the `vi-VN` locale, outline icons, CSS tokens, and native links and images. Toast and modal APIs require mounted providers.
 
@@ -78,7 +78,7 @@ export function UIRoot({ children }: { children: ReactNode }) {
 
 **Locale:** nested providers inherit omitted settings. Calendar maps merge, while a supplied translations array replaces the catalog. Message overrides merge for the same locale; switching locale code or supplying a different locale object resets inherited overrides. These settings apply to the React subtree.
 
-**Adapters:** a nested `UIProvider` replaces only the adapters supplied through `link` and `image`; each omitted adapter inherits from its parent. `LinkImageProvider` remains the advanced/scoped option when only adapters need changing. Its `Link` and `Image` props override the same context, including inside `UIProvider`.
+**Adapters:** a nested `UIProvider` replaces only the adapters supplied through `link` and `image`; each omitted adapter inherits from its parent. Use `<UIProvider link={ScopedLink}>` to override only links in a subtree while retaining the parent image adapter.
 
 **Feedback:** each toast or modal provider has its own controller. One client can bind to only one mounted provider. Use `createToastClient()` and `createModalClient()` for independent application roots, and retain those clients for the root's lifetime. For a local subtree, set `client={null}` and call `useToast()` or `useModal()`; the default exported clients still target the root providers. Changing a modal provider's client or unmounting it settles pending modals as dismissed.
 

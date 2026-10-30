@@ -41,7 +41,16 @@ export * from './number-input';
 export * from './input-password';
 export * from './input-otp';
 export * from './accordion';
-export * from './link-image-provider';
+export {
+  UiLink,
+  UiImage,
+  useUiLink,
+  useUiImage,
+  type UiLinkProps,
+  type UiImageProps,
+  type UiLinkComponent,
+  type UiImageComponent,
+} from './link-image-provider';
 
 export * from './modal';
 
