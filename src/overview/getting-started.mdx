@@ -30,11 +30,9 @@ For a **Tailwind CSS v4 host**, use the source entry, which includes Tailwind, t
 
 ```css
 @import '@itclabs/react-ui/theme/styles.css';
-/* Adjust this source to your application's files. */
-@source '../app';
-/* Include the installed kit so Tailwind generates its utility classes. */
-@source '../node_modules/@itclabs/react-ui/dist';
 ```
+
+The theme registers the kit's own class sources, so you do not need an `@source` pointing into `node_modules`. Add `@source` only for your own folders that Tailwind does not detect automatically.
 
 For a **host without Tailwind**, use the precompiled stylesheet:
 
