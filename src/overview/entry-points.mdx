@@ -37,6 +37,7 @@ Append each subpath to `@itclabs/react-ui`; `.` means the package root. Wildcard
 | `./theme/vendor.css`               | Toast, crop, editor, and event calendar styles.                                                                                                                                                   |
 | `./theme/motion.css`               | Overlay, toast, submenu, and badge animations with reduced-motion support.                                                                                                                        |
 | `./theme/fonts-800.css`            | Optional Be Vietnam Pro font faces at weight 800.                                                                                                                                                 |
+| `./transfer`                       | `Transfer` for searchable, virtualized dual-list selection; no optional peers.                                                                                                                    |
 | `./tree-select`                    | `TreeSelect` for virtualized hierarchical selection, lazy children, paging, and search; no optional peers.                                                                                        |
 | `./rich-text-view`                 | `RichTextView` for sanitized HTML with shared Editor typography; no optional peers.                                                                                                               |
 | `./editor`                         | Optional Tiptap `Editor` and `EditorField` integration.                                                                                                                                           |
@@ -87,6 +88,7 @@ The script bundles source entries with esbuild for the browser as minified produ
 | Button                      |   17.82 |
 | Spinner                     |   17.02 |
 | Dialog                      |   34.75 |
+| Transfer                    |   37.24 |
 | TreeSelect                  |   59.37 |
 | Select                      |   53.19 |
 | DataTable                   |   83.07 |
@@ -99,12 +101,13 @@ The script bundles source entries with esbuild for the browser as minified produ
 
 These are script fixtures, not predictions for a complete application. The root fixture retains all root exports; the other fixtures retain the named exports shown. Application imports and bundler settings can produce different results.
 
-Gzip budgets are enforced by `src/components/icon/bundle-size.test.ts`, which runs the same script and checks the complete measurement key list. The script guards against full icon packs in ordinary imports; the built-in icon registry in Button, Dialog, Rating, QuantityInput, ColorPicker, OptionGroup, JsonView, CodeView, Carousel, MediaGallery, Lightbox, and TreeSelect; React Select in DataTable, Calendar, and TreeSelect; optional heavy features in Calendar; and MediaGallery, Prism, Embla, and TreeSelect in the root entry.
+Gzip budgets are enforced by `src/components/icon/bundle-size.test.ts`, which runs the same script and checks the complete measurement key list. The script guards against full icon packs in ordinary imports; the built-in icon registry in Button, Dialog, Rating, QuantityInput, ColorPicker, OptionGroup, JsonView, CodeView, Carousel, MediaGallery, Lightbox, TreeSelect, and Transfer; React Select in DataTable, Calendar, TreeSelect, and Transfer; optional heavy features in Calendar; and MediaGallery, Prism, Embla, TreeSelect, and Transfer in the root entry.
 
 The new component budgets allow approximately 10% headroom over these measurements:
 
 | Entry         | Gzip budget (bytes) |
 | ------------- | ------------------: |
+| Transfer      |              42,000 |
 | TreeSelect    |              65,000 |
 | QuantityInput |              20,600 |
 | OptionGroup   |              52,000 |

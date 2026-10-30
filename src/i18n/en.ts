@@ -1,4 +1,34 @@
 export const enMessages = {
+  'transfer.label': 'Transfer selection',
+  'transfer.available': 'Available',
+  'transfer.selected': 'Selected',
+  'transfer.search': 'Search items',
+  'transfer.searchSource': 'Search available items',
+  'transfer.searchTarget': 'Search selected items',
+  'transfer.selectAll': 'Select all visible items',
+  'transfer.empty': 'No items found',
+  'transfer.moveRight': 'Move checked items to selected',
+  'transfer.moveLeft': 'Move checked items to available',
+  'transfer.moveAllRight': 'Move all available items',
+  'transfer.moveAllLeft': 'Remove all selected items',
+  'transfer.remove': 'Remove {label}',
+  'transfer.count': {
+    one: '{count}/{total} selected',
+    other: '{count}/{total} selected',
+  },
+  'transfer.limit': {
+    one: 'Select up to {count} item',
+    other: 'Select up to {count} items',
+  },
+  'transfer.movedRight': {
+    one: 'Moved {count} item to selected',
+    other: 'Moved {count} items to selected',
+  },
+  'transfer.movedLeft': {
+    one: 'Moved {count} item to available',
+    other: 'Moved {count} items to available',
+  },
+
   'treeSelect.label': 'Tree selection',
   'treeSelect.placeholder': 'Select an item',
   'treeSelect.search': 'Search items',

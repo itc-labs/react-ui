@@ -191,6 +191,7 @@ for (const subpath of [
   './code-view',
   './rich-text-view',
   './tree-select',
+  './transfer',
   './templates',
   './theme',
   './theme/provider',
@@ -213,8 +214,11 @@ for (const subpath of [
   );
   if (['.', './components', './modules'].includes(subpath))
     assert.ok(
-      !('MediaGallery' in api) && !('RichTextView' in api) && !('TreeSelect' in api),
-      `MediaGallery, RichTextView and TreeSelect must remain isolated from ${subpath}`,
+      !('MediaGallery' in api) &&
+        !('RichTextView' in api) &&
+        !('TreeSelect' in api) &&
+        !('Transfer' in api),
+      `MediaGallery, RichTextView, TreeSelect and Transfer must remain isolated from ${subpath}`,
     );
   for (const name of [
     'LinkImageProvider',
@@ -361,3 +365,8 @@ const treeSelect = await import(
   pathToFileURL(resolve(root, packed.exports['./tree-select'].import)).href
 );
 assert.equal(typeof treeSelect.TreeSelect, 'function');
+
+const transfer = await import(
+  pathToFileURL(resolve(root, packed.exports['./transfer'].import)).href
+);
+assert.equal(typeof transfer.Transfer, 'function');

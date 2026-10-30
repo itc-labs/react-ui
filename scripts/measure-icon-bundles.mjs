@@ -24,6 +24,7 @@ const entries = {
   Dialog: 'components/dialog/index.tsx',
   Select: 'components/select/index.tsx',
   TreeSelect: 'modules/tree-select/index.tsx',
+  Transfer: 'modules/transfer/index.tsx',
   DataTable: 'modules/data-table/index.tsx',
   Root: 'index.ts',
   Calendar: 'modules/calendar/index.tsx',
@@ -60,6 +61,7 @@ for (const [name, file] of Object.entries(entries)) {
   if (
     [
       'TreeSelect',
+      'Transfer',
       'Timeline',
       'Dialog',
       'Button',
@@ -81,7 +83,7 @@ for (const [name, file] of Object.entries(entries)) {
     if (registries.length)
       throw new Error(`${name} imports the built-in icon registry: ${registries}`);
   }
-  if (['DataTable', 'Calendar', 'TreeSelect'].includes(name)) {
+  if (['DataTable', 'Calendar', 'TreeSelect', 'Transfer'].includes(name)) {
     const forbidden = Object.keys(metafile.inputs).filter((input) =>
       /node_modules\/react-select\//.test(input),
     );
@@ -97,10 +99,11 @@ for (const [name, file] of Object.entries(entries)) {
       throw new Error(`Calendar imports optional features: ${forbidden}`);
   }
   if (name === 'Root') {
-    const treeSelect = Object.keys(metafile.inputs).filter((input) =>
-      /modules\/tree-select\/|@tanstack\/.*virtual/.test(input),
+    const isolatedSelection = Object.keys(metafile.inputs).filter((input) =>
+      /modules\/(?:tree-select|transfer)\/|@tanstack\/.*virtual/.test(input),
     );
-    if (treeSelect.length) throw new Error(`Root imports TreeSelect: ${treeSelect}`);
+    if (isolatedSelection.length)
+      throw new Error(`Root imports isolated selection modules: ${isolatedSelection}`);
     const galleries = Object.keys(metafile.inputs).filter((input) =>
       /modules\/media-gallery\//.test(input),
     );
@@ -151,6 +154,7 @@ for (const [name, limit] of Object.entries({
   Dialog: 38_000,
   Select: 58_000,
   TreeSelect: 65_000,
+  Transfer: 42_000,
   Form: 22_000,
   DataTable: 90_000,
   Calendar: 100_000,

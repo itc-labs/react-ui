@@ -34,6 +34,7 @@ it('keeps ordinary imports free of heavy modules and within gzip budgets', () =>
     'Slider',
     'Spinner',
     'Timeline',
+    'Transfer',
     'TreeSelect',
   ]);
 }, 60_000);

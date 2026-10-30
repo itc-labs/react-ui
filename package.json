@@ -59,7 +59,8 @@
     "./carousel": "./src/modules/carousel/index.tsx",
     "./media-gallery": "./src/modules/media-gallery/index.tsx",
     "./rich-text-view": "./src/modules/rich-text-view/index.tsx",
-    "./tree-select": "./src/modules/tree-select/index.tsx"
+    "./tree-select": "./src/modules/tree-select/index.tsx",
+    "./transfer": "./src/modules/transfer/index.tsx"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
@@ -300,6 +301,10 @@
       "./tree-select": {
         "types": "./dist/modules/tree-select/index.d.ts",
         "import": "./dist/modules/tree-select/index.js"
+      },
+      "./transfer": {
+        "types": "./dist/modules/transfer/index.d.ts",
+        "import": "./dist/modules/transfer/index.js"
       }
     },
     "access": "public"

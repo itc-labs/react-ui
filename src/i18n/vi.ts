@@ -1,5 +1,35 @@
 import type { UIMessages } from './types';
 export const viMessages = {
+  'transfer.label': 'Chuyển lựa chọn',
+  'transfer.available': 'Có sẵn',
+  'transfer.selected': 'Đã chọn',
+  'transfer.search': 'Tìm kiếm mục',
+  'transfer.searchSource': 'Tìm mục có sẵn',
+  'transfer.searchTarget': 'Tìm mục đã chọn',
+  'transfer.selectAll': 'Chọn tất cả mục hiển thị',
+  'transfer.empty': 'Không tìm thấy mục',
+  'transfer.moveRight': 'Chuyển mục đã đánh dấu sang đã chọn',
+  'transfer.moveLeft': 'Chuyển mục đã đánh dấu về có sẵn',
+  'transfer.moveAllRight': 'Chuyển tất cả mục có sẵn',
+  'transfer.moveAllLeft': 'Xóa tất cả mục đã chọn',
+  'transfer.remove': 'Xóa {label}',
+  'transfer.count': {
+    one: 'Đã đánh dấu {count}/{total}',
+    other: 'Đã đánh dấu {count}/{total}',
+  },
+  'transfer.limit': {
+    one: 'Chọn tối đa {count} mục',
+    other: 'Chọn tối đa {count} mục',
+  },
+  'transfer.movedRight': {
+    one: 'Đã chuyển {count} mục sang đã chọn',
+    other: 'Đã chuyển {count} mục sang đã chọn',
+  },
+  'transfer.movedLeft': {
+    one: 'Đã chuyển {count} mục về có sẵn',
+    other: 'Đã chuyển {count} mục về có sẵn',
+  },
+
   'treeSelect.label': 'Chọn trong cây',
   'treeSelect.placeholder': 'Chọn mục',
   'treeSelect.search': 'Tìm kiếm mục',
