@@ -9,6 +9,9 @@ import { PlayIcon as PlayBoldIcon } from '../../components/icon/bold/play';
 import { UiImage } from '../../components/link-image-provider';
 import { useUILocale } from '../../i18n/provider';
 import { Carousel } from '../carousel';
+import { Lightbox, clampMediaIndex } from './lightbox';
+export { Lightbox } from './lightbox';
+export type { LightboxProps, LightboxClassNames } from './lightbox';
 
 export interface MediaItem {
   id: string;
@@ -37,13 +40,13 @@ export interface MediaGalleryProps extends Omit<
   /** Left on desktop and bottom on small screens when omitted. */
   thumbnails?: 'left' | 'bottom' | 'none';
   aspectRatio?: string;
+  zoom?: boolean;
+  zoomScale?: number;
+  lightbox?: boolean;
   onOpen?: (index: number) => void;
   classNames?: MediaGalleryClassNames;
   'data-testid'?: string;
 }
-
-const clampIndex = (value: number, count: number) =>
-  Math.max(0, Math.min(count - 1, Number.isFinite(value) ? Math.floor(value) : 0));
 
 export function MediaGallery({
   items,
@@ -52,6 +55,9 @@ export function MediaGallery({
   onIndexChange,
   thumbnails,
   aspectRatio = '1 / 1',
+  zoom = true,
+  zoomScale = 2,
+  lightbox = true,
   onOpen,
   className,
   classNames,
@@ -60,8 +66,18 @@ export function MediaGallery({
   ...props
 }: MediaGalleryProps) {
   const { t } = useUILocale();
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [hover, setHover] = useState<{ id: string; x: number; y: number } | null>(null);
+
+  const openMedia = (itemIndex: number) => {
+    setHover(null);
+    if (lightbox) setLightboxOpen(true);
+    onOpen?.(itemIndex);
+  };
+
   const [internalIndex, setInternalIndex] = useState(defaultIndex);
-  const active = clampIndex(index ?? internalIndex, items.length);
+  const active = clampMediaIndex(index ?? internalIndex, items.length);
+  const mediaRefs = useRef(new Map<string, HTMLButtonElement | HTMLVideoElement>());
   const thumbnailRefs = useRef(new Map<string, HTMLButtonElement>());
   const videoRefs = useRef(new Map<string, HTMLVideoElement>());
   const activeId = items[active]?.id;
@@ -75,12 +91,28 @@ export function MediaGallery({
     });
 
     videoRefs.current.forEach((video, id) => {
-      if (id !== activeId) video.pause();
+      if (lightboxOpen || id !== activeId) video.pause();
     });
-  }, [activeId, thumbnails]);
+  }, [activeId, thumbnails, lightboxOpen]);
+
+  useEffect(() => {
+    setHover(null);
+    const fine = window.matchMedia('(hover: hover) and (pointer: fine)');
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+    const reset = () => setHover(null);
+
+    fine.addEventListener('change', reset);
+    reduced.addEventListener('change', reset);
+
+    return () => {
+      fine.removeEventListener('change', reset);
+      reduced.removeEventListener('change', reset);
+    };
+  }, [activeId, zoom]);
 
   const select = (next: number) => {
-    const value = clampIndex(next, items.length);
+    const value = clampMediaIndex(next, items.length);
     if (!items.length || value === active) return;
     if (index === undefined) setInternalIndex(value);
     onIndexChange?.(value);
@@ -158,8 +190,13 @@ export function MediaGallery({
             {item.type === 'video' ? (
               <video
                 ref={(node) => {
-                  if (node) videoRefs.current.set(item.id, node);
-                  else videoRefs.current.delete(item.id);
+                  if (node) {
+                    videoRefs.current.set(item.id, node);
+                    mediaRefs.current.set(item.id, node);
+                  } else {
+                    videoRefs.current.delete(item.id);
+                    mediaRefs.current.delete(item.id);
+                  }
                 }}
                 src={item.src}
                 poster={item.poster}
@@ -176,15 +213,19 @@ export function MediaGallery({
                   classNames?.media,
                   classNames?.video,
                 )}
-                onClick={() => onOpen?.(itemIndex)}
+                onClick={() => openMedia(itemIndex)}
                 onKeyDown={(event) => {
-                  if (event.key === 'Enter') onOpen?.(itemIndex);
+                  if (event.key === 'Enter') openMedia(itemIndex);
                 }}
               />
             ) : (
               <button
                 type="button"
-                disabled={!onOpen}
+                ref={(node) => {
+                  if (node) mediaRefs.current.set(item.id, node);
+                  else mediaRefs.current.delete(item.id);
+                }}
+                disabled={!onOpen && !lightbox}
                 aria-label={t('mediaGallery.open', {
                   index: itemIndex + 1,
                   count: items.length,
@@ -193,7 +234,41 @@ export function MediaGallery({
                   'block h-full w-full disabled:cursor-default',
                   focusRingClassName,
                 )}
-                onClick={() => onOpen?.(itemIndex)}
+                onClick={() => openMedia(itemIndex)}
+                onPointerMove={(event) => {
+                  if (
+                    !zoom ||
+                    event.pointerType !== 'mouse' ||
+                    !window.matchMedia('(hover: hover) and (pointer: fine)').matches ||
+                    window.matchMedia('(prefers-reduced-motion: reduce)').matches
+                  ) {
+                    setHover(null);
+
+                    return;
+                  }
+                  const bounds = event.currentTarget.getBoundingClientRect();
+                  if (!bounds.width || !bounds.height) return;
+                  setHover({
+                    id: item.id,
+                    x: Math.max(
+                      0,
+                      Math.min(
+                        100,
+                        ((event.clientX - bounds.left) / bounds.width) * 100,
+                      ),
+                    ),
+                    y: Math.max(
+                      0,
+                      Math.min(
+                        100,
+                        ((event.clientY - bounds.top) / bounds.height) * 100,
+                      ),
+                    ),
+                  });
+                }}
+                onPointerLeave={() => setHover(null)}
+                onPointerCancel={() => setHover(null)}
+                onBlur={() => setHover(null)}
               >
                 <UiImage
                   src={item.src}
@@ -201,6 +276,11 @@ export function MediaGallery({
                   {...(item.width === undefined ? {} : { width: item.width })}
                   {...(item.height === undefined ? {} : { height: item.height })}
                   draggable={false}
+                  style={{
+                    transform: `scale(${zoom && hover?.id === item.id && itemIndex === active ? (Number.isFinite(zoomScale) ? Math.max(1, zoomScale) : 2) : 1})`,
+                    transformOrigin:
+                      hover?.id === item.id ? `${hover.x}% ${hover.y}%` : '50% 50%',
+                  }}
                   data-testid={partTestId(testId, 'media', item.id)}
                   className={cn('h-full w-full object-contain', classNames?.media)}
                 />
@@ -209,6 +289,23 @@ export function MediaGallery({
           </div>
         )}
       />
+      {lightbox && (
+        <Lightbox
+          items={items}
+          open={lightboxOpen}
+          onOpenChange={setLightboxOpen}
+          onCloseAutoFocus={(event) => {
+            const target = mediaRefs.current.get(activeId ?? '');
+            if (target) {
+              event.preventDefault();
+              target.focus();
+            }
+          }}
+          index={active}
+          onIndexChange={select}
+          data-testid={partTestId(testId, 'lightbox')}
+        />
+      )}
       {thumbnails !== 'none' && (
         <div
           role="group"

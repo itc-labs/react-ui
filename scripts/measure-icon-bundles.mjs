@@ -23,6 +23,7 @@ const entries = {
   Calendar: 'modules/calendar/index.tsx',
   Carousel: 'modules/carousel/index.tsx',
   MediaGallery: 'modules/media-gallery/index.tsx',
+  Lightbox: 'modules/media-gallery/index.tsx',
   Form: 'modules/form/index.tsx',
 };
 const sizes = {};
@@ -62,6 +63,7 @@ for (const [name, file] of Object.entries(entries)) {
       'CodeView',
       'Carousel',
       'MediaGallery',
+      'Lightbox',
     ].includes(name)
   ) {
     const registries = Object.keys(metafile.inputs).filter((input) =>
@@ -120,7 +122,9 @@ for (const [name, limit] of Object.entries({
   // About 10% above the measured display subpath fixtures.
   CodeView: 50_000,
   Carousel: 30_300,
-  MediaGallery: 35_000,
+  // Fullscreen media adds Dialog focus management and image zoom controls.
+  MediaGallery: 55_000,
+  Lightbox: 41_000,
   Button: 20_000,
   Spinner: 20_000,
   Dialog: 38_000,

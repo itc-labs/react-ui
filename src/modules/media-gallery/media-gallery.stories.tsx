@@ -35,7 +35,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'Browse images and native video with swipe gestures, arrow controls, and a thumbnail strip. Import from @itclabs/react-ui/media-gallery. Omit thumbnails for left placement on desktop and bottom placement on small screens. index/defaultIndex and onIndexChange use zero-based indices; out-of-range indices are clamped. Images use the host image adapter. Leaving a video pauses it. onOpen receives the activated media index for host-owned expanded views. classNames exposes root, main, slide, media, thumbnails, thumbnail, and video slots. Part test IDs use stable item IDs.',
+          'Browse images and native video with swipe gestures, arrow controls, and a thumbnail strip. Import from @itclabs/react-ui/media-gallery. Omit thumbnails for left placement on desktop and bottom placement on small screens. index/defaultIndex and onIndexChange use zero-based indices; out-of-range indices are clamped. Images use the host image adapter. Leaving a video pauses it. Hovering an image with a fine mouse pointer magnifies it; zoom and zoomScale configure this behavior. Click or press Enter to open the fullscreen lightbox. Set lightbox=false for a host-owned view; onOpen receives the activated index. classNames exposes root, main, slide, media, thumbnails, thumbnail, and video slots. Part test IDs use stable item IDs.',
       },
     },
   },
@@ -68,6 +68,11 @@ export const AspectRatios: Story = {
       />
     </div>
   ),
+};
+
+export const ZoomAndLightbox: Story = {
+  tags: ['example'],
+  args: { zoom: true, zoomScale: 2.5, lightbox: true },
 };
 
 export const CustomClasses: Story = {
