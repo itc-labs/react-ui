@@ -34,18 +34,26 @@ export function SidebarItemRow({
       ? String(item.label)
       : '';
   const buttonClass = cn(
-    'grid size-8 shrink-0 place-items-center rounded-control hover:bg-[var(--sidebar-hover)] text-[var(--sidebar-muted,var(--color-muted))]',
+    'grid size-7 shrink-0 place-items-center rounded-control hover:bg-[var(--sidebar-hover)] text-[var(--sidebar-muted,var(--color-muted))]',
     focusRingClassName,
     classNames?.actionButton,
   );
 
   return (
-    <div className="group/sidebar-row flex min-w-0 items-center gap-1 [&>*:first-child]:min-w-0 [&>*:first-child]:flex-1">
+    // Actions overlay the row's right edge (like Notion) so the row keeps its full width.
+    <div
+      className={cn(
+        'group/sidebar-row relative min-w-0 [&>*:first-child]:w-full',
+        item.onAdd && item.actions?.length
+          ? '[&>*:first-child]:group-hover/sidebar-row:pr-[4.5rem] [&>*:first-child]:group-focus-within/sidebar-row:pr-[4.5rem] pointer-coarse:[&>*:first-child]:pr-[4.5rem]'
+          : '[&>*:first-child]:group-hover/sidebar-row:pr-10 [&>*:first-child]:group-focus-within/sidebar-row:pr-10 pointer-coarse:[&>*:first-child]:pr-10',
+      )}
+    >
       {children}
       <div
         data-testid={partTestId(testId, 'actions')}
         className={cn(
-          'flex shrink-0 opacity-0 group-hover/sidebar-row:opacity-100 group-focus-within/sidebar-row:opacity-100 has-[[data-state=open]]:opacity-100 [@media(hover:none)]:opacity-100 pointer-coarse:opacity-100',
+          'absolute top-1/2 right-0.5 flex shrink-0 -translate-y-1/2 opacity-0 group-hover/sidebar-row:opacity-100 group-focus-within/sidebar-row:opacity-100 has-[[data-state=open]]:opacity-100 [@media(hover:none)]:opacity-100 pointer-coarse:opacity-100',
           classNames?.itemActions,
         )}
       >
