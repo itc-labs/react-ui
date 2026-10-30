@@ -39,6 +39,14 @@ export type SidebarEntry<TAccess = unknown> =
       toggleLabel?: string;
     } & ({ href: string; onSelect?: () => void } | { href?: never; onSelect?: never }));
 
+export type SidebarSection<TAccess = unknown> = {
+  id: string;
+  label: string;
+  icon: IconName | IconGlyph;
+  badge?: number;
+  items: readonly SidebarEntry<TAccess>[];
+};
+
 export type SidebarItemAction = {
   id: string;
   label: string;
@@ -67,6 +75,12 @@ export type SidebarBrand = {
 };
 export type SidebarClassNames = SlotClasses<
   | 'root'
+  | 'overlay'
+  | 'sectionRail'
+  | 'sections'
+  | 'section'
+  | 'sectionPanel'
+  | 'sectionTitle'
   | 'header'
   | 'brand'
   | 'brandLogo'
@@ -102,6 +116,12 @@ export type SidebarClassNames = SlotClasses<
 >;
 export type SidebarProps<TAccess = unknown> = ComponentProps<'aside'> &
   TestIdProps & {
+    /** Preview a collapsed icon sidebar without changing its layout width. */
+    expandOnHover?: boolean;
+    sections?: readonly SidebarSection<TAccess>[];
+    section?: string;
+    defaultSection?: string;
+    onSectionChange?: (section: string) => void;
     variant?: 'sidebar' | 'floating';
     collapsible?: 'icon' | 'offcanvas' | 'none';
     tone?: 'default' | 'dark' | 'brand';

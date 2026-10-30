@@ -143,6 +143,8 @@ export const viMessages = {
   'userMenu.open': 'Mở menu tài khoản của {name}',
   'navbar.navigation': 'Điều hướng chính',
   'navbar.openMenu': 'Mở menu điều hướng',
+  'sidebar.sections': 'Các mục điều hướng',
+  'sidebar.sectionCount': '{count} thông báo',
   'sidebar.search': 'Tìm kiếm…',
   'sidebar.moreActions': 'Thêm tác vụ cho {label}',
   'sidebar.add': 'Thêm vào {label}',

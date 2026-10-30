@@ -572,3 +572,33 @@ ID. Avoid overriding Sidebar's state when using provider-owned triggers.
 collapse toggle and shortcut. Caller-supplied header and footer content can use
 `--sidebar-fg`, `--sidebar-muted`, `--sidebar-hover` and `--sidebar-border` to match
 the selected tone; caller classes and inline styles continue to take precedence.
+
+### Sidebar hover previews and sections
+
+`expandOnHover` previews a collapsed `collapsible="icon"` sidebar on devices
+with a fine pointer and hover support. Pointer entry opens after 150 ms; leaving
+closes after 250 ms unless focus remains inside. Keyboard focus opens immediately
+and Escape dismisses the preview, returning focus to the collapse toggle. The
+layout column retains its collapsed width, while an elevated surface uses the
+expanded sidebar width. `data-hover-expanded` exposes the preview state. Motion
+uses the existing reduced-motion-aware sidebar styles.
+
+Pass `sections: readonly SidebarSection[]` to render a section rail and an active
+panel instead of top-level `items`. Each section supplies `id`, `label`, `icon`,
+optional numeric `badge`, and `items` using the existing group/submenu contract.
+The rail keeps the collapsed brand/logo, section buttons, collapse toggle and
+footer slot; pass an avatar or compact account control as the footer. Collapsing
+hides the panel while retaining the rail. The mobile drawer displays labeled
+section buttons above the active section's items.
+
+`section` and `onSectionChange` control selection. Uncontrolled selection derives
+from the deepest active route after permission filtering, falling back to
+`defaultSection` and then the first section. A manual selection persists until
+`currentPath` changes. Section changes do not navigate or dismiss the mobile
+drawer; choosing a navigation entry retains the existing dismissal behavior.
+Section buttons support Tab, Enter/Space, arrow keys and Home/End.
+
+The additive `classNames` slots are `overlay`, `sectionRail`, `sections`,
+`section`, `sectionPanel` and `sectionTitle`. Part test IDs use the same suffixes;
+section buttons use `-section-{id}` and mobile parts retain the `-drawer` scope.
+`tone`, `itemVariant` and `variant` apply to the rail and panel.

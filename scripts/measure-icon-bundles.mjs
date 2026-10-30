@@ -162,8 +162,8 @@ for (const [name, limit] of Object.entries({
   Form: 22_000,
   DataTable: 90_000,
   Calendar: 100_000,
-  // Slider adds the Radix pointer and keyboard interaction primitive to core.
-  Root: 275_000,
+  // Sidebar hover previews and section navigation add focus handling and a rail renderer.
+  Root: 278_000,
   ColorPicker: 54_300,
 })) {
   if (sizes[name].gzip >= limit) {

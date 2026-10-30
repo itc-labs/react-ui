@@ -145,6 +145,11 @@ export const enMessages = {
   'userMenu.open': 'Open user menu for {name}',
   'navbar.navigation': 'Main navigation',
   'navbar.openMenu': 'Open navigation menu',
+  'sidebar.sections': 'Navigation sections',
+  'sidebar.sectionCount': {
+    one: '{count} notification',
+    other: '{count} notifications',
+  },
   'sidebar.search': 'Search…',
   'sidebar.moreActions': 'More actions for {label}',
   'sidebar.add': 'Add to {label}',
