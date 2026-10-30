@@ -24,8 +24,10 @@ import { partTestId, type TestIdProps } from '../common/testing';
 import { Popover, PopoverContent, PopoverTrigger } from '../popover';
 import { useComposedRefs } from '../common/refs';
 import { KitIcon } from '../icon/kit-icon';
-import { ColorFilterIcon } from '../icon/outline/color-filter';
-import { ColorFilterIcon as ColorFilterBoldIcon } from '../icon/bold/color-filter';
+import { ChevronDownIcon } from '../icon/outline/chevron-down';
+import { ChevronDownIcon as ChevronDownBoldIcon } from '../icon/bold/chevron-down';
+import { EyedropperIcon } from '../icon/outline/eyedropper';
+import { EyedropperIcon as EyedropperBoldIcon } from '../icon/bold/eyedropper';
 
 export type ColorPickerProps = Omit<
   ComponentProps<'button'>,
@@ -70,6 +72,48 @@ function normalize(hex: string, alpha: boolean): string | undefined {
 
   return `#${alpha ? digits.padEnd(8, 'f') : digits}`;
 }
+
+// Checkerboard behind swatches so empty and translucent colors stay visible.
+const checkerboard = {
+  backgroundImage: 'conic-gradient(#d4d4d4 0 25%, #fff 0 50%, #d4d4d4 0 75%, #fff 0)',
+  backgroundSize: '8px 8px',
+};
+
+function Swatch({
+  color,
+  className,
+  ...props
+}: ComponentProps<'span'> & { color: string }) {
+  return (
+    <span
+      aria-hidden="true"
+      {...props}
+      style={checkerboard}
+      className={cn(
+        'relative shrink-0 overflow-hidden rounded-full shadow-[inset_0_0_0_1px_rgb(0_0_0/0.12)]',
+        className,
+      )}
+    >
+      <span
+        className="absolute inset-0 shadow-[inset_0_0_0_1px_rgb(0_0_0/0.12)]"
+        style={{ backgroundColor: color || 'transparent' }}
+      />
+    </span>
+  );
+}
+
+// react-colorful ships fixed sizes; reshape it into a rounded area with slim sliders.
+// Source and runtime text must match for Tailwind, so the escaped underscores use String.raw.
+const pickerClassName = String.raw`!h-auto !w-full gap-3
+  [&_.react-colorful\_\_saturation]:!h-40 [&_.react-colorful\_\_saturation]:!flex-none
+  [&_.react-colorful\_\_saturation]:!rounded-lg [&_.react-colorful\_\_saturation]:!border-b-0
+  [&_.react-colorful\_\_hue]:!h-3 [&_.react-colorful\_\_hue]:!flex-none [&_.react-colorful\_\_hue]:!rounded-full
+  [&_.react-colorful\_\_alpha]:!h-3 [&_.react-colorful\_\_alpha]:!flex-none [&_.react-colorful\_\_alpha]:!rounded-full
+  [&_.react-colorful\_\_pointer]:!size-5 [&_.react-colorful\_\_pointer]:!border-[3px]
+  [&_.react-colorful\_\_pointer]:!shadow-[0_1px_4px_rgb(0_0_0/0.35)]`.replace(
+  /\s+/g,
+  ' ',
+);
 
 type EyeDropperWindow = Window & {
   EyeDropper?: new () => {
@@ -243,31 +287,35 @@ export function ColorPicker({
               controlBase,
               controlSizes[size],
               focusRingClassName,
-              'flex items-center gap-2 text-left',
+              'group/color flex items-center gap-2.5 text-left',
               readOnly && 'cursor-default',
               classNames?.control,
               className,
             )}
           >
-            <span
-              aria-hidden="true"
+            <Swatch
+              color={value}
               data-testid={partTestId(testId, 'swatch')}
-              style={{ backgroundColor: value || 'transparent' }}
-              className={cn(
-                'size-5 shrink-0 rounded border border-line',
-                classNames?.swatch,
-              )}
+              className={cn('size-6', classNames?.swatch)}
             />
             <span
               data-testid={partTestId(testId, 'value')}
               className={cn(
-                'min-w-0 truncate',
-                !value && 'text-muted',
+                'min-w-0 flex-1 truncate',
+                value ? 'font-mono text-ui-sm uppercase' : 'text-muted',
                 classNames?.value,
               )}
             >
               {value || placeholder || t('color.placeholder')}
             </span>
+            {!readOnly && (
+              <KitIcon
+                name="chevronDown"
+                builtin={{ outline: ChevronDownIcon, bold: ChevronDownBoldIcon }}
+                size={16}
+                className="shrink-0 text-muted motion-safe:transition-transform group-aria-expanded/color:rotate-180"
+              />
+            )}
           </button>
         </PopoverTrigger>
         <PopoverContent
@@ -278,7 +326,7 @@ export function ColorPicker({
           align="start"
           aria-label={t('color.label')}
           data-testid={partTestId(testId, 'popover')}
-          className={cn('flex flex-col gap-3', classNames?.popover)}
+          className={cn('flex w-64 flex-col gap-3 p-3', classNames?.popover)}
         >
           <div ref={setPicker}>
             {[t('color.saturation'), t('color.hue'), t('color.alpha')].map(
@@ -297,58 +345,11 @@ export function ColorPicker({
               onChange={change}
               data-testid={partTestId(testId, 'picker')}
               className={cn(
-                '!w-full motion-reduce:[&_*]:!transition-none',
+                pickerClassName,
+                'motion-reduce:[&_*]:!transition-none',
                 classNames?.picker,
               )}
             />
-          </div>
-          <div className="grid gap-1.5">
-            <label
-              data-testid={partTestId(testId, 'hex-label')}
-              htmlFor={`${controlId}-hex`}
-              className="text-ui-sm font-medium text-ink"
-            >
-              {t('color.hex')}
-            </label>
-            <input
-              id={`${controlId}-hex`}
-              value={draft ?? value}
-              placeholder={t(
-                alpha ? 'color.hexAlphaPlaceholder' : 'color.hexPlaceholder',
-              )}
-              autoComplete="off"
-              spellCheck={false}
-              data-testid={partTestId(testId, 'hex')}
-              className={cn(
-                controlBase,
-                controlSizes[size],
-                focusRingClassName,
-                classNames?.hex,
-              )}
-              aria-invalid={invalid}
-              aria-describedby={invalid ? `${controlId}-hex-error` : undefined}
-              onChange={(event) => {
-                setDraft(event.target.value);
-                setInvalid(false);
-              }}
-              onBlur={commit}
-              onKeyDown={(event) => {
-                if (event.key === 'Enter') {
-                  event.preventDefault();
-                  commit();
-                }
-              }}
-            />
-            {invalid && (
-              <p
-                data-testid={partTestId(testId, 'hex-error')}
-                id={`${controlId}-hex-error`}
-                role="alert"
-                className="text-ui-sm text-danger-700"
-              >
-                {t('color.invalid')}
-              </p>
-            )}
           </div>
           {presets.length > 0 && (
             <div
@@ -372,9 +373,9 @@ export function ColorPicker({
                   data-testid={partTestId(testId, `preset-${preset.slice(1)}`)}
                   style={{ backgroundColor: preset }}
                   className={cn(
-                    'size-7 rounded-control border border-line',
+                    'size-6 cursor-pointer rounded-full shadow-[inset_0_0_0_1px_rgb(0_0_0/0.12)] ring-offset-2 ring-offset-surface motion-safe:transition-transform hover:scale-110',
                     focusRingClassName,
-                    'aria-pressed:ring-2 aria-pressed:ring-accent',
+                    'aria-pressed:ring-2 aria-pressed:ring-ink',
                     classNames?.preset,
                   )}
                   onClick={() => change(preset)}
@@ -382,24 +383,78 @@ export function ColorPicker({
               ))}
             </div>
           )}
-          {eyeDropper && hasEyeDropper && (
-            <button
-              type="button"
-              data-testid={partTestId(testId, 'eyeDropper')}
-              className={cn(
-                'flex items-center justify-center gap-2 rounded-control border border-line p-2 text-control hover:bg-hover',
-                focusRingClassName,
-                classNames?.eyeDropper,
-              )}
-              onClick={sample}
+          <div className="grid gap-1.5">
+            <label
+              data-testid={partTestId(testId, 'hex-label')}
+              htmlFor={`${controlId}-hex`}
+              className="sr-only"
             >
-              <KitIcon
-                name="colorFilter"
-                builtin={{ outline: ColorFilterIcon, bold: ColorFilterBoldIcon }}
+              {t('color.hex')}
+            </label>
+            <div className="flex items-center gap-2">
+              <Swatch color={value} className="size-control-sm" />
+              <input
+                id={`${controlId}-hex`}
+                value={draft ?? value}
+                placeholder={t(
+                  alpha ? 'color.hexAlphaPlaceholder' : 'color.hexPlaceholder',
+                )}
+                autoComplete="off"
+                spellCheck={false}
+                data-testid={partTestId(testId, 'hex')}
+                className={cn(
+                  controlBase,
+                  controlSizes.sm,
+                  'min-w-0 flex-1 font-mono uppercase placeholder:normal-case',
+                  focusRingClassName,
+                  classNames?.hex,
+                )}
+                aria-invalid={invalid}
+                aria-describedby={invalid ? `${controlId}-hex-error` : undefined}
+                onChange={(event) => {
+                  setDraft(event.target.value);
+                  setInvalid(false);
+                }}
+                onBlur={commit}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter') {
+                    event.preventDefault();
+                    commit();
+                  }
+                }}
               />
-              {t('color.eyeDropper')}
-            </button>
-          )}
+              {eyeDropper && hasEyeDropper && (
+                <button
+                  type="button"
+                  aria-label={t('color.eyeDropper')}
+                  title={t('color.eyeDropper')}
+                  data-testid={partTestId(testId, 'eyeDropper')}
+                  className={cn(
+                    'grid size-control-sm shrink-0 cursor-pointer place-items-center rounded-control border border-control-border text-ink hover:bg-hover',
+                    focusRingClassName,
+                    classNames?.eyeDropper,
+                  )}
+                  onClick={sample}
+                >
+                  <KitIcon
+                    name="eyedropper"
+                    builtin={{ outline: EyedropperIcon, bold: EyedropperBoldIcon }}
+                    size={16}
+                  />
+                </button>
+              )}
+            </div>
+            {invalid && (
+              <p
+                data-testid={partTestId(testId, 'hex-error')}
+                id={`${controlId}-hex-error`}
+                role="alert"
+                className="text-ui-sm text-danger-700"
+              >
+                {t('color.invalid')}
+              </p>
+            )}
+          </div>
         </PopoverContent>
       </Popover>
       {error ? (
