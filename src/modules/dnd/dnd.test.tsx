@@ -1,12 +1,16 @@
 // @vitest-environment jsdom
-import { act, createRef, useState } from 'react';
+import { act, createRef, useState, type ReactNode } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import {
   DragHandle,
-  SortableBoard,
-  SortableList,
-  type SortableListProps,
+  Sortable,
+  SortableGroup,
+  SortableHandle,
+  SortableItem,
+  SortableOverlay,
+  type MoveEvent,
+  type SortableProps,
 } from './index';
 import { UILocaleProvider } from '../../i18n/provider';
 
@@ -15,19 +19,18 @@ let host: HTMLDivElement;
 let root: Root;
 let reduced = false;
 const items = ['a', 'b', 'c'];
-const onReorder = vi.fn();
-const defaults = {
-  items,
-  getId: (item: string) => item,
-  renderItem: (item: string) => <span>{item}</span>,
-  onReorder,
-};
+const onValueChange = vi.fn();
 
 const part = (id: string) =>
   document.querySelector<HTMLElement>(`[data-testid="${id}"]`)!;
 
-const activator = (id: string) =>
-  part(`list-item-${id}`).querySelector<HTMLElement>('[data-dnd-activator]')!;
+const activator = (id: string) => {
+  const item = part(`list-item-${id}`);
+
+  return item.matches('[data-dnd-activator]')
+    ? item
+    : item.querySelector<HTMLElement>('[data-dnd-activator]')!;
+};
 
 beforeEach(() => {
   reduced = false;
@@ -44,12 +47,8 @@ beforeEach(() => {
     this: HTMLElement,
   ) {
     const row = this.closest<HTMLElement>('[data-dnd-item]');
-    const container = this.closest<HTMLElement>('[data-testid^="board-container-"]');
-    const column = container
-      ? Array.from(container.parentElement!.parentElement!.children).indexOf(
-          container.parentElement!,
-        )
-      : 0;
+    const container = this.closest<HTMLElement>('[role="list"][data-testid^="col-"]');
+    const column = container?.dataset.testid === 'col-two' ? 1 : 0;
     const index = row ? Array.from(row.parentElement!.children).indexOf(row) : 0;
     const grid = row?.parentElement?.classList.contains('grid');
     const horizontal =
@@ -75,7 +74,7 @@ beforeEach(() => {
   host = document.createElement('div');
   document.body.append(host);
   root = createRoot(host);
-  onReorder.mockClear();
+  onValueChange.mockClear();
 });
 
 afterEach(() => {
@@ -86,14 +85,28 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-function render(props: Partial<SortableListProps<string>> = {}) {
-  act(() =>
-    root.render(
-      <UILocaleProvider locale="en-US">
-        <SortableList {...defaults} data-testid="list" {...props} />
-      </UILocaleProvider>,
-    ),
+function List({
+  value = items,
+  handle = false,
+  children,
+  ...props
+}: Partial<SortableProps> & { handle?: boolean; children?: ReactNode }) {
+  return (
+    <Sortable value={value} onValueChange={onValueChange} data-testid="list" {...props}>
+      {value.map((id) => (
+        <SortableItem key={id} id={id}>
+          {handle && <SortableHandle data-testid={`handle-${id}`} />}
+          <span>{id}</span>
+          {handle && <button type="button">Open {id}</button>}
+        </SortableItem>
+      ))}
+      {children}
+    </Sortable>
   );
+}
+
+function render(node: ReactNode, locale = 'en-US') {
+  act(() => root.render(<UILocaleProvider locale={locale}>{node}</UILocaleProvider>));
 }
 
 async function key(target: HTMLElement | Document, code: string) {
@@ -118,25 +131,26 @@ async function pick(id = 'a') {
   await key(node, 'Space');
 }
 
-it('reorders through the real keyboard sensor, reports indices, and keeps controlled data unchanged', async () => {
-  render();
+const order = () =>
+  Array.from(host.querySelectorAll('[data-dnd-item]')).map((node) =>
+    node.getAttribute('data-dnd-item'),
+  );
+
+it('reorders wrapped items through the keyboard sensor and keeps controlled data unchanged', async () => {
+  render(<List />);
   await pick();
   expect(part('list-item-a').dataset.dragging).toBe('true');
   expect(part('list-overlay').textContent).toBe('a');
   expect(document.body.textContent).toContain('Picked up a.');
   await key(document, 'ArrowDown');
   await key(document, 'Enter');
-  expect(onReorder).toHaveBeenCalledWith(['b', 'a', 'c'], {
+  expect(onValueChange).toHaveBeenCalledWith(['b', 'a', 'c'], {
     activeId: 'a',
     overId: 'b',
     from: 0,
     to: 1,
   });
-  expect(
-    Array.from(host.querySelectorAll('[data-dnd-item]')).map(
-      (node) => node.textContent,
-    ),
-  ).toEqual(items);
+  expect(order()).toEqual(items);
   expect(document.activeElement).toBe(activator('a'));
 });
 
@@ -144,86 +158,64 @@ it('accepts reordered host state and restores focus after a drop', async () => {
   function Example() {
     const [value, setValue] = useState(items);
 
-    return (
-      <SortableList
-        {...defaults}
-        items={value}
-        onReorder={setValue}
-        data-testid="list"
-      />
-    );
+    return <List value={value} onValueChange={setValue} />;
   }
 
-  act(() => root.render(<Example />));
-
+  render(<Example />);
   await pick();
   await key(document, 'ArrowDown');
   await key(document, 'Space');
-  expect(
-    Array.from(host.querySelectorAll('[data-dnd-item]')).map(
-      (node) => node.textContent,
-    ),
-  ).toEqual(['b', 'a', 'c']);
+  expect(order()).toEqual(['b', 'a', 'c']);
   expect(document.activeElement).toBe(activator('a'));
 });
 
-it('cancels with Escape without committing and localizes instructions and announcements', async () => {
-  act(() =>
-    root.render(
-      <UILocaleProvider locale="vi-VN">
-        <SortableList
-          {...defaults}
-          getLabel={(item) => `Mục ${item}`}
-          data-testid="list"
-        />
-      </UILocaleProvider>,
-    ),
+it('cancels with Escape and localizes instructions and announcements with item labels', async () => {
+  render(
+    <Sortable value={items} onValueChange={onValueChange} data-testid="list">
+      {items.map((id) => (
+        <SortableItem key={id} id={id} label={`Mục ${id}`}>
+          {id}
+        </SortableItem>
+      ))}
+    </Sortable>,
+    'vi-VN',
   );
-
   expect(document.body.textContent).toContain('Nhấn Space hoặc Enter để chọn mục.');
   await pick();
   expect(document.body.textContent).toContain('Đã nhấc Mục a.');
   await key(document, 'ArrowDown');
   await key(document, 'Escape');
-  expect(onReorder).not.toHaveBeenCalled();
+  expect(onValueChange).not.toHaveBeenCalled();
   expect(document.body.textContent).toContain('Đã hủy kéo Mục a.');
   expect(document.activeElement).toBe(activator('a'));
 });
 
-it('activates handle-only rows exclusively through the accessible handle', async () => {
-  render({
-    handle: true,
-    renderItem: (item, { handleProps }) => (
-      <>
-        <DragHandle {...handleProps} label={item} />
-        <button type="button">Open {item}</button>
-      </>
-    ),
-  });
+it('drags only from SortableHandle when an item contains one', async () => {
+  render(<List handle />);
   const row = part('list-item-a');
+  expect(row.hasAttribute('data-dnd-activator')).toBe(false);
   expect(row.getAttribute('tabindex')).toBeNull();
-  expect(activator('a').getAttribute('aria-label')).toBe('Drag to reorder a');
-  expect(activator('a').getAttribute('aria-describedby')).toBeTruthy();
+  expect(part('handle-a').getAttribute('aria-label')).toBe('Drag to reorder a');
+  expect(part('handle-a').getAttribute('aria-describedby')).toBeTruthy();
   await key(row.querySelector<HTMLElement>('button:last-child')!, 'Space');
   expect(row.dataset.dragging).toBeUndefined();
   await pick();
   await key(document, 'ArrowDown');
   await key(document, 'Space');
-  expect(onReorder).toHaveBeenCalledTimes(1);
+  expect(onValueChange).toHaveBeenCalledTimes(1);
 });
 
 it('disables sensors and handles while retaining native props, refs and caller classes', async () => {
   const ref = createRef<HTMLDivElement>();
-  render({
-    ref,
-    disabled: true,
-    handle: true,
-    className: 'gap-8',
-    classNames: { root: 'gap-4', item: 'custom-item' },
-    renderItem: (item, { handleProps }) => (
-      <DragHandle {...handleProps} label={item} data-testid={`handle-${item}`} />
-    ),
-  });
+  render(
+    <List
+      ref={ref}
+      handle
+      disabled
+      className="gap-8"
+      classNames={{ root: 'gap-4', item: 'custom-item' }}
+    />,
+  );
   expect(ref.current).toBe(part('list'));
   expect(part('list').className).toContain('gap-8');
   expect(part('list').className).not.toContain('gap-4');
@@ -235,15 +227,17 @@ it('disables sensors and handles while retaining native props, refs and caller c
   expect(part('list-item-a').dataset.dragging).toBeUndefined();
 });
 
-it('keeps the placeholder styled and overlay inert, without duplicate activator bindings', async () => {
+it('styles the placeholder and keeps the overlay inert', async () => {
   reduced = true;
-  render({
-    classNames: {
-      itemDragging: 'dragging-slot',
-      placeholder: 'placeholder-slot',
-      overlay: 'overlay-slot',
-    },
-  });
+  render(
+    <List
+      classNames={{
+        itemDragging: 'dragging-slot',
+        placeholder: 'placeholder-slot',
+        overlay: 'overlay-slot',
+      }}
+    />,
+  );
   await pick();
   expect(part('list-item-a').className).toContain('placeholder-slot');
   expect(part('list-item-a').className).toContain('dragging-slot');
@@ -251,150 +245,117 @@ it('keeps the placeholder styled and overlay inert, without duplicate activator 
   expect(part('list-overlay').className).toContain('overlay-slot');
   expect(part('list-overlay').hasAttribute('inert')).toBe(true);
   expect(part('list-overlay').getAttribute('aria-hidden')).toBe('true');
+  expect(
+    part('list-overlay').parentElement!.closest('[data-testid="list"]'),
+  ).toBeNull();
   await key(document, 'Escape');
 });
+
+function Board({
+  canDrop,
+  onChange = vi.fn(),
+  initial = { one: ['a', 'b'], two: [] as string[] },
+}: {
+  canDrop?: (id: string, from: string, to: string) => boolean;
+  onChange?: (next: Record<string, string[]>, event: MoveEvent) => void;
+  initial?: Record<string, string[]>;
+}) {
+  const [value, setValue] = useState(initial);
+
+  return (
+    <SortableGroup
+      value={value}
+      onValueChange={(next, event) => {
+        onChange(next, event);
+        setValue(next);
+      }}
+      {...(canDrop ? { canDrop } : {})}
+    >
+      {Object.keys(value).map((column) => (
+        <Sortable
+          key={column}
+          id={column}
+          aria-label={column}
+          data-testid={`col-${column}`}
+        >
+          {value[column]!.map((id) => (
+            <SortableItem key={id} id={id}>
+              <SortableHandle data-testid={`handle-${id}`} />
+              {id}
+            </SortableItem>
+          ))}
+        </Sortable>
+      ))}
+    </SortableGroup>
+  );
+}
 
 it.each([false, true])(
   'moves to an empty container only when canDrop permits it (blocked=%s)',
   async (blocked) => {
-    const onMove = vi.fn();
-    const containers = [
-      { id: 'one', title: 'First', items: ['a', 'b'] },
-      { id: 'two', title: 'Second', items: [] as string[] },
-    ];
-
-    act(() =>
-      root.render(
-        <UILocaleProvider locale="en-US">
-          <SortableBoard
-            containers={containers}
-            getId={(item) => item}
-            renderItem={(item) => item}
-            canDrop={(_, from, to) => !blocked || from === to}
-            onMove={onMove}
-            data-testid="board"
-          />
-        </UILocaleProvider>,
-      ),
+    const onChange = vi.fn();
+    render(
+      <Board onChange={onChange} canDrop={(_, from, to) => !blocked || from === to} />,
     );
+    expect(part('col-two-empty').textContent).toBe('Drop items here');
+    const handle = part('handle-a');
 
-    expect(part('board-empty-two').textContent).toBe('Drop items here');
-    const node =
-      part('board-item-a').querySelector<HTMLElement>('[data-dnd-activator]')!;
+    act(() => handle.focus());
 
-    act(() => node.focus());
-
-    await key(node, 'Space');
+    await key(handle, 'Space');
     await key(document, 'ArrowRight');
     await key(document, 'Space');
-    if (blocked) expect(onMove).not.toHaveBeenCalled();
-    else {
-      expect(onMove).toHaveBeenCalledWith(
-        [
-          { ...containers[0], items: ['b'] },
-          { ...containers[1], items: ['a'] },
-        ],
-        { activeId: 'a', fromContainer: 'one', toContainer: 'two', index: 0 },
+    if (blocked) expect(onChange).not.toHaveBeenCalled();
+    else
+      expect(onChange).toHaveBeenCalledWith(
+        { one: ['b'], two: ['a'] },
+        {
+          activeId: 'a',
+          overId: expect.any(String),
+          fromContainer: 'one',
+          toContainer: 'two',
+          from: 0,
+          to: 0,
+        },
       );
-    }
-    expect(containers[0]!.items).toEqual(['a', 'b']);
   },
 );
 
-it.each(['horizontal', 'grid'] as const)(
-  'supports %s keyboard ordering',
-  async (orientation) => {
-    render({ orientation });
-    await pick();
-    await key(document, 'ArrowRight');
-    await key(document, 'Space');
-    expect(onReorder).toHaveBeenCalledWith(
-      ['b', 'a', 'c'],
-      expect.objectContaining({ from: 0, to: 1 }),
-    );
-  },
-);
-
-it('moves across populated containers, accepts host data and restores the new handle focus', async () => {
-  const ref = createRef<HTMLDivElement>();
-
-  function Example() {
-    const [containers, setContainers] = useState([
-      { id: 'one', items: ['a', 'b'] },
-      { id: 'two', items: ['c'] },
-    ]);
-
-    return (
-      <SortableBoard
-        ref={ref}
-        containers={containers}
-        getId={(item) => item}
-        onMove={setContainers}
-        handle
-        renderItem={(item, { handleProps }) => (
-          <DragHandle {...handleProps} label={item} />
-        )}
-        renderContainer={(_, children) => (
-          <div className="custom-container">{children}</div>
-        )}
-        classNames={{
-          root: 'board-root',
-          container: 'container-slot',
-          empty: 'empty-slot',
-        }}
-        data-testid="board"
-      />
-    );
-  }
-
-  // Account for the consumer's extra container wrapper when measuring columns.
-  vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(function (
-    this: HTMLElement,
-  ) {
-    const container = this.closest<HTMLElement>('[data-testid^="board-container-"]');
-    const left = container?.dataset.testid === 'board-container-two' ? 250 : 0;
-    const row = this.closest<HTMLElement>('[data-dnd-item]');
-    const top = row ? Array.from(row.parentElement!.children).indexOf(row) * 60 : 0;
-
-    return {
-      x: left,
-      y: top,
-      left,
-      top,
-      right: left + 200,
-      bottom: top + 50,
-      width: 200,
-      height: 50,
-      toJSON() {},
-    };
-  });
-
-  act(() => root.render(<Example />));
-
-  expect(ref.current).toBe(part('board'));
-  const handle = part('board-item-a').querySelector('button')!;
+it('moves across populated containers and restores focus to the moved handle', async () => {
+  render(<Board initial={{ one: ['a', 'b'], two: ['c'] }} />);
+  const handle = part('handle-a');
 
   act(() => handle.focus());
 
   await key(handle, 'Enter');
   await key(document, 'ArrowRight');
   await key(document, 'Enter');
-  expect(part('board-container-one').querySelectorAll('[data-dnd-item]').length).toBe(
-    1,
-  );
+  expect(part('col-one').querySelectorAll('[data-dnd-item]')).toHaveLength(1);
   expect(
-    Array.from(part('board-container-two').querySelectorAll('[data-dnd-item]')).map(
-      (node) => node.getAttribute('data-dnd-item'),
+    Array.from(part('col-two').querySelectorAll('[data-dnd-item]')).map((node) =>
+      node.getAttribute('data-dnd-item'),
     ),
-  ).toEqual(['a', 'c']);
-  expect(document.activeElement).toBe(part('board-item-a').querySelector('button'));
-  expect(part('board').className).toContain('board-root');
-  expect(part('board-container-two').className).toContain('container-slot');
+  ).toContain('a');
+  expect(document.activeElement).toBe(part('handle-a'));
 });
 
-it('keeps clicks working below the pointer activation distance and supports pointer cancellation', async () => {
+it.each(['horizontal', 'grid'] as const)(
+  'supports %s keyboard ordering',
+  async (orientation) => {
+    render(<List orientation={orientation} />);
+    await pick();
+    await key(document, 'ArrowRight');
+    await key(document, 'Space');
+    expect(onValueChange).toHaveBeenCalledWith(
+      ['b', 'a', 'c'],
+      expect.objectContaining({ from: 0, to: 1 }),
+    );
+  },
+);
+
+it('keeps clicks working below the pointer activation distance and supports cancellation', async () => {
   const onClick = vi.fn();
-  render({ onClick });
+  render(<List onClick={onClick} />);
   const node = activator('a');
 
   const pointer = async (target: EventTarget, type: string, x: number) => {
@@ -427,26 +388,20 @@ it('keeps clicks working below the pointer activation distance and supports poin
   await pointer(document, 'pointermove', 16);
   expect(part('list-item-a').dataset.dragging).toBe('true');
   await key(document, 'Escape');
-  expect(onReorder).not.toHaveBeenCalled();
+  expect(onValueChange).not.toHaveBeenCalled();
 });
 
 it('forwards DragHandle native refs, labels, selectors and class slots', () => {
   const ref = createRef<HTMLButtonElement>();
-
-  act(() =>
-    root.render(
-      <UILocaleProvider locale="en-US">
-        <DragHandle
-          ref={ref}
-          label="Lorem ipsum"
-          data-testid="grip"
-          className="size-10"
-          classNames={{ root: 'size-6', icon: 'text-brand-700' }}
-        />
-      </UILocaleProvider>,
-    ),
+  render(
+    <DragHandle
+      ref={ref}
+      label="Lorem ipsum"
+      data-testid="grip"
+      className="size-10"
+      classNames={{ root: 'size-6', icon: 'text-brand-700' }}
+    />,
   );
-
   expect(ref.current).toBe(part('grip'));
   expect(part('grip').getAttribute('aria-label')).toBe('Drag to reorder Lorem ipsum');
   expect(part('grip').getAttribute('type')).toBe('button');
@@ -456,35 +411,74 @@ it('forwards DragHandle native refs, labels, selectors and class slots', () => {
   expect(part('grip').hasAttribute('label')).toBe(false);
 });
 
-it('uses renderOverlay with the original item index and safe handle props', async () => {
-  const renderOverlay = vi.fn(
-    (item: string, state: { isOverlay: boolean; index: number }) => (
-      <span>
-        {item}-{state.index}-{String(state.isOverlay)}
-      </span>
-    ),
+it('replaces the preview with SortableOverlay and renders inert handles in the default copy', async () => {
+  render(
+    <List handle>
+      <SortableOverlay>{(id) => <span>preview-{id}</span>}</SortableOverlay>
+    </List>,
   );
-  render({ renderOverlay });
   await pick('b');
-  expect(part('list-overlay').textContent).toBe('b-1-true');
-  expect(renderOverlay).toHaveBeenCalledWith(
-    'b',
-    expect.objectContaining({
-      isOverlay: true,
-      isDragging: true,
-      index: 1,
-      handleProps: { disabled: true, tabIndex: -1 },
-    }),
-  );
+  expect(part('list-overlay').textContent).toBe('preview-b');
+  await key(document, 'Escape');
+  render(<List handle />);
+  await pick('b');
+  const copy = part('list-overlay').querySelector('button')!;
+  expect(copy.disabled).toBe(true);
+  expect(copy.hasAttribute('data-dnd-activator')).toBe(false);
   await key(document, 'Escape');
 });
 
-it('does not emit selectors without a consumer test ID and disables whole-row activators', () => {
-  act(() => root.render(<SortableList {...defaults} disabled />));
+it('merges into caller elements with asChild', async () => {
+  render(
+    <Sortable asChild value={items} onValueChange={onValueChange} data-testid="list">
+      <ul className="caller-list">
+        {items.map((id) => (
+          <SortableItem key={id} id={id} asChild>
+            <li className="caller-item">{id}</li>
+          </SortableItem>
+        ))}
+      </ul>
+    </Sortable>,
+  );
+  expect(part('list').tagName).toBe('UL');
+  expect(part('list').className).toContain('caller-list');
+  expect(part('list-item-a').tagName).toBe('LI');
+  expect(part('list-item-a').parentElement).toBe(part('list'));
+  await pick();
+  expect(part('list-item-a').className).toContain('outline-dashed');
+  await key(document, 'ArrowDown');
+  await key(document, 'Space');
+  expect(onValueChange).toHaveBeenCalledWith(
+    ['b', 'a', 'c'],
+    expect.objectContaining({ from: 0, to: 1 }),
+  );
+});
 
+it('does not emit selectors without a consumer test ID and disables whole-item activators', () => {
+  render(
+    <Sortable value={items} disabled>
+      {items.map((id) => (
+        <SortableItem key={id} id={id}>
+          {id}
+        </SortableItem>
+      ))}
+    </Sortable>,
+  );
   expect(host.querySelector('[data-testid]')).toBeNull();
   const row = host.querySelector<HTMLElement>('[data-dnd-activator]')!;
   expect(row.getAttribute('aria-disabled')).toBe('true');
   expect(row.tabIndex).toBe(-1);
   expect(row.hasAttribute('disabled')).toBe(false);
+});
+
+it('throws a clear error when parts are used outside a container', () => {
+  vi.spyOn(console, 'error').mockImplementation(() => {});
+
+  expect(() =>
+    render(
+      <SortableItem id="a">
+        <span>a</span>
+      </SortableItem>,
+    ),
+  ).toThrow('SortableItem must be rendered inside Sortable or SortableGroup.');
 });

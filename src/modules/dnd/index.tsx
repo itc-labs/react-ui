@@ -1,12 +1,22 @@
 'use client';
 
 import {
+  Children,
+  cloneElement,
+  createContext,
+  createElement,
+  isValidElement,
+  useCallback,
+  useContext,
   useEffect,
   useId,
   useRef,
   useState,
   type ComponentPropsWithRef,
+  type CSSProperties,
+  type ReactElement,
   type ReactNode,
+  type Ref,
 } from 'react';
 import {
   DndContext,
@@ -147,41 +157,25 @@ export function DragHandle({
 }
 
 export type SortableClassNames = Partial<
-  Record<'root' | 'item' | 'itemDragging' | 'overlay' | 'placeholder', string>
+  Record<'root' | 'item' | 'itemDragging' | 'placeholder' | 'overlay' | 'empty', string>
 >;
-export type DragHandleBindings = Omit<ComponentPropsWithRef<'button'>, 'children'>;
-export interface SortableItemState {
-  handleProps: DragHandleBindings;
-  isDragging: boolean;
-  isOverlay: boolean;
-  index: number;
-}
+export type SortableOrientation = 'vertical' | 'horizontal' | 'grid';
+export type SortableValue = Readonly<Record<string, readonly string[]>>;
 export interface ReorderEvent {
   activeId: string;
   overId: string;
   from: number;
   to: number;
 }
-export type SortableOrientation = 'vertical' | 'horizontal' | 'grid';
-interface SortableOptions<T> extends Omit<ComponentPropsWithRef<'div'>, 'children'> {
-  getId: (item: T) => string;
-  /** Defaults to the stable ID. Supply a human-readable label for announcements. */
-  getLabel?: (item: T) => string;
-  renderItem: (item: T, state: SortableItemState) => ReactNode;
-  renderOverlay?: (item: T, state: SortableItemState) => ReactNode;
-  handle?: boolean;
-  disabled?: boolean;
-  gap?: 0 | 1 | 2 | 3 | 4 | 6 | 8;
-  classNames?: SortableClassNames;
-  restrictToParent?: boolean;
-  lockAxis?: 'x' | 'y';
-  'data-testid'?: string;
+export interface MoveEvent extends ReorderEvent {
+  fromContainer: string;
+  toContainer: string;
 }
-export interface SortableListProps<T> extends SortableOptions<T> {
-  items: readonly T[];
-  onReorder: (next: T[], event: ReorderEvent) => void;
-  orientation?: SortableOrientation;
+export interface SortableItemState {
+  isDragging: boolean;
+  isOverlay: boolean;
 }
+
 const gaps = {
   0: 'gap-0',
   1: 'gap-1',
@@ -196,6 +190,10 @@ const strategies = {
   horizontal: horizontalListSortingStrategy,
   grid: rectSortingStrategy,
 };
+const placeholderClassName =
+  'bg-brand-50 text-transparent outline-2 -outline-offset-2 outline-brand-500 outline-dashed [&_*]:invisible';
+const overlayClassName =
+  'scale-[1.02] cursor-grabbing rounded-control bg-surface text-ink shadow-overlay ring-2 ring-brand-500';
 
 function modifiersFor(restrict: boolean, axis: 'x' | 'y' | undefined): Modifiers {
   return [
@@ -225,600 +223,782 @@ function useReducedMotion() {
   return reduced;
 }
 
-function useDragFocus() {
-  const root = useRef<HTMLDivElement>(null);
-  const pending = useRef<string | null>(null);
-  const [activeId, setActiveId] = useState<string | null>(null);
+type ElementProps = Record<string, unknown> & {
+  className?: string | undefined;
+  style?: CSSProperties | undefined;
+  ref?: Ref<HTMLElement> | undefined;
+};
 
-  useEffect(() => {
-    if (activeId !== null || pending.current === null) return;
-    const row = Array.from(
-      root.current?.querySelectorAll<HTMLElement>('[data-dnd-item]') ?? [],
-    ).find((node) => node.dataset.dndItem === pending.current);
-    row
-      ?.querySelector<HTMLElement>('[data-dnd-activator]')
-      ?.focus({ preventScroll: true });
-    pending.current = null;
-  });
-
-  return {
-    root,
-    activeId,
-    setActiveId,
-    finish: (id: string) => {
-      pending.current = id;
-      setActiveId(null);
-    },
-  };
+function assignRef<T>(ref: Ref<T> | undefined, node: T | null) {
+  if (typeof ref === 'function') ref(node);
+  else if (ref) (ref as { current: T | null }).current = node;
 }
 
-interface ItemProps<T> {
-  item: T;
+/** Merge kit props into a single child element for asChild, keeping the child's own handlers. */
+function renderElement(
+  asChild: boolean | undefined,
+  props: ElementProps,
+  children: ReactNode,
+  /** Applied after the child's own classes, for state styling that must win. */
+  stateClassName?: string | false,
+) {
+  if (asChild && isValidElement(children)) {
+    const child = children as ReactElement<ElementProps>;
+    const merged: ElementProps = { ...props, ...child.props };
+    for (const key of Object.keys(props)) {
+      const ours = props[key];
+      const theirs = child.props[key];
+      if (
+        /^on[A-Z]/.test(key) &&
+        typeof ours === 'function' &&
+        typeof theirs === 'function'
+      )
+        merged[key] = (...args: unknown[]) => {
+          (theirs as (...args: unknown[]) => void)(...args);
+          (ours as (...args: unknown[]) => void)(...args);
+        };
+    }
+
+    return cloneElement(child, {
+      ...merged,
+      className: cn(props.className, child.props.className, stateClassName),
+      style: { ...child.props.style, ...props.style },
+      ref: (node: HTMLElement | null) => {
+        assignRef(props.ref, node);
+        assignRef(child.props.ref, node);
+      },
+    });
+  }
+
+  return createElement(
+    'div',
+    { ...props, className: cn(props.className, stateClassName) },
+    children,
+  );
+}
+
+interface ItemRecord {
+  label: string;
+  asChild: boolean;
+  className: string | undefined;
+  children: SortableItemProps['children'];
+  activator: HTMLElement | null;
+}
+interface EngineContextValue {
+  shown: SortableValue;
+  activeId: string | null;
+  disabled: boolean;
+  reduced: boolean;
+  prefix: string;
+  testId: string | undefined;
+  classNames: SortableClassNames | undefined;
+  items: Map<string, ItemRecord>;
+  activeRef: { current: string | null };
+  setOverlay: (render: ((id: string) => ReactNode) | null) => void;
+}
+const EngineContext = createContext<EngineContextValue | null>(null);
+const ContainerContext = createContext<{
+  id: string;
+  testId: string | undefined;
+} | null>(null);
+interface ItemContextValue {
   id: string;
   label: string;
-  index: number;
-  containerId?: string;
-  handle: boolean;
   disabled: boolean;
-  reduced: boolean;
-  renderItem: SortableOptions<T>['renderItem'];
+  overlay: boolean;
+  sortable: ReturnType<typeof useSortable> | null;
+  setHandle: (node: HTMLElement | null) => void;
+}
+const ItemContext = createContext<ItemContextValue | null>(null);
+
+function containing(value: SortableValue, id: unknown) {
+  return Object.keys(value).find((key) => value[key]!.includes(String(id)));
+}
+
+function useEngine(name: string) {
+  const engine = useContext(EngineContext);
+  if (!engine)
+    throw new Error(`${name} must be rendered inside Sortable or SortableGroup.`);
+
+  return engine;
+}
+
+interface EngineProps {
+  value: SortableValue;
+  onChange: (next: Record<string, string[]>, event: MoveEvent) => void;
+  canDrop?: ((id: string, from: string, to: string) => boolean) | undefined;
+  disabled: boolean;
+  restrictToParent: boolean;
+  lockAxis: 'x' | 'y' | undefined;
   classNames: SortableClassNames | undefined;
   testId: string | undefined;
-}
-
-function SortableItem<T>({
-  item,
-  id,
-  label,
-  index,
-  containerId,
-  handle,
-  disabled,
-  reduced,
-  renderItem,
-  classNames,
-  testId,
-}: ItemProps<T>) {
-  const sortable = useSortable({
-    id,
-    disabled,
-    data: { containerId, label },
-    ...(reduced ? { transition: null } : {}),
-  });
-  const bindings = {
-    ...sortable.attributes,
-    ...sortable.listeners,
-    ref: sortable.setActivatorNodeRef,
-    tabIndex: disabled ? -1 : sortable.attributes.tabIndex,
-    'data-dnd-activator': '',
-  };
-
-  return (
-    <div
-      ref={sortable.setNodeRef}
-      role="listitem"
-      data-dnd-item={id}
-      data-testid={partTestId(testId, 'item', id)}
-      data-dragging={sortable.isDragging || undefined}
-      style={{
-        transform: CSS.Transform.toString(sortable.transform),
-        transition: reduced ? undefined : sortable.transition,
-      }}
-      className={cn(
-        'relative rounded-control border border-transparent motion-reduce:transition-none',
-        sortable.isDragging &&
-          'bg-brand-50 outline-2 -outline-offset-2 outline-brand-500 outline-dashed',
-        classNames?.item,
-        sortable.isDragging && classNames?.itemDragging,
-        sortable.isDragging && classNames?.placeholder,
-      )}
-    >
-      <div
-        {...(!handle ? bindings : {})}
-        className={cn(
-          'rounded-control',
-          !handle && !disabled && 'touch-none cursor-grab active:cursor-grabbing',
-          focusRingClassName,
-          sortable.isDragging && 'opacity-0',
-        )}
-      >
-        {renderItem(item, {
-          handleProps: handle ? { ...bindings, disabled } : { disabled: true },
-          isDragging: sortable.isDragging,
-          isOverlay: false,
-          index,
-        })}
-      </div>
-    </div>
-  );
-}
-
-function Overlay<T>({
-  item,
-  index,
-  reduced,
-  renderItem,
-  renderOverlay,
-  classNames,
-  testId,
-}: {
-  item: T | undefined;
-  index: number;
-  reduced: boolean;
-  renderItem: SortableOptions<T>['renderItem'];
-  renderOverlay: SortableOptions<T>['renderOverlay'];
-  classNames: SortableClassNames | undefined;
-  testId: string | undefined;
-}) {
-  return (
-    <OverlayPortal>
-      <DragOverlay dropAnimation={reduced ? null : undefined}>
-        {item !== undefined && (
-          <div
-            aria-hidden="true"
-            inert
-            data-testid={partTestId(testId, 'overlay')}
-            className={cn(
-              'scale-[1.02] cursor-grabbing rounded-control bg-surface text-ink shadow-overlay ring-2 ring-brand-500',
-              classNames?.overlay,
-            )}
-          >
-            {(renderOverlay ?? renderItem)(item, {
-              handleProps: { disabled: true, tabIndex: -1 },
-              isDragging: true,
-              isOverlay: true,
-              index,
-            })}
-          </div>
-        )}
-      </DragOverlay>
-    </OverlayPortal>
-  );
-}
-
-/** Controlled ordering: apply next items in onReorder to persist a drop. IDs must be globally unique. */
-export function SortableList<T>({
-  items,
-  getId,
-  getLabel,
-  onReorder,
-  renderItem,
-  renderOverlay,
-  orientation = 'vertical',
-  handle = false,
-  disabled = false,
-  gap = 2,
-  className,
-  classNames,
-  restrictToParent = false,
-  lockAxis,
-  'data-testid': testId,
-  ref,
-  ...props
-}: SortableListProps<T>) {
-  const { t } = useUILocale();
-  const reduced = useReducedMotion();
-  const drag = useDragFocus();
-  const index = items.findIndex((item) => getId(item) === drag.activeId);
-
-  return (
-    <DndProvider
-      accessibility={{ restoreFocus: false }}
-      modifiers={modifiersFor(restrictToParent, lockAxis)}
-      onDragStart={({ active }) => drag.setActiveId(String(active.id))}
-      onDragCancel={({ active }) => drag.finish(String(active.id))}
-      onDragEnd={({ active, over }) => {
-        drag.finish(String(active.id));
-        if (disabled || !over || active.id === over.id) return;
-        const from = items.findIndex((item) => getId(item) === active.id);
-        const to = items.findIndex((item) => getId(item) === over.id);
-        if (from >= 0 && to >= 0)
-          onReorder(arrayMove([...items], from, to), {
-            activeId: String(active.id),
-            overId: String(over.id),
-            from,
-            to,
-          });
-      }}
-    >
-      <div
-        {...props}
-        ref={(node) => {
-          drag.root.current = node;
-          if (typeof ref === 'function') return ref(node);
-          if (ref) ref.current = node;
-        }}
-        role={props.role ?? 'list'}
-        aria-label={props['aria-label'] ?? t('dnd.list')}
-        aria-disabled={disabled || undefined}
-        data-testid={testId}
-        className={cn(
-          orientation === 'grid' ? 'grid grid-cols-2' : 'flex',
-          orientation === 'vertical' && 'flex-col',
-          gaps[gap],
-          classNames?.root,
-          className,
-        )}
-      >
-        <SortableContext
-          items={items.map(getId)}
-          strategy={strategies[orientation]}
-          disabled={disabled}
-        >
-          {items.map((item, index) => (
-            <SortableItem
-              key={getId(item)}
-              item={item}
-              id={getId(item)}
-              label={getLabel?.(item) ?? getId(item)}
-              index={index}
-              handle={handle}
-              disabled={disabled}
-              reduced={reduced}
-              renderItem={renderItem}
-              classNames={classNames}
-              testId={testId}
-            />
-          ))}
-        </SortableContext>
-      </div>
-      <Overlay
-        item={items[index]}
-        index={index}
-        reduced={reduced}
-        renderItem={renderItem}
-        renderOverlay={renderOverlay}
-        classNames={classNames}
-        testId={testId}
-      />
-    </DndProvider>
-  );
-}
-
-export interface SortableContainer<T> {
-  id: string;
-  title?: ReactNode;
-  items: T[];
-}
-export interface MoveEvent {
-  activeId: string;
-  fromContainer: string;
-  toContainer: string;
-  index: number;
-}
-export type SortableBoardClassNames = SortableClassNames &
-  Partial<Record<'container' | 'containerTitle' | 'containerItems' | 'empty', string>>;
-export interface SortableBoardProps<T> extends Omit<SortableOptions<T>, 'classNames'> {
-  containers: readonly SortableContainer<T>[];
-  onMove: (next: SortableContainer<T>[], event: MoveEvent) => void;
-  /** Receives the complete drop zone as children; retain it in the returned layout. */
-  renderContainer?: (container: SortableContainer<T>, children: ReactNode) => ReactNode;
-  canDrop?: (item: T, from: string, to: string) => boolean;
-  classNames?: SortableBoardClassNames;
-}
-
-function BoardContainer<T>({
-  container,
-  dropId,
-  disabled,
-  classNames,
-  children,
-  testId,
-}: {
-  container: SortableContainer<T>;
-  dropId: string;
-  disabled: boolean;
-  classNames: SortableBoardClassNames | undefined;
   children: ReactNode;
-  testId: string | undefined;
-}) {
-  const { t } = useUILocale();
-  const { setNodeRef, isOver } = useDroppable({
-    id: dropId,
-    disabled,
-    data: {
-      containerId: container.id,
-      label: typeof container.title === 'string' ? container.title : container.id,
-      isContainer: true,
-    },
-  });
-
-  return (
-    <section
-      ref={setNodeRef}
-      aria-label={typeof container.title === 'string' ? container.title : container.id}
-      data-testid={partTestId(testId, 'container', container.id)}
-      data-over={isOver || undefined}
-      className={cn(
-        'h-full min-w-0 rounded-panel border border-line bg-canvas p-3 motion-safe:transition-colors data-[over]:border-brand-500 data-[over]:bg-brand-50',
-        classNames?.container,
-      )}
-    >
-      {container.title != null && (
-        <div className={cn('mb-3 font-medium text-ink', classNames?.containerTitle)}>
-          {container.title}
-        </div>
-      )}
-      <div
-        role="list"
-        aria-label={
-          typeof container.title === 'string' ? container.title : container.id
-        }
-        className={cn('flex min-h-16 flex-col gap-2', classNames?.containerItems)}
-      >
-        {children}
-        {!container.items.length && (
-          <div
-            role="listitem"
-            data-testid={partTestId(testId, 'empty', container.id)}
-            className={cn(
-              'rounded-control border border-dashed border-control-border p-4 text-ui-sm text-ink-muted',
-              classNames?.empty,
-              classNames?.placeholder,
-            )}
-          >
-            {t('dnd.empty')}
-          </div>
-        )}
-      </div>
-    </section>
-  );
 }
 
-/** Commits one immutable move on drop. Cancelled and rejected drops leave host data untouched. */
-export function SortableBoard<T>({
-  containers,
-  getId,
-  getLabel,
-  onMove,
-  renderItem,
-  renderOverlay,
-  renderContainer,
+/** Shared drag engine: previews cross-container moves and commits one change on drop. */
+function SortableEngine({
+  value,
+  onChange,
   canDrop,
-  handle = false,
-  disabled = false,
-  gap = 4,
-  className,
-  classNames,
-  restrictToParent = false,
+  disabled,
+  restrictToParent,
   lockAxis,
-  'data-testid': testId,
-  ref,
-  ...props
-}: SortableBoardProps<T>) {
-  const { t } = useUILocale();
+  classNames,
+  testId,
+  children,
+}: EngineProps) {
   const prefix = useId();
   const reduced = useReducedMotion();
-  const drag = useDragFocus();
-  // While dragging, the item is previewed in the column under the pointer; the host only sees the drop.
-  const [preview, setPreview] = useState<SortableContainer<T>[] | null>(null);
-  const shown = preview ?? containers;
+  const items = useRef(new Map<string, ItemRecord>()).current;
+  const [activeId, setActiveId] = useState<string | null>(null);
+  const [preview, setPreview] = useState<Record<string, string[]> | null>(null);
+  const [renderOverlay, setRenderOverlay] = useState<
+    ((id: string) => ReactNode) | null
+  >(null);
+  const setOverlay = useCallback(
+    (render: ((id: string) => ReactNode) | null) => setRenderOverlay(() => render),
+    [],
+  );
+  const pendingFocus = useRef<string | null>(null);
+  const activeRef = useRef<string | null>(null);
+  const blocked = useRef(false);
+  activeRef.current = activeId;
+  const shown: SortableValue = preview ?? value;
 
-  const containing = (list: readonly SortableContainer<T>[], id: unknown) =>
-    list.find((container) => container.items.some((item) => getId(item) === id));
+  const allowed = (id: string, to: string) => {
+    const from = containing(value, id);
 
-  const source = containing(shown, drag.activeId);
-  const activeIndex =
-    source?.items.findIndex((item) => getId(item) === drag.activeId) ?? -1;
-  const activeItem = source?.items[activeIndex];
+    return from !== undefined && (!canDrop || canDrop(id, from, to));
+  };
+
+  useEffect(() => {
+    if (activeId !== null || pendingFocus.current === null) return;
+    items.get(pendingFocus.current)?.activator?.focus({ preventScroll: true });
+    pendingFocus.current = null;
+  });
+
+  const finish = (id: string) => {
+    pendingFocus.current = id;
+    setPreview(null);
+    setActiveId(null);
+  };
 
   const over = ({ active, over }: DragOverEvent) => {
-    if (disabled || !over || over.id === active.id) return;
+    // Hovering a container that refuses the item returns it to its origin.
+    if (!over) return blocked.current ? setPreview(null) : undefined;
+    if (disabled || over.id === active.id) return;
 
     setPreview((previous) => {
-      const list = previous ?? containers;
-      const from = containing(list, active.id);
-      const to = list.find(
-        (container) => container.id === over.data.current?.containerId,
-      );
-      const origin = containing(containers, active.id);
-      if (!from || !to || !origin || from === to) return previous;
-      const item = from.items.find((entry) => getId(entry) === active.id)!;
-      if (canDrop && !canDrop(item, origin.id, to.id)) return previous;
-      const overIndex = to.items.findIndex((entry) => getId(entry) === over.id);
+      const list: Record<string, string[]> = previous ?? {
+        ...Object.fromEntries(
+          Object.entries(value).map(([key, ids]) => [key, [...ids]]),
+        ),
+      };
+      const id = String(active.id);
+      const from = containing(list, id);
+      const to = over.data.current?.containerId as string | undefined;
+      if (!from || !to || from === to || !list[to] || !allowed(id, to)) return previous;
+      const overIndex = list[to].indexOf(String(over.id));
       const translated = active.rect.current.translated;
       const below =
         overIndex >= 0 &&
         !!translated &&
         translated.top + translated.height / 2 > over.rect.top + over.rect.height / 2;
-      const index = overIndex < 0 ? to.items.length : overIndex + (below ? 1 : 0);
+      const index = overIndex < 0 ? list[to].length : overIndex + (below ? 1 : 0);
+      const target = list[to].filter((entry) => entry !== id);
+      target.splice(index, 0, id);
 
-      return list.map((container) => {
-        if (container === from)
-          return {
-            ...container,
-            items: container.items.filter((entry) => getId(entry) !== active.id),
-          };
-        if (container === to)
-          return {
-            ...container,
-            items: [
-              ...container.items.slice(0, index),
-              item,
-              ...container.items.slice(index),
-            ],
-          };
-
-        return container;
-      });
+      return {
+        ...list,
+        [from]: list[from]!.filter((entry) => entry !== id),
+        [to]: target,
+      };
     });
   };
 
   const end = ({ active, over }: DragEndEvent) => {
-    const list = preview ?? containers;
-    setPreview(null);
-    drag.finish(String(active.id));
+    const list = preview ?? value;
+    const id = String(active.id);
+    finish(id);
     if (disabled || !over) return;
-    const origin = containing(containers, active.id);
-    const to = containing(list, active.id);
-    if (!origin || !to) return;
-    const originIndex = origin.items.findIndex((item) => getId(item) === active.id);
-    const item = origin.items[originIndex]!;
-    if (canDrop && !canDrop(item, origin.id, to.id)) return;
-    const fromIndex = to.items.findIndex((entry) => getId(entry) === active.id);
-    const overIndex = to.items.findIndex((entry) => getId(entry) === over.id);
-    const items =
-      overIndex >= 0 && overIndex !== fromIndex
-        ? arrayMove(to.items, fromIndex, overIndex)
-        : to.items;
-    const index = items.findIndex((entry) => getId(entry) === active.id);
-    if (to.id === origin.id && index === originIndex) return;
-    const next = list.map((container) =>
-      container === to ? { ...container, items } : container,
+    const origin = containing(value, id);
+    const to = containing(list, id);
+    if (!origin || !to || !allowed(id, to)) return;
+    const from = value[origin]!.indexOf(id);
+    const current = list[to]!.indexOf(id);
+    const overIndex = list[to]!.indexOf(String(over.id));
+    const ids =
+      overIndex >= 0 && overIndex !== current
+        ? arrayMove([...list[to]!], current, overIndex)
+        : [...list[to]!];
+    const index = ids.indexOf(id);
+    if (to === origin && index === from) return;
+    const next = Object.fromEntries(
+      Object.entries(list).map(([key, entries]) => [
+        key,
+        key === to ? ids : [...entries],
+      ]),
     );
-    onMove(next, {
-      activeId: String(active.id),
-      fromContainer: origin.id,
-      toContainer: to.id,
-      index,
+    onChange(next, {
+      activeId: id,
+      overId: String(over.id),
+      fromContainer: origin,
+      toContainer: to,
+      from,
+      to: index,
     });
   };
 
-  return (
-    <DndProvider
-      accessibility={{ restoreFocus: false }}
-      modifiers={modifiersFor(restrictToParent, lockAxis)}
-      collisionDetection={(args) => {
-        const from = containing(containers, args.active.id);
-        const item = from?.items.find((item) => getId(item) === args.active.id);
-        const allowed = args.droppableContainers.filter((entry) => {
-          const target = shown.find(
-            (container) => container.id === entry.data.current?.containerId,
-          );
-
-          return (
-            !!target &&
-            !!from &&
-            item !== undefined &&
-            (!canDrop || canDrop(item, from.id, target.id))
-          );
-        });
-        const columns = allowed.filter((entry) => entry.data.current?.isContainer);
-        const pointer = args.pointerCoordinates;
-
-        if (!pointer)
-          // Keyboard: nearest card, or a column holding nothing but the dragged item.
-          return closestCenter({
-            ...args,
-            droppableContainers: allowed.filter((entry) => {
-              const target = shown.find(
-                (container) => container.id === entry.data.current?.containerId,
-              )!;
-
-              return (
-                !entry.data.current?.isContainer ||
-                !target.items.some((item) => getId(item) !== args.active.id)
-              );
-            }),
-          });
-
-        // Pointer: the column under the cursor wins, then the nearest card in it.
-        const point = {
-          ...args,
-          collisionRect: {
-            top: pointer.y,
-            bottom: pointer.y,
-            left: pointer.x,
-            right: pointer.x,
-            width: 0,
-            height: 0,
-          },
-        };
-        const [column] = pointerWithin({
-          ...args,
-          droppableContainers: columns,
-        }).concat(closestCenter({ ...point, droppableContainers: columns }));
-        if (!column) return [];
-        const containerId = columns.find((entry) => entry.id === column.id)?.data
-          .current?.containerId;
-        const cards = allowed.filter(
-          (entry) =>
-            !entry.data.current?.isContainer &&
-            entry.data.current?.containerId === containerId,
-        );
-
-        return cards.length
-          ? closestCenter({ ...point, droppableContainers: cards })
-          : [column];
-      }}
-      onDragStart={({ active }) => drag.setActiveId(String(active.id))}
-      onDragOver={over}
-      onDragCancel={({ active }) => {
-        setPreview(null);
-        drag.finish(String(active.id));
-      }}
-      onDragEnd={end}
-    >
-      <div
-        {...props}
-        ref={(node) => {
-          drag.root.current = node;
-          if (typeof ref === 'function') return ref(node);
-          if (ref) ref.current = node;
-        }}
-        role={props.role ?? 'group'}
-        aria-label={props['aria-label'] ?? t('dnd.board')}
-        aria-disabled={disabled || undefined}
-        data-testid={testId}
-        className={cn(
-          'grid grid-cols-1 md:grid-cols-3',
-          gaps[gap],
-          classNames?.root,
-          className,
-        )}
-      >
-        {shown.map((container) => {
-          const content = (
-            <BoardContainer
-              container={container}
-              dropId={`${prefix}-${container.id}`}
-              disabled={disabled}
-              classNames={classNames}
-              testId={testId}
+  const record = activeId === null ? undefined : items.get(activeId);
+  const overlayContent =
+    activeId === null
+      ? null
+      : renderOverlay
+        ? renderOverlay(activeId)
+        : record && (
+            <ItemContext.Provider
+              value={{
+                id: activeId,
+                label: record.label,
+                disabled: true,
+                overlay: true,
+                sortable: null,
+                setHandle: () => {},
+              }}
             >
-              <SortableContext
-                items={container.items.map(getId)}
-                strategy={verticalListSortingStrategy}
-                disabled={disabled}
-              >
-                {container.items.map((item, index) => (
-                  <SortableItem
-                    key={getId(item)}
-                    item={item}
-                    id={getId(item)}
-                    label={getLabel?.(item) ?? getId(item)}
-                    index={index}
-                    containerId={container.id}
-                    handle={handle}
-                    disabled={disabled}
-                    reduced={reduced}
-                    renderItem={renderItem}
-                    classNames={classNames}
-                    testId={testId}
-                  />
-                ))}
-              </SortableContext>
-            </BoardContainer>
+              {typeof record.children === 'function'
+                ? record.children({ isDragging: true, isOverlay: true })
+                : record.children}
+            </ItemContext.Provider>
           );
 
-          return (
-            <div key={container.id}>
-              {renderContainer ? renderContainer(container, content) : content}
-            </div>
+  return (
+    <EngineContext.Provider
+      value={{
+        shown,
+        activeId,
+        disabled,
+        reduced,
+        prefix,
+        testId,
+        classNames,
+        items,
+        activeRef,
+        setOverlay,
+      }}
+    >
+      <DndProvider
+        accessibility={{ restoreFocus: false }}
+        modifiers={modifiersFor(restrictToParent, lockAxis)}
+        collisionDetection={(args) => {
+          const id = String(args.active.id);
+          const candidates = args.droppableContainers.filter((entry) => {
+            const container = entry.data.current?.containerId as string | undefined;
+
+            return (
+              container !== undefined && !!shown[container] && allowed(id, container)
+            );
+          });
+          const columns = candidates.filter((entry) => entry.data.current?.isContainer);
+          const pointer = args.pointerCoordinates;
+          blocked.current = false;
+
+          if (!pointer)
+            // Keyboard: nearest item, or a container holding nothing but the dragged item.
+            return closestCenter({
+              ...args,
+              droppableContainers: candidates.filter((entry) => {
+                const container = entry.data.current?.containerId as string;
+
+                return (
+                  !entry.data.current?.isContainer ||
+                  !shown[container]!.some((entry) => entry !== id)
+                );
+              }),
+            });
+
+          // Pointer: the container under the cursor wins, then its nearest item.
+          const point = {
+            ...args,
+            collisionRect: {
+              top: pointer.y,
+              bottom: pointer.y,
+              left: pointer.x,
+              right: pointer.x,
+              width: 0,
+              height: 0,
+            },
+          };
+          // A container that refuses the item blocks the drop instead of passing it on.
+          const [hit] = pointerWithin({
+            ...args,
+            droppableContainers: args.droppableContainers.filter(
+              (entry) => entry.data.current?.isContainer,
+            ),
+          });
+          blocked.current = !!hit && !columns.some((entry) => entry.id === hit.id);
+          if (blocked.current) return [];
+          const [column] = hit
+            ? [hit]
+            : closestCenter({ ...point, droppableContainers: columns });
+          if (!column) return [];
+          const container = columns.find((entry) => entry.id === column.id)?.data
+            .current?.containerId;
+          const cards = candidates.filter(
+            (entry) =>
+              !entry.data.current?.isContainer &&
+              entry.data.current?.containerId === container,
           );
-        })}
-      </div>
-      <Overlay
-        item={activeItem}
-        index={activeIndex}
-        reduced={reduced}
-        renderItem={renderItem}
-        renderOverlay={renderOverlay}
-        classNames={classNames}
-        testId={testId}
-      />
-    </DndProvider>
+
+          return cards.length
+            ? closestCenter({ ...point, droppableContainers: cards })
+            : [column];
+        }}
+        onDragStart={({ active }) => setActiveId(String(active.id))}
+        onDragOver={over}
+        onDragCancel={({ active }) => finish(String(active.id))}
+        onDragEnd={end}
+      >
+        {children}
+        <OverlayPortal>
+          <DragOverlay dropAnimation={reduced ? null : undefined}>
+            {overlayContent != null && (
+              <div
+                aria-hidden="true"
+                inert
+                data-testid={partTestId(testId, 'overlay')}
+                className={cn(
+                  !renderOverlay && overlayClassName,
+                  !renderOverlay && record?.className,
+                  classNames?.overlay,
+                )}
+              >
+                {overlayContent}
+              </div>
+            )}
+          </DragOverlay>
+        </OverlayPortal>
+      </DndProvider>
+    </EngineContext.Provider>
   );
+}
+
+export interface SortableGroupProps {
+  /** Item IDs per container, keyed by the `id` of each nested Sortable. IDs must be unique across the group. */
+  value: SortableValue;
+  onValueChange: (next: Record<string, string[]>, event: MoveEvent) => void;
+  canDrop?: (id: string, from: string, to: string) => boolean;
+  disabled?: boolean;
+  restrictToParent?: boolean;
+  lockAxis?: 'x' | 'y';
+  classNames?: SortableClassNames;
+  'data-testid'?: string;
+  children: ReactNode;
+}
+
+/** Connects several Sortable containers so items can move between them. Renders no element. */
+export function SortableGroup({
+  value,
+  onValueChange,
+  canDrop,
+  disabled = false,
+  restrictToParent = false,
+  lockAxis,
+  classNames,
+  'data-testid': testId,
+  children,
+}: SortableGroupProps) {
+  return (
+    <SortableEngine
+      value={value}
+      onChange={onValueChange}
+      canDrop={canDrop}
+      disabled={disabled}
+      restrictToParent={restrictToParent}
+      lockAxis={lockAxis}
+      classNames={classNames}
+      testId={testId}
+    >
+      {children}
+    </SortableEngine>
+  );
+}
+
+export interface SortableProps extends Omit<
+  ComponentPropsWithRef<'div'>,
+  'children' | 'onChange' | 'defaultValue'
+> {
+  /** Container ID inside SortableGroup; the group owns the value. */
+  id?: string;
+  /** Ordered item IDs for a standalone list. */
+  value?: readonly string[];
+  onValueChange?: (next: string[], event: ReorderEvent) => void;
+  orientation?: SortableOrientation;
+  gap?: 0 | 1 | 2 | 3 | 4 | 6 | 8;
+  disabled?: boolean;
+  restrictToParent?: boolean;
+  lockAxis?: 'x' | 'y';
+  /** Shown inside an empty container of a group. Pass null to hide it. */
+  emptyContent?: ReactNode;
+  asChild?: boolean;
+  classNames?: SortableClassNames | undefined;
+  'data-testid'?: string;
+  children?: ReactNode;
+}
+
+const STANDALONE = 'list';
+
+/** A sortable container. Standalone it owns a list; inside SortableGroup it is one column. */
+export function Sortable({
+  id,
+  value,
+  onValueChange,
+  disabled = false,
+  restrictToParent = false,
+  lockAxis,
+  classNames,
+  ...props
+}: SortableProps) {
+  const engine = useContext(EngineContext);
+
+  if (engine) {
+    if (id === undefined)
+      throw new Error('Sortable inside SortableGroup requires an id.');
+
+    return (
+      <SortableContainer
+        {...props}
+        id={id}
+        classNames={classNames}
+        disabled={disabled}
+      />
+    );
+  }
+
+  return (
+    <SortableEngine
+      value={{ [STANDALONE]: value ?? [] }}
+      onChange={(next, event) =>
+        onValueChange?.(next[STANDALONE]!, {
+          activeId: event.activeId,
+          overId: event.overId,
+          from: event.from,
+          to: event.to,
+        })
+      }
+      disabled={disabled}
+      restrictToParent={restrictToParent}
+      lockAxis={lockAxis}
+      classNames={classNames}
+      testId={props['data-testid']}
+    >
+      <SortableContainer
+        {...props}
+        id={STANDALONE}
+        standalone
+        classNames={classNames}
+        disabled={disabled}
+      />
+    </SortableEngine>
+  );
+}
+
+function SortableContainer({
+  id,
+  standalone = false,
+  orientation = 'vertical',
+  gap = 2,
+  disabled,
+  emptyContent,
+  asChild,
+  className,
+  classNames,
+  'data-testid': testId,
+  children,
+  ref,
+  ...props
+}: Omit<SortableProps, 'value' | 'onValueChange' | 'restrictToParent' | 'lockAxis'> & {
+  id: string;
+  standalone?: boolean;
+}) {
+  const { t } = useUILocale();
+  const engine = useEngine('Sortable');
+  const ids = engine.shown[id] ?? [];
+  const off = engine.disabled || Boolean(disabled);
+  const label = props['aria-label'] ?? t(standalone ? 'dnd.list' : 'dnd.board');
+  const { setNodeRef, isOver } = useDroppable({
+    id: `${engine.prefix}-${id}`,
+    disabled: off,
+    data: { containerId: id, label, isContainer: true },
+  });
+  // Children are rendered in preview order so a dragged item appears in its target container.
+  const byId = new Map<string, ReactNode>();
+  const rest: ReactNode[] = [];
+  // With asChild the items live inside the caller's element, such as a ul.
+  const shell =
+    asChild && isValidElement<{ children?: ReactNode }>(children) ? children : null;
+
+  Children.forEach(shell ? shell.props.children : children, (child) => {
+    if (isValidElement<{ id?: unknown }>(child) && typeof child.props.id === 'string')
+      byId.set(child.props.id, child);
+    else rest.push(child);
+  });
+
+  const external = (itemId: string) =>
+    engine.activeId === itemId && !byId.has(itemId) ? (
+      <SortableItem key={itemId} id={itemId}>
+        {null}
+      </SortableItem>
+    ) : null;
+
+  const content = (
+    <SortableContext items={[...ids]} strategy={strategies[orientation]} disabled={off}>
+      {ids.map(
+        (itemId) => byId.get(itemId) ?? lookup(engine, itemId) ?? external(itemId),
+      )}
+      {rest}
+      {!standalone && !ids.length && emptyContent !== null && (
+        <div
+          role="listitem"
+          data-testid={partTestId(testId, 'empty')}
+          className={cn(
+            'rounded-control border border-dashed border-control-border p-4 text-ui-sm text-ink-muted',
+            classNames?.empty,
+          )}
+        >
+          {emptyContent ?? t('dnd.empty')}
+        </div>
+      )}
+    </SortableContext>
+  );
+
+  return (
+    <ContainerContext.Provider
+      value={{ id, testId: testId ?? (standalone ? engine.testId : undefined) }}
+    >
+      {renderElement(
+        asChild,
+        {
+          ...props,
+          ref: (node: HTMLElement | null) => {
+            setNodeRef(node);
+            assignRef(ref as Ref<HTMLElement>, node);
+          },
+          role: props.role ?? 'list',
+          'aria-label': label,
+          'aria-disabled': off || undefined,
+          'data-testid': testId,
+          'data-over': (!standalone && isOver) || undefined,
+          className: cn(
+            orientation === 'grid' ? 'grid grid-cols-2' : 'flex',
+            orientation === 'vertical' && 'flex-col',
+            gaps[gap],
+            !standalone &&
+              'min-h-16 rounded-panel motion-safe:transition-colors data-[over]:bg-brand-50',
+            classNames?.root,
+            className,
+          ),
+        },
+        shell ? cloneElement(shell, undefined, content) : content,
+      )}
+    </ContainerContext.Provider>
+  );
+}
+
+/** While previewing a move, the dragged item is rendered by its target container from the registry. */
+function lookup(engine: EngineContextValue, itemId: string) {
+  const record = engine.items.get(itemId);
+  if (!record || engine.activeId !== itemId) return null;
+
+  return (
+    <SortableItem
+      key={itemId}
+      id={itemId}
+      label={record.label}
+      asChild={record.asChild}
+      className={record.className}
+    >
+      {record.children}
+    </SortableItem>
+  );
+}
+
+export interface SortableItemProps extends Omit<
+  ComponentPropsWithRef<'div'>,
+  'children' | 'id'
+> {
+  id: string;
+  /** Readable name for announcements and the handle label. Defaults to the ID. */
+  label?: string | undefined;
+  disabled?: boolean;
+  /** Merge sortable behavior into the single child element, such as an li or a card. */
+  asChild?: boolean;
+  'data-testid'?: string;
+  children?: ReactNode | ((state: SortableItemState) => ReactNode);
+}
+
+/** Wrap any content to make it sortable. Without a SortableHandle the whole item drags. */
+export function SortableItem({
+  id,
+  label,
+  disabled = false,
+  asChild = false,
+  className,
+  style,
+  children,
+  ref,
+  'data-testid': testId,
+  ...props
+}: SortableItemProps) {
+  const engine = useEngine('SortableItem');
+  const container = useContext(ContainerContext);
+  const [handle, setHandle] = useState<HTMLElement | null>(null);
+  const name = label ?? id;
+  const off = engine.disabled || disabled;
+  const sortable = useSortable({
+    id,
+    disabled: off,
+    data: { containerId: container?.id, label: name },
+    ...(engine.reduced ? { transition: null } : {}),
+  });
+  const dragging = sortable.isDragging;
+  const record = engine.items.get(id);
+
+  if (record) {
+    record.label = name;
+    record.asChild = asChild;
+    record.className = className;
+    record.children = children;
+  } else
+    engine.items.set(id, {
+      label: name,
+      asChild,
+      className,
+      children,
+      activator: null,
+    });
+
+  useEffect(() => {
+    const entry = engine.items.get(id);
+    if (entry) entry.activator = handle ?? entry.activator;
+  });
+
+  useEffect(
+    () => () => {
+      if (engine.activeRef.current !== id) engine.items.delete(id);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [id],
+  );
+
+  const { role: _role, ...attributes } = sortable.attributes;
+  const whole = !handle;
+  const element = renderElement(
+    asChild,
+    {
+      ...props,
+      ...(whole ? { ...attributes, ...sortable.listeners } : {}),
+      ...(asChild ? {} : { role: 'listitem' }),
+      tabIndex: whole ? (off ? -1 : 0) : props.tabIndex,
+      'aria-disabled': whole && off ? true : undefined,
+      ref: (node: HTMLElement | null) => {
+        sortable.setNodeRef(node);
+        if (whole) {
+          sortable.setActivatorNodeRef(node);
+          const entry = engine.items.get(id);
+          if (entry && node) entry.activator = node;
+        }
+        assignRef(ref as Ref<HTMLElement>, node);
+      },
+      'data-dnd-item': id,
+      'data-dnd-activator': whole ? '' : undefined,
+      'data-dragging': dragging || undefined,
+      'data-testid': testId ?? partTestId(container?.testId, 'item', id),
+      style: {
+        ...style,
+        transform: CSS.Transform.toString(sortable.transform),
+        transition: engine.reduced ? undefined : sortable.transition,
+      },
+      className: cn(
+        'relative rounded-control motion-reduce:transition-none',
+        whole && !off && 'touch-none cursor-grab active:cursor-grabbing',
+        whole && focusRingClassName,
+        engine.classNames?.item,
+        className,
+      ),
+    },
+    typeof children === 'function'
+      ? children({ isDragging: dragging, isOverlay: false })
+      : children,
+    dragging &&
+      cn(
+        placeholderClassName,
+        engine.classNames?.itemDragging,
+        engine.classNames?.placeholder,
+      ),
+  );
+
+  return (
+    <ItemContext.Provider
+      value={{ id, label: name, disabled: off, overlay: false, sortable, setHandle }}
+    >
+      {element}
+    </ItemContext.Provider>
+  );
+}
+
+export type SortableHandleProps = Omit<DragHandleProps, 'label'> & { label?: string };
+
+/** Drag handle for the enclosing SortableItem; the rest of the item stays interactive. */
+export function SortableHandle({ label, ref, ...props }: SortableHandleProps) {
+  const item = useContext(ItemContext);
+  if (!item) throw new Error('SortableHandle must be rendered inside SortableItem.');
+  const { setHandle, sortable } = item;
+  const setActivator = sortable?.setActivatorNodeRef;
+  const attach = useCallback(
+    (node: HTMLButtonElement | null) => {
+      setActivator?.(node);
+      setHandle(node);
+      assignRef(ref, node);
+    },
+    [setActivator, setHandle, ref],
+  );
+
+  useEffect(() => {
+    if (item.overlay) return;
+
+    return () => setHandle(null);
+  }, [item.overlay, setHandle]);
+
+  if (item.overlay || !sortable)
+    return <DragHandle {...props} label={label ?? item.label} disabled tabIndex={-1} />;
+
+  return (
+    <DragHandle
+      {...sortable.attributes}
+      {...sortable.listeners}
+      {...props}
+      label={label ?? item.label}
+      disabled={item.disabled || props.disabled}
+      data-dnd-activator=""
+      ref={attach}
+    />
+  );
+}
+
+/** Replaces the default drag preview (a copy of the item) for the enclosing Sortable or group. */
+export function SortableOverlay({ children }: { children: (id: string) => ReactNode }) {
+  const { setOverlay } = useEngine('SortableOverlay');
+  const render = useRef(children);
+  render.current = children;
+
+  useEffect(() => {
+    setOverlay((id) => render.current(id));
+
+    return () => setOverlay(null);
+  }, [setOverlay]);
+
+  return null;
 }
 
 export { createTransferDnd, createRowReorder } from './integrations';

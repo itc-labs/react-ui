@@ -220,7 +220,7 @@ for (const subpath of [
         !('RichTextView' in api) &&
         !('TreeSelect' in api) &&
         !('Transfer' in api) &&
-        !('SortableList' in api),
+        !('SortableGroup' in api),
       `MediaGallery, RichTextView, TreeSelect, Transfer and Dnd must remain isolated from ${subpath}`,
     );
   for (const name of [
@@ -403,8 +403,11 @@ const dnd = await import(
   pathToFileURL(resolve(root, packed.exports['./dnd'].import)).href
 );
 for (const name of [
-  'SortableList',
-  'SortableBoard',
+  'Sortable',
+  'SortableGroup',
+  'SortableItem',
+  'SortableHandle',
+  'SortableOverlay',
   'DragHandle',
   'DndProvider',
   'useSortableItem',

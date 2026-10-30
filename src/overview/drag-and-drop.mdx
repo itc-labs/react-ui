@@ -4,19 +4,19 @@ import { Meta } from '@storybook/addon-docs/blocks';
 
 # Drag & drop
 
-Import sortable compositions and integration factories from `@itclabs/react-ui/dnd`.
-`SortableList` reorders one collection; `SortableBoard` moves items between
-containers, including empty ones. Transfer and DataTable opt in through plugins.
+Import the sortable wrappers and integration factories from `@itclabs/react-ui/dnd`.
+Wrap your own markup: `Sortable` is the container, `SortableItem` wraps each entry,
+`SortableHandle` limits dragging to a grip, and `SortableGroup` connects several
+containers. Transfer and DataTable opt in through plugins.
 Ordinary root, Transfer and DataTable imports stay independent of dnd-kit.
 All examples keep ordering in host state; persist successful changes in your application.
 
 ## Accessibility and interaction
 
-Use stable item IDs, unique across the entire board, and readable `getLabel`
-values for announcements. With `handle`, spread `handleProps` onto `DragHandle`;
-its `label` names the item being moved. Without `handle`, the item is the activator.
-Keep visible focus indicators and avoid nesting interactive controls inside a
-whole-row activator; use a handle when rows contain links or buttons.
+Use stable item IDs, unique across a whole group, and give `SortableItem` a readable
+`label` for announcements and the handle name. Without a `SortableHandle`, the whole
+item is the activator. Keep visible focus indicators and avoid nesting interactive
+controls inside a whole-item activator; add a handle when items contain links or buttons.
 
 Tab to an activator. Space or Enter picks up and drops; arrow keys move; Escape
 cancels. Transfer also uses Left/Right to change panel, and its reorder integration
@@ -26,8 +26,11 @@ disables sorting transitions and drop animation. Pointer activation requires 4px
 of movement; auto-scroll and inert drag overlays are provided.
 
 While dragging, the original slot stays visible as a dashed brand placeholder.
-SortableBoard previews the item in the column under the pointer, so the
-placeholder always marks where the drop lands; `onMove` still fires only on drop.
+In a group the item is previewed in the container under the pointer, so the
+placeholder always marks where the drop lands; `onValueChange` still fires only on
+drop. A container that `canDrop` refuses returns the item to its origin while hovered.
+The preview is a copy of the item rendered on `document.body`, so transformed
+ancestors such as an animating Dialog do not offset it; `SortableOverlay` replaces it.
 Transfer and DataTable keep rows in place and draw a brand line before or after
 the target row, tint the panel that will receive the item, and show a compact
 label chip under the cursor. Keyboard dragging uses the same line.
@@ -35,95 +38,110 @@ label chip under the cursor. Keyboard dragging uses the same line.
 `DndProvider` supplies sensors and announcements for advanced compositions and
 accepts DndContext options. `useSortableItem` exposes the sortable hook. Custom
 compositions own their sortable contexts, item bindings, drop zones and overlays.
-The list, board and plugin compositions already provide their own context.
+Sortable, SortableGroup and the plugins already provide their own context.
 
 ## Sortable list
 
-`onReorder(next, event)` returns reordered items and the moved ID and indices.
-`orientation` supports `vertical`, `horizontal`, and `grid`; `lockAxis` and
-`restrictToParent` constrain movement. `gap` uses kit spacing steps.
+`Sortable` owns an ordered ID array through `value` and `onValueChange(next, event)`;
+the event reports `activeId`, `overId`, `from` and `to`. Render one `SortableItem` per
+ID as a direct child (an array from `map` is fine). `orientation` supports `vertical`,
+`horizontal` and `grid`; `lockAxis` and `restrictToParent` constrain movement, and
+`gap` uses kit spacing steps. `asChild` on `Sortable` or `SortableItem` merges the
+behavior into your own element, such as a `ul` and its `li` rows. An item's children
+may be a function receiving `{ isDragging, isOverlay }`.
 
 ```tsx
 'use client';
 
 import { useState } from 'react';
-import { DragHandle, SortableList } from '@itclabs/react-ui/dnd';
+import { Sortable, SortableHandle, SortableItem } from '@itclabs/react-ui/dnd';
 
 type Item = { id: string; label: string };
+const items: Item[] = [
+  { id: 'first', label: 'Lorem ipsum' },
+  { id: 'second', label: 'Dolor sit amet' },
+];
 
 export function ReorderList() {
-  const [items, setItems] = useState<Item[]>([
-    { id: 'first', label: 'Lorem ipsum' },
-    { id: 'second', label: 'Dolor sit amet' },
-  ]);
+  const [order, setOrder] = useState(items.map((item) => item.id));
 
   return (
-    <SortableList
+    <Sortable
       aria-label="Reorder items"
-      items={items}
-      getId={(item) => item.id}
-      getLabel={(item) => item.label}
-      onReorder={setItems}
-      handle
+      value={order}
+      onValueChange={setOrder}
       lockAxis="y"
-      renderItem={(item, { handleProps }) => (
-        <div className="flex items-center gap-3 rounded-control border border-line bg-surface p-4">
-          <DragHandle {...handleProps} label={item.label} />
-          <span>{item.label}</span>
-        </div>
-      )}
-    />
+    >
+      {order.map((id) => {
+        const item = items.find((entry) => entry.id === id)!;
+
+        return (
+          <SortableItem
+            key={id}
+            id={id}
+            label={item.label}
+            className="flex items-center gap-3 rounded-control border border-line bg-surface p-4"
+          >
+            <SortableHandle />
+            <span>{item.label}</span>
+          </SortableItem>
+        );
+      })}
+    </Sortable>
   );
 }
 ```
 
-See [List stories](?path=/docs/modules-dnd--docs) for horizontal and grid layouts
-and typed `classNames` targets for items, placeholders and overlays.
+See [Dnd stories](?path=/docs/modules-dnd--docs) for horizontal, grid and `asChild`
+layouts and typed `classNames` targets for items, placeholders and overlays.
 
-## Sortable board
+## Sortable group
 
-Apply the complete next container array from `onMove`. Optional `canDrop(item,
-fromId, toId)` restricts destinations. Custom `renderContainer(container, children)`
-must retain the supplied children, which include the drop zone.
+`SortableGroup` owns a record of ID arrays keyed by each nested `Sortable` `id`, and
+`onValueChange(next, event)` adds `fromContainer` and `toContainer` to the event.
+Optional `canDrop(id, from, to)` restricts destinations. The group renders no element,
+so place columns in any layout; an empty container shows `emptyContent`.
 
 ```tsx
 'use client';
 
 import { useState } from 'react';
 import {
-  DragHandle,
-  SortableBoard,
-  type SortableContainer,
+  Sortable,
+  SortableGroup,
+  SortableHandle,
+  SortableItem,
 } from '@itclabs/react-ui/dnd';
 
-type Item = { id: string; label: string };
+const titles: Record<string, string> = { todo: 'To do', done: 'Done' };
 
 export function ReorderBoard() {
-  const [containers, setContainers] = useState<SortableContainer<Item>[]>([
-    { id: 'todo', title: 'To do', items: [{ id: 'first', label: 'Lorem ipsum' }] },
-    { id: 'done', title: 'Done', items: [] },
-  ]);
+  const [columns, setColumns] = useState<Record<string, string[]>>({
+    todo: ['Lorem ipsum', 'Dolor sit amet'],
+    done: [],
+  });
 
   return (
-    <SortableBoard
-      aria-label="Work board"
-      containers={containers}
-      getId={(item) => item.id}
-      getLabel={(item) => item.label}
-      onMove={setContainers}
-      handle
-      renderItem={(item, { handleProps }) => (
-        <div className="flex items-center gap-3 rounded-control border border-line bg-surface p-4">
-          <DragHandle {...handleProps} label={item.label} />
-          <span>{item.label}</span>
-        </div>
-      )}
-    />
+    <SortableGroup value={columns} onValueChange={setColumns}>
+      <div className="grid gap-4 md:grid-cols-2">
+        {Object.keys(columns).map((column) => (
+          <section key={column} className="grid content-start gap-3">
+            <h3>{titles[column]}</h3>
+            <Sortable id={column} aria-label={titles[column]}>
+              {columns[column]!.map((id) => (
+                <SortableItem key={id} id={id} className="flex items-center gap-2 p-2">
+                  <SortableHandle />
+                  {id}
+                </SortableItem>
+              ))}
+            </Sortable>
+          </section>
+        ))}
+      </div>
+    </SortableGroup>
   );
 }
 ```
-
-See [Board](?path=/story/modules-dnd--board).
 
 ## Transfer plugin
 
