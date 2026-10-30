@@ -45,11 +45,9 @@ export function SidebarEntries({
               label={item.label}
               data-testid={id}
               className={cn(classNames?.group, item.className)}
-              {...(classNames?.groupLabel
-                ? { labelClassName: classNames.groupLabel }
-                : {})}
+              labelClassName={cn(collapsed && 'sr-only', classNames?.groupLabel)}
             >
-              <div className="grid gap-1">
+              <div className="grid gap-0.5">
                 <SidebarEntries
                   items={item.items}
                   activePath={childActivePath}

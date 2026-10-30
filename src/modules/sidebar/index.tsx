@@ -2,8 +2,7 @@
 import { useEffect, useState, type ComponentProps, type ReactNode } from 'react';
 import { cn, partTestId } from '../../components/common';
 import { Drawer } from '../../components/drawer';
-import { ChevronLeftIcon } from '../../components/icon/outline/chevron-left';
-import { ChevronRightIcon } from '../../components/icon/outline/chevron-right';
+import { PanelLeftIcon } from '../../components/icon/outline/panel-left';
 import { MenuIcon } from '../../components/icon/outline/menu';
 import { KitIconButton } from '../../components/icon-button/kit-icon-button';
 import { useUILocale } from '../../i18n/provider';
@@ -77,19 +76,25 @@ export function Sidebar<TAccess = unknown>({
     <>
       <div
         data-testid={partTestId(id, mobile ? 'sidebarHeader' : 'header')}
-        className={cn('min-w-0 shrink-0', classNames?.header)}
+        className={cn(
+          'flex min-w-0 shrink-0 items-center gap-1',
+          rail && 'flex-col gap-2',
+          classNames?.header,
+        )}
       >
         {header != null && (
-          <SidebarHeader
-            header={header}
-            collapsed={rail}
-            classNames={classNames}
-            testId={id}
-          />
+          <div className="min-w-0 flex-1">
+            <SidebarHeader
+              header={header}
+              collapsed={rail}
+              classNames={classNames}
+              testId={id}
+            />
+          </div>
         )}
         {!mobile && (
           <KitIconButton
-            icon={rail ? ChevronRightIcon : ChevronLeftIcon}
+            icon={PanelLeftIcon}
             label={
               rail
                 ? (expandLabel ?? t('sidebar.expand'))
@@ -99,7 +104,11 @@ export function Sidebar<TAccess = unknown>({
             onClick={toggle}
             variant="ghost"
             data-testid={partTestId(id, 'toggle')}
-            className={cn('mt-2', classNames?.toggle)}
+            className={cn(
+              'shrink-0 text-muted',
+              !header && !rail && 'ml-auto',
+              classNames?.toggle,
+            )}
           />
         )}
       </div>
@@ -114,7 +123,7 @@ export function Sidebar<TAccess = unknown>({
           <SidebarNav
             aria-label={navigationLabel}
             data-testid={partTestId(id, 'nav')}
-            className={cn('gap-4', classNames?.nav)}
+            className={cn('gap-5', classNames?.nav)}
           >
             <SidebarEntries
               items={visibleItems ?? []}
@@ -133,7 +142,7 @@ export function Sidebar<TAccess = unknown>({
         <div
           data-testid={partTestId(id, 'footer')}
           className={cn(
-            'min-w-0 shrink-0 border-t border-line pt-3 text-ui-sm text-muted',
+            'grid min-w-0 shrink-0 text-ui-sm text-muted [&>*]:min-w-0',
             classNames?.footer,
           )}
         >
@@ -179,7 +188,7 @@ export function Sidebar<TAccess = unknown>({
         data-testid={testId}
         data-collapsed={collapsed}
         className={cn(
-          'group/sidebar sticky top-0 hidden h-dvh min-w-0 flex-col gap-4 overflow-hidden border-r border-line bg-sidebar p-3 lg:flex motion-safe:transition-[width] motion-safe:duration-[var(--motion-duration-normal)]',
+          'group/sidebar sticky top-0 hidden h-dvh min-w-0 flex-col gap-4 overflow-hidden bg-sidebar p-3 lg:flex motion-safe:transition-[width] motion-safe:duration-[var(--motion-duration-normal)]',
           collapsed ? 'w-sidebar-collapsed px-2' : 'w-sidebar',
           classNames?.root,
           className,
@@ -202,7 +211,7 @@ export function SidebarNav({
     <nav
       {...props}
       aria-label={label ?? t('sidebar.label')}
-      className={cn('grid gap-2', className)}
+      className={cn('grid gap-1', className)}
     />
   );
 }
@@ -219,7 +228,7 @@ export function SidebarGroup({
       {label != null && (
         <p
           className={cn(
-            'mb-3 px-1 text-eyebrow font-medium uppercase tracking-widest text-muted break-words',
+            'mb-1 px-2.5 text-ui-sm font-medium text-muted break-words',
             labelClassName,
           )}
         >

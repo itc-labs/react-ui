@@ -560,6 +560,8 @@ function RailExample({
               collapseOnMobile={false}
               className="w-full"
               classNames={{
+                trigger:
+                  'w-full border-transparent bg-transparent hover:bg-surface/60 group-data-[collapsed=true]/sidebar:justify-center',
                 details: 'group-data-[collapsed=true]/sidebar:hidden',
                 chevron: 'group-data-[collapsed=true]/sidebar:hidden',
               }}

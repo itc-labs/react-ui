@@ -21,11 +21,11 @@ export function SidebarItem({
 }) {
   const Component = asChild ? Slot.Root : 'span';
   const classes = cn(
-    'flex min-w-0 items-center gap-3 rounded-control px-3 py-2.5 text-control font-medium [overflow-wrap:anywhere] transition-colors focus-visible:outline-offset-2',
+    'flex min-h-9 min-w-0 items-center gap-2.5 rounded-control px-2.5 py-1.5 text-control [overflow-wrap:anywhere] motion-safe:transition-colors focus-visible:-outline-offset-2',
     focusRingClassName,
     active
-      ? 'bg-selected text-selected-ink'
-      : 'text-muted hover:bg-hover hover:text-ink',
+      ? 'bg-surface font-medium text-ink shadow-panel ring-1 ring-line [&_svg]:text-accent'
+      : 'text-muted hover:bg-surface/60 hover:text-ink',
     className,
   );
 

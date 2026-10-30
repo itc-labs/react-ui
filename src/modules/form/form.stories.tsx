@@ -1,5 +1,7 @@
 import { AvatarField } from '@itclabs/react-ui/avatar-upload';
-import { EditorField } from '@itclabs/react-ui/editor';
+import { Editor, EditorField } from '@itclabs/react-ui/editor';
+import { TreeSelect } from '@itclabs/react-ui/tree-select';
+import { Transfer } from '@itclabs/react-ui/transfer';
 import { DatePicker } from '../../components/date-picker';
 import { Input } from '../../components/input';
 import { InputPassword } from '../../components/input-password';
@@ -11,6 +13,7 @@ import { OptionGroup } from '../../components/option-group';
 import { QuantityInput } from '../../components/quantity-input';
 import { ColorPicker } from '../../components/color-picker';
 import { Rating } from '../../components/rating';
+import { Slider } from '../../components/slider';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, userEvent, waitFor, within } from 'storybook/test';
 import { useState } from 'react';
@@ -580,6 +583,88 @@ function ProductOptionsDemo() {
   );
 }
 
+function AdvancedFieldsDemo() {
+  const [saved, setSaved] = useState('');
+  const form = useAppForm({
+    defaultValues: {
+      price: [20, 80] as [number, number],
+      category: null as string | null,
+      channels: [] as string[],
+      description: '',
+    },
+    onSubmit: async ({ value }) => {
+      setSaved(JSON.stringify(value, null, 2));
+    },
+  });
+  const schema = {
+    price: v.tuple([v.number(), v.number()]),
+    category: v.pipe(
+      v.nullable(v.string()),
+      v.check((value) => value !== null, 'Choose a category.'),
+    ),
+    channels: v.pipe(
+      v.array(v.string()),
+      v.minLength(1, 'Choose at least one channel.'),
+    ),
+    description: v.pipe(v.string(), v.minLength(1, 'Write a description.')),
+  };
+
+  return (
+    <Form
+      form={form}
+      schema={schema}
+      className="grid max-w-2xl gap-5"
+      aria-label="Advanced fields"
+    >
+      <FormField name="price" label="Price range" required>
+        <Slider range min={0} max={100} formatValue={(value) => `$${value}`} />
+      </FormField>
+      <FormField name="category" label="Category" required>
+        <TreeSelect
+          searchable
+          showPath
+          nodes={[
+            {
+              id: 'apparel',
+              label: 'Apparel',
+              children: [
+                { id: 't-shirts', label: 'T-shirts' },
+                { id: 'hoodies', label: 'Hoodies' },
+              ],
+            },
+            {
+              id: 'home',
+              label: 'Home & living',
+              children: [
+                { id: 'mugs', label: 'Mugs' },
+                { id: 'posters', label: 'Posters' },
+              ],
+            },
+          ]}
+        />
+      </FormField>
+      <FormField name="channels" label="Sales channels" required>
+        <Transfer
+          searchable
+          items={['Lorem', 'Ipsum', 'Dolor', 'Sit', 'Amet'].map((label) => ({
+            id: label.toLowerCase(),
+            label,
+          }))}
+        />
+      </FormField>
+      <FormField name="description" label="Description" required>
+        <Editor />
+      </FormField>
+      <Button type="submit">Save</Button>
+      {saved && (
+        <pre role="status" className="rounded-control bg-surface p-3 text-ui-sm">
+          {saved}
+        </pre>
+      )}
+    </Form>
+  );
+}
+
 function ComposedCustomDemo() {
   const form = useAppForm({ defaultValues: { name: '' }, onSubmit: async () => {} });
 
@@ -671,6 +756,20 @@ export const ProductOptions: Story = {
       description: {
         story:
           'OptionGroup (swatch and chip), QuantityInput, ColorPicker, and Rating inside FormField. They bind through value/onValueChange like any other control; extra options open from the "+N" menu. Click Add to cart to see validation and the submitted values.',
+      },
+    },
+  },
+};
+
+export const AdvancedFields: Story = {
+  tags: ['example'],
+  name: 'Advanced fields',
+  render: () => <AdvancedFieldsDemo />,
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Slider (range), TreeSelect, Transfer, and Editor inside FormField. Each binds through value/onValueChange like other controls. Click Save to see validation and the submitted values.',
       },
     },
   },
