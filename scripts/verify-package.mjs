@@ -205,7 +205,32 @@ for (const subpath of [
   './chart',
   './avatar-upload',
 ]) {
-  await import(pathToFileURL(resolve(root, packed.exports[subpath].import)).href);
+  const api = await import(
+    pathToFileURL(resolve(root, packed.exports[subpath].import)).href
+  );
+  for (const name of [
+    'LinkImageProvider',
+    'LinkImageProviderProps',
+    'AdapterProvider',
+    'LinkImageContext',
+  ])
+    assert.ok(!(name in api), `Internal adapter export in ${subpath}: ${name}`);
+  if (subpath === '.' || subpath === './components') {
+    for (const name of ['UiLink', 'UiImage', 'useUiLink', 'useUiImage'])
+      assert.equal(
+        typeof api[name],
+        'function',
+        `Missing adapter API in ${subpath}: ${name}`,
+      );
+    const declarations = await readFile(
+      resolve(root, packed.exports[subpath].types),
+      'utf8',
+    );
+    assert.doesNotMatch(
+      declarations,
+      /\b(?:LinkImageProvider|LinkImageProviderProps|AdapterProvider|LinkImageContext)\b/,
+    );
+  }
 }
 
 const css = await readFile(`${root}/dist/ui.css`, 'utf8');

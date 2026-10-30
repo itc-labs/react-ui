@@ -1,22 +1,17 @@
+import { UIProvider } from '../../theme/provider';
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import {
-  LinkImageProvider,
-  UiLink,
-  UiImage,
-  type UiLinkProps,
-  type UiImageProps,
-} from './index';
+import { UiLink, UiImage, type UiLinkProps, type UiImageProps } from './index';
 
 const image = `data:image/svg+xml,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="320" height="180"><rect width="320" height="180" fill="#e1e9d7"/><circle cx="160" cy="90" r="45" fill="#365c42"/></svg>')}`;
 const meta = {
-  title: 'Components/LinkImageProvider',
-  component: LinkImageProvider,
-  subcomponents: { UiLink, UiImage },
+  title: 'Components/UiLink & UiImage',
+  component: UiLink,
+  subcomponents: { UiImage },
   parameters: {
     docs: {
       description: {
         component:
-          'UiLink and UiImage preserve native props, refs and className, and render as a/img by default. Supply Link/Image adapters through LinkImageProvider to use your app router or image optimizer. Nested providers inherit adapters they do not override.',
+          'UiLink and UiImage preserve native props, refs and className, and render as a/img by default. Supply link/image adapters through UIProvider to use your app router or image optimizer. Nested providers inherit adapters they do not override.',
       },
     },
   },
@@ -53,8 +48,9 @@ function ProjectImage(props: UiImageProps) {
 export const CustomAdapters: Story = {
   tags: ['example'],
   render: () => (
-    <LinkImageProvider Link={ProjectLink} Image={ProjectImage}>
+    <UIProvider link={ProjectLink} image={ProjectImage}>
       <div className="grid max-w-sm gap-4">
+        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
         <UiLink href="#custom-image" className="text-brand-700 underline">
           View image through adapter
         </UiLink>
@@ -66,7 +62,7 @@ export const CustomAdapters: Story = {
           height={180}
         />
       </div>
-    </LinkImageProvider>
+    </UIProvider>
   ),
 };
 export const CustomClasses: Story = {

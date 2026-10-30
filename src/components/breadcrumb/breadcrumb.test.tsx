@@ -1,9 +1,10 @@
 // @vitest-environment jsdom
+import { UIProvider } from '../../theme/provider';
 import { act, createRef } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { Breadcrumb, BreadcrumbLink } from './index';
-import { LinkImageProvider, UiLink, type UiLinkProps } from '../link-image-provider';
+import { UiLink, type UiLinkProps } from '../link-image-provider';
 import { Sidebar, SidebarItem } from '../../modules/sidebar';
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
@@ -35,7 +36,7 @@ it.each(['page', 'hero'] as const)(
     const clicked = vi.fn();
     await act(async () =>
       root.render(
-        <LinkImageProvider Link={ProjectLink}>
+        <UIProvider link={ProjectLink}>
           <Breadcrumb
             variant={variant}
             data-testid="path"
@@ -71,7 +72,7 @@ it.each(['page', 'hero'] as const)(
               },
             ]}
           />
-        </LinkImageProvider>,
+        </UIProvider>,
       ),
     );
     const link = byId('path-link-parent%2Fa');
@@ -125,7 +126,7 @@ it('forwards compound link refs through UiLink and Slot and renders no-href part
   const slottedRef = createRef<HTMLAnchorElement>();
   await act(async () =>
     root.render(
-      <LinkImageProvider Link={ProjectLink}>
+      <UIProvider link={ProjectLink}>
         <BreadcrumbLink href="/parent" ref={breadcrumbRef} data-testid="link">
           Parent
         </BreadcrumbLink>
@@ -147,7 +148,7 @@ it('forwards compound link refs through UiLink and Slot and renders no-href part
         <SidebarItem active data-testid="row-label" icon={<span>Icon</span>}>
           Label
         </SidebarItem>
-      </LinkImageProvider>,
+      </UIProvider>,
     ),
   );
   for (const [id, ref] of [

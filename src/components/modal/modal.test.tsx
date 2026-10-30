@@ -151,7 +151,7 @@ it('returns a typed custom value, preserves local content on enqueue and dismiss
   input.value = 'local draft';
 
   act(() => {
-    void controller.alert({ title: 'Queued', id: 'queued' });
+    void controller.alert({ title: 'Queued', id: 'queued', priority: 10 });
   });
 
   expect(byId('draft')).toBe(input);
@@ -235,6 +235,68 @@ it('shows FIFO entries, dedupes queued and visible IDs with the exact same promi
   await expect(third).resolves.toBeUndefined();
 });
 
+it('selects the highest waiting priority without interrupting or remounting active content', async () => {
+  mount({ 'data-testid': 'dialogs' });
+
+  act(() => {
+    void controller.open({
+      id: 'current',
+      title: 'Current',
+      content: () => <input data-testid="draft" defaultValue="initial" />,
+    });
+  });
+
+  const current = byId('dialogs-modal-current');
+  const input = byId('draft') as HTMLInputElement;
+  input.value = 'local draft';
+
+  act(() => {
+    void controller.alert({ id: 'normal', title: 'Normal' });
+    void controller.alert({ id: 'low', title: 'Low', priority: -1 });
+    void controller.alert({ id: 'high', title: 'High', priority: 10 });
+    void controller.alert({ id: 'equal', title: 'Equal', priority: 10 });
+    void controller.alert({ id: 'zero', title: 'Zero', priority: 0 });
+  });
+
+  expect(byId('dialogs-modal-current')).toBe(current);
+  expect(byId('draft')).toBe(input);
+  expect(input.value).toBe('local draft');
+  expect(document.querySelectorAll('[role="alertdialog"]')).toHaveLength(0);
+  await click('dialogs-modal-current-close');
+  for (const id of ['high', 'equal', 'normal', 'zero', 'low']) {
+    expect(document.querySelectorAll('[role="alertdialog"]')).toHaveLength(1);
+    await click(`dialogs-modal-${id}-ok`);
+  }
+  expect(controller.isOpen()).toBe(false);
+});
+
+it('keeps the original priority and promise when a queued or visible ID is reused', async () => {
+  mount({ 'data-testid': 'dialogs' });
+  let current!: Promise<void>, normal!: Promise<void>, high!: Promise<void>;
+
+  act(() => {
+    current = controller.alert({ id: 'current', title: 'Current' });
+    normal = controller.alert({ id: 'normal', title: 'Normal' });
+    high = controller.alert({ id: 'high', title: 'High', priority: 10 });
+  });
+
+  expect(controller.alert({ id: 'current', title: 'Duplicate', priority: -10 })).toBe(
+    current,
+  );
+  expect(controller.alert({ id: 'normal', title: 'Duplicate', priority: 20 })).toBe(
+    normal,
+  );
+  expect(controller.alert({ id: 'high', title: 'Duplicate', priority: -20 })).toBe(
+    high,
+  );
+  await click('dialogs-modal-current-ok');
+  await expect(current).resolves.toBeUndefined();
+  await click('dialogs-modal-high-ok');
+  await expect(high).resolves.toBeUndefined();
+  await click('dialogs-modal-normal-ok');
+  await expect(normal).resolves.toBeUndefined();
+});
+
 it('nests stacked confirmations immediately and restores focus to the underlying opener', async () => {
   mount();
   let stacked!: Promise<boolean>;
@@ -251,6 +313,7 @@ it('nests stacked confirmations immediately and restores focus to the underlying
             stacked = controller.confirm({
               title: 'Stacked',
               id: 'stacked',
+              priority: -10,
               stack: true,
               'data-testid': 'stacked',
             });
@@ -260,7 +323,7 @@ it('nests stacked confirmations immediately and restores focus to the underlying
         </Button>
       ),
     });
-    void controller.alert({ title: 'Queued', id: 'queued' });
+    void controller.alert({ title: 'Queued', id: 'queued', priority: 10 });
   });
 
   const parent = byId('parent');

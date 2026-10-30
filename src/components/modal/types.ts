@@ -8,6 +8,7 @@ export interface ModalOptions {
   id?: string;
   title: NonNullable<ReactNode>;
   description?: ReactNode;
+  priority?: number;
   stack?: boolean;
   'data-testid'?: string;
   className?: string;

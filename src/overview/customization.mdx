@@ -38,6 +38,25 @@ export function Example() {
 
 Here `px-6` wins over `px-4`; the control slot replaces the default radius. Your application must provide CSS for its classes. With Tailwind, ensure your application's source files are scanned.
 
+## Editor autocomplete for classNames
+
+Configure VS Code Tailwind CSS IntelliSense in your application's `.vscode/settings.json`; a package cannot configure the editor:
+
+```jsonc
+{
+  "tailwindCSS.classAttributes": ["class", "className", "classNames"],
+  "tailwindCSS.classFunctions": ["cn", "cva"],
+}
+```
+
+For `prettier-plugin-tailwindcss`, add this option to your Prettier configuration to sort classes in `classNames`:
+
+```json
+{
+  "tailwindAttributes": ["classNames"]
+}
+```
+
 ## Select slots
 
 Select exposes label, control, menu, option, and other React Select slots. React Select slot values accept strings or callbacks with state such as `isFocused`, `isSelected`, and `isDisabled`. `className` targets the React Select container; `classNames.root` targets the outer field wrapper.

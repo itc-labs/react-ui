@@ -5,6 +5,12 @@ import { createPortal } from 'react-dom';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { UIProvider, useTheme } from './provider';
+import {
+  UiLink,
+  UiImage,
+  type UiLinkProps,
+  type UiImageProps,
+} from '../components/link-image-provider';
 import type { UIThemeTokens } from './index';
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
@@ -152,3 +158,68 @@ it('leaves no root overrides after navigating away from a token-themed story', (
 
   expect(document.querySelector('style')).toBeNull();
 });
+
+function AppLink(props: UiLinkProps) {
+  return <a {...props} data-adapter="app" />;
+}
+
+function AppImage(props: UiImageProps) {
+  return <img {...props} data-adapter="app" />;
+}
+
+function ScopedLink(props: UiLinkProps) {
+  return <a {...props} data-adapter="scoped" />;
+}
+
+function ScopedImage(props: UiImageProps) {
+  return <img {...props} data-adapter="scoped" />;
+}
+
+function AdapterConsumers() {
+  return (
+    <>
+      <UiLink href="/page">Page</UiLink>
+      <UiImage src="image.png" alt="Example" />
+    </>
+  );
+}
+
+it('supplies UIProvider adapters to UiLink and UiImage', () => {
+  act(() =>
+    root.render(
+      <UIProvider link={AppLink} image={AppImage}>
+        <AdapterConsumers />
+      </UIProvider>,
+    ),
+  );
+
+  expect(host.querySelector('a')?.getAttribute('data-adapter')).toBe('app');
+  expect(host.querySelector('img')?.getAttribute('data-adapter')).toBe('app');
+});
+
+it.each([
+  { link: ScopedLink, image: undefined, expectedLink: 'scoped', expectedImage: 'app' },
+  { link: undefined, image: ScopedImage, expectedLink: 'app', expectedImage: 'scoped' },
+  { link: undefined, image: undefined, expectedLink: 'app', expectedImage: 'app' },
+])(
+  'inherits omitted adapters in nested UIProvider ($expectedLink/$expectedImage)',
+  ({ link, image, expectedLink, expectedImage }) => {
+    act(() =>
+      root.render(
+        <UIProvider link={AppLink} image={AppImage}>
+          <UIProvider {...(link ? { link } : {})} {...(image ? { image } : {})}>
+            <AdapterConsumers />
+          </UIProvider>
+          <section>
+            <AdapterConsumers />
+          </section>
+        </UIProvider>,
+      ),
+    );
+
+    expect(host.querySelector('a')?.getAttribute('data-adapter')).toBe(expectedLink);
+    expect(host.querySelector('img')?.getAttribute('data-adapter')).toBe(expectedImage);
+    expect(host.querySelector('section a')?.getAttribute('data-adapter')).toBe('app');
+    expect(host.querySelector('section img')?.getAttribute('data-adapter')).toBe('app');
+  },
+);

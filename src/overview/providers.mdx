@@ -4,16 +4,18 @@ import { Meta } from '@storybook/addon-docs/blocks';
 
 # Providers & adapters
 
-`UIProvider` configures theme and language. `LinkImageProvider` connects host routing and image rendering. `ToastProvider` and `ModalProvider` mount imperative feedback services. The application owns data fetching and business behavior.
+`UIProvider` configures theme, language, host routing, and image rendering. Nested `UIProvider` scopes provide adapter overrides. `ToastProvider` and `ModalProvider` mount imperative feedback services. The application owns data fetching and business behavior.
 
 Without configuration, controls use the `vi-VN` locale, outline icons, CSS tokens, and native links and images. Toast and modal APIs require mounted providers.
 
 ## UIProvider props
 
-All configuration props are optional; `children` is required. Theme types are exported from `@itclabs/react-ui/theme`; locale types from `@itclabs/react-ui/i18n`.
+All configuration props are optional; `children` is required. Adapter types are exported from `@itclabs/react-ui`. Theme types are exported from `@itclabs/react-ui/theme`; locale types from `@itclabs/react-ui/i18n`.
 
 | Prop              | Type                  | Behavior                                                                                                                                                                                                    |
 | ----------------- | --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `link`            | `UiLinkComponent`     | Host link adapter; inherits when omitted, defaulting to native links.                                                                                                                                       |
+| `image`           | `UiImageComponent`    | Host image adapter; inherits when omitted, defaulting to native images.                                                                                                                                     |
 | `theme`           | `UITheme`             | Optional readonly `icons` and `tokens` settings; inherits the parent theme.                                                                                                                                 |
 | `locale`          | `string \| UILocale`  | A locale code or an object containing `code`, readonly `messages`, and optional `calendarLocale`. Inherits the parent; defaults to `vi-VN`.                                                                 |
 | `translations`    | `UITranslations`      | A readonly array of `{ locale: string; messages: Readonly<Partial<UIMessages>> }`. Replaces the inherited catalog when supplied. Defaults to an empty catalog with built-in English and Vietnamese support. |
@@ -36,26 +38,33 @@ Use this order at the application root. Each example below is a separate complet
 import type { ReactNode } from 'react';
 import {
   UIProvider,
-  LinkImageProvider,
   ToastProvider,
   ModalProvider,
+  type UiLinkProps,
+  type UiImageProps,
 } from '@itclabs/react-ui';
+
+function AppLink(props: UiLinkProps) {
+  return <a {...props} />;
+}
+
+function AppImage(props: UiImageProps) {
+  return <img {...props} />;
+}
 
 export function UIRoot({ children }: { children: ReactNode }) {
   return (
-    <UIProvider locale="en-US">
-      <LinkImageProvider>
-        <ToastProvider position="bottom-right">
-          <ModalProvider>{children}</ModalProvider>
-        </ToastProvider>
-      </LinkImageProvider>
+    <UIProvider locale="en-US" link={AppLink} image={AppImage}>
+      <ToastProvider position="bottom-right">
+        <ModalProvider>{children}</ModalProvider>
+      </ToastProvider>
     </UIProvider>
   );
 }
 ```
 
 - Put `UIProvider` outside feedback providers so their labels and icons use its configuration.
-- Put `LinkImageProvider` around consumers such as Breadcrumb, Sidebar, menu links, avatars, and file previews.
+- Configure `UIProvider link` and `image` for consumers such as Breadcrumb, Sidebar, menu links, avatars, and file previews.
 - Mount one default `ToastProvider` and one default `ModalProvider` for the exported `toast` and `modal` clients. They do not depend on each other's controllers; either can wrap the other. Keep both around children that use their hooks.
 - Call imperative APIs after mount, for example in event handlers. There is no server or pre-mount queue. `useToast()` and `useModal()` require their respective providers.
 
@@ -69,7 +78,7 @@ export function UIRoot({ children }: { children: ReactNode }) {
 
 **Locale:** nested providers inherit omitted settings. Calendar maps merge, while a supplied translations array replaces the catalog. Message overrides merge for the same locale; switching locale code or supplying a different locale object resets inherited overrides. These settings apply to the React subtree.
 
-**Adapters:** a nested `LinkImageProvider` replaces only the adapters supplied to it; the other adapter inherits from its parent.
+**Adapters:** a nested `UIProvider` replaces only the adapters supplied through `link` and `image`; each omitted adapter inherits from its parent. Use `<UIProvider link={ScopedLink}>` to override only links in a subtree while retaining the parent image adapter.
 
 **Feedback:** each toast or modal provider has its own controller. One client can bind to only one mounted provider. Use `createToastClient()` and `createModalClient()` for independent application roots, and retain those clients for the root's lifetime. For a local subtree, set `client={null}` and call `useToast()` or `useModal()`; the default exported clients still target the root providers. Changing a modal provider's client or unmounting it settles pending modals as dismissed.
 
@@ -91,7 +100,6 @@ import NextLink from 'next/link';
 import NextImage from 'next/image';
 import {
   UIProvider,
-  LinkImageProvider,
   ToastProvider,
   ModalProvider,
   type UiLinkProps,
@@ -112,12 +120,10 @@ function AppImage({ width, height, ...props }: UiImageProps) {
 
 export function AppProviders({ children }: { children: ReactNode }) {
   return (
-    <UIProvider locale="en-US">
-      <LinkImageProvider Link={AppLink} Image={AppImage}>
-        <ToastProvider>
-          <ModalProvider>{children}</ModalProvider>
-        </ToastProvider>
-      </LinkImageProvider>
+    <UIProvider locale="en-US" link={AppLink} image={AppImage}>
+      <ToastProvider>
+        <ModalProvider>{children}</ModalProvider>
+      </ToastProvider>
     </UIProvider>
   );
 }
@@ -133,7 +139,7 @@ React Router's `Link` takes `to` instead of `href`. This complete module accepts
 'use client';
 
 import { useMemo, type ComponentType, type ReactNode } from 'react';
-import { LinkImageProvider, type UiLinkProps } from '@itclabs/react-ui';
+import { UIProvider, type UiLinkProps } from '@itclabs/react-ui';
 
 type RouterLinkProps = Omit<UiLinkProps, 'href'> & { to: string };
 
@@ -152,7 +158,7 @@ export function RouterAdapters({
     return Adapter;
   }, [RouterLink]);
 
-  return <LinkImageProvider Link={AppLink}>{children}</LinkImageProvider>;
+  return <UIProvider link={AppLink}>{children}</UIProvider>;
 }
 ```
 

@@ -47,20 +47,33 @@ Use one of the two, not both.
 
 ## Providers
 
-Every provider is optional; components fall back to sensible defaults (Vietnamese labels, Outline icons, native `<a>`/`<img>`). Mount them once in a client root.
+Every provider is optional; components fall back to sensible defaults (Vietnamese labels, Outline icons, native `<a>`/`<img>`). Mount them once in a client root. This Next.js App Router example passes `next/link` and `next/image` to the kit:
 
 ```tsx
 'use client';
 
 import type { ReactNode } from 'react';
+import NextLink from 'next/link';
+import NextImage from 'next/image';
 import {
   UIProvider,
-  LinkImageProvider,
   ToastProvider,
   ModalProvider,
   defineTheme,
+  type UiLinkProps,
+  type UiImageProps,
 } from '@itclabs/react-ui';
-import { AppLink, AppImage } from './ui-adapters';
+
+function AppLink(props: UiLinkProps) {
+  return <NextLink {...props} />;
+}
+
+function AppImage({ width, height, ...props }: UiImageProps) {
+  // next/image needs known dimensions; fall back to <img> otherwise.
+  if (!width || !height) return <img {...props} />;
+
+  return <NextImage {...props} width={width} height={height} />;
+}
 
 // Define the theme outside render so its identity stays stable.
 const theme = defineTheme({
@@ -71,32 +84,33 @@ const theme = defineTheme({
 export function UIRoot({ children }: { children: ReactNode }) {
   return (
     <UIProvider
+      link={AppLink}
+      image={AppImage}
       theme={theme}
       locale="en-US"
       fallbackLocale="en-US"
       messages={{ 'dialog.close': 'Close panel' }}
     >
-      <LinkImageProvider Link={AppLink} Image={AppImage}>
-        <ToastProvider>
-          <ModalProvider>{children}</ModalProvider>
-        </ToastProvider>
-      </LinkImageProvider>
+      <ToastProvider>
+        <ModalProvider>{children}</ModalProvider>
+      </ToastProvider>
     </UIProvider>
   );
 }
 ```
 
-| Provider            | Purpose                                                   |
-| ------------------- | --------------------------------------------------------- |
-| `UIProvider`        | Locale, translations, icon theme and runtime theme tokens |
-| `LinkImageProvider` | Router link / optimized image adapters (e.g. Next.js)     |
-| `ToastProvider`     | Enables `toast.success/error/info/warning` anywhere       |
-| `ModalProvider`     | Enables `modal.confirm/alert/open` with a FIFO queue      |
+| Provider        | Purpose                                              |
+| --------------- | ---------------------------------------------------- |
+| `UIProvider`    | Locale, theme, router link and image adapters        |
+| `ToastProvider` | Enables `toast.success/error/info/warning` anywhere  |
+| `ModalProvider` | Enables `modal.confirm/alert/open` with a FIFO queue |
 
 `UIProvider` props:
 
 | Prop              | Purpose                                                                              |
 | ----------------- | ------------------------------------------------------------------------------------ |
+| `link`            | `UiLinkComponent`: host router link adapter; inherits when omitted                   |
+| `image`           | `UiImageComponent`: host image adapter; inherits when omitted                        |
 | `theme`           | `defineTheme({ tokens, icons })`: CSS token overrides and icon variant, size, packs  |
 | `locale`          | Locale code (`'vi-VN'` default, `'en-US'` built in) or a locale from `defineLocale`  |
 | `translations`    | Extra catalogs: `[{ locale: 'fr-FR', messages: { … } }]`; missing keys fall back     |
@@ -106,26 +120,7 @@ export function UIRoot({ children }: { children: ReactNode }) {
 
 ### Link and image adapters
 
-`LinkImageProvider` lets kit components (Sidebar, Navbar, Breadcrumb, Avatar…) render your router link and image component. Without it they render `<a>` and `<img>`. Adapters receive `UiLinkProps` / `UiImageProps`; a Next.js App Router version:
-
-```tsx
-'use client';
-
-import NextLink from 'next/link';
-import NextImage from 'next/image';
-import type { UiLinkProps, UiImageProps } from '@itclabs/react-ui';
-
-export function AppLink(props: UiLinkProps) {
-  return <NextLink {...props} />;
-}
-
-export function AppImage({ width, height, ...props }: UiImageProps) {
-  // next/image needs known dimensions; fall back to <img> otherwise.
-  if (!width || !height) return <img {...props} />;
-
-  return <NextImage {...props} width={width} height={height} />;
-}
-```
+`link` and `image` let kit components (Sidebar, Navbar, Breadcrumb, Avatar…) render your router link and image component; without them they render `<a>` and `<img>`. Adapters receive `UiLinkProps` / `UiImageProps`, so any router works (for React Router, map `href` to `to`). Use a nested `<UIProvider link={ScopedLink}>` for a scoped override: it replaces the link adapter and inherits the image adapter. Define adapters in a client module; do not pass adapter functions across a server/client boundary.
 
 ## Usage
 
@@ -322,6 +317,25 @@ Or apply runtime tokens through the root provider:
 ```
 
 `@itclabs/react-ui/theme/custom-theme.example.css` lists every overridable token with its default value.
+
+### Editor autocomplete for classNames
+
+Configure VS Code Tailwind CSS IntelliSense in your application's `.vscode/settings.json`; a package cannot configure the editor:
+
+```jsonc
+{
+  "tailwindCSS.classAttributes": ["class", "className", "classNames"],
+  "tailwindCSS.classFunctions": ["cn", "cva"],
+}
+```
+
+For `prettier-plugin-tailwindcss`, add this option to your Prettier configuration to sort classes in `classNames`:
+
+```json
+{
+  "tailwindAttributes": ["classNames"]
+}
+```
 
 ## Icons
 

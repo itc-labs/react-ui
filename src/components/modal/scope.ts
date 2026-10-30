@@ -37,7 +37,14 @@ export function createModalScope() {
   function finish(entry: ModalEntry, result?: unknown) {
     if (!entries.includes(entry)) return;
     const next = entries.filter((item) => item !== entry);
-    if (!next.some((item) => item.visible) && next[0]) next[0].visible = true;
+    if (!next.some((item) => item.visible)) {
+      let waiting: ModalEntry | undefined;
+      for (const item of next) {
+        if (!waiting || (item.options.priority ?? 0) > (waiting.options.priority ?? 0))
+          waiting = item;
+      }
+      if (waiting) waiting.visible = true;
+    }
     publish(next);
     entry.resolve(
       entry.kind === 'confirm'

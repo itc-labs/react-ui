@@ -4,12 +4,17 @@ import type { UITheme, ResolvedUITheme } from './index';
 import { themeColors } from './colors';
 import { themeTokenRule, validateThemeTokens } from './tokens';
 
+import type {
+  UiLinkComponent,
+  UiImageComponent,
+} from '../components/link-image-provider';
+import { AdapterProvider } from '../components/link-image-provider/context';
 import { UILocaleProvider } from '../i18n/provider';
 import type { UILocale, UIMessages, UITranslations, UICalendarLocales } from '../i18n';
 const emptyTheme: UITheme = {};
 const ThemeContext = createContext<UITheme>({});
 
-/** Token strings are serializable RSC props; icon components need a client root. */
+/** Token strings are serializable RSC props; icon components and adapters need a client root. */
 export function UIProvider({
   theme = emptyTheme,
   locale,
@@ -17,6 +22,8 @@ export function UIProvider({
   translations,
   fallbackLocale,
   calendarLocales,
+  link,
+  image,
   children,
 }: {
   theme?: UITheme;
@@ -25,6 +32,8 @@ export function UIProvider({
   fallbackLocale?: string;
   calendarLocales?: UICalendarLocales;
   messages?: Partial<UIMessages>;
+  link?: UiLinkComponent;
+  image?: UiImageComponent;
   children: ReactNode;
 }) {
   const parent = useContext(ThemeContext);
@@ -71,7 +80,16 @@ export function UIProvider({
         {!parent.tokens && hasTokens && tokens && (
           <style>{themeTokenRule(tokens)}</style>
         )}
-        {children}
+        {link || image ? (
+          <AdapterProvider
+            {...(link ? { Link: link } : {})}
+            {...(image ? { Image: image } : {})}
+          >
+            {children}
+          </AdapterProvider>
+        ) : (
+          children
+        )}
       </UILocaleProvider>
     </ThemeContext.Provider>
   );
