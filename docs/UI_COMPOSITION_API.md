@@ -45,7 +45,7 @@ Composed mode is selected by prop key presence: `title` for Dialog/Drawer/AlertD
   side="right"
   actions={[{ id: 'close', label: 'Đóng', close: true }]}
 >
-  <Input label="Nội dung" />
+  <Input aria-label="Nội dung" />
 </Drawer>
 
 <Tabs items={[

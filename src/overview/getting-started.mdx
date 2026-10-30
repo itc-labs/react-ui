@@ -4,6 +4,14 @@ import { Meta } from '@storybook/addon-docs/blocks';
 
 # Getting started
 
+## 0. Cài đặt
+
+```bash
+pnpm add @itclabs/react-ui valibot date-fns @date-fns/tz @tanstack/react-form @tanstack/react-table
+```
+
+Năm thư viện sau kit là peer dependency bắt buộc: ứng dụng và kit dùng chung một bản, và ứng dụng import trực tiếp từ chính package đó.
+
 ## 1. Import CSS một lần
 
 Ứng dụng dùng Tailwind CSS v4. Cách nhanh nhất là import entry đầy đủ trong file CSS gốc:
@@ -19,13 +27,16 @@ import { Meta } from '@storybook/addon-docs/blocks';
 ## 2. Bọc provider ở gốc ứng dụng
 
 ```tsx
+// AppLink/AppImage là adapter của ứng dụng (ví dụ bọc next/link, next/image) — xem **Overview/Providers**.
+import { AppLink, AppImage } from './ui-adapters';
+
 <UIProvider locale="vi-VN">
   <LinkImageProvider Link={AppLink} Image={AppImage}>
     <ToastProvider>
       <ModalProvider>{children}</ModalProvider>
     </ToastProvider>
   </LinkImageProvider>
-</UIProvider>
+</UIProvider>;
 ```
 
 Provider nào cũng có giá trị mặc định hợp lý; chỉ thêm khi cần. Chi tiết, thứ tự và lưu ý SSR ở **Overview/Providers**.
