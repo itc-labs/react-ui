@@ -31,7 +31,7 @@ const slices: ChartSlice[] = [
 const meta = {
   title: 'Modules/Chart',
   component: Chart,
-  args: { type: 'line', label: 'Dữ liệu minh họa', title: 'Lorem ipsum', data, series },
+  args: { type: 'line', label: 'Sample chart', title: 'Lorem ipsum', data, series },
   argTypes: {
     type: { control: 'select', options: ['line', 'area', 'bar'] },
     data: { control: false },
@@ -41,7 +41,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'Biểu đồ dùng chung với type="line", "area", "bar", "pie" hoặc "donut". Line/area/bar nhận data và series; pie/donut nhận các phần có value. Tooltip, legend và bảng dữ liệu dùng cùng giá trị; null là thiếu dữ liệu, không đổi thành 0. Ứng dụng cung cấp dữ liệu và formatter.',
+          'Display line, area, bar, pie, or donut charts. Line/area/bar use data and series; pie/donut use slices with a value. Tooltips, legends, and data tables share the same values; null means missing data and is not converted to 0. The application supplies data and formatters.',
       },
     },
   },
@@ -77,8 +77,8 @@ export const States: Story = {
     <div className="grid gap-8 sm:grid-cols-2">
       <Chart
         type="line"
-        label="Đang tải"
-        title="Đang tải"
+        label="Loading"
+        title="Loading"
         data={data}
         series={series}
         loading
@@ -86,25 +86,25 @@ export const States: Story = {
       />
       <Chart
         type="line"
-        label="Chưa có dữ liệu"
-        title="Trống"
+        label="No data yet"
+        title="Empty"
         data={[]}
         series={series}
         height={200}
       />
       <Chart
         type="line"
-        label="Không tải được dữ liệu"
-        title="Có lỗi"
+        label="Could not load data"
+        title="Error"
         data={data}
         series={series}
-        error="Không tải được dữ liệu."
+        error="Could not load data."
         height={200}
       />
       <Chart
         type="donut"
-        label="Tất cả giá trị bằng 0"
-        title="Giá trị 0"
+        label="All values are zero"
+        title="Zero values"
         data={[{ id: 'zero', label: 'Lorem ipsum', value: 0 }]}
         showDataTable
         height={200}
@@ -119,7 +119,7 @@ export const StackedAndHorizontal: Story = {
     <div className="grid gap-8 lg:grid-cols-2">
       <Chart
         type="bar"
-        label="Cột xếp chồng"
+        label="Stacked bar"
         title="Stacked bar"
         data={data}
         series={series}
@@ -127,7 +127,7 @@ export const StackedAndHorizontal: Story = {
       />
       <Chart
         type="area"
-        label="Vùng xếp chồng"
+        label="Stacked area"
         title="Stacked area"
         data={data}
         series={series}
@@ -135,7 +135,7 @@ export const StackedAndHorizontal: Story = {
       />
       <Chart
         type="bar"
-        label="Thanh ngang"
+        label="Horizontal bar"
         title="Horizontal bar"
         data={data}
         series={series}
@@ -167,15 +167,15 @@ function RetryExample() {
     <div className="grid gap-4">
       <Chart
         type="bar"
-        label="Dữ liệu minh họa"
+        label="Sample chart"
         data={failed ? [] : data}
         series={series}
-        error={failed ? 'Không tải được dữ liệu.' : undefined}
+        error={failed ? 'Could not load data.' : undefined}
         onRetry={() => setFailed(false)}
         data-testid="retry-chart"
       />
       <Button variant="secondary" onClick={() => setFailed(true)}>
-        Đặt lại ví dụ
+        Reset example
       </Button>
     </div>
   );
@@ -196,8 +196,14 @@ export const NarrowContainer: Story = {
   tags: ['example'],
   render: () => (
     <div className="grid w-72 max-w-full gap-8">
-      <Chart type="line" label="Vùng hẹp" data={data} series={series} height={220} />
-      <Chart type="donut" label="Vùng hẹp" data={slices} height={220} />
+      <Chart
+        type="line"
+        label="Narrow container"
+        data={data}
+        series={series}
+        height={220}
+      />
+      <Chart type="donut" label="Narrow container" data={slices} height={220} />
     </div>
   ),
 };
@@ -213,7 +219,7 @@ function CustomChartExample() {
   return (
     <Chart
       type="area"
-      label="Dữ liệu minh họa"
+      label="Sample chart"
       title="Lorem ipsum"
       description="Dolor sit amet, consectetur adipiscing elit."
       data={data}

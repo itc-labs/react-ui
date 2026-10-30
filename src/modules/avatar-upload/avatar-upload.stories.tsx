@@ -9,7 +9,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'Chọn ảnh bằng cách hover hoặc focus vào avatar. Ảnh mới được crop trước khi xác nhận; nút X xóa ảnh đã chọn. Hỗ trợ avatar tròn/vuông và trả File qua onValueChange để ứng dụng xử lý upload.',
+          'Hover over or focus the avatar to select an image. Crop the image before confirming; the X button removes it. Supports circular and square avatars and returns a File through onValueChange for the application to upload.',
       },
     },
   },
@@ -49,7 +49,7 @@ export const States: Story = {
       <AvatarUpload
         alt="Lorem Ipsum"
         size="lg"
-        error="Ảnh chưa hợp lệ. Chọn lại để tiếp tục."
+        error="Invalid image. Choose another image to continue."
       />
     </div>
   ),
@@ -67,7 +67,7 @@ export const NarrowContainer: Story = {
         alt="Lorem Ipsum"
         size="lg"
         shape="square"
-        error="Ảnh chưa hợp lệ. Chọn PNG, JPEG hoặc WebP để thử lại."
+        error="Invalid image. Choose PNG, JPEG or WebP to try again."
       />
     </div>
   ),
@@ -79,7 +79,7 @@ export const CustomClasses: Story = {
     <AvatarUpload
       alt="Lorem Ipsum"
       size="lg"
-      hint="Lorem ipsum dolor sit amet."
+      hint="Choose an image to crop and upload."
       classNames={{
         root: 'max-w-xs rounded-panel border border-line bg-surface p-5',
         avatar: 'border-4 border-brand-700',
@@ -114,7 +114,9 @@ export const SelectAndRemove: Story = {
     await waitFor(() =>
       expect(canvasElement.querySelector('img')?.getAttribute('src')).toMatch(/^blob:/),
     );
-    await userEvent.click(canvas.getByRole('button', { name: 'Bỏ ảnh đã chọn' }));
+    await userEvent.click(
+      canvas.getByRole('button', { name: 'Remove selected image' }),
+    );
     await expect(canvas.queryByText('avatar.png')).not.toBeInTheDocument();
   },
 };
