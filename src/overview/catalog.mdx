@@ -1,0 +1,126 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Reference/Catalog" />
+
+# Catalog
+
+Browse the three UI layers below. Each link opens its story documentation, including examples and available controls. See [Entry points & bundle size](?path=/docs/reference-entry-points-bundle-size--docs) for import paths.
+
+## Components
+
+Small UI building blocks for presentation, interaction, and feedback.
+
+### Actions and navigation
+
+| Name         | Purpose                                                   | Story docs                                            |
+| ------------ | --------------------------------------------------------- | ----------------------------------------------------- |
+| Button       | Trigger an action with size, variant, and loading states. | [Examples](?path=/docs/components-button--docs)       |
+| IconButton   | Trigger an action with a labeled icon button.             | [Examples](?path=/docs/components-iconbutton--docs)   |
+| Breadcrumb   | Show the current location in a hierarchy.                 | [Examples](?path=/docs/components-breadcrumb--docs)   |
+| Tabs         | Switch between related content panels.                    | [Examples](?path=/docs/components-tabs--docs)         |
+| DropdownMenu | Present actions, links, and nested menus.                 | [Examples](?path=/docs/components-dropdownmenu--docs) |
+| Accordion    | Expand and collapse sections of content.                  | [Examples](?path=/docs/components-accordion--docs)    |
+
+### Inputs and selection
+
+| Name          | Purpose                                                        | Story docs                                             |
+| ------------- | -------------------------------------------------------------- | ------------------------------------------------------ |
+| Input         | Collect a single line of text with a label and feedback.       | [Examples](?path=/docs/components-input--docs)         |
+| Textarea      | Collect multiple lines of text.                                | [Examples](?path=/docs/components-textarea--docs)      |
+| NumberInput   | Collect a formatted numeric value with optional step controls. | [Examples](?path=/docs/components-numberinput--docs)   |
+| InputPassword | Collect a password with a visibility toggle.                   | [Examples](?path=/docs/components-inputpassword--docs) |
+| InputOTP      | Collect a one-time code in visual slots.                       | [Examples](?path=/docs/components-inputotp--docs)      |
+| Select        | Choose one or more values from options.                        | [Examples](?path=/docs/components-select--docs)        |
+| Checkbox      | Toggle a checked or indeterminate value.                       | [Examples](?path=/docs/components-checkbox--docs)      |
+| RadioGroup    | Choose one value from a labeled option group.                  | [Examples](?path=/docs/components-radiogroup--docs)    |
+| Switch        | Toggle a boolean setting.                                      | [Examples](?path=/docs/components-switch--docs)        |
+| UploadField   | Select files and report file validation issues.                | [Examples](?path=/docs/components-uploadfield--docs)   |
+
+### Dates and times
+
+| Name            | Purpose                                                 | Story docs                                               |
+| --------------- | ------------------------------------------------------- | -------------------------------------------------------- |
+| Calendar        | Select a date or date range in a month grid.            | [Examples](?path=/docs/components-calendar--docs)        |
+| DatePicker      | Choose a single date through a field and calendar.      | [Examples](?path=/docs/components-datepicker--docs)      |
+| DateRangePicker | Choose a start and end date.                            | [Examples](?path=/docs/components-daterangepicker--docs) |
+| TimePicker      | Choose a time within configurable bounds and intervals. | [Examples](?path=/docs/components-timepicker--docs)      |
+
+### Display and feedback
+
+| Name         | Purpose                                                           | Story docs                                            |
+| ------------ | ----------------------------------------------------------------- | ----------------------------------------------------- |
+| Avatar       | Show an image with fallback and loading states.                   | [Examples](?path=/docs/components-avatar--docs)       |
+| Badge        | Attach a count or dot indicator to content.                       | [Examples](?path=/docs/components-badge--docs)        |
+| Tag          | Show a label with optional selection or removal.                  | [Examples](?path=/docs/components-tag--docs)          |
+| Card         | Group content with title, description, action, and footer slots.  | [Examples](?path=/docs/components-card--docs)         |
+| Icon         | Render a semantic icon or supplied glyph.                         | [Examples](?path=/docs/components-icon--docs)         |
+| Illustration | Render an SVG illustration for common empty or error states.      | [Examples](?path=/docs/components-illustration--docs) |
+| Alert        | Show an inline or panel status message.                           | [Examples](?path=/docs/components-alert--docs)        |
+| Skeleton     | Reserve space with a decorative loading placeholder.              | [Examples](?path=/docs/components-skeleton--docs)     |
+| Spinner      | Indicate ongoing work with an accessible label.                   | [Examples](?path=/docs/components-spinner--docs)      |
+| Progress     | Show linear or circular progress, including indeterminate states. | [Examples](?path=/docs/components-progress--docs)     |
+| TopLoader    | Show progress for navigation or other asynchronous work.          | [Examples](?path=/docs/components-toploader--docs)    |
+| Toast        | Show transient notifications through a provider and client API.   | [Examples](?path=/docs/components-toast--docs)        |
+
+### Overlays and adapters
+
+| Name              | Purpose                                                              | Story docs                                                 |
+| ----------------- | -------------------------------------------------------------------- | ---------------------------------------------------------- |
+| Dialog            | Present modal content with a trigger, title, and actions.            | [Examples](?path=/docs/components-dialog--docs)            |
+| AlertDialog       | Request confirmation before continuing an action.                    | [Examples](?path=/docs/components-alertdialog--docs)       |
+| Drawer            | Present modal content from any edge.                                 | [Examples](?path=/docs/components-drawer--docs)            |
+| Popover           | Open contextual content anchored to a trigger.                       | [Examples](?path=/docs/components-popover--docs)           |
+| Tooltip           | Show a short explanation for a trigger.                              | [Examples](?path=/docs/components-tooltip--docs)           |
+| Modal             | Open alerts, confirmations, or custom dialogs through a promise API. | [Examples](?path=/docs/components-modal--docs)             |
+| LinkImageProvider | Supply link and image adapters for host frameworks.                  | [Examples](?path=/docs/components-linkimageprovider--docs) |
+
+## Modules
+
+Compositions of components for recurring interface patterns. The application supplies data and action handlers.
+
+### Page structure and navigation
+
+| Name       | Purpose                                                     | Story docs                                       |
+| ---------- | ----------------------------------------------------------- | ------------------------------------------------ |
+| PageHeader | Compose a page title, description, breadcrumb, and actions. | [Examples](?path=/docs/modules-pageheader--docs) |
+| EmptyState | Explain an empty state and offer a next action.             | [Examples](?path=/docs/modules-emptystate--docs) |
+| Navbar     | Render responsive top navigation with nested menus.         | [Examples](?path=/docs/modules-navbar--docs)     |
+| Sidebar    | Render responsive side navigation with a collapsible rail.  | [Examples](?path=/docs/modules-sidebar--docs)    |
+| UserMenu   | Combine an avatar and user details with an action menu.     | [Examples](?path=/docs/modules-usermenu--docs)   |
+| Tree       | Select nodes in an expandable hierarchy.                    | [Examples](?path=/docs/modules-tree--docs)       |
+| Stepper    | Show a sequence of steps and their status.                  | [Examples](?path=/docs/modules-stepper--docs)    |
+| Pagination | Navigate between pages of results.                          | [Examples](?path=/docs/modules-pagination--docs) |
+
+### Forms and data
+
+| Name              | Purpose                                                                | Story docs                                              |
+| ----------------- | ---------------------------------------------------------------------- | ------------------------------------------------------- |
+| Form              | Compose validated fields and submit controls with TanStack Form.       | [Examples](?path=/docs/modules-form--docs)              |
+| DataTable         | Display rows with sorting, pagination, selection, and column controls. | [Examples](?path=/docs/modules-datatable--docs)         |
+| Calendar          | Display and edit events in month, week, day, and list views.           | [Examples](?path=/docs/modules-calendar--docs)          |
+| ProgressList      | Compare item progress with optional thresholds and sorting.            | [Examples](?path=/docs/modules-progresslist--docs)      |
+| SegmentedProgress | Show a segmented distribution with a legend and text summary.          | [Examples](?path=/docs/modules-segmentedprogress--docs) |
+
+### Optional features
+
+| Name         | Purpose                                                     | Story docs                                         |
+| ------------ | ----------------------------------------------------------- | -------------------------------------------------- |
+| Editor       | Edit rich text with a Tiptap toolbar.                       | [Examples](?path=/docs/modules-editor--docs)       |
+| Chart        | Plot data with Recharts and an accessible equivalent table. | [Examples](?path=/docs/modules-chart--docs)        |
+| AvatarUpload | Select, crop, and upload an avatar image.                   | [Examples](?path=/docs/modules-avatarupload--docs) |
+
+## Templates
+
+Workspace structure and complete layout examples. WorkspaceShell is exported by the package; ApplicationLayout and CalendarPage are story compositions to adapt in your application.
+
+### Workspace layouts
+
+| Name              | Purpose                                                                 | Story docs                                                |
+| ----------------- | ----------------------------------------------------------------------- | --------------------------------------------------------- |
+| WorkspaceShell    | Arrange sidebar, header, and main content slots.                        | [Examples](?path=/docs/templates-workspaceshell--docs)    |
+| ApplicationLayout | Demonstrate sidebar or top navigation with a user menu and page header. | [Examples](?path=/docs/templates-applicationlayout--docs) |
+| CalendarPage      | Demonstrate an event calendar within a workspace layout.                | [Examples](?path=/docs/templates-calendarpage--docs)      |
+
+The component Calendar selects dates. The module Calendar manages events and is exported as `EventCalendar` from the root and `/modules`, or as `Calendar` from `/calendar`. See [Event calendar](?path=/docs/guides-event-calendar--docs).
+
+For implementation guidance, see [Forms](?path=/docs/guides-forms--docs), [Navigation](?path=/docs/guides-navigation--docs), and [Overlays & feedback](?path=/docs/guides-overlays-feedback--docs).

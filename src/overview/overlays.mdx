@@ -1,0 +1,204 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Guides/Overlays & feedback" />
+
+# Overlays & feedback
+
+Use a menu for actions, a dialog or drawer for focused interaction, and tabs for related panels. Keep important messages visible with `Alert` or field errors. Toasts provide temporary feedback; they should not be the only place users can find an error they must resolve.
+
+## Data-driven composition
+
+`DropdownMenu` accepts `trigger` and `items`, including actions, links, checkboxes, separators, labels, groups, and submenus. `Dialog` and `Drawer` accept a `title`, optional `description`, body children, and either `actions` or a custom `footer`. Set `close: true` on an action to close immediately. For asynchronous saves, control `open` and close only after success.
+
+```tsx
+import { useState } from 'react';
+import { Dialog, Drawer, DropdownMenu, Tabs } from '@itclabs/react-ui';
+
+export function OverlayExamples() {
+  const [showDetails, setShowDetails] = useState(true);
+  const [message, setMessage] = useState('');
+
+  return (
+    <>
+      <DropdownMenu
+        trigger="Actions"
+        items={[
+          {
+            id: 'copy',
+            label: 'Copy link',
+            onSelect: () => setMessage('Link copied in this demo.'),
+          },
+          { id: 'separator', type: 'separator' },
+          {
+            id: 'details',
+            type: 'checkbox',
+            label: 'Show details',
+            checked: showDetails,
+            onCheckedChange: setShowDetails,
+            closeOnSelect: false,
+          },
+        ]}
+      />
+      <Dialog
+        trigger="Preview"
+        title="Preview"
+        description="Review the content before continuing."
+        actions={[{ id: 'close', label: 'Close', close: true }]}
+      >
+        <p>Lorem ipsum dolor sit amet.</p>
+      </Dialog>
+      <Drawer
+        trigger="Open details"
+        title="Details"
+        description="Review additional information."
+        side="right"
+        actions={[{ id: 'done', label: 'Done', close: true }]}
+      >
+        <p>Lorem ipsum dolor sit amet.</p>
+      </Drawer>
+      <Tabs
+        label="Item information"
+        variant="underline"
+        items={[
+          { value: 'summary', label: 'Summary', content: <p>Lorem ipsum.</p> },
+          {
+            value: 'details',
+            label: 'Details',
+            content: <p>Dolor sit amet.</p>,
+            disabled: !showDetails,
+          },
+        ]}
+      />
+      <p role="status">{message}</p>
+    </>
+  );
+}
+```
+
+String triggers become kit buttons. Kit buttons and native buttons can serve directly as triggers. For a custom interactive trigger, use `triggerAsChild` and forward native props and ref.
+
+Dialogs and drawers use Radix focus scopes, Escape dismissal, and focus restoration. Supply a meaningful title and a description when instructions are needed. Drawer supports `left`, `right`, `top`, and `bottom`. Primitive parts such as `DialogContent` and `DialogTitle` remain available for custom composition.
+
+Tabs support `segmented`, `underline`, `pills`, and `outline`, three sizes, both orientations, and automatic or manual keyboard activation. By default, a panel mounts when first visited, then stays mounted but hidden and inert while inactive, preserving drafts. Set `keepMounted={false}` globally or per item to reset inactive panels. Keeping panels mounted does not prevent React renders.
+
+For value selection, use `Select` rather than an action menu. It stores strings (or string arrays for multiple selection), supports `searchable`, and integrates with [Forms](?path=/docs/guides-forms--docs). Select menus stay within Dialog/Drawer modal scope; within Popover they render inline. See [Navigation](?path=/docs/guides-navigation--docs) for navigation patterns.
+
+## Toast facade and useToast
+
+Mount `ToastProvider` once at the application root before using the hook-free `toast` facade from `@itclabs/react-ui/toast`. `useToast` returns the same methods for the nearest provider scope. Call notifications from browser event handlers or async workflows after mounting.
+
+```tsx
+import { Button, ToastProvider, useToast } from '@itclabs/react-ui';
+import { toast } from '@itclabs/react-ui/toast';
+
+export function reportSaveError() {
+  toast.error('Could not save', { description: 'Try again.' });
+}
+
+function SaveButton({ save }: { save: () => Promise<void> }) {
+  const notify = useToast();
+
+  async function handleSave() {
+    try {
+      await notify.promise(save, {
+        loading: 'Saving',
+        success: 'Saved',
+        error: 'Could not save. Try again.',
+      });
+    } catch {
+      // The error toast is already shown; the host can also retain a form error.
+    }
+  }
+
+  return (
+    <Button
+      onClick={() => {
+        void handleSave();
+      }}
+    >
+      Save
+    </Button>
+  );
+}
+
+export function ToastExample({ save }: { save: () => Promise<void> }) {
+  return (
+    <ToastProvider>
+      <SaveButton save={save} />
+    </ToastProvider>
+  );
+}
+```
+
+Use `success`, `error`, `info`, or `warning` for a tone. `loading` returns an ID; finish it with `update(id, { title: 'Saved', loading: false, tone: 'success' })`. `promise` returns the task's result or rejects with its error, so handle failures in the caller.
+
+React-Toastify manages lifecycle and the queue. `maxVisible` limits visible toasts; additional messages wait. `clearQueue()` removes waiting messages, while `dismiss(id)` closes a message and `dismiss()` closes the scope. Reuse a message `id` to deduplicate notifications. `duration={false}` disables automatic dismissal. Provider props include `position`, `duration`, `classNames`, and accessible close/viewport labels.
+
+For separate applications on one page, create a client with `createToastClient()` and pass it to `ToastProvider client`. Use `client={null}` for a hook-only scope that does not attach a facade. See [Providers & adapters](?path=/docs/guides-providers-adapters--docs) and [Localization](?path=/docs/guides-localization--docs).
+
+## Modal queue and useModal
+
+Use declarative `Dialog` when the screen owns open state, a long-lived form, or a custom layout. Use the modal queue for confirmations, acknowledgments, and short workflows that return a result to their caller. Mount `ModalProvider` once before calling the hook-free `modal` facade from `@itclabs/react-ui/modal`. `useModal` targets the nearest provider.
+
+```tsx
+import { Button, ModalProvider, useModal } from '@itclabs/react-ui';
+import { modal } from '@itclabs/react-ui/modal';
+
+export async function confirmRemoval(remove: () => Promise<void>) {
+  return modal.confirm({
+    title: 'Remove item?',
+    description: 'This action cannot be undone.',
+    confirmLabel: 'Remove',
+    cancelLabel: 'Cancel',
+    tone: 'danger',
+    onConfirm: remove,
+  });
+}
+
+function WorkflowButton() {
+  const dialogs = useModal();
+
+  async function run() {
+    const choice = await dialogs.open<string>({
+      title: 'Choose a format',
+      description: 'Select the format to continue.',
+      content: ({ close }) => <Button onClick={() => close('csv')}>CSV</Button>,
+      actions: ({ dismiss }) => (
+        <Button variant="secondary" onClick={dismiss}>
+          Cancel
+        </Button>
+      ),
+    });
+    if (choice === undefined) return;
+    await dialogs.alert({
+      title: 'Format selected',
+      description: `Selected format: ${choice}`,
+      okLabel: 'OK',
+    });
+  }
+
+  return (
+    <Button
+      onClick={() => {
+        void run();
+      }}
+    >
+      Choose format
+    </Button>
+  );
+}
+
+export function ModalExample() {
+  return (
+    <ModalProvider>
+      <WorkflowButton />
+    </ModalProvider>
+  );
+}
+```
+
+`confirm` resolves to `true` after confirmation succeeds, or `false` on dismissal. An async `onConfirm` shows loading state and keeps the modal open on failure so users can retry. Use `onError` to observe failures and `showErrorMessage` to include the thrown error message instead of the generic failure text. `alert` resolves when closed. `open<T>` passes `close(result)` and `dismiss()` to its content/actions and resolves to `T | undefined`.
+
+Requests queue by default; `stack: true` opens a nested modal immediately. Repeated requests with the same `id` reuse the pending promise. `close(id, result)`, `closeAll()`, and `isOpen(id?)` manage a scope, including queued entries. Provider unmount resolves pending requests as dismissed. For isolated applications, use `createModalClient()` with `ModalProvider client`, or `client={null}` with `useModal` only. Facades are browser-only and require a mounted provider; do not invoke them from server code.
+
+Use [Theming](?path=/docs/guides-theming--docs) and [Customization](?path=/docs/guides-customization--docs) to adjust tokens and component slots consistently.

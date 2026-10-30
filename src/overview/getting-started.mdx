@@ -4,65 +4,125 @@ import { Meta } from '@storybook/addon-docs/blocks';
 
 # Getting started
 
-## 0. Cài đặt
+## 1. Install
+
+Start with a React 19 application that already has `react` and `react-dom` installed. Add the kit and its required feature peers:
 
 ```bash
 pnpm add @itclabs/react-ui valibot date-fns @date-fns/tz @tanstack/react-form @tanstack/react-table
 ```
 
-Năm thư viện sau kit là peer dependency bắt buộc: ứng dụng và kit dùng chung một bản, và ứng dụng import trực tiếp từ chính package đó.
+Supported peer versions: Valibot 1, date-fns 4, `@date-fns/tz` ^1.2.0, TanStack Form 1, and TanStack Table 8.
 
-## 1. Import CSS một lần
+Install optional peers only for the features you use:
 
-Ứng dụng dùng Tailwind CSS v4. Cách nhanh nhất là import entry đầy đủ trong file CSS gốc:
+| Feature entry point               | Optional peers                                                            |
+| --------------------------------- | ------------------------------------------------------------------------- |
+| `@itclabs/react-ui/editor`        | `@tiptap/react` ^3.0.0, `@tiptap/pm` ^3.0.0, `@tiptap/starter-kit` ^3.0.0 |
+| `@itclabs/react-ui/chart`         | `recharts` ^3.0.0, `react-is` ^19.0.0                                     |
+| `@itclabs/react-ui/avatar-upload` | `react-easy-crop` ^6.0.0                                                  |
+
+## 2. Load CSS once
+
+Choose **one** stylesheet in your application's global CSS.
+
+For a **Tailwind CSS v4 host**, use the source entry, which includes Tailwind, tokens, fonts, base rules, vendor styles, and motion:
 
 ```css
 @import '@itclabs/react-ui/theme/styles.css';
-/* Thêm @source cho component của ứng dụng */
-@source '../app';
 ```
 
-`styles.css` gồm Tailwind, token, font Be Vietnam Pro, base rule, CSS vendor và motion. Muốn tự chọn font hoặc bỏ phần không dùng, ghép từng entry — xem **Overview/Theming**.
+The theme registers the kit's own class sources, so you do not need an `@source` pointing into `node_modules`. Add `@source` only for your own folders that Tailwind does not detect automatically.
 
-## 2. Bọc provider ở gốc ứng dụng
+For a **host without Tailwind**, use the precompiled stylesheet:
+
+```css
+@import '@itclabs/react-ui/ui.css';
+```
+
+The compiled stylesheet supplies kit styles; it does not generate utilities for your own markup. See [Theming](?path=/docs/guides-theming--docs) for individual CSS entries and token overrides.
+
+## 3. Mount the providers
+
+This complete client module uses native link and image adapters. Wrap your screen in `UIRoot` at the application root. Choose `en-US` explicitly because the default locale is `vi-VN`.
 
 ```tsx
-// AppLink/AppImage là adapter của ứng dụng (ví dụ bọc next/link, next/image) — xem **Overview/Providers**.
-import { AppLink, AppImage } from './ui-adapters';
+'use client';
 
-<UIProvider locale="vi-VN">
-  <LinkImageProvider Link={AppLink} Image={AppImage}>
-    <ToastProvider>
-      <ModalProvider>{children}</ModalProvider>
-    </ToastProvider>
-  </LinkImageProvider>
-</UIProvider>;
+import type { ReactNode } from 'react';
+import {
+  UIProvider,
+  LinkImageProvider,
+  ToastProvider,
+  ModalProvider,
+  type UiLinkProps,
+  type UiImageProps,
+} from '@itclabs/react-ui';
+
+function AppLink(props: UiLinkProps) {
+  return <a {...props} />;
+}
+
+function AppImage(props: UiImageProps) {
+  return <img {...props} />;
+}
+
+export function UIRoot({ children }: { children: ReactNode }) {
+  return (
+    <UIProvider locale="en-US">
+      <LinkImageProvider Link={AppLink} Image={AppImage}>
+        <ToastProvider>
+          <ModalProvider>{children}</ModalProvider>
+        </ToastProvider>
+      </LinkImageProvider>
+    </UIProvider>
+  );
+}
 ```
 
-Provider nào cũng có giá trị mặc định hợp lý; chỉ thêm khi cần. Chi tiết, thứ tự và lưu ý SSR ở **Overview/Providers**.
+Native adapters are also the defaults. Replace them with framework adapters when needed; see [Providers & adapters](?path=/docs/guides-providers-adapters--docs).
 
-## 3. Import component theo tầng
+## 4. Build a first screen
+
+Render `FirstScreen` inside `UIRoot`. This complete module validates a required name with Valibot, submits through TanStack Form, and shows feedback using the mounted toast provider. Saving is a local demonstration; connect your own persistence in `onSubmit`.
 
 ```tsx
-import { Button, Input, DropdownMenu, toast } from '@itclabs/react-ui/components';
-import { Form, FormField, useAppForm, DataTable } from '@itclabs/react-ui/modules';
-import { WorkspaceShell } from '@itclabs/react-ui/templates';
+'use client';
+
+import * as v from 'valibot';
+import { Button, toast } from '@itclabs/react-ui/components';
+import { Form, useAppForm } from '@itclabs/react-ui/modules';
+
+const schema = v.object({
+  name: v.pipe(v.string(), v.trim(), v.minLength(1, 'Enter a name.')),
+});
+
+export function FirstScreen() {
+  const form = useAppForm({
+    defaultValues: { name: '' },
+    validators: { onChange: schema },
+    onSubmit: async () => {
+      toast.success('Demo saved.');
+    },
+  });
+
+  return (
+    <main>
+      <h1>Lorem ipsum</h1>
+      <Button onClick={() => toast.info('Ready to begin.')}>Show notification</Button>
+      <Form form={form} aria-label="Profile">
+        <form.AppField name="name">
+          {(field) => <field.TextField label="Name" required />}
+        </form.AppField>
+        <form.SubmitButton>Save</form.SubmitButton>
+      </Form>
+    </main>
+  );
+}
 ```
 
-Root `@itclabs/react-ui` cũng export toàn bộ. Barrel gốc tương thích Server Component; chỉ entry có hook mới đánh dấu `'use client'`.
+## 5. Next steps
 
-## 4. Dùng theo dữ liệu, không ráp primitive
-
-```tsx
-<DropdownMenu
-  trigger={<IconButton icon="more" label="Tác vụ" />}
-  items={[
-    { id: 'edit', label: 'Chỉnh sửa', onSelect: onEdit },
-    { id: 'delete', label: 'Xóa', tone: 'danger', onSelect: onDelete },
-  ]}
-/>
-```
-
-Overlay, menu, tabs, breadcrumb và sidebar nhận `items`/slot. Các compound part vẫn còn cho trường hợp nâng cao.
-
-Icon chỉ kèm các glyph nội bộ của kit. Khi dùng tên khác, import từng glyph qua `@itclabs/react-ui/icons/outline/<name>` hoặc `@itclabs/react-ui/icons/bold/<name>` và truyền `glyph`; để tra cứu đầy đủ, đăng ký `outlineCatalog`/`boldCatalog` từ `@itclabs/react-ui/icons/catalog` trong `UIProvider theme={defineTheme({ icons: { packs: { outline: outlineCatalog, bold: boldCatalog } } })}`. Xem Components/Icon để chọn cách dùng và variant.
+- Configure [Providers & adapters](?path=/docs/guides-providers-adapters--docs), [Theming](?path=/docs/guides-theming--docs), and [Localization](?path=/docs/guides-localization--docs).
+- Explore [Forms](?path=/docs/guides-forms--docs) and [Overlays & feedback](?path=/docs/guides-overlays-feedback--docs).
+- Browse the [Catalog](?path=/docs/reference-catalog--docs) and choose [Entry points & bundle size](?path=/docs/reference-entry-points-bundle-size--docs) for your imports.

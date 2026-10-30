@@ -4,38 +4,111 @@ import * as Tables from '../modules/data-table/data-table.stories';
 import * as Forms from '../modules/form/form.stories';
 import * as Dialogs from '../components/dialog/dialog.stories';
 
-<Meta title="Overview/Custom classes" />
+<Meta title="Guides/Customization" />
 
-# Custom classes
+# Customization
 
-Custom từng component bằng className hoặc các slot classNames có type, độc lập với token/theme.
+Use `className` for the component's primary element and typed `classNames` slots for its parts. Use [Theming](?path=/docs/guides-theming--docs) for shared design tokens and [Icons](?path=/docs/guides-icons--docs) for icon packs. A single control does not need a new theme.
 
-Class mặc định và state styles được merge trước; classNames của bạn ghi đè sau, rồi className trên cùng phần tử được ưu tiên cuối. Dùng cn() để loại class Tailwind xung đột. Không cần khai báo theme mới khi chỉ chỉnh một control.
+## Merge order and cn()
 
-## Select
+Components merge default and state classes first, then your slot classes, then `className` on the same element. The last conflicting utility wins through `cn()`, which combines `clsx` with Tailwind merging, including the kit's semantic typography, spacing, radius, and shadow utilities. This utility merging does not replace the CSS cascade for arbitrary custom classes.
 
-Select hỗ trợ classNames cho label/control/menu/option và các slot của React Select. Slot của thư viện nhận string hoặc callback có isFocused/isSelected/isDisabled. className hiện tại vẫn chỉnh container của React Select; classNames.root chỉnh field wrapper.
+The element receiving `className` varies by component. For `Input`, it is the native input; `classNames.root` styles the field wrapper. `rootClassName`, where supported, comes after the root slot.
+
+```tsx
+import { cn, Input } from '@itclabs/react-ui';
+
+export function Example() {
+  return (
+    <Input
+      label="Display name"
+      hint="Enter the name shown on your profile."
+      classNames={{
+        root: 'max-w-sm gap-2',
+        label: 'text-brand-700',
+        control: 'rounded-full',
+        hint: 'text-ui-sm',
+      }}
+      className={cn('px-4', 'px-6')}
+    />
+  );
+}
+```
+
+Here `px-6` wins over `px-4`; the control slot replaces the default radius. Your application must provide CSS for its classes. With Tailwind, ensure your application's source files are scanned.
+
+## Select slots
+
+Select exposes label, control, menu, option, and other React Select slots. React Select slot values accept strings or callbacks with state such as `isFocused`, `isSelected`, and `isDisabled`. `className` targets the React Select container; `classNames.root` targets the outer field wrapper.
+
+```tsx
+import { cn, Select } from '@itclabs/react-ui';
+
+export function Example() {
+  return (
+    <Select
+      label="Status"
+      options={[
+        { value: 'draft', label: 'Draft' },
+        { value: 'published', label: 'Published' },
+      ]}
+      classNames={{
+        root: 'max-w-sm',
+        control: 'rounded-full',
+        option: ({ isSelected }) => cn(isSelected && 'font-semibold'),
+      }}
+    />
+  );
+}
+```
 
 <Canvas of={Selects.CustomClasses} />
 
-## Table
+## Tables and bound forms
 
-Custom toolbar, header, cell, selected row, empty state và pagination qua classNames. State/handlers giữ nguyên; sizing theo cột vẫn dùng ColumnDef và columnSizing.
+Table slots cover the toolbar, header, cells, selected rows, empty state, and pagination. Styling preserves state and handlers. Column sizing still uses `ColumnDef` and `columnSizing`.
 
 <Canvas of={Tables.CustomClasses} />
 
-## Bound Form
-
-Field nhận nguyên styling API của control tương ứng; không cần bỏ TanStack Form để custom giao diện.
+Bound Form fields retain the styling API of their underlying controls. You can customize their appearance while keeping TanStack Form bindings. See [Forms](?path=/docs/guides-forms--docs).
 
 <Canvas of={Forms.ComposedCustomClasses} />
 
-## Compound và portal
+## Compound components and portals
 
-Tabs, Breadcrumb, Sidebar, Dialog… nhận className trên từng part. DialogContent/DrawerContent có thêm classNames.overlay và close cho phần được render sẵn. Menu/Popover vẫn dùng portal và semantics của Radix.
+Tabs, Breadcrumb, Sidebar, and Dialog parts accept their own `className`. `DialogContent` and `DrawerContent` also expose `classNames.overlay` and `classNames.close` for the parts they render internally. Menu and Popover retain Radix portals and semantics. See [Overlays & feedback](?path=/docs/guides-overlays-feedback--docs).
 
 <Canvas of={Dialogs.CustomClasses} />
 
-Các control khác có story CustomClasses ngay trong nhóm của mình. Component một phần tử như Icon/Skeleton dùng className; không thêm wrapper hoặc styling prop vào headless root không render DOM.
+Other controls include a **CustomClasses** story in their component group. Single-element components such as Icon and Skeleton use `className`. Headless roots that render no DOM do not gain wrappers or styling props.
 
-Consumer phải có CSS cho class truyền vào. Khi dùng Tailwind, đảm bảo source của consumer được scan. defineTheme/UIProvider đã hỗ trợ đăng ký icon packs (Components/Icon). CSS token theme generator và bản npm với CSS build sẵn vẫn là công việc riêng.
+## Test selectors
+
+Pass a consumer-owned `data-testid` to opt into test selectors. Components use `partTestId(base, part, ...keys)` for generated parts. It returns `undefined` when the base is absent; otherwise it joins the base, part, and URL-encoded keys with hyphens. It encodes keys with `encodeURIComponent(String(key))`.
+
+```tsx
+import { Input, partTestId } from '@itclabs/react-ui';
+
+export const fieldSelectors = {
+  control: 'profile-name',
+  root: partTestId('profile-name', 'root'),
+  label: partTestId('profile-name', 'label'),
+  hint: partTestId('profile-name', 'hint'),
+};
+
+export const rowSelector = partTestId('records', 'row', 'a/b');
+// rowSelector is "records-row-a%2Fb".
+
+export function Example() {
+  return (
+    <Input
+      data-testid={fieldSelectors.control}
+      label="Display name"
+      hint="Enter the name shown on your profile."
+    />
+  );
+}
+```
+
+For this Input, the base ID targets the native input; the wrapper, label, and hint receive the derived IDs shown above. Parts rendered conditionally only receive selectors when present. Other components define their own parts and key structure; inspect their API or source before selecting them. Test IDs do not replace accessible labels or change styling and behavior.

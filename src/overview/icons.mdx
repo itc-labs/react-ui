@@ -1,28 +1,48 @@
-import { Meta, Canvas, Source } from '@storybook/addon-docs/blocks';
+import { Meta, Canvas } from '@storybook/addon-docs/blocks';
 import * as Icons from '../components/icon/icon.stories';
 
-<Meta of={Icons} name="Docs" />
+<Meta title="Guides/Icons" />
 
-# Icon
+# Icons
 
-Một bộ icon chung: **651 tên, hai chế độ Outline và Bold**. Lọc theo 18 nhóm; tìm tên hoặc alias như search, trash, eye; đổi variant rồi bấm icon để copy import trực tiếp. Không cần chọn thư viện nguồn. Catalog hiện 80 ô mỗi lần; bấm Xem thêm để tải tiếp.
+The catalog contains 651 names in Outline and Bold variants. Use leaf glyph imports for a few icons, or register the full catalogs to resolve names through `Icon`. See [Theming](?path=/docs/guides-theming--docs) for provider configuration and [Entry points & bundle size](?path=/docs/reference-entry-points-bundle-size--docs) for import boundaries.
 
-<Canvas of={Icons.Playground} />
+## Import individual glyphs
 
-## Hai variant
+Leaf imports load the glyphs you select and need no catalog registration. Direct glyph components are independent of `UIProvider` icon settings.
 
-<Canvas of={Icons.Variants} />
+```tsx
+import { Icon } from '@itclabs/react-ui';
+import { SearchIcon } from '@itclabs/react-ui/icons/outline/search';
+import { SearchIcon as SearchBoldIcon } from '@itclabs/react-ui/icons/bold/search';
 
-Mỗi tên có mặt ở cả hai variant. Spinner và ba trạng thái chevron sort là glyph trung tính, giữ nguyên ở cả hai kiểu. 288 tên có cặp thật từ thư viện nguồn. Với 359 tên chỉ có Outline, cả hai chế độ dùng chung glyph Outline và catalog ghi “Chỉ có Outline”; không giả bold bằng cách tăng stroke-width.
+export function Example() {
+  return (
+    <>
+      <SearchIcon size={24} className="text-brand-700" />
+      <SearchBoldIcon size={24} label="Search" />
+      <Icon glyph={SearchIcon} size={20} label="Search" />
+    </>
+  );
+}
+```
 
-## Cách dùng
+`Icon glyph={...}` uses the provider's size and stroke width defaults unless overridden. A direct glyph import uses its own SVG defaults. `className` controls color and other styles independently of size and variant. Icons are decorative (`aria-hidden`) unless given a `label`. `IconButton` owns the button's accessible label.
 
-Icon mặc định chỉ nạp 34 tên dùng trong controls của kit, có cả Outline/Bold. Để tra cứu toàn bộ 651 tên, đăng ký hai catalog trong UIProvider như ví dụ dưới. Nếu chỉ cần vài icon bổ sung, ưu tiên import từng glyph và dùng `glyph={SearchIcon}`; không cần đăng ký catalog. IconName và iconNames vẫn đủ 651 tên. Tên chưa đăng ký báo lỗi kèm hướng dẫn cấu hình. Theme overrides, custom packs/defaultPack và thứ tự ưu tiên glyph/pack/variant vẫn được giữ trong từng provider.
+<Canvas of={Icons.DirectImports} />
 
-<Source language="tsx" code={`import { Icon, IconButton, UIProvider, defineTheme } from '@itclabs/react-ui';
+## Resolve names with catalog registration
+
+By default, `Icon` loads only the 35 names needed by kit controls, in both variants. `IconName` and `iconNames` still describe all 651 names. An unregistered name throws an error with configuration instructions.
+
+```tsx
+'use client';
+import { Icon, IconButton, UIProvider, defineTheme } from '@itclabs/react-ui';
 import { outlineCatalog, boldCatalog } from '@itclabs/react-ui/icons/catalog';
 
-const theme = defineTheme({ icons: { packs: { outline: outlineCatalog, bold: boldCatalog } } });
+const theme = defineTheme({
+  icons: { packs: { outline: outlineCatalog, bold: boldCatalog } },
+});
 
 export function Example() {
   return (
@@ -33,29 +53,71 @@ export function Example() {
     </UIProvider>
   );
 }
-`} />
+```
 
-<Canvas of={Icons.DirectImports} />
+Register both catalogs to browse or use every name in either variant. Prefer leaf imports when you need only a few additional icons.
 
-<Source language="tsx" code={`import { SearchIcon } from '@itclabs/react-ui/icons/outline/search';
-import { SearchIcon as SearchBoldIcon } from '@itclabs/react-ui/icons/bold/search';
+## Variant and size defaults
 
-export function Example() {
-  return (
-    <>
-      <SearchIcon size={24} className="text-brand-700" />
-      <SearchBoldIcon size={24} label="Search" />
-    </>
-  );
-}
-`} />
-
-Đặt variant mặc định một lần qua `defineTheme({ icons: { variant: 'bold' } })` trong UIProvider. Props variant/iconVariant ghi đè cho từng chỗ dùng. className và size vẫn tùy chỉnh độc lập. IconButton sở hữu accessible label của nút; icon trang trí mặc định aria-hidden.
+Set `icons.variant` to `outline` or `bold` through `defineTheme`. Per-icon `variant` and control `iconVariant` props select a variant for that use. Set `icons.size` and `icons.strokeWidth` for provider defaults; explicit icon props take priority. Without configuration, `Icon` uses size 16 and stroke width 1.75. Stroke width does not turn a filled glyph into an outline glyph.
 
 <Canvas of={Icons.ThemeSwitch} />
 
-Illustration là bộ artwork riêng ở Components/Illustration, import từ @itclabs/react-ui/illustrations; không thuộc icon packs.
+<Canvas of={Icons.Variants} />
 
-Catalog chỉ báo “Đã copy” khi Clipboard API thành công; nếu bị chặn, code được chọn sẵn để copy thủ công. Tab và Enter/Space dùng được trên từng ô icon.
+Every name is available in both variants. There are 288 true source-library pairs. Another 359 names have only an outline glyph, reused unchanged in Bold and marked as outline-only in the catalog. Spinner and the three sort chevrons are neutral glyphs shared across variants. Bold is never simulated by increasing stroke width.
 
-Nguồn: [Heroicons](https://heroicons.com) (MIT) và [Lucide](https://lucide.dev) (ISC). Bộ tuyển chọn có 651 tên: 288 Heroicons, 360 Lucide và 3 sort glyph cục bộ; 359 tên chỉ có Outline dùng chung nét ở Bold. Nguồn từng file và neutral glyph được ghi trong sources.json; giữ THIRD_PARTY_NOTICES.md khi phân phối.
+## Custom packs and overrides
+
+Use `defineIconPack` to build a pack from selected glyphs. Register it under a key matching its `id`, then choose it with `defaultPack` or an explicit `pack` prop. Overrides replace semantic names when neither `pack` nor `variant` is explicit.
+
+```tsx
+'use client';
+import { defineIconPack, defineTheme, Icon, UIProvider } from '@itclabs/react-ui';
+import { SearchIcon } from '@itclabs/react-ui/icons/outline/search';
+import { SearchIcon as SearchBoldIcon } from '@itclabs/react-ui/icons/bold/search';
+
+const appPack = defineIconPack('app', { search: SearchIcon });
+const theme = defineTheme({
+  icons: {
+    variant: 'bold',
+    size: 20,
+    packs: { app: appPack },
+    defaultPack: 'app',
+    overrides: { search: SearchBoldIcon },
+  },
+});
+
+export function Example() {
+  return (
+    <UIProvider theme={theme}>
+      <Icon name="search" label="Search" />
+      <Icon name="search" pack="app" label="Search" />
+      <Icon name="search" pack={appPack} size={24} label="Search" />
+    </UIProvider>
+  );
+}
+```
+
+Resolution follows these rules:
+
+- An explicit `glyph` wins.
+- Without an explicit `pack` or `variant`, a theme override wins over pack lookup.
+- Pack selection uses an explicit pack object/string, then explicit `variant`, then theme `defaultPack`, then theme `variant`, then `outline`.
+- If the selected pack lacks a name, lookup falls back to the explicit or theme variant's registered pack, then that variant's built-in control glyphs. An unknown explicit pack string throws.
+
+Nested providers merge packs and overrides while inheriting other icon settings. `defineTheme` validates pack IDs and positive size/stroke width values, then snapshots and freezes the settings. For application-specific semantic names, `UIIconNames` supports TypeScript module augmentation.
+
+## Browse the catalog
+
+<Canvas of={Icons.Playground} />
+
+Filter by 18 categories or search names and aliases such as search, trash, and eye. Select a variant, then activate a tile to copy its direct import. The catalog renders 80 tiles at a time; use the load-more control to display the next group. Each tile supports Tab and Enter/Space.
+
+The catalog reports a successful copy only after the Clipboard API succeeds. If copying is blocked, it selects the code for manual copying.
+
+Illustrations are separate artwork, imported from `@itclabs/react-ui/illustrations`; they are not icon packs. See [Catalog](?path=/docs/reference-catalog--docs).
+
+## Sources and licenses
+
+The selection contains 288 [Heroicons](https://heroicons.com) names (MIT), 360 [Lucide](https://lucide.dev) names (ISC), and three local sort glyphs. The 359 outline-only names reuse the same glyph in Bold. Per-file sources and neutral glyphs are recorded in `sources.json`. Preserve `THIRD_PARTY_NOTICES.md` when distributing the kit.
