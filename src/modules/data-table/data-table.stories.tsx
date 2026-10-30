@@ -453,6 +453,7 @@ function RowReorderExample() {
       caption="Reorder rows"
       rowReorder={{
         plugin: createRowReorder(),
+        getLabel: (row) => row.label,
         onReorder: (ids) =>
           setRows(ids.map((id) => rows.find((row) => row.id === id)!)),
       }}

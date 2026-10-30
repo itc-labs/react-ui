@@ -19,6 +19,7 @@ import {
   useSensors,
   type Announcements,
   type DragEndEvent,
+  type DragOverEvent,
   type Modifiers,
 } from '@dnd-kit/core';
 import {
@@ -303,7 +304,7 @@ function SortableItem<T>({
       }}
       className={cn(
         'relative rounded-control border border-transparent motion-reduce:transition-none',
-        sortable.isDragging && 'border-dashed border-control-border bg-canvas',
+        sortable.isDragging && 'border-dashed border-brand-500 bg-brand-50',
         classNames?.item,
         sortable.isDragging && classNames?.itemDragging,
         sortable.isDragging && classNames?.placeholder,
@@ -524,7 +525,7 @@ function BoardContainer<T>({
       data-testid={partTestId(testId, 'container', container.id)}
       data-over={isOver || undefined}
       className={cn(
-        'min-w-0 rounded-panel border border-line bg-canvas p-3',
+        'min-w-0 rounded-panel border border-line bg-canvas p-3 motion-safe:transition-colors data-[over]:border-brand-500 data-[over]:bg-brand-50',
         classNames?.container,
       )}
     >
@@ -584,52 +585,85 @@ export function SortableBoard<T>({
   const prefix = useId();
   const reduced = useReducedMotion();
   const drag = useDragFocus();
-  const source = containers.find((container) =>
-    container.items.some((item) => getId(item) === drag.activeId),
-  );
+  // While dragging, the item is previewed in the column under the pointer; the host only sees the drop.
+  const [preview, setPreview] = useState<SortableContainer<T>[] | null>(null);
+  const shown = preview ?? containers;
+
+  const containing = (list: readonly SortableContainer<T>[], id: unknown) =>
+    list.find((container) => container.items.some((item) => getId(item) === id));
+
+  const source = containing(shown, drag.activeId);
   const activeIndex =
     source?.items.findIndex((item) => getId(item) === drag.activeId) ?? -1;
   const activeItem = source?.items[activeIndex];
 
-  const end = ({ active, over }: DragEndEvent) => {
-    drag.finish(String(active.id));
-    if (disabled || !over || active.id === over.id) return;
-    const from = containers.find((container) =>
-      container.items.some((item) => getId(item) === active.id),
-    );
-    const to = containers.find(
-      (container) => container.id === over.data.current?.containerId,
-    );
-    if (!from || !to) return;
-    const fromIndex = from.items.findIndex((item) => getId(item) === active.id);
-    const item = from.items[fromIndex]!;
-    if (canDrop && !canDrop(item, from.id, to.id)) return;
-    const overIndex = to.items.findIndex((item) => getId(item) === over.id);
-    const index = overIndex < 0 ? to.items.length : overIndex;
-    if (from === to && (fromIndex === index || index === to.items.length)) return;
-    const next = containers.map((container) => {
-      if (from === to && container === from)
-        return { ...container, items: arrayMove(container.items, fromIndex, index) };
-      if (container === from)
-        return {
-          ...container,
-          items: container.items.filter((_, i) => i !== fromIndex),
-        };
-      if (container === to)
-        return {
-          ...container,
-          items: [
-            ...container.items.slice(0, index),
-            item,
-            ...container.items.slice(index),
-          ],
-        };
+  const over = ({ active, over }: DragOverEvent) => {
+    if (disabled || !over || over.id === active.id) return;
 
-      return container;
+    setPreview((previous) => {
+      const list = previous ?? containers;
+      const from = containing(list, active.id);
+      const to = list.find(
+        (container) => container.id === over.data.current?.containerId,
+      );
+      const origin = containing(containers, active.id);
+      if (!from || !to || !origin || from === to) return previous;
+      const item = from.items.find((entry) => getId(entry) === active.id)!;
+      if (canDrop && !canDrop(item, origin.id, to.id)) return previous;
+      const overIndex = to.items.findIndex((entry) => getId(entry) === over.id);
+      const translated = active.rect.current.translated;
+      const below =
+        overIndex >= 0 &&
+        !!translated &&
+        translated.top > over.rect.top + over.rect.height / 2;
+      const index = overIndex < 0 ? to.items.length : overIndex + (below ? 1 : 0);
+
+      return list.map((container) => {
+        if (container === from)
+          return {
+            ...container,
+            items: container.items.filter((entry) => getId(entry) !== active.id),
+          };
+        if (container === to)
+          return {
+            ...container,
+            items: [
+              ...container.items.slice(0, index),
+              item,
+              ...container.items.slice(index),
+            ],
+          };
+
+        return container;
+      });
     });
+  };
+
+  const end = ({ active, over }: DragEndEvent) => {
+    const list = preview ?? containers;
+    setPreview(null);
+    drag.finish(String(active.id));
+    if (disabled || !over) return;
+    const origin = containing(containers, active.id);
+    const to = containing(list, active.id);
+    if (!origin || !to) return;
+    const originIndex = origin.items.findIndex((item) => getId(item) === active.id);
+    const item = origin.items[originIndex]!;
+    if (canDrop && !canDrop(item, origin.id, to.id)) return;
+    const fromIndex = to.items.findIndex((entry) => getId(entry) === active.id);
+    const overIndex = to.items.findIndex((entry) => getId(entry) === over.id);
+    const items =
+      overIndex >= 0 && overIndex !== fromIndex
+        ? arrayMove(to.items, fromIndex, overIndex)
+        : to.items;
+    const index = items.findIndex((entry) => getId(entry) === active.id);
+    if (to.id === origin.id && index === originIndex) return;
+    const next = list.map((container) =>
+      container === to ? { ...container, items } : container,
+    );
     onMove(next, {
       activeId: String(active.id),
-      fromContainer: from.id,
+      fromContainer: origin.id,
       toContainer: to.id,
       index,
     });
@@ -643,14 +677,17 @@ export function SortableBoard<T>({
         closestCenter({
           ...args,
           droppableContainers: args.droppableContainers.filter((entry) => {
-            const target = containers.find(
+            const target = shown.find(
               (container) => container.id === entry.data.current?.containerId,
             );
-            if (!target || (entry.data.current?.isContainer && target.items.length))
+            // A column is a drop zone only while it holds nothing but the dragged item.
+            if (
+              !target ||
+              (entry.data.current?.isContainer &&
+                target.items.some((item) => getId(item) !== args.active.id))
+            )
               return false;
-            const from = containers.find((container) =>
-              container.items.some((item) => getId(item) === args.active.id),
-            );
+            const from = containing(containers, args.active.id);
             const item = from?.items.find((item) => getId(item) === args.active.id);
 
             return (
@@ -662,7 +699,11 @@ export function SortableBoard<T>({
         })
       }
       onDragStart={({ active }) => drag.setActiveId(String(active.id))}
-      onDragCancel={({ active }) => drag.finish(String(active.id))}
+      onDragOver={over}
+      onDragCancel={({ active }) => {
+        setPreview(null);
+        drag.finish(String(active.id));
+      }}
       onDragEnd={end}
     >
       <div
@@ -683,7 +724,7 @@ export function SortableBoard<T>({
           className,
         )}
       >
-        {containers.map((container) => {
+        {shown.map((container) => {
           const content = (
             <BoardContainer
               container={container}

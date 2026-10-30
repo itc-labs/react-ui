@@ -48,7 +48,7 @@ export function DataTable<T>(props: DataTableProps<T>) {
     <Provider
       items={view.visibleRows.map((row) => ({
         id: row.id,
-        label: row.id,
+        label: props.rowReorder?.getLabel?.(row.original) ?? row.id,
         container: 'rows',
       }))}
       containers={['rows']}

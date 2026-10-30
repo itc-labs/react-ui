@@ -25,6 +25,13 @@ and instructions follow UIProvider's English/Vietnamese locale. Reduced motion
 disables sorting transitions and drop animation. Pointer activation requires 4px
 of movement; auto-scroll and inert drag overlays are provided.
 
+While dragging, the original slot stays visible as a dashed brand placeholder.
+SortableBoard previews the item in the column under the pointer, so the
+placeholder always marks where the drop lands; `onMove` still fires only on drop.
+Transfer and DataTable keep rows in place and draw a brand line before or after
+the target row, tint the panel that will receive the item, and show a compact
+label chip under the cursor. Keyboard dragging uses the same line.
+
 `DndProvider` supplies sensors and announcements for advanced compositions and
 accepts DndContext options. `useSortableItem` exposes the sortable hook. Custom
 compositions own their sortable contexts, item bindings, drop zones and overlays.
@@ -170,6 +177,7 @@ other IDs. Sorting blocks reorder with a localized explanation. Server mode,
 including server pages/groups, also blocks it unless `allowServerReorder: true`;
 the host then owns persistence across pages and groups. Loading and `disabled`
 block interactions. `handle` defaults to true; false makes the row the activator.
+Pass `getLabel` to name rows in the drag chip and announcements; it defaults to the row ID.
 
 ```tsx
 'use client';
@@ -196,6 +204,7 @@ export function ReorderRows() {
       columns={columns}
       rowReorder={{
         plugin,
+        getLabel: (row) => row.label,
         onReorder: (ids) =>
           setRows(ids.map((id) => rows.find((row) => row.id === id)!)),
       }}

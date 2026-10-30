@@ -20,7 +20,11 @@ import {
   useSensors,
 } from '@dnd-kit/core';
 import { SortableContext, useSortable } from '@dnd-kit/sortable';
+import { snapCenterToCursor } from '@dnd-kit/modifiers';
 import { DndProvider, DragHandle } from './index';
+import { KitIcon } from '../../components/icon/kit-icon';
+import { GripVerticalIcon } from '../../components/icon/outline/grip-vertical';
+import { GripVerticalIcon as GripVerticalBoldIcon } from '../../components/icon/bold/grip-vertical';
 import { Tooltip } from '../../components/tooltip';
 import { cn, partTestId } from '../../components/common';
 import { focusRingClassName } from '../../components/common/focus-ring';
@@ -35,10 +39,38 @@ import type {
 } from './integration-types';
 
 type Destination = { container: string; index: number };
+/** Where a drop would land: a line before/after a row, or the end of a zone. */
+type Indicator = { container: string; id?: string; position?: 'before' | 'after' };
+const dropLineClassName = cn(
+  'data-[drop=before]:shadow-[inset_0_2px_0_0_var(--color-brand-500)] data-[drop=after]:shadow-[inset_0_-2px_0_0_var(--color-brand-500)]',
+  '[&[data-drop=before]>td]:shadow-[inset_0_2px_0_0_var(--color-brand-500)] [&[data-drop=after]>td]:shadow-[inset_0_-2px_0_0_var(--color-brand-500)]',
+);
+
+function indicatorFor(
+  items: readonly DndIntegrationItem[],
+  active: DndIntegrationItem,
+  container: string,
+  target: DndIntegrationItem | undefined,
+): Indicator | null {
+  if (target?.id === active.id) return null;
+  const targets = items.filter((item) => item.container === container);
+  if (!target) {
+    const last = targets.filter((item) => item.id !== active.id).at(-1);
+
+    return last ? { container, id: last.id, position: 'after' } : { container };
+  }
+  const after =
+    active.container === container && targets.indexOf(target) > targets.indexOf(active);
+
+  return { container, id: target.id, position: after ? 'after' : 'before' };
+}
+
 const Context = createContext<{
   items: readonly DndIntegrationItem[];
   disabled: boolean;
   active: string | null;
+  indicator: Indicator | null;
+  sourceContainer: string | undefined;
   instructions: string;
   containerLabels: Readonly<Record<string, string>> | undefined;
   handles: Map<string, HTMLElement>;
@@ -66,10 +98,36 @@ function Provider({
   );
   const [active, setActive] = useState<string | null>(null);
   const [keyboard, setKeyboard] = useState<Destination | null>(null);
+  const [pointer, setPointer] = useState<{ container: string; id?: string } | null>(
+    null,
+  );
   const [announcement, setAnnouncement] = useState('');
   const handles = useRef(new Map<string, HTMLElement>());
   const pendingFocus = useRef<string | null>(null);
   const activeItem = items.find((item) => item.id === active);
+  const destination = keyboard
+    ? {
+        container: keyboard.container,
+        id: items.filter((item) => item.container === keyboard.container)[
+          keyboard.index
+        ]?.id,
+      }
+    : pointer;
+  const allowed =
+    activeItem &&
+    destination &&
+    !(canDrop && !canDrop(activeItem.id, destination.container));
+  const indicator = allowed
+    ? indicatorFor(
+        items,
+        activeItem,
+        destination.container,
+        items.find(
+          (item) =>
+            item.id === destination.id && item.container === destination.container,
+        ),
+      )
+    : null;
 
   function finish(cancelled: boolean, destination?: Destination) {
     if (!activeItem) return;
@@ -101,6 +159,7 @@ function Provider({
     );
     setActive(null);
     setKeyboard(null);
+    setPointer(null);
   }
 
   useEffect(() => {
@@ -184,6 +243,8 @@ function Provider({
         items,
         disabled,
         active,
+        indicator,
+        sourceContainer: activeItem?.container,
         instructions,
         containerLabels,
         handles: handles.current,
@@ -212,6 +273,13 @@ function Provider({
         sensors={sensors}
         accessibility={{ restoreFocus: false }}
         onDragStart={({ active }) => setActive(String(active.id))}
+        onDragOver={({ over }) => {
+          const target = items.find((item) => item.id === over?.id);
+          const container = target?.container ?? over?.data.current?.container;
+          setPointer(
+            container ? { container, ...(target ? { id: target.id } : {}) } : null,
+          );
+        }}
         onDragCancel={() => finish(true)}
         onDragEnd={({ over }) => {
           const target = items.find((item) => item.id === over?.id);
@@ -225,18 +293,24 @@ function Provider({
         <SortableContext items={items.map((item) => item.id)} disabled={disabled}>
           {children}
         </SortableContext>
-        <DragOverlay dropAnimation={null}>
+        <DragOverlay dropAnimation={null} modifiers={[snapCenterToCursor]}>
           {activeItem && (
             <div
               inert
               aria-hidden="true"
               data-testid={partTestId(testId, 'dragOverlay')}
               className={cn(
-                'rounded-control border border-line bg-surface p-3 text-ink shadow-overlay',
+                'mx-auto flex w-max max-w-xs cursor-grabbing items-center gap-2 rounded-control border border-brand-500 bg-surface py-2 pr-3 pl-2 text-ui-sm font-medium text-ink shadow-overlay',
                 overlayClassName,
               )}
             >
-              {activeItem.label}
+              <KitIcon
+                name="gripVertical"
+                builtin={{ outline: GripVerticalIcon, bold: GripVerticalBoldIcon }}
+                aria-hidden="true"
+                className="size-4 shrink-0 text-ink-muted"
+              />
+              <span className="truncate">{activeItem.label}</span>
             </div>
           )}
         </DragOverlay>
@@ -285,6 +359,7 @@ function Row({ id, children, handle = true }: DndIntegrationRowProps) {
         className: cn(
           !handle && 'touch-none',
           !handle && focusRingClassName,
+          dropLineClassName,
           child.props.className,
         ),
         ref: (node) => {
@@ -303,6 +378,8 @@ function Row({ id, children, handle = true }: DndIntegrationRowProps) {
           opacity: context.active === id ? 0.4 : child.props.style?.opacity,
         },
         'data-dnd-item': id,
+        'data-drop':
+          context.indicator?.id === id ? context.indicator.position : undefined,
       } as ComponentPropsWithRef<'div'>)}
     </RowContext.Provider>
   );
@@ -358,14 +435,23 @@ function Zone({ id, children }: { id: string; children: ReactElement }) {
   });
   const child = children as ReactElement<ComponentPropsWithRef<'div'>>;
 
+  const highlighted =
+    context.indicator?.container === id &&
+    (context.sourceContainer !== id || !context.indicator.id);
+
   return cloneElement(child, {
+    'data-drop-target': highlighted || undefined,
+    className: cn(
+      'motion-safe:transition-colors data-[drop-target]:bg-brand-50',
+      child.props.className,
+    ),
     ref: (node) => {
       setNodeRef(node);
       const ref = child.props.ref;
       if (typeof ref === 'function') ref(node);
       else if (ref) ref.current = node;
     },
-  });
+  } as ComponentPropsWithRef<'div'>);
 }
 
 /** Inject into Transfer.dnd. Dragging implies order="selection". */

@@ -19,6 +19,8 @@ type BaseProps<T> = {
       orderedIds: string[],
       move: { id: string; from: number; to: number },
     ) => void;
+    /** Human-readable row name for the drag preview and announcements. Defaults to the row ID. */
+    getLabel?: (row: T) => string;
     handle?: boolean;
     disabled?: boolean;
     /** Explicitly permit reordering the supplied server page/group. Sorting still blocks reorder. */
