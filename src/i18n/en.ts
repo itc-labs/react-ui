@@ -1,4 +1,8 @@
 export const enMessages = {
+  'optionGroup.selectedLabel': '{label}: {selected}',
+  'optionGroup.help': 'More information about {label}',
+  'optionGroup.expand': 'Show {count} more options',
+  'optionGroup.more': '+{count}',
   'carousel.label': 'Carousel',
   'carousel.previous': 'Previous slide',
   'carousel.next': 'Next slide',

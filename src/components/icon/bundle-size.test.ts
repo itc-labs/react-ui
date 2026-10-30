@@ -20,6 +20,7 @@ it('keeps ordinary imports free of heavy modules and within gzip budgets', () =>
     'Form',
     'Icon',
     'JsonView',
+    'OptionGroup',
     'Rating',
     'Root',
     'Select',

@@ -9,6 +9,7 @@ const root = fileURLToPath(new URL('../', import.meta.url));
 const entries = {
   Icon: 'components/icon/index.tsx',
   Rating: 'components/rating/index.tsx',
+  OptionGroup: 'components/option-group/index.tsx',
   JsonView: 'components/json-view/index.tsx',
   CodeView: 'modules/code-view/index.tsx',
   Button: 'components/button/index.tsx',
@@ -47,7 +48,15 @@ for (const [name, file] of Object.entries(entries)) {
     logLevel: 'silent',
   });
   if (
-    ['Dialog', 'Button', 'Rating', 'JsonView', 'CodeView', 'Carousel'].includes(name)
+    [
+      'Dialog',
+      'Button',
+      'Rating',
+      'OptionGroup',
+      'JsonView',
+      'CodeView',
+      'Carousel',
+    ].includes(name)
   ) {
     const registries = Object.keys(metafile.inputs).filter((input) =>
       /components\/icon\/kit-icons\.(?:ts|tsx)$/.test(input),
@@ -95,6 +104,7 @@ console.log(JSON.stringify(sizes, null, 2));
 for (const [name, limit] of Object.entries({
   Icon: 20_000,
   Rating: 20_000,
+  OptionGroup: 45_000,
   JsonView: 22_000,
   // About 10% above the measured display subpath fixtures.
   CodeView: 50_000,

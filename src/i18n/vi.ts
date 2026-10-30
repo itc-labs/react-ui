@@ -1,5 +1,9 @@
 import type { UIMessages } from './types';
 export const viMessages = {
+  'optionGroup.selectedLabel': '{label}: {selected}',
+  'optionGroup.help': 'Thông tin thêm về {label}',
+  'optionGroup.expand': 'Hiện thêm {count} lựa chọn',
+  'optionGroup.more': '+{count}',
   'carousel.label': 'Băng chuyền',
   'carousel.previous': 'Trang trước',
   'carousel.next': 'Trang sau',

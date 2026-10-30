@@ -13,6 +13,7 @@ export * from './select';
 export * from './alert';
 export * from './checkbox';
 export * from './radio-group';
+export * from './option-group';
 export * from './switch';
 export * from './tabs';
 export * from './dialog';
