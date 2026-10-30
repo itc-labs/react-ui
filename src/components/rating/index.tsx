@@ -38,12 +38,8 @@ export type RatingProps = Omit<
     classNames?: RatingClassNames;
   };
 
-const sizes = {
-  sm: 'size-control-sm',
-  md: 'size-control-md',
-  lg: 'size-control-lg',
-};
-const iconSizes = { sm: 16, md: 20, lg: 24 };
+const sizes = { sm: 'size-4', md: 'size-5', lg: 'size-7' };
+const iconSizes = { sm: 16, md: 20, lg: 28 };
 const starBuiltin = { outline: StarIcon, bold: StarBoldIcon };
 
 export function Rating({
@@ -137,7 +133,7 @@ export function Rating({
       aria-invalid={error ? true : props['aria-invalid']}
       data-testid={testId}
       className={cn(
-        'inline-flex flex-wrap items-center gap-2 text-warning-700',
+        'inline-flex flex-wrap items-center gap-2',
         disabled && 'cursor-not-allowed opacity-50',
         classNames?.root,
         className,
@@ -154,7 +150,7 @@ export function Rating({
       )}
       <span
         data-testid={partTestId(testId, 'stars')}
-        className={cn('inline-flex', classNames?.stars)}
+        className={cn('inline-flex gap-1', classNames?.stars)}
         onMouseLeave={() => setPreview(null)}
         onBlur={(event) => {
           if (!event.currentTarget.contains(event.relatedTarget)) setPreview(null);
@@ -172,13 +168,13 @@ export function Rating({
           >
             <span
               aria-hidden="true"
-              className="pointer-events-none relative inline-flex text-line"
+              className="pointer-events-none relative inline-flex text-rating-empty"
             >
               {renderIcon('icon', index + 1)}
               <span
                 data-testid={partTestId(testId, 'fill', index + 1)}
                 className={cn(
-                  'absolute inset-y-0 left-0 overflow-hidden text-warning-700',
+                  'absolute inset-y-0 left-0 overflow-hidden text-rating',
                   classNames?.fill,
                 )}
                 style={{
@@ -202,7 +198,7 @@ export function Rating({
                     tabIndex={!disabled && option === (selected || step) ? 0 : -1}
                     data-testid={partTestId(testId, 'control', option)}
                     className={cn(
-                      'absolute inset-y-0 rounded-control focus-visible:outline-offset-2 disabled:cursor-not-allowed',
+                      'absolute inset-y-0 cursor-pointer rounded-control focus-visible:outline-offset-2 disabled:cursor-not-allowed',
                       allowHalf
                         ? halfIndex === 0
                           ? 'left-0 w-1/2'
@@ -248,7 +244,10 @@ export function Rating({
         <span
           aria-hidden="true"
           data-testid={partTestId(testId, 'value')}
-          className={cn('text-control tabular-nums text-muted', classNames?.value)}
+          className={cn(
+            'text-control font-medium tabular-nums text-ink',
+            classNames?.value,
+          )}
         >
           {t('rating.value', { value: displayed, max: count })}
         </span>

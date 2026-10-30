@@ -38,6 +38,8 @@ export const uiThemeTokenNames = [
   'color-success-700',
   'color-warning-50',
   'color-warning-700',
+  'color-rating',
+  'color-rating-empty',
   'color-danger-50',
   'color-danger-700',
   'color-danger-800',

@@ -27,6 +27,8 @@ export const themeColors = Object.freeze({
     50: 'var(--color-warning-50)',
     700: 'var(--color-warning-700)',
   }),
+  rating: 'var(--color-rating)',
+  ratingEmpty: 'var(--color-rating-empty)',
   danger: Object.freeze({
     50: 'var(--color-danger-50)',
     700: 'var(--color-danger-700)',
