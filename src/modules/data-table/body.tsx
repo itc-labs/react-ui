@@ -89,7 +89,9 @@ export function DataTableBody<T>({
             key={row.id}
             data-selected={row.getIsSelected()}
             className={cn(
-              'transition-colors hover:bg-hover/70 data-[selected=true]:bg-hover',
+              // The last row has no divide border. Keep its color set before a sort
+              // moves it between rows, avoiding a currentColor-to-line transition.
+              'border-line transition-colors hover:bg-hover/70 data-[selected=true]:bg-hover',
               classNames?.row,
               row.getIsSelected() && classNames?.selectedRow,
             )}

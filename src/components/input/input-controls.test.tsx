@@ -242,3 +242,53 @@ it('steps decimals without floating drift and blocks controls for disabled/read-
     Array.from(host.querySelectorAll('button')).every((button) => button.disabled),
   ).toBe(true);
 });
+
+it('clears controlled search values without submitting and restores input focus', () => {
+  const submit = vi.fn();
+
+  function Search() {
+    const [value, setValue] = useState('category');
+
+    return (
+      <UIProvider locale="en-US">
+        <form onSubmit={submit}>
+          <Input
+            label="Search"
+            value={value}
+            onChange={(event) => setValue(event.target.value)}
+            clearable
+            onClear={() => setValue('')}
+          />
+        </form>
+      </UIProvider>
+    );
+  }
+
+  act(() => root.render(<Search />));
+
+  const input = host.querySelector('input')!;
+  const clear = host.querySelector<HTMLButtonElement>(
+    'button[aria-label="Clear input"]',
+  )!;
+  expect(clear).not.toBeNull();
+
+  act(() => clear.click());
+
+  expect(input.value).toBe('');
+  expect(document.activeElement).toBe(input);
+  expect(host.querySelector('button')).toBeNull();
+  expect(submit).not.toHaveBeenCalled();
+});
+
+it('hides the clear action for readonly and disabled values', () => {
+  act(() =>
+    root.render(
+      <>
+        <Input value="locked" readOnly clearable onClear={vi.fn()} />
+        <Input value="disabled" disabled clearable onClear={vi.fn()} />
+      </>,
+    ),
+  );
+
+  expect(host.querySelectorAll('button')).toHaveLength(0);
+});

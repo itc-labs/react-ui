@@ -36,7 +36,7 @@ export function cn(...values: ClassValue[]) {
 
 export type ControlSize = 'sm' | 'md' | 'lg';
 export const clearIndicatorClassName =
-  'rounded p-0.5 text-muted hover:bg-hover-strong hover:text-ink';
+  'rounded p-0.5 text-muted hover:bg-hover-strong hover:text-ink [&_svg]:stroke-[1.5]';
 export const controlSizes: Record<ControlSize, string> = {
   sm: 'h-control-sm px-2.5 text-ui-sm',
   md: 'h-control-md px-3 text-control',

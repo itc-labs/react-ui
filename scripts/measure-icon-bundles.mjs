@@ -168,7 +168,7 @@ for (const [name, limit] of Object.entries({
   Sidebar: 87_500,
   Icon: 20_000,
   // Shared drag-and-drop translations add about 500 gzip bytes to locale consumers.
-  Rating: 20_700,
+  Rating: 20_800,
   Divider: 10_600,
   Kbd: 19_500,
   Slider: 32_300,

@@ -232,6 +232,7 @@ export const viMessages = {
   'table.rows': '{count} dòng',
   'table.pagination': 'Phân trang: {caption}',
   'date.placeholder': 'Chọn ngày',
+  'input.clear': 'Xóa nội dung',
   'date.clear': 'Xóa lựa chọn ngày',
   'date.invalid': 'Ngày không hợp lệ.',
   'date.outOfBounds': 'Ngày nằm ngoài phạm vi cho phép.',

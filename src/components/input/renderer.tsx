@@ -1,4 +1,7 @@
 'use client';
+import { useUILocale } from '../../i18n/provider';
+import { CloseIcon } from '../icon/outline/close';
+import { focusRingClassName } from '../common/focus-ring';
 import { interactiveTrigger } from '../common/interactive-trigger';
 import type { TestIdProps } from '../common/testing';
 
@@ -8,6 +11,7 @@ import { useId, type ComponentProps, type ReactNode } from 'react';
 import {
   type SlotClasses,
   cn,
+  clearIndicatorClassName,
   controlBase,
   controlSizes,
   fieldDescription,
@@ -25,6 +29,10 @@ export type InputProps = (Omit<ComponentProps<'input'>, 'size'> & {
   icon?: IconName | IconGlyph;
   iconRight?: IconName | IconGlyph;
   endAddon?: ReactNode;
+  /** Show a clear action for a controlled value. Supply onClear to update host state. */
+  clearable?: boolean;
+  onClear?: () => void;
+  clearLabel?: string;
   classNames?: SlotClasses<
     | 'root'
     | 'label'
@@ -34,6 +42,7 @@ export type InputProps = (Omit<ComponentProps<'input'>, 'size'> & {
     | 'icon'
     | 'iconRight'
     | 'endAddon'
+    | 'clear'
     | 'hint'
     | 'error'
   >;
@@ -51,6 +60,9 @@ export function InputRenderer({
   icon,
   iconRight,
   endAddon,
+  clearable = false,
+  onClear,
+  clearLabel,
   rootClassName,
   className,
   classNames,
@@ -62,6 +74,16 @@ export function InputRenderer({
 }: InputProps & { renderIcon: (props: IconProps) => ReactNode } & {
   'data-testid'?: string | undefined;
 }) {
+  const { t } = useUILocale();
+  const hasClearAction =
+    clearable &&
+    onClear &&
+    props.value != null &&
+    String(props.value).length > 0 &&
+    !props.disabled &&
+    !props.readOnly &&
+    endAddon == null;
+
   const generatedId = useId();
   const controlId = id ?? generatedId;
 
@@ -122,7 +144,7 @@ export function InputRenderer({
             controlBase,
             controlSizes[size],
             icon && 'pl-9',
-            (iconRight || endAddon != null) && 'pr-10',
+            (iconRight || endAddon != null || hasClearAction) && 'pr-10',
             classNames?.control,
             className,
           )}
@@ -134,6 +156,26 @@ export function InputRenderer({
           >
             {endAddon}
           </span>
+        ) : hasClearAction ? (
+          <button
+            type="button"
+            data-testid={partTestId(testId, 'clear')}
+            aria-label={clearLabel ?? t('input.clear')}
+            className={cn(
+              clearIndicatorClassName,
+              focusRingClassName,
+              'absolute right-2 inline-flex size-5 items-center justify-center border-0',
+              classNames?.clear,
+            )}
+            onMouseDown={(event) => event.preventDefault()}
+            onClick={(event) => {
+              const input = event.currentTarget.parentElement?.querySelector('input');
+              onClear();
+              input?.focus();
+            }}
+          >
+            {renderIcon({ glyph: CloseIcon, size: 16 })}
+          </button>
         ) : (
           iconRight &&
           renderIcon({
