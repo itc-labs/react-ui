@@ -585,3 +585,52 @@ export const ClientCrossPageSelection: Story = {
   render: () => <SelectionPages />,
   play: ServerCrossPageSelection.play!,
 };
+
+export const StableBordersAfterSorting: Story = {
+  tags: ['!dev', '!autodocs', 'regression'],
+  render: () => (
+    <DataTable<Example>
+      caption="Sample list"
+      columns={columns}
+      rows={[
+        { id: 'a', label: 'Dolor sit amet', state: 'Lorem ipsum' },
+        { id: 'b', label: 'Lorem ipsum', state: 'Dolor sit amet' },
+        { id: 'c', label: 'Consectetur adipiscing', state: 'Lorem ipsum' },
+      ]}
+      rowId={(row) => row.id}
+    />
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const table = canvas.getByRole('table', { name: 'Sample list' });
+    const sort = canvas.getByRole('button', { name: 'Name' });
+
+    const rowElements = () => Array.from(table.querySelectorAll('tbody tr'));
+
+    const firstRow = table.querySelector('tbody tr');
+
+    if (!firstRow) throw new Error('Expected fixture rows.');
+
+    const borderColor = getComputedStyle(firstRow).borderBottomColor;
+    const initialLastId = rowElements().at(-1)?.getAttribute('data-row-id');
+    let lastRowMoved = false;
+
+    const expectStableBorders = () => {
+      for (const row of rowElements()) {
+        expect(getComputedStyle(row).borderBottomColor).toBe(borderColor);
+      }
+    };
+
+    expectStableBorders();
+
+    for (let click = 0; click < 6; click += 1) {
+      await userEvent.click(sort);
+      expectStableBorders();
+      lastRowMoved ||=
+        rowElements().at(-1)?.getAttribute('data-row-id') !== initialLastId;
+    }
+
+    expect(lastRowMoved).toBe(true);
+    await expect(table).toHaveAttribute('aria-busy', 'false');
+  },
+};

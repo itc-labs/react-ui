@@ -21,7 +21,7 @@ export function selectClasses(
       cn(
         'rounded-control border bg-surface text-control text-ink transition-[border-color,box-shadow] motion-reduce:transition-none',
         size === 'sm'
-          ? 'min-h-control-sm'
+          ? 'min-h-control-sm text-ui-sm'
           : size === 'lg'
             ? 'min-h-control-lg'
             : 'min-h-control-md',
@@ -40,7 +40,10 @@ export function selectClasses(
     dropdownIndicator: () => 'rounded p-0.5',
     indicatorSeparator: () => 'hidden',
     menu: () =>
-      'my-1 overflow-hidden rounded-control border border-line bg-surface p-1 text-control text-ink shadow-floating',
+      cn(
+        'my-1 overflow-hidden rounded-control border border-line bg-surface p-1 text-control text-ink shadow-floating',
+        size === 'sm' && 'text-ui-sm',
+      ),
     menuList: () => 'max-h-60 overflow-y-auto',
     option: ({ isFocused, isSelected, isDisabled }) =>
       cn(

@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useEffect, useState } from 'react';
 import { expect, userEvent, waitFor, within } from 'storybook/test';
 import { Select } from './index';
+import { Input } from '../input';
 const options = [
   { value: '', label: 'None — root category' },
   { value: 'pets', label: 'Pets' },
@@ -369,5 +370,45 @@ export const DebouncedSearch: Story = {
       expect(canvas.getByLabelText('Search query')).toHaveTextContent('Option 1'),
     );
     await expect(canvas.getByLabelText('Search calls')).toHaveTextContent('1');
+  },
+};
+
+export const MatchingControlTypography: Story = {
+  tags: ['!dev', '!autodocs', 'regression'],
+  render: () => (
+    <div className="grid max-w-lg gap-4">
+      {(['sm', 'md', 'lg'] as const).map((size) => (
+        <div key={size} className="grid grid-cols-2 items-end gap-3">
+          <Input label={`Search ${size}`} placeholder="Search" size={size} />
+          <Select
+            label={`Category ${size}`}
+            placeholder="Select category"
+            options={options}
+            size={size}
+          />
+        </div>
+      ))}
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+
+    for (const size of ['sm', 'md', 'lg']) {
+      const input = canvas.getByRole('textbox', { name: `Search ${size}` });
+      const select = canvas.getByRole('combobox', { name: `Category ${size}` });
+      const expectedFontSize = getComputedStyle(input).fontSize;
+
+      await userEvent.click(select);
+      const option = within(document.body).getByRole('option', {
+        name: 'Pets',
+      });
+      expect(getComputedStyle(option).fontSize).toBe(expectedFontSize);
+      await userEvent.click(option);
+      const selected = within(input.closest('.grid-cols-2') as HTMLElement).getByText(
+        'Pets',
+      );
+      expect(getComputedStyle(selected).fontSize).toBe(expectedFontSize);
+      await userEvent.clear(input);
+    }
   },
 };

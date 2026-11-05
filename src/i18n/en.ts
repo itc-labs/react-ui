@@ -252,6 +252,7 @@ export const enMessages = {
   },
   'table.pagination': 'Pagination: {caption}',
   'date.placeholder': 'Select date',
+  'input.clear': 'Clear input',
   'date.clear': 'Clear date selection',
   'date.invalid': 'Invalid date.',
   'date.outOfBounds': 'Date is outside the allowed range.',

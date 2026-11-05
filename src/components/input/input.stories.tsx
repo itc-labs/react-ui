@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, userEvent, within } from 'storybook/test';
 import { Input } from './index';
+import { useState } from 'react';
 const meta = {
   parameters: {
     docs: {
@@ -127,5 +128,24 @@ export const FocusError: Story = {
     await userEvent.click(field);
     await expect(field).toHaveFocus();
     await expect(field).toHaveAttribute('aria-invalid', 'true');
+  },
+};
+
+export const Clearable: Story = {
+  tags: ['example'],
+  render: function ClearableExample() {
+    const [value, setValue] = useState('Category');
+
+    return (
+      <Input
+        label="Search"
+        icon="search"
+        clearable
+        value={value}
+        onChange={(event) => setValue(event.target.value)}
+        onClear={() => setValue('')}
+        rootClassName="max-w-sm"
+      />
+    );
   },
 };
