@@ -1,3 +1,6 @@
+import { useFormatters } from '../hooks';
+import { DateFormat } from '../format';
+import { LanguageSwitcher } from '../components/language-switcher';
 import catalog from './locales/translations.json';
 import type { UITranslations } from '../i18n';
 import { useState } from 'react';
@@ -220,4 +223,57 @@ export const PartialLocaleFallback: Story = {
       </div>
     </UIProvider>
   ),
+};
+
+function FormatterValues() {
+  const { formatNumber, formatCurrency, formatDate } = useFormatters({
+    timeZone: 'Asia/Ho_Chi_Minh',
+  });
+
+  return (
+    <dl className="grid gap-2 text-control">
+      <dt>Number</dt>
+      <dd data-testid="formatted-number">{formatNumber(1234.5)}</dd>
+      <dt>Currency (USD)</dt>
+      <dd>{formatCurrency(19.9, 'USD')}</dd>
+      <dt>Month name</dt>
+      <dd data-testid="formatted-month">{formatDate('2026-11-06', 'MMMM')}</dd>
+      <dt>Custom date pattern</dt>
+      <dd>{formatDate('2026-11-06T08:30:00Z', DateFormat.DMY_TIME)}</dd>
+      <dt>Explicit English number</dt>
+      <dd>{formatNumber(1234.5, { locale: 'en-US' })}</dd>
+    </dl>
+  );
+}
+
+function FormattersExample() {
+  const [locale, setLocale] = useState('vi-VN');
+
+  return (
+    <UIProvider locale={locale}>
+      <div className="grid gap-5">
+        <LanguageSwitcher
+          value={locale}
+          onValueChange={setLocale}
+          options={[
+            { value: 'en-US', label: 'English', flag: '🇺🇸' },
+            { value: 'vi-VN', label: 'Tiếng Việt', flag: '🇻🇳' },
+          ]}
+        />
+        <FormatterValues />
+      </div>
+    </UIProvider>
+  );
+}
+
+export const Formatters: Story = {
+  tags: ['example'],
+  render: () => <FormattersExample />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getByTestId('formatted-number')).toHaveTextContent('1.234,5');
+    await userEvent.click(canvas.getByRole('radio', { name: 'English' }));
+    await expect(canvas.getByTestId('formatted-number')).toHaveTextContent('1,234.5');
+    await expect(canvas.getByTestId('formatted-month')).toHaveTextContent('November');
+  },
 };

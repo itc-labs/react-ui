@@ -441,3 +441,6 @@ assert.deepEqual(Object.keys(presets.themePresets), [
   'ember',
 ]);
 assert.equal(presets.emberTheme.light.tokens['color-brand-700'], '#9a3412');
+
+assert.equal(formatting.formatDate('2026-11-06'), '06/11/2026');
+assert.equal(formatting.formatDate('2026-11-06', 'yyyy-MM-dd'), '2026-11-06');

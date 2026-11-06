@@ -13,3 +13,5 @@ Add dashed Button/IconButton variants and dashed DropdownMenu entries/submenu tr
 Add stateless formatDate, formatCurrency and formatNumber helpers on the server-safe format subpath, with explicit locale/currency/time-zone options and documented missing-value handling.
 
 Add optional Forest, Ocean, Violet, Slate and Ember orange light/dark token presets on the isolated theme/presets entry, with contrast coverage, an interactive guide and reproducible bundle measurements.
+
+Bind UI formatters to UIProvider locale with typed useFormatters defaults and per-call overrides. Add DateFormat presets and custom date-fns pattern support (default dd/MM/yyyy), retaining the Intl options overload and server-safe pure helpers.

@@ -1,51 +1,35 @@
-import { Meta } from '@storybook/addon-docs/blocks';
+import { Meta, Canvas } from '@storybook/addon-docs/blocks';
+import * as Localization from './localization.stories';
 
 <Meta title="Reference/Format helpers" />
 
 # Format helpers
 
-Import pure formatting helpers from **`@itclabs/react-ui/format`**. This entry has no React dependency or client directive and works in server code, browser code and table cell renderers. The functions are also available from the root export. They wrap native Intl and do not change the original value.
+Use **`useFormatters()` from `@itclabs/react-ui/hooks`** in React components to inherit the current UIProvider locale automatically. Switching provider locale updates formatting without remounting children. Defaults can be customized for the hook or one function call. Currency denomination remains explicit; changing the interface language must not change USD into VND.
 
-## Numbers and currency
+## Automatic locale in UI components
 
 ```tsx
-import { formatNumber, formatCurrency } from '@itclabs/react-ui/format';
+'use client';
+
+import { useFormatters } from '@itclabs/react-ui/hooks';
+import { DateFormat } from '@itclabs/react-ui/format';
 
 export function Summary() {
+  const { formatNumber, formatCurrency, formatDate } = useFormatters();
+
   return (
     <dl>
       <dt>Quantity</dt>
-      <dd>{formatNumber(1234567.89, { locale: 'vi-VN' })}</dd>
+      <dd>{formatNumber(1234567.89)}</dd>
       <dt>Price</dt>
-      <dd>{formatCurrency(125000, 'VND', { locale: 'vi-VN' })}</dd>
-      <dt>Price in USD</dt>
-      <dd>{formatCurrency(19.9, 'USD', { locale: 'en-US' })}</dd>
-      <dt>Rate</dt>
-      <dd>{formatNumber(0.25, { locale: 'en-US', style: 'percent' })}</dd>
-    </dl>
-  );
-}
-```
-
-`formatNumber(value, options?)` accepts a number, null or undefined and native `Intl.NumberFormatOptions`, plus `locale` and `fallback`. `formatCurrency(value, currency, options?)` requires an explicit currency code such as `VND`, `USD` or `EUR`; locale does not choose the denomination. Currency fraction defaults follow Intl (for example VND has no minor fraction). Formatting is not currency conversion, financial rounding or storage: keep calculations and original numeric data in the host.
-
-## Dates and time zones
-
-```tsx
-import { formatDate } from '@itclabs/react-ui/format';
-
-export function Dates() {
-  return (
-    <dl>
+      <dd>{formatCurrency(19.9, 'USD')}</dd>
       <dt>Calendar date</dt>
-      <dd>{formatDate('2026-11-06', { locale: 'vi-VN', dateStyle: 'long' })}</dd>
-      <dt>Event time</dt>
+      <dd>{formatDate('2026-11-06', DateFormat.DMY)}</dd>
+      <dt>Custom format</dt>
       <dd>
-        {formatDate('2026-11-06T08:30:00Z', {
-          locale: 'vi-VN',
+        {formatDate('2026-11-06T08:30:00Z', 'dd/MM/yyyy HH:mm', {
           timeZone: 'Asia/Ho_Chi_Minh',
-          dateStyle: 'medium',
-          timeStyle: 'short',
         })}
       </dd>
     </dl>
@@ -53,32 +37,100 @@ export function Dates() {
 }
 ```
 
-`formatDate(value, options?)` accepts Date, epoch milliseconds, an ISO calendar date (`YYYY-MM-DD`), an ISO datetime with `Z` or an explicit `±HH:MM` offset, null or undefined. Local strings such as `06/11/2026` and datetimes without a time-zone offset are rejected as ambiguous. Invalid calendar dates such as February 30 are missing values.
+<Canvas of={Localization.Formatters} />
 
-A date-only string is a calendar day and is formatted in UTC to preserve that day, even if options contain another timeZone. Instants (Date, epoch milliseconds or ISO datetimes) default to UTC; pass `timeZone` for application-local display. Time-zone behavior does not depend on the server's or browser's local setting. Native Intl options include `dateStyle`, `timeStyle` and granular fields; do not combine styles with incompatible granular fields.
+## Typed custom defaults and per-call overrides
 
-## Missing values and locale ownership
-
-All helpers default to `locale="vi-VN"` and `fallback="—"`. Null, undefined, invalid dates and nonfinite numbers use the fallback. Zero is a real number, and epoch `0` is a real instant. Override `fallback` with your application's missing-value copy. Invalid formatter configuration (for example an invalid currency code or timeZone) throws; it is not silently hidden as missing data.
-
-Pure helpers do not read UIProvider, navigator or global locale. For UI formatting, pass the current provider locale explicitly:
+Options use exported TypeScript types: `UseFormattersOptions`, `LocaleFormatters`, `FormatNumberOptions`, `FormatCurrencyOptions`, `FormatDateOptions` (Intl) and `FormatDatePatternOptions` (patterns). `CurrencyCode` suggests common denominations while accepting other valid codes. An explicit per-call option wins over hook defaults; hook `locale` wins over UIProvider. These are local bindings, not shared global configuration.
 
 ```tsx
 'use client';
 
-import { useUILocale } from '@itclabs/react-ui';
-import { formatCurrency } from '@itclabs/react-ui/format';
+import { useFormatters, type UseFormattersOptions } from '@itclabs/react-ui/hooks';
+import {
+  DateFormat,
+  type FormatNumberOptions,
+  type FormatDatePatternOptions,
+} from '@itclabs/react-ui/format';
 
-export function Price({ amount }: { amount: number | null }) {
-  const { locale } = useUILocale();
+const defaults = {
+  timeZone: 'Asia/Ho_Chi_Minh',
+  fallback: 'Not available',
+} satisfies UseFormattersOptions;
+const precision = { maximumFractionDigits: 2 } satisfies FormatNumberOptions;
+const customDate = {
+  locale: 'en-US',
+  timeZone: 'UTC',
+} satisfies FormatDatePatternOptions;
+
+export function CustomSummary() {
+  const { formatNumber, formatCurrency, formatDate } = useFormatters(defaults);
 
   return (
-    <span>
-      {formatCurrency(amount, 'VND', {
-        locale: locale.code,
-        fallback: 'Not available',
-      })}
-    </span>
+    <div>
+      <p>{formatNumber(1234.567, precision)}</p>
+      <p>{formatNumber(1234.5, { locale: 'en-US' })}</p>
+      <p>{formatCurrency(19.9, 'USD', { currencyDisplay: 'code' })}</p>
+      <p>{formatDate('2026-11-06T08:30:00Z', DateFormat.DMY_TIME, customDate)}</p>
+    </div>
   );
 }
 ```
+
+## Date patterns
+
+`formatDate(value)` defaults to **`dd/MM/yyyy`**. Choose a predefined `DateFormat` for editor suggestions, or pass a custom date-fns pattern. `DateFormatPattern` keeps those suggestions while accepting free-form strings. TypeScript checks option names and value types; a free-form pattern's meaning is validated by date-fns at runtime. Use lowercase `yyyy` and `dd`, not week-year/day-of-year `YYYY` and `DD`.
+
+| Enum                     | Pattern               |
+| ------------------------ | --------------------- |
+| `DateFormat.DMY`         | `dd/MM/yyyy`          |
+| `DateFormat.YMD`         | `yyyy-MM-dd`          |
+| `DateFormat.DMY_TIME`    | `dd/MM/yyyy HH:mm`    |
+| `DateFormat.DMY_SECONDS` | `dd/MM/yyyy HH:mm:ss` |
+| `DateFormat.TIME`        | `HH:mm`               |
+
+For pattern month/day labels, built-in locale resolution supports Vietnamese and English; other locale codes fall back to English labels. Supply a full date-fns `Locale` using `dateLocale` in hook defaults or the third pattern-options argument for other languages. This is independent of the provider's optional partial calendar locale. Intl formatting supports the runtime's native locale catalog.
+
+The existing Intl options signature is also supported: `formatDate(value, { dateStyle: 'long', locale: 'vi-VN' })`. For patterns, use `formatDate(value, 'dd MMMM yyyy', { locale: 'en-US' })`. Do not pass an Intl options object as the third pattern argument.
+
+## Pure helpers for server and non-React code
+
+Import **`formatDate`, `formatCurrency`, `formatNumber` and their types from `@itclabs/react-ui/format`**. They have no React dependency or client directive. A pure function cannot read React context; it defaults to `vi-VN` and accepts explicit locale overrides. There is no navigator detection or global locale mutation, so independent requests cannot change each other's formatting.
+
+```tsx
+import {
+  formatDate,
+  formatCurrency,
+  formatNumber,
+  DateFormat,
+} from '@itclabs/react-ui/format';
+
+export function ServerSummary() {
+  return (
+    <dl>
+      <dt>Quantity</dt>
+      <dd>{formatNumber(1234567.89, { locale: 'vi-VN' })}</dd>
+      <dt>Price</dt>
+      <dd>{formatCurrency(19.9, 'USD', { locale: 'en-US' })}</dd>
+      <dt>Day</dt>
+      <dd>{formatDate('2026-11-06', DateFormat.DMY)}</dd>
+      <dt>Localized date</dt>
+      <dd>{formatDate('2026-11-06', { locale: 'en-US', dateStyle: 'long' })}</dd>
+    </dl>
+  );
+}
+```
+
+## Missing values and time zones
+
+Numbers accept number, null or undefined and support native Intl number options. Currency requires a code such as `VND`, `USD` or `EUR`; its fraction defaults follow Intl. Formatting does not convert currencies or provide financial arithmetic.
+
+Dates accept Date, epoch milliseconds, an ISO calendar date (`YYYY-MM-DD`), or an ISO datetime with `Z`/an explicit `±HH:MM` offset, null or undefined. Ambiguous local strings and datetimes without an offset are rejected. Invalid calendar dates such as February 30 use the fallback.
+
+All helpers default to fallback `—`; null, undefined, invalid dates and nonfinite numbers are missing. Zero and epoch `0` are valid values. Invalid configuration (currency, locale, time zone, date pattern or incompatible Intl options) throws instead of being silently hidden as missing data.
+
+Date-only strings preserve their calendar day in UTC, even when another timeZone is supplied. Instants default to UTC; set timeZone in hook defaults or per call for application-local display. Locale follows the provider; timeZone is a separate explicit setting. Original numeric values and Date objects are not mutated.
+
+## Bundle behavior
+
+Pattern formatting reuses the package's existing date-fns and date-fns/tz peers. The entire format entry including patterns and Vietnamese/English date labels measures approximately 9.7 KB gzip; a named formatNumber import is about 155 bytes gzip. Unused format modules and optional theme presets do not enter the Button bundle. Run `node scripts/measure-feature-bundles.mjs` to reproduce. These are production ESM JavaScript transfer measurements, not installed-package sizes.

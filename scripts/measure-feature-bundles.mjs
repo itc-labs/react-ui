@@ -3,6 +3,7 @@ import { gzipSync } from 'node:zlib';
 const require = createRequire(import.meta.url);
 const { build } = createRequire(require.resolve('vite/package.json'))('esbuild');
 const fixtures = {
+  NumberOnly: "export { formatNumber } from './src/format/index.ts'",
   Format:
     "export { formatDate, formatCurrency, formatNumber } from './src/format/index.ts'",
   OnePreset: "export { emberTheme } from './src/theme/presets/index.ts'",
@@ -30,6 +31,7 @@ for (const [name, contents] of Object.entries(fixtures)) {
   );
   if (
     name !== 'Button' &&
+    name !== 'Format' &&
     inputs.some((path) => /node_modules|components\/icon/.test(path))
   )
     throw new Error(`${name} unexpectedly imports a runtime dependency`);

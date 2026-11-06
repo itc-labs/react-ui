@@ -9,7 +9,8 @@ it('keeps format and preset imports lean and unused helpers out of the Button gr
   const sizes = JSON.parse(
     execFileSync(process.execPath, [script], { encoding: 'utf8' }),
   ) as Record<string, { minified: number; gzip: number }>;
-  expect(sizes.Format!.gzip).toBeLessThan(1000);
+  expect(sizes.NumberOnly!.gzip).toBeLessThan(1000);
+  expect(sizes.Format!.gzip).toBeLessThan(15000);
   expect(sizes.OnePreset!.gzip).toBeLessThan(1500);
   expect(sizes.AllPresets!.gzip).toBeLessThan(2000);
 });

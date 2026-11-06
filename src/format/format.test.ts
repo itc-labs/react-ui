@@ -1,5 +1,5 @@
 import { expect, it } from 'vitest';
-import { formatCurrency, formatDate, formatNumber } from './index';
+import { DateFormat, formatCurrency, formatDate, formatNumber } from './index';
 
 it('formats numbers per explicit locale, preserves zero and supports Intl precision and percentage options', () => {
   expect(formatNumber(1234567.89)).toBe('1.234.567,89');
@@ -77,4 +77,23 @@ it('rejects missing, invalid and ambiguous dates, while leaving invalid configur
     expect(formatDate(value)).toBe('—');
   expect(formatDate('bad', { fallback: '' })).toBe('');
   expect(() => formatDate(0, { timeZone: 'Not/AZone' })).toThrow(RangeError);
+});
+
+it('supports typed predefined formats and custom date-fns patterns with explicit zones', () => {
+  expect(formatDate('2026-11-06')).toBe('06/11/2026');
+  expect(formatDate('2026-11-06', DateFormat.YMD)).toBe('2026-11-06');
+  expect(
+    formatDate('2026-11-06T08:30:00Z', 'dd/MM/yyyy HH:mm', {
+      timeZone: 'Asia/Ho_Chi_Minh',
+    }),
+  ).toBe('06/11/2026 15:30');
+  expect(formatDate('2026-11-06', 'MMMM', { locale: 'en-US' })).toBe('November');
+  expect(formatDate('2026-11-06', 'MMMM', { locale: 'vi-VN' })).toBe('tháng 11');
+  expect(
+    formatDate('2026-11-06', DateFormat.DMY, { timeZone: 'America/Los_Angeles' }),
+  ).toBe('06/11/2026');
+  expect(formatDate(null, DateFormat.DMY, { fallback: '' })).toBe('');
+  expect(() => formatDate(0, DateFormat.DMY, { timeZone: 'Not/AZone' })).toThrow(
+    RangeError,
+  );
 });

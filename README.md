@@ -426,9 +426,13 @@ import { formatDate, formatCurrency, formatNumber } from '@itclabs/react-ui/form
 
 formatNumber(1234567.89, { locale: 'vi-VN' });
 formatCurrency(19.9, 'USD', { locale: 'en-US' });
-formatDate('2026-11-06T08:30:00Z', { timeZone: 'Asia/Ho_Chi_Minh' });
+formatDate('2026-11-06T08:30:00Z', 'dd/MM/yyyy HH:mm', {
+  timeZone: 'Asia/Ho_Chi_Minh',
+});
 ```
 
 ### Built-in theme presets
 
 Import `forestTheme`, `oceanTheme`, `violetTheme`, `slateTheme` or `emberTheme` (earthy orange) from `@itclabs/react-ui/theme/presets`. Each provides `.light` and `.dark` UIProvider configurations. Use `theme={emberTheme[mode]}` with the same mode as ThemeToggle. Presets are isolated from root imports; one named light/dark palette is approximately 813 bytes gzip. Import `themePresets` from the same entry only when offering all five palettes. See Guides → Theming for the complete example.
+
+For automatic UI locale, import `useFormatters` from `@itclabs/react-ui/hooks`. Its format functions default to the UIProvider locale and update on language changes. Hook defaults and per-call options are typed and overridable. `formatDate` defaults to `dd/MM/yyyy`, supports `DateFormat` presets/custom date-fns patterns, and retains its Intl options overload. Pure helpers remain server-safe and cannot read React context.

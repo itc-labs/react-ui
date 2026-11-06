@@ -50,7 +50,7 @@ For a host-controlled theme picker, import `themePresets`, `ThemePresetName` and
 
 <Canvas of={Theme.Presets} />
 
-Measured with minified browser ESM, production mode and gzip: a single named preset with both modes is about 813 bytes; the five-preset map is about 1,128 bytes. Formatting helpers are about 501 bytes. Run `node scripts/measure-feature-bundles.mjs` to reproduce; its Button probe rejects unused preset/format contributions after tree-shaking. Serialized runtime token objects and generated style text are separate from these JavaScript transfer measurements. Essential opaque text/control color pairs are covered by contrast tests; consumers still need to review modified colors and custom component combinations.
+Measured with minified browser ESM, production mode and gzip: a single named preset with both modes is about 813 bytes; the five-preset map is about 1,128 bytes. A named formatNumber import is about 155 bytes; the complete formatting entry with date patterns/locales is about 9.7 KB. Run `node scripts/measure-feature-bundles.mjs` to reproduce; its Button probe rejects unused preset/format contributions after tree-shaking. Serialized runtime token objects and generated style text are separate from these JavaScript transfer measurements. Essential opaque text/control color pairs are covered by contrast tests; consumers still need to review modified colors and custom component combinations.
 
 ## Foundation reference
 
