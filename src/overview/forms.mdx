@@ -4,7 +4,7 @@ import { Meta } from '@storybook/addon-docs/blocks';
 
 # Forms
 
-`useAppForm` creates the TanStack Form state. The recommended pattern, used throughout the Form stories, wraps ordinary kit controls in `FormField` inside `Form`, passes per-field Valibot rules through `Form schema` and submits with a plain `Button type="submit"`, which shows loading and stays disabled while the form submits. `form.AppField` bound fields are a shorter alternative. `Form` supplies context, prevents native submission, and focuses the first element marked `aria-invalid="true"` after submission completes.
+`useAppForm` creates the TanStack Form state. The recommended pattern, used throughout the Form stories, wraps ordinary kit controls in `FormField` inside `Form`, passes per-field Standard Schema rules (Valibot in these examples; Zod or ArkType work the same way) through `Form schema` and submits with a plain `Button type="submit"`, which shows loading and stays disabled while the form submits. `form.AppField` bound fields are a shorter alternative. `Form` supplies context, prevents native submission, and focuses the first element marked `aria-invalid="true"` after submission completes.
 
 ## Compose controls with FormField (recommended)
 
@@ -460,6 +460,31 @@ export function ProfileForm({
 ```
 
 `Form schema` installs per-field `onChange` validators for `FormField name`, which also run on submit. Bound `form.AppField` controls use validators passed to `useAppForm` or to the field itself, as in the example above. For whole-form or cross-field validation, use TanStack Form's `validators` option on `useAppForm`. Schema parsing can transform values, so use the parsed output when saving.
+
+`Form schema` accepts any synchronous [Standard Schema](https://standardschema.dev) rule. Mixing libraries is allowed. An asynchronous rule throws with guidance; put async checks in an `onChangeAsync` validator through `Form validators` or `FormField validators`. `createStandardSchemaFieldValidators` exposes the same adapter; `createValibotFieldValidators` remains as a deprecated alias.
+
+```tsx
+import { Button, Form, FormField, Input, useAppForm } from '@itclabs/react-ui';
+import { z } from 'zod';
+
+export function NewsletterForm() {
+  const form = useAppForm({
+    defaultValues: { email: '' },
+    onSubmit: async ({ value }) => {
+      console.info(value.email);
+    },
+  });
+
+  return (
+    <Form form={form} schema={{ email: z.email('Enter a valid email') }}>
+      <FormField name="email" label="Email">
+        <Input type="email" />
+      </FormField>
+      <Button type="submit">Subscribe</Button>
+    </Form>
+  );
+}
+```
 
 ## Custom wrappers
 

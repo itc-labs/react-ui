@@ -60,15 +60,16 @@ See [Getting started](?path=/docs/overview-getting-started--docs) for CSS setup 
 
 Required peers must be supplied by the consuming application. Optional peers are needed when using their feature subpath. These classifications follow `peerDependenciesMeta` in `package.json`.
 
-| Status   | Packages and supported versions                                | Used by                         |
-| -------- | -------------------------------------------------------------- | ------------------------------- |
-| Required | `react` and `react-dom`: `^19.0.0`                             | React components and rendering. |
-| Required | `valibot`: `^1.0.0`; `@tanstack/react-form`: `^1.0.0`          | Form state and validation.      |
-| Required | `@tanstack/react-table`: `^8.0.0`                              | DataTable.                      |
-| Required | `date-fns`: `^4.0.0`; `@date-fns/tz`: `^1.2.0`                 | Date and calendar utilities.    |
-| Optional | `@tiptap/react`, `@tiptap/pm`, `@tiptap/starter-kit`: `^3.0.0` | `/editor`.                      |
-| Optional | `recharts`: `^3.0.0`; `react-is`: `^19.0.0`                    | `/chart`.                       |
-| Optional | `react-easy-crop`: `^6.0.0`                                    | `/avatar-upload`.               |
+| Status   | Packages and supported versions                                | Used by                                                                       |
+| -------- | -------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| Required | `react` and `react-dom`: `^19.0.0`                             | React components and rendering.                                               |
+| Required | `@tanstack/react-form`: `^1.0.0`                               | Form state.                                                                   |
+| Required | `@tanstack/react-table`: `^8.0.0`                              | DataTable.                                                                    |
+| Required | `date-fns`: `^4.0.0`; `@date-fns/tz`: `^1.2.0`                 | Date and calendar utilities.                                                  |
+| Optional | `@tiptap/react`, `@tiptap/pm`, `@tiptap/starter-kit`: `^3.0.0` | `/editor`.                                                                    |
+| Optional | `recharts`: `^3.0.0`; `react-is`: `^19.0.0`                    | `/chart`.                                                                     |
+| Optional | `react-easy-crop`: `^6.0.0`                                    | `/avatar-upload`.                                                             |
+| Optional | `valibot`: `^1.0.0`                                            | Not imported by the kit; any Standard Schema library works for `Form schema`. |
 
 ## Measured bundle size
 

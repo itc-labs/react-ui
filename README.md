@@ -19,13 +19,15 @@ pnpm add @itclabs/react-ui
 
 Requires React 19 and Node.js >= 22.12.
 
-pnpm and npm (v7+) install the required peers automatically: `valibot`, `date-fns`, `@date-fns/tz`, `@tanstack/react-form` and `@tanstack/react-table`. Add them to your own `package.json` only if your app imports them directly (for example, Valibot schemas shared with server code) or your package manager does not auto-install peers (Yarn, or pnpm with `auto-install-peers=false`):
+pnpm and npm (v7+) install the required peers automatically: `date-fns`, `@date-fns/tz`, `@tanstack/react-form` and `@tanstack/react-table`. Add them to your own `package.json` only if your app imports them directly or your package manager does not auto-install peers (Yarn, or pnpm with `auto-install-peers=false`):
 
 ```bash
-pnpm add valibot date-fns @date-fns/tz @tanstack/react-form @tanstack/react-table
+pnpm add date-fns @date-fns/tz @tanstack/react-form @tanstack/react-table
 ```
 
-They are peers so the app and the kit share a single copy. `useAppForm` builds on TanStack Form, `createValibotFieldValidators` adapts Valibot schemas, DataTable extends TanStack Table column meta with `align`, and calendar helpers build on date-fns with date-fns time-zone support. Import the libraries from their own packages; the kit does not re-export them.
+Form validation accepts any [Standard Schema](https://standardschema.dev) library, so install the one your app uses, for example `pnpm add valibot` (Valibot 1), `pnpm add zod` (Zod 3.24+ or 4) or `pnpm add arktype` (ArkType 2). `valibot` is an optional peer; the kit does not import it.
+
+They are peers so the app and the kit share a single copy. `useAppForm` builds on TanStack Form, `createStandardSchemaFieldValidators` adapts Standard Schema rules (Valibot, Zod, ArkType), DataTable extends TanStack Table column meta with `align`, and calendar helpers build on date-fns with date-fns time-zone support. Import the libraries from their own packages; the kit does not re-export them.
 
 ## Styles
 
@@ -145,7 +147,7 @@ import { Button, Input, Select } from '@itclabs/react-ui';
 
 ### Forms
 
-Wrap ordinary controls in `FormField` inside `Form`. `Form schema` takes Valibot rules per field; `FormField` binds the value, blur, label and error, and a `Button type="submit"` inside `Form` shows loading and stays disabled while the form submits.
+Wrap ordinary controls in `FormField` inside `Form`. `Form schema` takes a Standard Schema rule per field (Valibot in this example; Zod or ArkType work the same way); `FormField` binds the value, blur, label and error, and a `Button type="submit"` inside `Form` shows loading and stays disabled while the form submits.
 
 ```tsx
 'use client';

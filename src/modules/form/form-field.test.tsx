@@ -4,6 +4,7 @@ import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import * as v from 'valibot';
+import { z } from 'zod';
 import { Form, FormField, FormSubmit, useAppForm } from './index';
 import { Input } from '../../components/input';
 import { QuantityInput } from '../../components/quantity-input';
@@ -12,7 +13,11 @@ import { Select } from '../../components/select';
 import { InputPassword } from '../../components/input-password';
 import { Checkbox } from '../../components/checkbox';
 import { Button } from '../../components/button';
-import { createValibotFieldValidators } from './validation';
+import {
+  createStandardSchemaFieldValidators,
+  createValibotFieldValidators,
+  type StandardSchemaV1,
+} from './validation';
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 let host: HTMLDivElement, root: Root;
@@ -321,4 +326,85 @@ it('auto-binds QuantityInput as a numeric value control and submits its value', 
   expect(host.querySelector<HTMLInputElement>('input[type="hidden"]')!.name).toBe(
     'quantity',
   );
+});
+
+function fieldRule(schema: StandardSchemaV1) {
+  return createStandardSchemaFieldValidators({ field: schema }).field!
+    .onChange as (args: { value: unknown }) => unknown;
+}
+
+it('keeps createValibotFieldValidators as an alias of the Standard Schema adapter', () => {
+  expect(createValibotFieldValidators).toBe(createStandardSchemaFieldValidators);
+});
+
+it('validates Zod and hand-written Standard Schema rules without a validation library', () => {
+  const zodRule = fieldRule(z.number('Quantity required'));
+  expect(zodRule({ value: 0 })).toBeUndefined();
+  expect(zodRule({ value: '0' })).toEqual([
+    expect.objectContaining({ message: 'Quantity required' }),
+  ]);
+
+  const custom: StandardSchemaV1<string> = {
+    '~standard': {
+      version: 1,
+      vendor: 'test',
+      validate: (value) =>
+        typeof value === 'string' && value.length > 0
+          ? { value }
+          : { issues: [{ message: 'Lorem required' }] },
+    },
+  };
+  const customRule = fieldRule(custom);
+  expect(customRule({ value: 'ipsum' })).toBeUndefined();
+  expect(customRule({ value: '' })).toEqual([{ message: 'Lorem required' }]);
+  expect(
+    fieldRule({
+      ...custom,
+      '~standard': { ...custom['~standard'], validate: () => ({ issues: [] }) },
+    })({ value: '' }),
+  ).toBeUndefined();
+});
+
+it('rejects asynchronous schemas in Form schema with guidance', () => {
+  const rule = fieldRule(z.string().refine(async (value) => value.length > 0));
+  expect(() => rule({ value: 'x' })).toThrow(/synchronous schemas only/);
+});
+
+it('submits a Form whose schema uses Zod', async () => {
+  const saved = vi.fn();
+
+  function Demo() {
+    const form = useAppForm({
+      defaultValues: { name: '' },
+      onSubmit: async ({ value }) => {
+        saved(value);
+      },
+    });
+
+    return (
+      <Form form={form} schema={{ name: z.string().min(1, 'Name required') }}>
+        <FormField name="name" label="Name">
+          <Input />
+        </FormField>
+        <Button type="submit">Save</Button>
+      </Form>
+    );
+  }
+
+  const submit = () =>
+    act(async () => {
+      host
+        .querySelector('form')!
+        .dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+      await new Promise((resolve) => setTimeout(resolve, 20));
+    });
+
+  await act(async () => root.render(<Demo />));
+  await submit();
+  expect(saved).not.toHaveBeenCalled();
+  expect(host.textContent).toContain('Name required');
+  inputChange(host.querySelector('input')!, 'Lorem');
+  await submit();
+  expect(saved).toHaveBeenCalledWith({ name: 'Lorem' });
+  expect(host.textContent).not.toContain('Name required');
 });

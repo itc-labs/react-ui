@@ -12,13 +12,15 @@ Start with a React 19 application that already has `react` and `react-dom` insta
 pnpm add @itclabs/react-ui
 ```
 
-pnpm and npm (v7+) install the required peers automatically: `valibot`, `date-fns`, `@date-fns/tz`, `@tanstack/react-form` and `@tanstack/react-table`. Add them to your own `package.json` only if your app imports them directly (for example, Valibot schemas shared with server code) or your package manager does not auto-install peers (Yarn, or pnpm with `auto-install-peers=false`):
+pnpm and npm (v7+) install the required peers automatically: `date-fns`, `@date-fns/tz`, `@tanstack/react-form` and `@tanstack/react-table`. Add them to your own `package.json` only if your app imports them directly or your package manager does not auto-install peers (Yarn, or pnpm with `auto-install-peers=false`):
 
 ```bash
-pnpm add valibot date-fns @date-fns/tz @tanstack/react-form @tanstack/react-table
+pnpm add date-fns @date-fns/tz @tanstack/react-form @tanstack/react-table
 ```
 
-Supported peer versions: Valibot 1, date-fns 4, `@date-fns/tz` ^1.2.0, TanStack Form 1, and TanStack Table 8.
+Form validation accepts any [Standard Schema](https://standardschema.dev) library, so install the one your app uses, for example `pnpm add valibot` (Valibot 1), `pnpm add zod` (Zod 3.24+ or 4) or `pnpm add arktype` (ArkType 2). `valibot` is an optional peer; the kit does not import it.
+
+Supported peer versions: date-fns 4, `@date-fns/tz` ^1.2.0, TanStack Form 1, and TanStack Table 8.
 
 Install optional peers only for the features you use:
 
@@ -89,7 +91,7 @@ Native adapters are also the defaults. Replace them with framework adapters when
 
 ## 4. Build a first screen
 
-Render `FirstScreen` inside `UIRoot`. Wrap ordinary controls in `FormField` inside `Form`; `schema` holds the Valibot rule for each field, and a `Button type="submit"` shows loading while the form submits. Saving here is a local demonstration that shows a toast; connect your own persistence in `onSubmit`.
+Render `FirstScreen` inside `UIRoot`. Wrap ordinary controls in `FormField` inside `Form`; `schema` holds a Standard Schema rule for each field (Valibot here; Zod or ArkType also work), and a `Button type="submit"` shows loading while the form submits. Saving here is a local demonstration that shows a toast; connect your own persistence in `onSubmit`.
 
 ```tsx
 'use client';
