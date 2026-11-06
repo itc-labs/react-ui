@@ -45,3 +45,13 @@ it('supports semantic tones independently of the visual variant and preserves ca
   expect(html).toContain('rounded-full');
   expect(html).not.toContain('tone="');
 });
+
+it('keeps a dashed outline on semantic icon actions while disabling loading clicks', () => {
+  const html = renderToStaticMarkup(
+    <IconButton icon="plus" label="Add user" variant="dashed" tone="danger" loading />,
+  );
+  expect(html).toContain('border-dashed');
+  expect(html).toContain('border-danger-700');
+  expect(html).toContain('disabled=""');
+  expect(html.match(/<svg\b/g)).toHaveLength(1);
+});

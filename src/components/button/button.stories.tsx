@@ -16,7 +16,7 @@ const meta = {
   argTypes: {
     variant: {
       control: 'select',
-      options: ['primary', 'secondary', 'ghost', 'danger', 'soft', 'outline'],
+      options: ['primary', 'secondary', 'ghost', 'danger', 'soft', 'outline', 'dashed'],
     },
     size: { control: 'select', options: ['sm', 'md', 'lg'] },
   },
@@ -30,13 +30,21 @@ export const Variants: Story = {
   tags: ['variants'],
   render: () => (
     <div className="flex flex-wrap gap-3">
-      {(['primary', 'secondary', 'ghost', 'danger', 'soft', 'outline'] as const).map(
-        (variant) => (
-          <Button key={variant} variant={variant}>
-            {variant}
-          </Button>
-        ),
-      )}
+      {(
+        [
+          'primary',
+          'secondary',
+          'ghost',
+          'danger',
+          'soft',
+          'outline',
+          'dashed',
+        ] as const
+      ).map((variant) => (
+        <Button key={variant} variant={variant}>
+          {variant}
+        </Button>
+      ))}
     </div>
   ),
 };
@@ -48,11 +56,13 @@ export const Tones: Story = {
       {(['neutral', 'brand', 'info', 'success', 'warning', 'danger'] as const).map(
         (tone) => (
           <div key={tone} className="flex flex-wrap items-center gap-3">
-            {(['primary', 'soft', 'outline', 'ghost'] as const).map((variant) => (
-              <Button key={variant} tone={tone} variant={variant}>
-                {tone} · {variant}
-              </Button>
-            ))}
+            {(['primary', 'soft', 'outline', 'dashed', 'ghost'] as const).map(
+              (variant) => (
+                <Button key={variant} tone={tone} variant={variant}>
+                  {tone} · {variant}
+                </Button>
+              ),
+            )}
           </div>
         ),
       )}

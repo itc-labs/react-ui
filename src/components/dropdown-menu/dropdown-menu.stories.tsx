@@ -1,3 +1,4 @@
+import { Button } from '../button';
 import { Avatar } from '../avatar';
 import { Icon } from '../icon';
 import { IconButton } from '../icon-button';
@@ -217,4 +218,35 @@ export const TableActions: Story = {
       'delete:second',
     );
   },
+};
+
+export const Dashed: Story = {
+  tags: ['example'],
+  render: () => (
+    <DropdownMenu
+      trigger={<Button variant="dashed">Users</Button>}
+      items={[
+        { id: 'profile', label: 'Profile', icon: 'user' },
+        {
+          id: 'more',
+          type: 'submenu',
+          label: 'More users',
+          icon: 'users',
+          variant: 'dashed',
+          items: [
+            { id: 'first', label: 'Lorem ipsum' },
+            { id: 'second', label: 'Dolor sit amet' },
+          ],
+        },
+        { id: 'add', label: 'Add user', icon: 'plus', variant: 'dashed' },
+        {
+          id: 'remove',
+          label: 'Remove user',
+          icon: 'close',
+          tone: 'danger',
+          variant: 'dashed',
+        },
+      ]}
+    />
+  ),
 };

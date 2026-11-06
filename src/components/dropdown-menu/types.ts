@@ -10,6 +10,7 @@ interface MenuEntryBase {
 interface MenuSelectable extends MenuEntryBase {
   label: ReactNode;
   disabled?: boolean;
+  variant?: 'default' | 'dashed';
   icon?: IconName;
   shortcut?: ReactNode;
   textValue?: string;

@@ -2,7 +2,7 @@
 
 ## Semantic actions
 
-Button and IconButton accept `tone="neutral|brand|info|success|warning|danger"` independently of `variant="primary|secondary|ghost|soft|outline"`. `variant="danger"` remains supported for existing consumers. An explicit tone overrides its color; caller classes override kit defaults. Icon also accepts `tone`; an omitted tone inherits the surrounding text color. Color does not replace action labels or confirmation for destructive operations.
+Button and IconButton accept `tone="neutral|brand|info|success|warning|danger"` independently of `variant="primary|secondary|ghost|soft|outline|dashed"`. `variant="danger"` remains supported for existing consumers. An explicit tone overrides its color; caller classes override kit defaults. Icon also accepts `tone`; an omitted tone inherits the surrounding text color. Color does not replace action labels or confirmation for destructive operations.
 
 ## Language and appearance
 

@@ -8,7 +8,7 @@ import type { ComponentProps } from 'react';
 import { DropdownMenu as Primitive } from 'radix-ui';
 import { type SlotClasses, cn, partTestId } from '../common';
 import { hasCompositionProp, overlayTrigger } from '../common/overlay-composition';
-import { menuContentClass, menuItemClass } from './classes';
+import { menuContentClass, menuItemClass, dashedMenuItemClass } from './classes';
 import { MenuEntries } from './items';
 import type { DropdownMenuProps } from './types';
 
@@ -84,10 +84,19 @@ export function DropdownMenuContent({
 
 export function DropdownMenuItem({
   className,
+  variant = 'default',
   ...props
-}: ComponentProps<typeof Primitive.Item>) {
+}: ComponentProps<typeof Primitive.Item> & { variant?: 'default' | 'dashed' }) {
   return (
-    <Primitive.Item {...props} className={cn('relative', menuItemClass, className)} />
+    <Primitive.Item
+      {...props}
+      className={cn(
+        'relative',
+        menuItemClass,
+        variant === 'dashed' && dashedMenuItemClass,
+        className,
+      )}
+    />
   );
 }
 

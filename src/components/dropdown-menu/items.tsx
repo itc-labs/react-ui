@@ -14,7 +14,12 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
 } from './index';
-import { dangerMenuItemClass, menuContentClass, menuItemClass } from './classes';
+import {
+  dangerMenuItemClass,
+  menuContentClass,
+  menuItemClass,
+  dashedMenuItemClass,
+} from './classes';
 import type { DropdownMenuClassNames, DropdownMenuEntry } from './types';
 
 export function MenuEntries({
@@ -79,6 +84,11 @@ export function MenuEntries({
       ...(item.textValue === undefined ? {} : { textValue: item.textValue }),
       'data-testid': id,
       className: cn(
+        item.variant === 'dashed' && dashedMenuItemClass,
+        item.type !== 'checkbox' &&
+          item.tone === 'danger' &&
+          item.variant === 'dashed' &&
+          'border-danger-700 bg-danger-50',
         item.type !== 'checkbox' && item.tone === 'danger' && dangerMenuItemClass,
         classNames?.item,
         item.className,

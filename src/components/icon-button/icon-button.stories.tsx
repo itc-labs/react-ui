@@ -89,6 +89,16 @@ export const SizesAndLoading: Story = {
   ),
 };
 
+export const Dashed: Story = {
+  tags: ['variants'],
+  render: () => (
+    <div className="flex gap-3">
+      <IconButton variant="dashed" icon="plus" label="Add user" />
+      <IconButton variant="dashed" tone="danger" icon="close" label="Remove user" />
+    </div>
+  ),
+};
+
 export const CustomClasses: Story = {
   tags: ['customization'],
   render: () => (

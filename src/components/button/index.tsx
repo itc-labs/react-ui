@@ -25,6 +25,8 @@ const button = cva(
         danger: 'bg-danger-700 text-on-brand hover:bg-danger-800',
         soft: 'bg-brand-100 text-brand-800 hover:bg-brand-50',
         outline: 'border border-brand-700 bg-surface text-brand-700 hover:bg-brand-50',
+        dashed:
+          'border border-dashed border-brand-500 bg-brand-50 text-brand-700 hover:border-brand-700 hover:bg-brand-100',
       },
       size: {
         sm: 'h-control-sm px-3 text-ui-sm',
@@ -75,7 +77,7 @@ export function Button({
           buttonToneClasses[tone][
             variant === 'ghost'
               ? 'ghost'
-              : variant === 'secondary' || variant === 'outline'
+              : variant === 'secondary' || variant === 'outline' || variant === 'dashed'
                 ? 'outline'
                 : variant === 'soft'
                   ? 'soft'

@@ -7,3 +7,5 @@ Add LanguageSwitcher with flag slots, compact two-language segmented selection a
 Expose useDataTable, DataTableRoot and DataTablePagination for shared controllers and host-positioned pagination. Add top, bottom, both and external pagination placement, compact top navigation, measured page-height preservation and consistent vertical cell alignment. Existing DataTable use remains supported.
 
 Draw raised Sidebar active-item borders inside their rounded bounds so overflow-clipped navigation regions and groups do not cut their contours.
+
+Add dashed Button/IconButton variants and dashed DropdownMenu entries/submenu triggers, with semantic tone support. Expand consumer utility-class and editor IntelliSense documentation.
