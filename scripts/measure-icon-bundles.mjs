@@ -172,7 +172,7 @@ for (const [name, limit] of Object.entries({
   Divider: 10_600,
   Kbd: 19_500,
   Slider: 32_300,
-  Timeline: 21_400,
+  Timeline: 22_000,
   // New collection feedback messages also enter the shared locale catalogs.
   QuantityInput: 21_200,
   OptionGroup: 52_000,

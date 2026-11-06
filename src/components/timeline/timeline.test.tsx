@@ -51,7 +51,7 @@ it('renders ordered events, semantic times, decorative dots, and optional blocks
       .querySelector('[data-testid="history-item-a%20%2F%20b-dot"]')
       ?.getAttribute('aria-hidden'),
   ).toBe('true');
-  expect(host.querySelector('li .sr-only')?.textContent).toBe('Success');
+  expect(host.querySelector('[data-testid$="status"]')?.textContent).toBe('Success');
   expect(host.querySelector('button')?.textContent).toBe('Details');
   expect(host.querySelectorAll('[data-state="event"]')).toHaveLength(3);
   expect(host.querySelector('[aria-current]')).toBeNull();
@@ -63,6 +63,7 @@ it('renders an empty list, falsy content, ISO fallback, and localized statuses',
   expect(render({ items: [] }).querySelectorAll('li')).toHaveLength(0);
   const host = render(
     {
+      'data-testid': 't',
       items: [
         { id: 'iso', title: 0, dateTime: '2026-10-01' },
         ...(['default', 'success', 'info', 'warning', 'danger'] as const).map(
@@ -74,7 +75,9 @@ it('renders an empty list, falsy content, ISO fallback, and localized statuses',
   );
   expect(host.querySelector('time')?.textContent).toBe('2026-10-01');
   expect(
-    Array.from(host.querySelectorAll('.sr-only')).map((el) => el.textContent),
+    Array.from(host.querySelectorAll('[data-testid$="status"]')).map(
+      (el) => el.textContent,
+    ),
   ).toEqual(['Mặc định', 'Thành công', 'Thông tin', 'Cảnh báo', 'Nguy hiểm']);
 });
 
@@ -232,4 +235,39 @@ it('forwards refs and native keyboard events, preserves child interaction, and u
 
     host.remove();
   }
+});
+
+it('distinguishes active progress, completed checks, upcoming events and pending spinners', () => {
+  const props = {
+    'data-testid': 't',
+    items: [
+      { id: 'done', title: 'Done', state: 'completed' },
+      { id: 'now', title: 'Now', state: 'active', status: 'info' },
+      { id: 'next', title: 'Next', state: 'upcoming' },
+      { id: 'wait', title: 'Wait', state: 'pending' },
+      { id: 'error', title: 'Error', status: 'danger', statusLabel: 'Failed' },
+    ],
+  } satisfies TimelineProps;
+  const host = render(props);
+  expect(
+    host.querySelector('[data-phase="active"]')?.getAttribute('aria-current'),
+  ).toBe('step');
+  expect(host.querySelector('[data-testid="t-item-now-dot"]')?.className).toContain(
+    'ring-4',
+  );
+  expect(host.querySelector('[data-testid="t-item-done-dot"] svg')).not.toBeNull();
+  expect(host.querySelector('[data-testid="t-item-next-state"]')?.textContent).toBe(
+    'Upcoming',
+  );
+  expect(host.querySelectorAll('.motion-safe\\:animate-spin')).toHaveLength(1);
+  expect(host.querySelector('[data-testid="t-item-error-status"]')?.textContent).toBe(
+    'Failed',
+  );
+  expect(
+    host.querySelector('[data-testid="t-item-now-state"]')?.className,
+  ).not.toContain('sr-only');
+  const hidden = render({ ...props, showStatus: false });
+  expect(hidden.querySelector('[data-testid="t-item-now-state"]')?.className).toContain(
+    'sr-only',
+  );
 });

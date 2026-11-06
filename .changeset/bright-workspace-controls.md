@@ -17,3 +17,5 @@ Add optional Forest, Ocean, Violet, Slate and Ember orange light/dark token pres
 Bind UI formatters to UIProvider locale with typed useFormatters defaults and per-call overrides. Add DateFormat presets and custom date-fns pattern support (default dd/MM/yyyy), retaining the Intl options overload and server-safe pure helpers.
 
 Add typed custom Carousel arrow/dot renderers and keep large-avatar upload text inside its overlay without a duplicate native tooltip.
+
+Clarify Timeline progress with visible localized state/outcome labels, completed checkmarks, an active marker and item-level pending spinners. Support explicit item phases, custom status copy and optional visually hidden labels. Preserve Stepper behavior.

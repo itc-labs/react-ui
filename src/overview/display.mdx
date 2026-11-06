@@ -40,6 +40,8 @@ export function HistoryExample() {
 }
 ```
 
+Timeline shows completed checkmarks, a highlighted current marker, hollow upcoming markers and pending spinners. Use `item.state` (`completed`, `active`, `upcoming`, `pending`) to override inferred progress, independently of outcome `status`. `statusLabel` supplies business-specific copy. Labels are visible by default; `showStatus={false}` retains them for screen readers. Customize labels through `classNames.status` and `classNames.state`, and markers through `icon` or `renderDot`.
+
 See [Timeline stories](?path=/docs/components-timeline--docs) for horizontal, alternate, and opposite-time layouts and styling slots.
 
 ## Divider and Kbd
