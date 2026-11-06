@@ -233,7 +233,7 @@ export function SidebarRailEntry({
           className={cn(
             'ui-floating-motion z-[var(--z-index-popover)] grid max-h-[80dvh] w-sidebar gap-0.5 overflow-y-auto rounded-panel border border-line bg-surface p-1.5 text-ink shadow-floating focus:outline-none',
             variant === 'raised' &&
-              '[&_[aria-current=page]]:bg-hover [&_[aria-current=page]]:shadow-none [&_[aria-current=page]]:ring-0',
+              '[&_[aria-current=page]]:bg-hover [&_[aria-current=page]]:shadow-none [&_[aria-current=page]]:ring-0 [&_[aria-current=page]]:inset-ring-0',
             classNames?.submenuContent,
             classNames?.flyout,
           )}

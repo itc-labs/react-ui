@@ -167,28 +167,29 @@ for (const [name, limit] of Object.entries({
   DataTableRowReorder: 117_600,
   Sidebar: 87_500,
   Icon: 20_000,
-  // Shared drag-and-drop translations add about 500 gzip bytes to locale consumers.
-  Rating: 20_800,
+  // Includes shared drag-and-drop and workspace-control translations.
+  Rating: 21_300,
   Divider: 10_600,
   Kbd: 19_500,
   Slider: 32_300,
-  Timeline: 21_400,
+  Timeline: 22_000,
   // New collection feedback messages also enter the shared locale catalogs.
-  QuantityInput: 20_800,
+  QuantityInput: 21_200,
   OptionGroup: 52_000,
   JsonView: 22_000,
   // About 10% above the measured display subpath fixtures.
   CodeView: 50_000,
   // DOMPurify plus shared class merging, with about 10% headroom.
   RichTextView: 24_000,
-  Carousel: 30_300,
+  // Typed arrow/dot renderers add about 120 gzip bytes.
+  Carousel: 30_600,
   VirtualList: 34_000,
   VirtualGrid: 34_000,
   // Fullscreen media adds Dialog focus management and image zoom controls.
   MediaGallery: 54_800,
   // Shared reorder instructions and disabled reasons are included in locale consumers.
-  Lightbox: 41_500,
-  Button: 20_000,
+  Lightbox: 42_300,
+  Button: 21_000,
   Spinner: 20_000,
   Dialog: 38_000,
   Select: 58_000,
@@ -197,8 +198,8 @@ for (const [name, limit] of Object.entries({
   Form: 22_000,
   DataTable: 90_000,
   Calendar: 100_000,
-  // Keep the existing aggregate limit: Root measures 277,010 gzip bytes.
-  Root: 278_000,
+  // Semantic tones, workspace controls and pagination add about 2.7 KB gzip.
+  Root: 282_000,
   ColorPicker: 54_300,
 })) {
   if (sizes[name].gzip >= limit) {

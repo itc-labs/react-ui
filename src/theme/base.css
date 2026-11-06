@@ -13,6 +13,8 @@
     [role='button'],
     [role='tab'],
     [role='menuitem'],
+    [role='menuitemradio'],
+    [role='menuitemcheckbox'],
     [role='option'],
     [role='checkbox'],
     [role='radio'],

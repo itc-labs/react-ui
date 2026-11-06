@@ -1,5 +1,11 @@
 import type { UIMessages } from './types';
 export const viMessages = {
+  'language.label': 'Ngôn ngữ',
+  'language.switchTo': 'Chuyển sang {language}',
+  'theme.light': 'Giao diện sáng',
+  'theme.dark': 'Giao diện tối',
+  'theme.switchToLight': 'Chuyển sang giao diện sáng',
+  'theme.switchToDark': 'Chuyển sang giao diện tối',
   'virtualList.empty': 'Không có mục nào',
   'virtualList.loadMore': 'Tải thêm',
   'virtualList.retry': 'Thử lại',

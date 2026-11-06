@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { functionalUpdate, useReactTable } from '@tanstack/react-table';
 import { useUILocale } from '../../i18n/provider';
 import { getDataTableModels, type DataTableState } from './state';
+import { usePageHeight } from './use-page-height';
 import type { DataTableProps } from './types';
 
 export function useDataTable<T>(props: DataTableProps<T>) {
@@ -157,7 +158,26 @@ export function useDataTable<T>(props: DataTableProps<T>) {
   const reorderDisabled = Boolean(loading || rowReorder?.disabled || reorderReason);
   const reorderHandle = Boolean(rowReorder && rowReorder.handle !== false);
 
+  const tableRef = useRef<HTMLTableElement>(null);
+  const heightScope = JSON.stringify([
+    count,
+    state.pagination.pageSize,
+    state.globalFilter,
+    state.columnFilters,
+    state.sorting,
+    state.columnVisibility,
+  ]);
+  const minPageHeight = usePageHeight(
+    tableRef,
+    (props.preservePageHeight ?? true) && paginated,
+    heightScope,
+  );
+
   return {
+    props,
+    tableRef,
+    minPageHeight,
+    verticalAlign: props.verticalAlign ?? 'top',
     rowReorder,
     reorderDisabled,
     reorderHandle,

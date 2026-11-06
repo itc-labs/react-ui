@@ -326,24 +326,26 @@ Or apply runtime tokens through the root provider:
 
 `@itclabs/react-ui/theme/custom-theme.example.css` lists every overridable token with its default value.
 
-### Editor autocomplete for classNames
+### Utility classes and editor autocomplete
 
-Configure VS Code Tailwind CSS IntelliSense in your application's `.vscode/settings.json`; a package cannot configure the editor:
+The kit theme provides utilities such as `bg-surface`, `text-ink`, `text-ui-sm`, `h-control-md`, `rounded-control` and `shadow-panel`. Stock Tailwind colors are reset; use semantic colors or define your own. Use the source stylesheet with a Tailwind v4 host to generate utilities for application markup.
 
-```jsonc
-{
-  "tailwindCSS.classAttributes": ["class", "className", "classNames"],
-  "tailwindCSS.classFunctions": ["cn", "cva"],
-}
-```
-
-For `prettier-plugin-tailwindcss`, add this option to your Prettier configuration to sort classes in `classNames`:
+Install the official Tailwind CSS IntelliSense extension. In the consuming workspace root's `.vscode/settings.json`, merge:
 
 ```json
 {
-  "tailwindAttributes": ["classNames"]
+  "editor.quickSuggestions": {
+    "strings": "on"
+  },
+  "tailwindCSS.classAttributes": ["class", "className", "classNames", "rootClassName"],
+  "tailwindCSS.classFunctions": ["cn", "clsx", "cva"],
+  "tailwindCSS.experimental.configFile": "src/styles/app.css"
 }
 ```
+
+Replace the CSS path with your application's source stylesheet importing `@itclabs/react-ui/theme/styles.css`. In a monorepo, map each CSS entry to its source folders. If nested `classNames` strings do not complete, use `classNames={{ root: cn('bg-surface') }}`. `ui.css` alone does not configure Tailwind generation or editor discovery. `defineTheme` changes token values at runtime, not the editor's class vocabulary.
+
+See **Reference → Utility classes** and **Guides → Customization** in [Storybook](https://react-ui-one-rose.vercel.app/) for the full list, host setup, monorepo mappings and troubleshooting. Settings follow the [official extension documentation](https://github.com/tailwindlabs/tailwindcss-intellisense#readme).
 
 ## Icons
 
@@ -414,3 +416,23 @@ loading. Supply stable keys, container sizing when needed, and host-owned loadin
 state. See [Data display](https://react-ui-one-rose.vercel.app/?path=/docs/guides-data-display--docs)
 and [bundle measurements](https://react-ui-one-rose.vercel.app/?path=/docs/reference-entry-points-bundle-size--docs).
 Both new subpaths use included runtime dependencies and require no extra peers.
+
+## Formatting helpers
+
+Import `formatDate`, `formatCurrency` and `formatNumber` from `@itclabs/react-ui/format` in server or client code. Options accept an explicit locale (default `vi-VN`) and a missing-value fallback (default `—`). Currency requires a code; instant dates default to UTC. See Reference → Format helpers in Storybook for full examples.
+
+```ts
+import { formatDate, formatCurrency, formatNumber } from '@itclabs/react-ui/format';
+
+formatNumber(1234567.89, { locale: 'vi-VN' });
+formatCurrency(19.9, 'USD', { locale: 'en-US' });
+formatDate('2026-11-06T08:30:00Z', 'dd/MM/yyyy HH:mm', {
+  timeZone: 'Asia/Ho_Chi_Minh',
+});
+```
+
+### Built-in theme presets
+
+Import `forestTheme`, `oceanTheme`, `violetTheme`, `slateTheme` or `emberTheme` (earthy orange) from `@itclabs/react-ui/theme/presets`. Each provides `.light` and `.dark` UIProvider configurations. Use `theme={emberTheme[mode]}` with the same mode as ThemeToggle. Presets are isolated from root imports; one named light/dark palette is approximately 813 bytes gzip. Import `themePresets` from the same entry only when offering all five palettes. See Guides → Theming for the complete example.
+
+For automatic UI locale, import `useFormatters` from `@itclabs/react-ui/hooks`. Its format functions default to the UIProvider locale and update on language changes. Hook defaults and per-call options are typed and overridable. `formatDate` defaults to `dd/MM/yyyy`, supports `DateFormat` presets/custom date-fns patterns, and retains its Intl options overload. Pure helpers remain server-safe and cannot read React context.

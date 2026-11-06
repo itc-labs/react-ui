@@ -6,6 +6,9 @@ import { cn, partTestId, type SlotClasses, type TestIdProps } from '../common';
 import { focusRingClassName } from '../common/focus-ring';
 import { KitIcon } from '../icon/kit-icon';
 import { SpinnerIcon } from '../icon/custom/spinner';
+import { TimelineMarker } from './marker';
+
+export type TimelinePhase = 'completed' | 'active' | 'upcoming' | 'pending';
 
 export type TimelineItem = {
   id: string;
@@ -15,6 +18,10 @@ export type TimelineItem = {
   /** ISO date/time value for the time element. */
   dateTime?: string;
   status?: 'default' | 'success' | 'info' | 'warning' | 'danger';
+  /** Explicit process phase; takes precedence over activeId. */
+  state?: TimelinePhase;
+  /** Consumer-owned outcome label, such as Failed or Awaiting approval. */
+  statusLabel?: ReactNode;
   icon?: ReactNode;
   content?: ReactNode;
 };
@@ -24,7 +31,16 @@ export type TimelineItemState = {
   upcoming: boolean;
 };
 export type TimelineClassNames = SlotClasses<
-  'root' | 'item' | 'dot' | 'connector' | 'time' | 'title' | 'description' | 'content'
+  | 'root'
+  | 'item'
+  | 'dot'
+  | 'connector'
+  | 'time'
+  | 'title'
+  | 'description'
+  | 'content'
+  | 'status'
+  | 'state'
 >;
 export type TimelineProps = Omit<ComponentProps<'ol'>, 'children'> &
   TestIdProps & {
@@ -38,12 +54,15 @@ export type TimelineProps = Omit<ComponentProps<'ol'>, 'children'> &
     reverse?: boolean;
     /** Completes items through this ID in the supplied order. Unknown IDs leave all upcoming. */
     activeId?: string;
+    /** Hide visible labels while retaining them for assistive technology. */
+    showStatus?: boolean;
     classNames?: TimelineClassNames;
     /** Replaces event dots; the pending spinner is always supplied by Timeline. */
     renderDot?: (item: TimelineItem, state: TimelineItemState) => ReactNode;
   };
 
 const tones = {
+  neutral: 'text-muted',
   default: 'text-accent',
   success: 'text-success-700',
   info: 'text-info-700',
@@ -61,6 +80,7 @@ export function Timeline({
   pending = false,
   reverse = false,
   activeId,
+  showStatus = true,
   renderDot,
   className,
   classNames,
@@ -110,11 +130,28 @@ export function Timeline({
       )}
     >
       {entries.map(({ item, index, isPending }, displayIndex) => {
+        const phase = isPending
+          ? 'pending'
+          : (item.state ??
+            (item.id === activeId
+              ? 'active'
+              : activeId === undefined
+                ? 'event'
+                : index < activeIndex
+                  ? 'completed'
+                  : 'upcoming'));
         const state: TimelineItemState = {
-          completed: !isPending && activeId !== undefined && index <= activeIndex,
-          active: !isPending && item.id === activeId,
-          upcoming: !isPending && activeId !== undefined && index > activeIndex,
+          completed: phase === 'completed' || phase === 'active',
+          active: phase === 'active',
+          upcoming: phase === 'upcoming',
         };
+        const tone =
+          item.status ??
+          (phase === 'completed'
+            ? 'success'
+            : phase === 'upcoming'
+              ? 'neutral'
+              : 'default');
         const left = split && align === 'alternate' && displayIndex % 2 === 1;
         const itemTestId = isPending
           ? partTestId(testId, 'pending')
@@ -146,12 +183,14 @@ export function Timeline({
             data-state={
               isPending
                 ? 'pending'
-                : activeId === undefined
-                  ? 'event'
-                  : state.completed
-                    ? 'completed'
-                    : 'upcoming'
+                : (item.state ??
+                  (activeId === undefined
+                    ? 'event'
+                    : state.completed
+                      ? 'completed'
+                      : 'upcoming'))
             }
+            data-phase={phase}
             data-status={item.status}
             aria-current={state.active ? 'step' : undefined}
             className={cn(
@@ -170,7 +209,7 @@ export function Timeline({
                   ? 'absolute inset-x-0 top-0 h-6'
                   : 'col-start-1 row-start-1 row-span-2',
                 split && 'md:col-start-2',
-                tones[item.status ?? 'default'],
+                tones[tone],
               )}
             >
               {displayIndex < entries.length - 1 && (
@@ -182,7 +221,9 @@ export function Timeline({
                     horizontal
                       ? 'inset-x-0 top-3 ms-6 border-t'
                       : 'top-6 bottom-0 start-3 border-s',
-                    state.upcoming ? 'border-dashed' : 'border-solid',
+                    phase === 'upcoming' || phase === 'pending'
+                      ? 'border-dashed'
+                      : 'border-solid',
                     classNames?.connector,
                   )}
                 />
@@ -193,11 +234,12 @@ export function Timeline({
                 className={cn(
                   'relative flex size-6 items-center justify-center rounded-full border-2 border-current bg-surface',
                   size === 'sm' && 'm-0.5 size-5',
-                  state.completed && 'bg-current',
+                  phase === 'completed' && 'bg-current',
+                  phase === 'active' && 'ring-4 ring-accent/20',
                   classNames?.dot,
                 )}
               >
-                {isPending ? (
+                {phase === 'pending' ? (
                   <KitIcon
                     name="spinner"
                     builtin={{ outline: SpinnerIcon, bold: SpinnerIcon }}
@@ -208,18 +250,13 @@ export function Timeline({
                   <span
                     className={cn(
                       'flex items-center justify-center',
-                      state.completed && 'text-on-brand',
+                      phase === 'completed' && 'text-on-brand',
                     )}
                   >
                     {renderDot
                       ? renderDot(item, state)
                       : (item.icon ?? (
-                          <span
-                            className={cn(
-                              'size-2 rounded-full',
-                              !state.upcoming && !state.completed && 'bg-current',
-                            )}
-                          />
+                          <TimelineMarker phase={phase} status={item.status} />
                         ))}
                   </span>
                 )}
@@ -264,14 +301,38 @@ export function Timeline({
                 </div>
                 {timePosition === 'inline' && time}
               </div>
-              {item.status !== undefined && (
-                <span className="sr-only">{t(`timeline.status.${item.status}`)}</span>
+              {(item.status !== undefined || item.statusLabel !== undefined) && (
+                <span
+                  data-testid={partTestId(itemTestId, 'status')}
+                  className={cn(
+                    showStatus
+                      ? 'mt-1 inline-flex rounded-full border border-current/20 px-2 py-0.5 text-ui-sm font-medium'
+                      : 'sr-only',
+                    tones[tone],
+                    classNames?.status,
+                  )}
+                >
+                  {item.statusLabel ?? t(`timeline.status.${item.status ?? 'default'}`)}
+                </span>
               )}
-              {state.completed && (
-                <span className="sr-only">{t('timeline.completed')}</span>
-              )}
-              {state.upcoming && (
-                <span className="sr-only">{t('timeline.upcoming')}</span>
+              {phase !== 'event' && !isPending && (
+                <span
+                  data-testid={partTestId(itemTestId, 'state')}
+                  className={cn(
+                    showStatus
+                      ? 'mt-1 block text-ui-sm font-medium text-muted'
+                      : 'sr-only',
+                    classNames?.state,
+                  )}
+                >
+                  {t(
+                    phase === 'completed'
+                      ? 'timeline.completed'
+                      : phase === 'upcoming'
+                        ? 'timeline.upcoming'
+                        : 'timeline.pending',
+                  )}
+                </span>
               )}
               {item.description !== undefined && (
                 <div

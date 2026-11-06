@@ -121,3 +121,7 @@ Illustrations are separate artwork, imported from `@itclabs/react-ui/illustratio
 ## Sources and licenses
 
 The selection contains 288 [Heroicons](https://heroicons.com) names (MIT), 360 [Lucide](https://lucide.dev) names (ISC), and three local sort glyphs. The 359 outline-only names reuse the same glyph in Bold. Per-file sources and neutral glyphs are recorded in `sources.json`. Preserve `THIRD_PARTY_NOTICES.md` when distributing the kit.
+
+## Semantic color
+
+Icon inherits the surrounding text color by default. Set `tone="danger"`, `info`, `success`, `warning`, `brand` or `neutral` for a semantic color. `className` still wins. For clickable icons, use IconButton with an accessible label; its `tone` is independent of `variant`, so `variant="ghost" tone="danger"` gives a quiet destructive action.

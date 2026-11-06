@@ -419,3 +419,28 @@ assert.match(
   await readFile(resolve(root, packed.exports['./dnd'].import), 'utf8'),
   /['"]use client['"]/,
 );
+
+// Pure formatting entry must work without a React/client module dependency.
+const formattingPath = resolve(root, packed.exports['./format'].import);
+const formatting = await import(pathToFileURL(formattingPath).href);
+assert.equal(formatting.formatNumber(0), '0');
+assert.equal(formatting.formatCurrency(1, 'USD', { locale: 'en-US' }), '$1.00');
+assert.equal(formatting.formatDate('2026-02-30'), '—');
+assert.doesNotMatch(
+  await readFile(formattingPath, 'utf8'),
+  /from ['"]react|use client/,
+);
+
+const presetsPath = resolve(root, packed.exports['./theme/presets'].import);
+const presets = await import(pathToFileURL(presetsPath).href);
+assert.deepEqual(Object.keys(presets.themePresets), [
+  'forest',
+  'ocean',
+  'violet',
+  'slate',
+  'ember',
+]);
+assert.equal(presets.emberTheme.light.tokens['color-brand-700'], '#9a3412');
+
+assert.equal(formatting.formatDate('2026-11-06'), '06/11/2026');
+assert.equal(formatting.formatDate('2026-11-06', 'yyyy-MM-dd'), '2026-11-06');

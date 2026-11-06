@@ -1,4 +1,6 @@
 'use client';
+import { cn } from '../common';
+import { iconToneClasses } from '../common/tone';
 import { useTheme } from '../../theme/provider';
 import type { IconGlyph, IconName, IconPack } from './types';
 import type { IconProps } from './props';
@@ -13,6 +15,8 @@ export function IconRenderer<Name extends string = IconName>({
   strokeWidth,
   label,
   variant,
+  tone,
+  className,
   ...props
 }: IconProps<Name> & { builtins: Readonly<Record<string, IconPack>> }) {
   const config = useTheme().icons;
@@ -59,6 +63,7 @@ export function IconRenderer<Name extends string = IconName>({
       height={resolvedSize}
       strokeWidth={strokeWidth ?? config?.strokeWidth ?? 1.75}
       {...props}
+      className={cn(tone && iconToneClasses[tone], className)}
     />
   );
 }

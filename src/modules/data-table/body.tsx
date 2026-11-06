@@ -34,7 +34,14 @@ export function DataTableBody<T>({
     emptyText,
     emptyState,
     classNames,
+    verticalAlign,
   } = view;
+
+  const alignment = {
+    top: 'align-top',
+    middle: 'align-middle',
+    bottom: 'align-bottom',
+  }[verticalAlign];
 
   const Row = view.rowReorder?.plugin.Row ?? PassThrough;
   const Handle = view.rowReorder?.plugin.Handle;
@@ -49,12 +56,14 @@ export function DataTableBody<T>({
         Array.from({ length: placeholders }, (_, index) => (
           <tr key={`skeleton-${index}`} aria-hidden="true" className="h-12">
             {view.reorderHandle && (
-              <td>
+              <td className={cn(alignment, classNames?.reorderCell)}>
                 <Skeleton className="size-4 rounded" />
               </td>
             )}
             {selectable && (
-              <td className="w-11 px-4 py-3.5">
+              <td
+                className={cn('w-11 px-4 py-3.5', alignment, classNames?.selectionCell)}
+              >
                 <Skeleton className="size-4 rounded" />
               </td>
             )}
@@ -64,6 +73,7 @@ export function DataTableBody<T>({
                 key={column.id}
                 className={cn(
                   'px-4 py-3.5',
+                  alignment,
                   columnAlign(table, column).text,
                   classNames?.cell,
                 )}
@@ -98,7 +108,7 @@ export function DataTableBody<T>({
           >
             {view.reorderHandle && Handle && (
               <td
-                className={cn('w-11 px-4 py-3.5 align-top', classNames?.reorderCell)}
+                className={cn('w-11 px-4 py-3.5', alignment, classNames?.reorderCell)}
                 data-testid={partTestId(view.testId, 'reorderCell', row.id)}
               >
                 <Handle
@@ -112,7 +122,7 @@ export function DataTableBody<T>({
             {selectable && (
               <td
                 data-testid={partTestId(view.testId, 'selectionCell', row.id)}
-                className={cn('w-11 px-4 py-3.5 align-top', classNames?.selectionCell)}
+                className={cn('w-11 px-4 py-3.5', alignment, classNames?.selectionCell)}
               >
                 <Checkbox
                   data-testid={partTestId(view.testId, 'checkbox', row.id)}
@@ -131,7 +141,8 @@ export function DataTableBody<T>({
                 data-testid={partTestId(view.testId, 'cell', row.id, cell.column.id)}
                 key={cell.id}
                 className={cn(
-                  'px-4 py-3.5 align-top',
+                  'px-4 py-3.5',
+                  alignment,
                   columnAlign(table, cell.column).text,
                   resizable && 'overflow-hidden text-ellipsis',
                   classNames?.cell,

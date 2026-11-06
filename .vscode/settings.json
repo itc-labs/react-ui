@@ -1,0 +1,10 @@
+{
+  "editor.quickSuggestions": {
+    "strings": "on"
+  },
+  "tailwindCSS.classAttributes": ["class", "className", "classNames", "rootClassName"],
+  "tailwindCSS.classFunctions": ["cn", "clsx", "cva"],
+  "tailwindCSS.experimental.configFile": {
+    ".storybook/preview.css": ["src/**", ".storybook/**"]
+  }
+}

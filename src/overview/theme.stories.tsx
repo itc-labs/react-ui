@@ -1,4 +1,11 @@
-import type { CSSProperties } from 'react';
+import { useState, type CSSProperties } from 'react';
+import {
+  themePresets,
+  type ThemePresetName,
+  type ThemePresetMode,
+} from '@itclabs/react-ui/theme/presets';
+import { Select } from '../components/select';
+import { ThemeToggle } from '../components/theme-toggle';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Button } from '../components/button';
 import { Checkbox } from '../components/checkbox';
@@ -168,3 +175,51 @@ export const ThemeTokens: Story = {
     </UIProvider>
   ),
 };
+
+function PresetsExample() {
+  const [name, setName] = useState<ThemePresetName>('ember');
+  const [mode, setMode] = useState<ThemePresetMode>('light');
+
+  return (
+    <UIProvider theme={themePresets[name][mode]}>
+      <div className="grid max-w-2xl gap-5 rounded-panel border border-line bg-canvas p-6 text-ink">
+        <div className="flex flex-wrap items-center gap-4">
+          <Select
+            label="Theme preset"
+            value={name}
+            onValueChange={(value) => {
+              if (value && value in themePresets) setName(value as ThemePresetName);
+            }}
+            options={[
+              { value: 'forest', label: 'Forest' },
+              { value: 'ocean', label: 'Ocean' },
+              { value: 'violet', label: 'Violet' },
+              { value: 'slate', label: 'Slate' },
+              { value: 'ember', label: 'Ember' },
+            ]}
+            rootClassName="min-w-48"
+          />
+          <ThemeToggle value={mode} onValueChange={setMode} appearance="switch" />
+        </div>
+        <div className="grid gap-4 rounded-panel border border-line bg-surface p-5">
+          <h2 className="text-heading">Lorem ipsum</h2>
+          <p className="text-muted">Dolor sit amet, consectetur adipiscing elit.</p>
+          <Input label="Display name" placeholder="Enter a name" />
+          <div className="flex flex-wrap gap-3">
+            <Button>Save</Button>
+            <Button variant="secondary">Cancel</Button>
+            <Button variant="dashed">Add item</Button>
+            <Button tone="danger" variant="soft">
+              Remove
+            </Button>
+          </div>
+          <Dialog title="Preview dialog" trigger="Open dialog">
+            <p>Lorem ipsum dolor sit amet.</p>
+          </Dialog>
+        </div>
+      </div>
+    </UIProvider>
+  );
+}
+
+export const Presets: Story = { tags: ['example'], render: () => <PresetsExample /> };

@@ -40,6 +40,8 @@ export function HistoryExample() {
 }
 ```
 
+Timeline shows completed checkmarks, a highlighted current marker, hollow upcoming markers and pending spinners. Use `item.state` (`completed`, `active`, `upcoming`, `pending`) to override inferred progress, independently of outcome `status`. `statusLabel` supplies business-specific copy. Labels are visible by default; `showStatus={false}` retains them for screen readers. Customize labels through `classNames.status` and `classNames.state`, and markers through `icon` or `renderDot`.
+
 See [Timeline stories](?path=/docs/components-timeline--docs) for horizontal, alternate, and opposite-time layouts and styling slots.
 
 ## Divider and Kbd
@@ -399,3 +401,84 @@ loaders, retry and empty states. Built-in loading, retry and empty copy follows
 the locale. See [VirtualList stories](?path=/docs/modules-virtuallist--docs),
 [Product grid](?path=/story/modules-virtuallist--product-grid), and
 [Window scrolling](?path=/story/modules-virtuallist--window-scrolling-page).
+
+## Table pagination outside the table
+
+Use `paginationPlacement="both"` for compact top navigation plus full bottom pagination. Paginated tables retain their measured page height by default; set `preservePageHeight={false}` for natural height. Use `verticalAlign="middle"` for compact rows with actions.
+
+For a sticky or fixed application footer, share one controller. The host owns positioning and any space reserved for a fixed footer.
+
+```tsx
+import {
+  DataTableRoot,
+  DataTablePagination,
+  useDataTable,
+  type ColumnDef,
+} from '@itclabs/react-ui';
+
+type RecordRow = { id: string; name: string };
+const rows: RecordRow[] = Array.from({ length: 23 }, (_, index) => ({
+  id: String(index + 1),
+  name: `Lorem ipsum ${index + 1}`,
+}));
+const columns: ColumnDef<RecordRow, unknown>[] = [
+  { accessorKey: 'name', header: 'Name' },
+];
+
+export function RecordList() {
+  const controller = useDataTable({
+    rows,
+    columns,
+    rowId: (row) => row.id,
+    caption: 'Records',
+    pagination: true,
+    paginationPlacement: 'none',
+  });
+
+  return (
+    <div className="grid gap-4">
+      <DataTableRoot controller={controller} />
+      <footer className="sticky bottom-0 z-10 bg-surface">
+        <DataTablePagination controller={controller} />
+      </footer>
+    </div>
+  );
+}
+```
+
+## Custom carousel navigation
+
+Use `classNames.prev`, `next`, `dot`, `dots` and `controls` for styling and positioning existing controls. For different markup, use typed `renderArrow` and `renderDot` callbacks on `@itclabs/react-ui/carousel`. Each receives native `buttonProps`; forward them to a real button to retain accessible names, disabled edges, events, autoplay interaction handling and stable test IDs. `renderArrow` also provides direction, disabled and the default icon; `renderDot` provides snap index and selected state. Dots address scroll snaps, not individual items in a multi-row carousel. Do not return another button nested inside the supplied control: callbacks replace the whole button.
+
+```tsx
+import { Carousel } from '@itclabs/react-ui/carousel';
+import { Button, cn } from '@itclabs/react-ui';
+
+export function CustomCarousel() {
+  return (
+    <Carousel
+      items={['Lorem ipsum', 'Dolor sit amet', 'Consectetur adipiscing']}
+      getItemKey={(item) => item}
+      renderItem={(item) => <p>{item}</p>}
+      dots
+      renderArrow={({ direction, buttonProps, icon }) => (
+        <Button {...buttonProps} variant="dashed" className="rounded-control px-3">
+          {icon}
+          {direction === 'previous' ? 'Previous' : 'Next'}
+        </Button>
+      )}
+      renderDot={({ index, selected, buttonProps }) => (
+        <button
+          {...buttonProps}
+          className={cn(
+            buttonProps.className,
+            selected ? 'bg-accent text-on-brand' : 'bg-canvas text-muted',
+          )}
+        >
+          {index + 1}
+        </button>
+      )}
+    />
+  );
+}
+```

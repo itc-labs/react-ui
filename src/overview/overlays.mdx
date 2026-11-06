@@ -251,3 +251,33 @@ export function UpdatesExample() {
 ```
 
 Use [Theming](?path=/docs/guides-theming--docs) and [Customization](?path=/docs/guides-customization--docs) to adjust tokens and component slots consistently.
+
+## Dashed actions and menu entries
+
+Use a dashed Button or IconButton as the trigger, and `variant="dashed"` on menu items or submenu entries to distinguish optional/additional actions. The dashed outline is a visual variant; normal disabled, keyboard and selection behavior remains intact. Use `tone="danger"` on destructive menu items, with a meaningful label.
+
+```tsx
+import { Button, IconButton, DropdownMenu } from '@itclabs/react-ui';
+
+export function UserActions() {
+  return (
+    <div className="flex gap-3">
+      <IconButton icon="plus" label="Add user" variant="dashed" />
+      <DropdownMenu
+        trigger={<Button variant="dashed">Users</Button>}
+        items={[
+          {
+            id: 'more',
+            type: 'submenu',
+            label: 'More users',
+            variant: 'dashed',
+            items: [{ id: 'first', label: 'Lorem ipsum' }],
+          },
+          { id: 'add', label: 'Add user', icon: 'plus', variant: 'dashed' },
+          { id: 'remove', label: 'Remove user', tone: 'danger', variant: 'dashed' },
+        ]}
+      />
+    </div>
+  );
+}
+```

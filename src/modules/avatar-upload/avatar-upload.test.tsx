@@ -1,3 +1,4 @@
+import { UIProvider } from '../../theme/provider';
 // @vitest-environment jsdom
 import { act, useEffect } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
@@ -172,4 +173,23 @@ it('ignores a crop result arriving after cancellation', async () => {
   );
   expect(change).not.toHaveBeenCalled();
   expect(document.querySelector('[role="dialog"]')).toBeNull();
+});
+
+it('keeps large-avatar upload copy compact and removes the overlapping native tooltip', () => {
+  act(() =>
+    root.render(
+      <UIProvider locale="en-US">
+        <AvatarUpload alt="Example" size="lg" data-testid="compact" />
+      </UIProvider>,
+    ),
+  );
+
+  const trigger = host.querySelector<HTMLElement>('[data-testid="compact-upload"]')!;
+  const copy = host.querySelector<HTMLElement>('[data-testid="compact-uploadText"]')!;
+  expect(copy.textContent).toBe('Upload');
+  expect(copy.className).toContain('tracking-normal');
+  expect(copy.className).toContain('whitespace-normal');
+  expect(trigger.className).toContain('overflow-hidden');
+  expect(trigger.hasAttribute('title')).toBe(false);
+  expect(trigger.getAttribute('aria-label')).toBe('Avatar');
 });

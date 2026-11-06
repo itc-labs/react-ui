@@ -1,8 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Timeline } from './index';
-import { KitIcon } from '../icon/kit-icon';
-import { CheckIcon } from '../icon/outline/check';
-import { CheckIcon as CheckBoldIcon } from '../icon/bold/check';
 
 const meta = {
   title: 'Components/Timeline',
@@ -27,13 +24,6 @@ const meta = {
         description: 'Lorem ipsum dolor sit amet.',
         time: '09:00',
         dateTime: '2026-10-01T09:00:00Z',
-        icon: (
-          <KitIcon
-            name="check"
-            builtin={{ outline: CheckIcon, bold: CheckBoldIcon }}
-            size={14}
-          />
-        ),
       },
       {
         id: 'packed',
@@ -41,13 +31,6 @@ const meta = {
         description: 'Consectetur adipiscing elit.',
         time: '10:30',
         dateTime: '2026-10-01T10:30:00Z',
-        icon: (
-          <KitIcon
-            name="check"
-            builtin={{ outline: CheckIcon, bold: CheckBoldIcon }}
-            size={14}
-          />
-        ),
       },
       {
         id: 'shipped',
@@ -126,5 +109,24 @@ export const CustomClasses: Story = {
       description: 'text-ink',
       content: 'rounded-panel bg-surface p-2',
     },
+  },
+};
+
+export const States: Story = {
+  tags: ['states'],
+  args: {
+    items: [
+      { id: 'done', title: 'Completed', state: 'completed', status: 'success' },
+      { id: 'current', title: 'Current step', state: 'active', status: 'info' },
+      { id: 'next', title: 'Next step', state: 'upcoming' },
+      { id: 'waiting', title: 'Processing', state: 'pending' },
+      { id: 'failed', title: 'Payment', status: 'danger', statusLabel: 'Failed' },
+      {
+        id: 'review',
+        title: 'Review',
+        status: 'warning',
+        statusLabel: 'Awaiting approval',
+      },
+    ],
   },
 };

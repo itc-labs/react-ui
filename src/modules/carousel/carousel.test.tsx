@@ -336,3 +336,34 @@ it('advances on the configured autoplay timer and pauses on hover', () => {
 
   expect(change).not.toHaveBeenCalled();
 });
+
+it('accepts custom arrow and dot buttons while retaining navigation, disabled edges, ARIA and focus', () => {
+  render({
+    dots: true,
+    renderArrow: ({ direction, buttonProps, icon }) => (
+      <button {...buttonProps} data-custom-arrow={direction}>
+        {icon}
+        <span>{direction}</span>
+      </button>
+    ),
+    renderDot: ({ index, selected, buttonProps }) => (
+      <button {...buttonProps} data-selected={selected}>
+        <strong>{index + 1}</strong>
+      </button>
+    ),
+  });
+  expect((part('prev') as HTMLButtonElement).disabled).toBe(true);
+  expect(part('prev').getAttribute('aria-label')).toBe('Previous slide');
+  click('next');
+  expect(api!.selectedScrollSnap()).toBe(1);
+  const lastDot = part('dot-2');
+
+  act(() => lastDot.focus());
+
+  click('dot-2');
+  expect(api!.selectedScrollSnap()).toBe(2);
+  expect(lastDot.getAttribute('aria-current')).toBe('true');
+  expect(document.activeElement).toBe(lastDot);
+  expect((part('next') as HTMLButtonElement).disabled).toBe(true);
+  expect(part('dot-0').className).not.toContain('after:');
+});

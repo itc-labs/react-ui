@@ -1117,3 +1117,38 @@ export const ActiveBranchChange: Story = {
     await waitFor(() => expect(trigger).toHaveAttribute('aria-expanded', 'true'));
   },
 };
+
+export const ActiveCorners: Story = {
+  tags: ['!dev', '!autodocs', 'regression'],
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Active item contours stay inside the row when scroll containers and collapsible groups clip overflow.',
+      },
+    },
+  },
+  render: () => (
+    <div className="flex flex-wrap gap-6">
+      {(['default', 'dark', 'brand'] as const).map((tone) => (
+        <Sidebar
+          key={tone}
+          tone={tone}
+          items={railItems}
+          className="static h-64"
+          data-testid={`corners-${tone}`}
+        />
+      ))}
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    for (const item of Array.from(
+      canvasElement.querySelectorAll<HTMLElement>('[aria-current="page"]'),
+    )) {
+      const style = getComputedStyle(item);
+      await expect(style.borderTopLeftRadius).not.toBe('0px');
+      await expect(style.borderBottomRightRadius).not.toBe('0px');
+      await expect(style.boxShadow).toContain('inset');
+    }
+  },
+};

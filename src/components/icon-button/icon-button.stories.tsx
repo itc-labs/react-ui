@@ -3,33 +3,30 @@ import { useEffect, useRef, useState } from 'react';
 import { expect, userEvent, waitFor, within } from 'storybook/test';
 import { IconButton } from './index';
 
-function Demo() {
-  const [count, setCount] = useState(0);
-
-  return (
-    <div className="flex items-center gap-3">
-      <IconButton icon="plus" label="Add example" onClick={() => setCount(count + 1)} />
-      <IconButton icon="settings" label="Settings" variant="secondary" />
-      <IconButton icon="close" label="Unavailable" disabled />
-      <IconButton icon="search" label="Searching" loading />
-      <output>{count}</output>
-    </div>
-  );
-}
-
 const meta = {
   title: 'Components/IconButton',
   component: IconButton,
   args: { icon: 'search', label: 'Search' },
+  argTypes: {
+    variant: {
+      control: 'select',
+      options: ['primary', 'secondary', 'ghost', 'danger', 'soft', 'outline', 'dashed'],
+    },
+    tone: {
+      control: 'select',
+      options: ['neutral', 'brand', 'info', 'success', 'warning', 'danger'],
+    },
+    size: { control: 'select', options: ['sm', 'md', 'lg'] },
+  },
   parameters: {
     docs: {
       description: {
         component:
-          'An icon-only button that requires a label describing its action. While loading, a spinner replaces the icon and the button prevents repeated actions.',
+          'An icon-only button with the same variants, tones, sizes and native button props as Button. A label is required. While loading, one spinner replaces the icon and repeated actions are disabled.',
       },
     },
   },
-} satisfies Meta;
+} satisfies Meta<typeof IconButton>;
 export default meta;
 type Story = StoryObj<typeof meta>;
 
@@ -41,7 +38,7 @@ function BusyDemo() {
   useEffect(() => () => clearTimeout(timer.current), []);
 
   return (
-    <div className="flex items-center gap-3">
+    <div className="flex flex-wrap items-center gap-3">
       <IconButton
         label="Run task"
         icon="search"
@@ -61,12 +58,22 @@ function BusyDemo() {
 export const Playground: Story = { tags: ['usage'] };
 
 export const SizesAndLoading: Story = {
-  tags: ['example'],
+  tags: ['!dev', '!autodocs', 'regression'],
   render: () => (
     <div className="grid justify-items-start gap-5">
       {(['sm', 'md', 'lg'] as const).map((size) => (
-        <div key={size} className="flex items-center gap-3">
-          {(['primary', 'secondary', 'ghost', 'danger'] as const).map((variant) => (
+        <div key={size} className="flex flex-wrap items-center gap-3">
+          {(
+            [
+              'primary',
+              'secondary',
+              'ghost',
+              'danger',
+              'soft',
+              'outline',
+              'dashed',
+            ] as const
+          ).map((variant) => (
             <div key={variant} className="flex items-center gap-2">
               <IconButton
                 label={`${size} ${variant}`}
@@ -89,15 +96,13 @@ export const SizesAndLoading: Story = {
   ),
 };
 
-export const CustomClasses: Story = {
-  tags: ['customization'],
+export const Dashed: Story = {
+  tags: ['!dev', '!autodocs', 'regression'],
   render: () => (
-    <IconButton
-      label="Add item"
-      icon="plus"
-      className="rounded-full bg-brand-100 text-brand-800"
-      iconClassName="size-5"
-    />
+    <div className="flex gap-3">
+      <IconButton variant="dashed" icon="plus" label="Add user" />
+      <IconButton variant="dashed" tone="danger" icon="close" label="Remove user" />
+    </div>
   ),
 };
 
@@ -119,4 +124,138 @@ export const LoadingInteraction: Story = {
     await waitFor(() => expect(button).toBeEnabled(), { timeout: 2000 });
     await expect(button.querySelectorAll('svg')).toHaveLength(1);
   },
+};
+
+export const Variants: Story = {
+  tags: ['variants'],
+  render: () => (
+    <div className="flex flex-wrap gap-4">
+      {(
+        [
+          'primary',
+          'secondary',
+          'ghost',
+          'danger',
+          'soft',
+          'outline',
+          'dashed',
+        ] as const
+      ).map((variant) => (
+        <div key={variant} className="grid justify-items-center gap-2">
+          <IconButton icon="plus" label={`Add item · ${variant}`} variant={variant} />
+          <span className="text-ui-sm text-muted">{variant}</span>
+        </div>
+      ))}
+    </div>
+  ),
+};
+
+export const Tones: Story = {
+  tags: ['variants'],
+  render: () => (
+    <div className="grid gap-5">
+      {(['neutral', 'brand', 'info', 'success', 'warning', 'danger'] as const).map(
+        (tone) => (
+          <div key={tone} className="grid gap-2">
+            <span className="text-ui-sm text-muted">{tone}</span>
+            <div className="flex flex-wrap items-center gap-4">
+              {(['primary', 'soft', 'outline', 'dashed', 'ghost'] as const).map(
+                (variant) => (
+                  <div key={variant} className="grid justify-items-center gap-1">
+                    <IconButton
+                      icon="plus"
+                      label={`Add item · ${tone} · ${variant}`}
+                      tone={tone}
+                      variant={variant}
+                    />
+                    <span className="text-eyebrow text-muted">{variant}</span>
+                  </div>
+                ),
+              )}
+            </div>
+          </div>
+        ),
+      )}
+    </div>
+  ),
+};
+
+export const Sizes: Story = {
+  tags: ['example'],
+  render: () => (
+    <div className="flex flex-wrap items-end gap-5">
+      {(['sm', 'md', 'lg'] as const).map((size) => (
+        <div key={size} className="grid justify-items-center gap-2">
+          <IconButton icon="search" label={`Search · ${size}`} size={size} />
+          <span className="text-ui-sm text-muted">{size}</span>
+        </div>
+      ))}
+    </div>
+  ),
+};
+
+export const States: Story = {
+  tags: ['states'],
+  render: () => (
+    <div className="flex flex-wrap gap-4">
+      {(
+        [
+          'primary',
+          'secondary',
+          'ghost',
+          'danger',
+          'soft',
+          'outline',
+          'dashed',
+        ] as const
+      ).map((variant) => (
+        <div key={variant} className="grid justify-items-center gap-2">
+          <span className="text-ui-sm text-muted">{variant}</span>
+          <div className="flex gap-2">
+            <IconButton icon="search" label={`Ready · ${variant}`} variant={variant} />
+            <IconButton
+              icon="search"
+              label={`Loading · ${variant}`}
+              variant={variant}
+              loading
+            />
+            <IconButton
+              icon="search"
+              label={`Unavailable · ${variant}`}
+              variant={variant}
+              disabled
+            />
+          </div>
+        </div>
+      ))}
+    </div>
+  ),
+};
+
+export const Badges: Story = {
+  tags: ['example'],
+  render: () => (
+    <div className="flex flex-wrap gap-5">
+      <IconButton icon="user" label="Notifications" badge={5} variant="secondary" />
+      <IconButton
+        icon="user"
+        label="Unread notifications"
+        badge={{ dot: true, tone: 'danger' }}
+        variant="ghost"
+      />
+      <IconButton icon="user" label="Notifications" badge={0} variant="outline" />
+    </div>
+  ),
+};
+
+export const CustomClasses: Story = {
+  tags: ['customization'],
+  render: () => (
+    <IconButton
+      label="Add item"
+      icon="plus"
+      className="rounded-full bg-brand-100 text-brand-800"
+      iconClassName="size-5"
+    />
+  ),
 };

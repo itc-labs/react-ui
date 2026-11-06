@@ -121,7 +121,6 @@ export function AvatarUpload({
             id={id}
             type="button"
             aria-label={label}
-            title={file || src ? t('avatar.change') : t('avatar.upload')}
             aria-invalid={Boolean(issue)}
             aria-busy={avatar.loading || undefined}
             aria-describedby={fieldDescription(id, Boolean(issue), Boolean(hint))}
@@ -130,7 +129,7 @@ export function AvatarUpload({
             onClick={() => input.current?.click()}
             className={cn(
               avatar.shape === 'square' ? 'rounded-control' : 'rounded-full',
-              'absolute inset-0 flex size-full cursor-pointer flex-col items-center justify-center gap-1 bg-brand-800/70 text-on-brand opacity-0 transition-opacity duration-[var(--motion-duration-control)] group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:bg-transparent disabled:opacity-0 [@media(hover:none)]:opacity-100 motion-reduce:transition-none',
+              'absolute inset-0 flex size-full cursor-pointer flex-col items-center justify-center gap-1 overflow-hidden p-2 bg-brand-800/70 text-on-brand opacity-0 transition-opacity duration-[var(--motion-duration-control)] group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:bg-transparent disabled:opacity-0 [@media(hover:none)]:opacity-100 motion-reduce:transition-none',
               focusRingClassName,
               classNames?.upload,
             )}
@@ -140,12 +139,15 @@ export function AvatarUpload({
               data-testid={partTestId(testId, 'uploadIcon')}
               name="upload"
               builtin={{ outline: UploadIcon, bold: UploadBoldIcon }}
-              className={classNames?.uploadIcon}
+              className={cn('shrink-0', classNames?.uploadIcon)}
             />
             {avatar.size === 'lg' && (
               <span
                 data-testid={partTestId(testId, 'uploadText')}
-                className={cn('text-eyebrow font-medium', classNames?.uploadText)}
+                className={cn(
+                  'w-full min-w-0 whitespace-normal break-words text-center text-ui-sm font-medium leading-tight tracking-normal',
+                  classNames?.uploadText,
+                )}
               >
                 {file || src ? t('avatar.changeShort') : t('avatar.uploadShort')}
               </span>

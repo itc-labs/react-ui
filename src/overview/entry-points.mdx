@@ -54,6 +54,8 @@ Append each subpath to `@itclabs/react-ui`; `.` means the package root. Wildcard
 
 See [Getting started](?path=/docs/overview-getting-started--docs) for CSS setup and [Providers & adapters](?path=/docs/guides-providers-adapters--docs) for provider wiring.
 
+`@itclabs/react-ui/format` exports server-safe `formatDate`, `formatCurrency` and `formatNumber`. See [Format helpers](?path=/docs/reference-format-helpers--docs) for signatures, missing values, locale and time-zone handling.
+
 ## Peer dependencies
 
 Required peers must be supplied by the consuming application. Optional peers are needed when using their feature subpath. These classifications follow `peerDependenciesMeta` in `package.json`.
@@ -157,3 +159,5 @@ Set `handle` and spread `renderItem` state’s `handleProps` onto `DragHandle` f
 `DndProvider` accepts DndContext options, with a 4px Pointer sensor activation distance, Keyboard sensor with sortable coordinates, auto-scroll, and English/Vietnamese announcements and instructions. Space/Enter picks up and drops, arrows move, and Escape cancels. Compositions restore focus to the moved activator, and reduced motion disables sorting transitions and drop animation. `useSortableItem` exposes dnd-kit’s sortable hook for custom compositions; advanced consumers own their SortableContext and overlay. The full dnd entry measures 61,701 bytes gzip (67,900-byte budget), including dnd-kit and shared localization. These ordering compositions are not value-style form controls.
 
 See [Drag & drop](?path=/docs/guides-drag-drop--docs) for list, board, Transfer and DataTable recipes, and [Data display](?path=/docs/guides-data-display--docs) for virtualized collections. Transfer + its dnd plugin measures 74,389 bytes gzip; DataTable + its reorder plugin measures 106,823 bytes. These combined fixtures include shared code once.
+
+`@itclabs/react-ui/theme/presets` exports `forestTheme`, `oceanTheme`, `violetTheme`, `slateTheme`, `emberTheme` and the opt-in `themePresets` map. See [Theming](?path=/docs/guides-theming--docs) for light/dark usage and size measurements.

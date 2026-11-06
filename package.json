@@ -62,7 +62,9 @@
     "./tree-select": "./src/modules/tree-select/index.tsx",
     "./transfer": "./src/modules/transfer/index.tsx",
     "./dnd": "./src/modules/dnd/index.tsx",
-    "./virtual-list": "./src/modules/virtual-list/index.tsx"
+    "./virtual-list": "./src/modules/virtual-list/index.tsx",
+    "./format": "./src/format/index.ts",
+    "./theme/presets": "./src/theme/presets/index.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
@@ -319,6 +321,14 @@
       "./virtual-list": {
         "types": "./dist/modules/virtual-list/index.d.ts",
         "import": "./dist/modules/virtual-list/index.js"
+      },
+      "./format": {
+        "types": "./dist/format/index.d.ts",
+        "import": "./dist/format/index.js"
+      },
+      "./theme/presets": {
+        "types": "./dist/theme/presets/index.d.ts",
+        "import": "./dist/theme/presets/index.js"
       }
     },
     "access": "public"

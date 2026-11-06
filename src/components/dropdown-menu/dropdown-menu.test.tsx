@@ -129,3 +129,48 @@ it('merges consumer item and submenu classes after danger tone', async () => {
     expect(byId(id).classList.contains('data-[highlighted]:bg-danger-50')).toBe(false);
   }
 });
+
+it('supports dashed actions and submenu triggers without changing keyboard selection or native disabled guards', async () => {
+  const selected = vi.fn();
+  await act(async () =>
+    root.render(
+      <DropdownMenu
+        trigger="Users"
+        defaultOpen
+        data-testid="users"
+        items={[
+          {
+            id: 'more',
+            type: 'submenu',
+            label: 'More users',
+            variant: 'dashed',
+            items: [{ id: 'child', label: 'Lorem ipsum' }],
+          },
+          { id: 'add', label: 'Add user', variant: 'dashed', onSelect: selected },
+          {
+            id: 'remove',
+            label: 'Remove user',
+            variant: 'dashed',
+            tone: 'danger',
+            disabled: true,
+            onSelect: selected,
+          },
+        ]}
+      />,
+    ),
+  );
+  expect(byId('users-submenu-more').className).toContain('border-dashed');
+  expect(byId('users-item-add').className).toContain('border-dashed');
+  expect(byId('users-item-remove').className).toContain('border-danger-700');
+  await act(async () => {
+    byId('users-item-remove').click();
+  });
+  expect(selected).not.toHaveBeenCalled();
+  await act(async () => {
+    byId('users-item-add').focus();
+    byId('users-item-add').dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }),
+    );
+  });
+  expect(selected).toHaveBeenCalledOnce();
+});

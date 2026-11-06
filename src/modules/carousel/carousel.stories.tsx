@@ -1,3 +1,5 @@
+import { Button } from '../../components/button';
+import { cn } from '../../components/common';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Carousel } from '@itclabs/react-ui/carousel';
 
@@ -101,6 +103,45 @@ export const CustomClasses: Story = {
       next: 'rounded-control',
       dots: 'gap-2',
       dot: 'aria-[current=true]:bg-selected',
+    },
+  },
+};
+
+export const CustomNavigation: Story = {
+  tags: ['example'],
+  args: {
+    dots: true,
+    perView: 1,
+    renderArrow: ({ direction, buttonProps, icon }) => (
+      <Button
+        {...buttonProps}
+        variant="dashed"
+        className="h-control-sm rounded-control px-3"
+      >
+        {direction === 'previous' ? icon : null}
+        {direction === 'previous' ? 'Previous' : 'Next'}
+        {direction === 'next' ? icon : null}
+      </Button>
+    ),
+    renderDot: ({ index, selected, buttonProps }) => (
+      <button
+        {...buttonProps}
+        className={cn(
+          buttonProps.className,
+          'size-8 rounded-control border border-line text-ui-sm',
+          selected ? 'border-accent bg-accent text-on-brand' : 'bg-surface text-muted',
+        )}
+      >
+        {index + 1}
+      </button>
+    ),
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Return complete controls from renderArrow and renderDot. Forward buttonProps to preserve navigation, ARIA, disabled edges and stable selectors. Use classNames for simple styling; the render callbacks replace the control contents and markup.',
+      },
     },
   },
 };

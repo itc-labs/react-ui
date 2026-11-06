@@ -72,3 +72,6 @@ export * from './kbd';
 export * from './timeline';
 
 export * from './slider';
+
+export * from './language-switcher';
+export * from './theme-toggle';

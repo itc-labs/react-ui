@@ -6,6 +6,8 @@ import { Meta } from '@storybook/addon-docs/blocks';
 
 Import these utilities from `@itclabs/react-ui/hooks`. They manage browser interaction and timing; applications own requests and persistence. Use the kit's overlay components for focus management, keyboard interaction, and accessible dismissal.
 
+Use `useFormatters()` to bind formatNumber, formatCurrency and formatDate to the current UIProvider locale, with typed hook/per-call overrides. Pure non-React helpers remain available separately; see [Format helpers](?path=/docs/reference-format-helpers--docs) and import from `@itclabs/react-ui/format`.
+
 ## useClickOutside
 
 `useClickOutside(refOrRefs, handler, enabled = true)` listens for `pointerdown` in the capture phase. Pass one ref or an array of refs, including portal content and its trigger, to treat multiple regions as inside. It checks both containment and the event's composed path for shadow DOM support. Disabling the hook or unmounting removes listeners.
