@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.12.0
+
+### Minor Changes
+
+- [#35](https://github.com/itc-labs/react-ui/pull/35) [`5cd75b5`](https://github.com/itc-labs/react-ui/commit/5cd75b5fe8efed23ab30ed2933279cef715ab839) Thanks [@vungbt](https://github.com/vungbt)! - Accept any synchronous Standard Schema rule (Valibot, Zod, ArkType) in `Form schema`, and make `valibot` an optional peer that the kit no longer imports. Add `createStandardSchemaFieldValidators` and the `StandardSchemaV1` types; `createValibotFieldValidators` remains as a deprecated alias. Field errors are now Standard Schema issues (`message`, `path`) rather than Valibot-specific issue objects. Asynchronous schemas throw with guidance to use an `onChangeAsync` validator.
+
 ## 0.11.0
 
 ### Minor Changes
