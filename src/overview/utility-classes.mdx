@@ -1,0 +1,58 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Reference/Utility classes" />
+
+# Utility classes
+
+These semantic utilities come from the kit's Tailwind v4 theme. They work in `className`, typed `classNames` slots and `cn()`. See [Customization](?path=/docs/guides-customization--docs) for editor setup and [Theming](?path=/docs/guides-theming--docs) for default values and `defineTheme`. They supplement ordinary Tailwind layout utilities such as `flex`, `grid`, `gap-4`, `p-4`, `sticky` and responsive/state variants.
+
+## Color suffixes
+
+Use each suffix below with Tailwind color utilities: `bg-*`, `text-*`, `border-*`, `divide-*`, `outline-*`, `ring-*`, `fill-*`, `stroke-*` and other color-aware utilities. For example, `bg-surface`, `text-ink`, `border-line`, `ring-focus`, `fill-danger-700` and `hover:bg-hover`. Opacity modifiers are supported, for example `bg-brand-700/10`. A suffix is a token name, not a standalone class.
+
+| Group              | All supplied suffixes                                                                                                       |
+| ------------------ | --------------------------------------------------------------------------------------------------------------------------- |
+| Surfaces and text  | `canvas`, `surface`, `sidebar`, `ink`, `muted`, `line`, `control-border`, `on-brand`                                        |
+| Interaction roles  | `hover`, `hover-strong`, `selected`, `selected-ink`, `focus`, `accent`                                                      |
+| Brand palette      | `brand-50`, `brand-100`, `brand-500`, `brand-700`, `brand-800`                                                              |
+| Feedback palettes  | `info-50`, `info-700`, `success-50`, `success-700`, `warning-50`, `warning-700`, `danger-50`, `danger-700`, `danger-800`    |
+| Charts and ratings | `chart-1`, `chart-2`, `chart-3`, `chart-4`, `chart-5`, `chart-6`, `rating`, `rating-empty`                                  |
+| Code view          | `code-surface`, `code-ink`, `code-comment`, `code-keyword`, `code-string`, `code-number`, `code-function`, `code-highlight` |
+
+The kit resets the stock color palette. Names such as `bg-white`, `text-black` and `text-red-500` are unavailable unless the host explicitly defines them; use semantic equivalents. `line` is decorative, while `control-border` is intended for control boundaries. Feedback must also have meaningful text.
+
+## Typography
+
+| Classes                                                      | Purpose                                                   |
+| ------------------------------------------------------------ | --------------------------------------------------------- |
+| `font-sans`                                                  | Kit font family; the host must load any replacement font. |
+| `text-display`, `text-title`, `text-heading`, `text-section` | Headings with associated line-height and tracking.        |
+| `text-body`, `text-control`, `text-ui-sm`, `text-eyebrow`    | Content, controls, metadata and small labels.             |
+
+Standard weight utilities still work. Bundled font files cover weights 400–700. Import the separate `theme/fonts-800.css` entry only when needed.
+
+## Dimensions and shape
+
+| Token suffix                                                               | Typical utilities                                                                                                       |
+| -------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `control-sm`, `control-md`, `control-lg`                                   | `h-control-sm`, `min-h-control-md`, `size-control-lg` and other spacing utilities.                                      |
+| `chart-height`                                                             | `h-chart-height`, `min-h-chart-height`.                                                                                 |
+| `sidebar`, `sidebar-collapsed`, `workspace`, `dialog`, `drawer`, `popover` | Width/container utilities such as `w-sidebar`, `max-w-workspace`, `max-w-dialog`.                                       |
+| Radius `control`, `panel`                                                  | `rounded-control`, `rounded-panel`, or directional forms such as `rounded-t-panel`.                                     |
+| Shadow `panel`, `floating`, `overlay`, `control-focus`, `control-error`    | `shadow-panel`, `shadow-floating`, `shadow-overlay`, `focus:shadow-control-focus`, `aria-invalid:shadow-control-error`. |
+
+## Layers and animation
+
+| Classes                                                                                           | Purpose                                                         |
+| ------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| `z-header`, `z-overlay`, `z-modal`, `z-popover`, `z-dropdown`, `z-select`, `z-tooltip`, `z-toast` | Shared overlay stacking roles.                                  |
+| `animate-spin`, `animate-pulse`, `animate-table-loading`                                          | Loading animations; pair with `motion-safe:` where appropriate. |
+| `animate-accordion-open`, `animate-accordion-close`                                               | Accordion transitions with the kit's durations.                 |
+
+Motion tokens are CSS variables rather than direct `duration-control` classes. Reference them explicitly, for example `duration-[var(--motion-duration-control)]` and `ease-[var(--motion-ease-standard)]`. The complete token reference lists available durations/easing. Internal `ui-*` motion selectors, vendor classes and component data attributes are implementation details, not a general utility API.
+
+## Generation and theme changes
+
+Use the source CSS entry in a Tailwind host. Tailwind generates the utilities it finds in scanned source files; `@source` is a build concern and editor mappings are a completion concern. A precompiled-CSS-only host can use ordinary CSS in its class slots, but must not assume every utility listed here is included in the published CSS.
+
+Changing a token through CSS or `defineTheme` updates the value of existing utilities. Adding an arbitrary runtime CSS variable does not generate new Tailwind classes. Use full static class strings and check the host's production build.

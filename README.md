@@ -326,24 +326,26 @@ Or apply runtime tokens through the root provider:
 
 `@itclabs/react-ui/theme/custom-theme.example.css` lists every overridable token with its default value.
 
-### Editor autocomplete for classNames
+### Utility classes and editor autocomplete
 
-Configure VS Code Tailwind CSS IntelliSense in your application's `.vscode/settings.json`; a package cannot configure the editor:
+The kit theme provides utilities such as `bg-surface`, `text-ink`, `text-ui-sm`, `h-control-md`, `rounded-control` and `shadow-panel`. Stock Tailwind colors are reset; use semantic colors or define your own. Use the source stylesheet with a Tailwind v4 host to generate utilities for application markup.
 
-```jsonc
-{
-  "tailwindCSS.classAttributes": ["class", "className", "classNames"],
-  "tailwindCSS.classFunctions": ["cn", "cva"],
-}
-```
-
-For `prettier-plugin-tailwindcss`, add this option to your Prettier configuration to sort classes in `classNames`:
+Install the official Tailwind CSS IntelliSense extension. In the consuming workspace root's `.vscode/settings.json`, merge:
 
 ```json
 {
-  "tailwindAttributes": ["classNames"]
+  "editor.quickSuggestions": {
+    "strings": "on"
+  },
+  "tailwindCSS.classAttributes": ["class", "className", "classNames", "rootClassName"],
+  "tailwindCSS.classFunctions": ["cn", "clsx", "cva"],
+  "tailwindCSS.experimental.configFile": "src/styles/app.css"
 }
 ```
+
+Replace the CSS path with your application's source stylesheet importing `@itclabs/react-ui/theme/styles.css`. In a monorepo, map each CSS entry to its source folders. If nested `classNames` strings do not complete, use `classNames={{ root: cn('bg-surface') }}`. `ui.css` alone does not configure Tailwind generation or editor discovery. `defineTheme` changes token values at runtime, not the editor's class vocabulary.
+
+See **Reference → Utility classes** and **Guides → Customization** in [Storybook](https://react-ui-one-rose.vercel.app/) for the full list, host setup, monorepo mappings and troubleshooting. Settings follow the [official extension documentation](https://github.com/tailwindlabs/tailwindcss-intellisense#readme).
 
 ## Icons
 

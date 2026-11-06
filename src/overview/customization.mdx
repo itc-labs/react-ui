@@ -38,24 +38,70 @@ export function Example() {
 
 Here `px-6` wins over `px-4`; the control slot replaces the default radius. Your application must provide CSS for its classes. With Tailwind, ensure your application's source files are scanned.
 
-## Editor autocomplete for classNames
+## Editor autocomplete
 
-Configure VS Code Tailwind CSS IntelliSense in your application's `.vscode/settings.json`; a package cannot configure the editor:
+Install the [official Tailwind CSS IntelliSense extension](https://marketplace.visualstudio.com/items?itemName=bradlc.vscode-tailwindcss) in VS Code or a compatible editor. Install Tailwind CSS v4 in the consuming application's devDependencies and use a local `.css` entry that imports the kit source stylesheet:
 
-```jsonc
-{
-  "tailwindCSS.classAttributes": ["class", "className", "classNames"],
-  "tailwindCSS.classFunctions": ["cn", "cva"],
-}
+```bash
+pnpm add -D tailwindcss @tailwindcss/vite
 ```
 
-For `prettier-plugin-tailwindcss`, add this option to your Prettier configuration to sort classes in `classNames`:
+Use `@tailwindcss/vite` for Vite; Next.js uses `@tailwindcss/postcss` with the corresponding PostCSS configuration instead. The kit does not install or configure the host's build plugin.
+
+In the consuming application, for example `src/styles/app.css`:
+
+```css
+@import '@itclabs/react-ui/theme/styles.css';
+```
+
+Import that stylesheet once from the application's root. The kit's tokens become Tailwind utilities, so `bg-surface`, `text-ink` and `rounded-control` are available in both builds and suggestions. A plain `ui.css` import supplies precompiled kit styles; it does not generate host utilities or replace a Tailwind source entry for editor discovery.
+
+Put the following in **the consuming workspace root's `.vscode/settings.json`**, not inside `node_modules` or the UI package. Merge it into existing settings. Replace `src/styles/app.css` with the actual CSS entry; paths are relative to the opened workspace:
 
 ```json
 {
-  "tailwindAttributes": ["classNames"]
+  "editor.quickSuggestions": {
+    "strings": "on"
+  },
+  "tailwindCSS.classAttributes": ["class", "className", "classNames", "rootClassName"],
+  "tailwindCSS.classFunctions": ["cn", "clsx", "cva"],
+  "tailwindCSS.experimental.configFile": "src/styles/app.css"
 }
 ```
+
+`classAttributes` covers JSX class props; `classFunctions` enables completion inside `cn()`, `clsx()` and `cva()`. Nested object strings in `classNames` are not reliably recognized in every extension version. Wrap a slot value in `cn('...')` for a supported completion context, including callback returns:
+
+```tsx
+import { cn, Input } from '@itclabs/react-ui';
+
+export function StyledField() {
+  return (
+    <Input
+      label="Name"
+      className="text-ink"
+      classNames={{ root: cn('max-w-sm gap-2'), label: cn('text-muted text-ui-sm') }}
+    />
+  );
+}
+```
+
+For a monorepo opened at its root, point the CSS entry to all consuming source folders:
+
+```json
+{
+  "tailwindCSS.experimental.configFile": {
+    "apps/web/src/styles/app.css": ["apps/web/src/**", "packages/module-*/src/**"]
+  }
+}
+```
+
+The kit registers its own `@source` paths. If host sources are outside Tailwind's automatic discovery, add their `@source` entries relative to the host stylesheet; editor glob mappings do not control generated CSS. Write complete literal classes such as `text-danger-700`; a constructed string such as `text-${tone}-700` cannot be detected statically.
+
+To troubleshoot, open a TSX file in the mapped source folder, type `bg-` inside `cn('')`, and press Ctrl+Space. Try `text-ui-sm`, `h-control-sm` and `rounded-control`, then hover to inspect their token references. Run **Tailwind CSS: Show Output** to check stylesheet resolution. If that command is missing, check extension activation, the local Tailwind installation and the configured CSS path; use **Developer: Reload Window** after changing editor settings. Runtime `defineTheme` changes values of known tokens; it cannot teach the editor new utility names.
+
+Settings are based on the [official extension documentation](https://github.com/tailwindlabs/tailwindcss-intellisense#readme). `experimental.configFile` is experimental. No editor automation was run to verify a particular editor version.
+
+For optional class sorting with `prettier-plugin-tailwindcss`, set `tailwindStylesheet` to the same CSS entry, `tailwindAttributes` to include `classNames` and `tailwindFunctions` to include `cn`. Sorting is separate from IntelliSense. See the [plugin configuration](https://github.com/tailwindlabs/prettier-plugin-tailwindcss#readme).
 
 ## Select slots
 

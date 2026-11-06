@@ -91,7 +91,7 @@ const preview: Preview = {
             'Customization',
           ],
           'Reference',
-          ['Catalog', 'Entry points & bundle size', 'Hooks'],
+          ['Catalog', 'Utility classes', 'Entry points & bundle size', 'Hooks'],
           'Foundations',
           'Components',
           [
