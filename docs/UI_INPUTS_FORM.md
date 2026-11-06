@@ -17,7 +17,7 @@ New UI-owned strings password.show/password.hide/otp.label are in typed vi/en di
 
 ## Form composition
 
-`pnpm add @itclabs/react-ui` also installs the required peers (Valibot, TanStack Form/Table, date-fns). Add `valibot` to your own dependencies when the app imports it directly, for example for schemas shared with server code. The app and kit share a single copy of these peers, and the app can import them directly, including Valibot schemas shared with server code. `useAppForm` builds on TanStack Form and `createValibotFieldValidators` adapts Valibot schemas; DataTable adds `align` to TanStack Table column meta, and calendar helpers use date-fns with date-fns time-zone support. Import these libraries from their own packages; the kit does not re-export them.
+`pnpm add @itclabs/react-ui` also installs the required peers (TanStack Form/Table, date-fns). Validation is library-neutral: install any Standard Schema library (Valibot, Zod, ArkType) in the app; `valibot` is only an optional peer. The app and kit share a single copy of the peers, and the app can import them directly, including schemas shared with server code. `useAppForm` builds on TanStack Form and `createStandardSchemaFieldValidators` adapts Standard Schema rules (`createValibotFieldValidators` is a deprecated alias); DataTable adds `align` to TanStack Table column meta, and calendar helpers use date-fns with date-fns time-zone support. Import these libraries from their own packages; the kit does not re-export them.
 
 ```tsx
 'use client';
@@ -62,7 +62,7 @@ export function Example() {
 }
 ```
 
-Form schema is a field-name → Valibot schema map, adapted to field onChange/onSubmit validators. Form validators overrides that map; FormField validators takes precedence for an individual name. The field must be mounted to validate, just as TanStack fields normally must; this API is not runtime server validation. Keep whole-form/cross-field schemas in useAppForm.validators and reuse business schemas on the server. Do not move required business rules into styling props. required is native/ARIA/presentation; Valibot enforces the actual constraint.
+Form schema is a field-name → synchronous Standard Schema map (Valibot, Zod, ArkType), adapted to field onChange/onSubmit validators. Form validators overrides that map; FormField validators takes precedence for an individual name. The field must be mounted to validate, just as TanStack fields normally must; this API is not runtime server validation. Keep whole-form/cross-field schemas in useAppForm.validators and reuse business schemas on the server. Do not move required business rules into styling props. required is native/ARIA/presentation; the schema enforces the actual constraint.
 
 FormField supports name or an explicit field from form.AppField. Name lookup uses the scoped TanStack form and type-erases its runtime path internally; explicit typed form.AppField remains available when compile-time path checking is needed. Children can be one ordinary control or a render function owning its markup/binding/accessibility. A single-control child receives value/checked, generated stable ID/name, errors and chained blur/change handlers without modifying its className/ref or classNames. Shared native-event inputs use onChange, value controls use onValueChange, boolean choice controls use onCheckedChange. Native checkbox controls retain native onChange. Nullable values stay null for value controls; text blanks use ''.
 

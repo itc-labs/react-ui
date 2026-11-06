@@ -15,12 +15,24 @@ const packed = tarball
     )
   : { ...manifest, ...manifest.publishConfig };
 const sharedPeers = {
-  valibot: '^1.0.0',
   'date-fns': '^4.0.0',
   '@date-fns/tz': '^1.2.0',
   '@tanstack/react-form': '^1.0.0',
   '@tanstack/react-table': '^8.0.0',
 };
+// Form schema accepts any Standard Schema library; Valibot stays an optional peer the kit never imports.
+for (const pkg of [manifest, packed]) {
+  assert.equal(
+    pkg.peerDependencies?.valibot,
+    '^1.0.0',
+    'Missing optional peer: valibot',
+  );
+  assert.equal(
+    pkg.peerDependenciesMeta?.valibot?.optional,
+    true,
+    'valibot must be optional',
+  );
+}
 for (const [name, range] of Object.entries(sharedPeers)) {
   for (const pkg of [manifest, packed]) {
     assert.equal(pkg.peerDependencies?.[name], range, `Missing shared peer: ${name}`);
@@ -169,7 +181,7 @@ async function checkLeanGraph(path) {
   ];
   for (const [, specifier] of imports) {
     assert.ok(
-      !/^(?:@dnd-kit\/|@tiptap\/|recharts(?:\/|$)|react-easy-crop(?:\/|$)|react-is(?:\/|$)|prism-react-renderer(?:\/|$)|embla-carousel(?:-react|-autoplay)?(?:\/|$)|dompurify(?:\/|$))/.test(
+      !/^(?:valibot(?:\/|$)|@dnd-kit\/|@tiptap\/|recharts(?:\/|$)|react-easy-crop(?:\/|$)|react-is(?:\/|$)|prism-react-renderer(?:\/|$)|embla-carousel(?:-react|-autoplay)?(?:\/|$)|dompurify(?:\/|$))/.test(
         specifier,
       ),
       `Optional dependency in core: ${specifier} (${relative(root, path)})`,

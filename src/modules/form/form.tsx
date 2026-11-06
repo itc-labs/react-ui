@@ -10,7 +10,7 @@ import { FormStatusContext } from '../../components/common/form-status';
 
 import {
   FormValidatorsContext,
-  createValibotFieldValidators,
+  createStandardSchemaFieldValidators,
   type FormSchema,
   type FieldValidators,
 } from './validation';
@@ -34,7 +34,9 @@ export function Form({
 
   return (
     <FormValidatorsContext.Provider
-      value={validators ?? (schema ? createValibotFieldValidators(schema) : undefined)}
+      value={
+        validators ?? (schema ? createStandardSchemaFieldValidators(schema) : undefined)
+      }
     >
       <form.AppForm>
         <form
