@@ -120,3 +120,21 @@ export const SelectAndRemove: Story = {
     await expect(canvas.queryByText('avatar.png')).not.toBeInTheDocument();
   },
 };
+
+export const OverlayText: Story = {
+  tags: ['!dev', '!autodocs', 'regression'],
+  args: { size: 'lg', 'data-testid': 'overlay-avatar' },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const trigger = canvas.getByTestId('overlay-avatar-upload');
+    await userEvent.hover(trigger);
+    const copy = canvas.getByTestId('overlay-avatar-uploadText');
+    const outer = trigger.getBoundingClientRect();
+    const inner = copy.getBoundingClientRect();
+    await expect(inner.left).toBeGreaterThanOrEqual(outer.left);
+    await expect(inner.right).toBeLessThanOrEqual(outer.right);
+    await expect(inner.bottom).toBeLessThanOrEqual(outer.bottom);
+    await expect(trigger).not.toHaveAttribute('title');
+    await expect(getComputedStyle(copy).letterSpacing).toBe('normal');
+  },
+};

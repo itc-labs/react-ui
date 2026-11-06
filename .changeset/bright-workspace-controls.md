@@ -15,3 +15,5 @@ Add stateless formatDate, formatCurrency and formatNumber helpers on the server-
 Add optional Forest, Ocean, Violet, Slate and Ember orange light/dark token presets on the isolated theme/presets entry, with contrast coverage, an interactive guide and reproducible bundle measurements.
 
 Bind UI formatters to UIProvider locale with typed useFormatters defaults and per-call overrides. Add DateFormat presets and custom date-fns pattern support (default dd/MM/yyyy), retaining the Intl options overload and server-safe pure helpers.
+
+Add typed custom Carousel arrow/dot renderers and keep large-avatar upload text inside its overlay without a duplicate native tooltip.

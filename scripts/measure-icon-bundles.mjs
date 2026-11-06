@@ -181,7 +181,8 @@ for (const [name, limit] of Object.entries({
   CodeView: 50_000,
   // DOMPurify plus shared class merging, with about 10% headroom.
   RichTextView: 24_000,
-  Carousel: 30_300,
+  // Typed arrow/dot renderers add about 120 gzip bytes.
+  Carousel: 30_600,
   VirtualList: 34_000,
   VirtualGrid: 34_000,
   // Fullscreen media adds Dialog focus management and image zoom controls.

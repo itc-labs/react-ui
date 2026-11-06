@@ -1,6 +1,7 @@
 'use client';
 
 import {
+  Fragment,
   useEffect,
   useMemo,
   useRef,
@@ -20,6 +21,22 @@ import { ChevronLeftIcon as ChevronLeftBoldIcon } from '../../components/icon/bo
 import { ChevronRightIcon } from '../../components/icon/outline/chevron-right';
 import { ChevronRightIcon as ChevronRightBoldIcon } from '../../components/icon/bold/chevron-right';
 import { useUILocale } from '../../i18n/provider';
+
+export type CarouselControlButtonProps = ComponentPropsWithRef<'button'> & {
+  'aria-label': string;
+  'data-testid'?: string | undefined;
+};
+export type CarouselArrowRenderProps = {
+  direction: 'previous' | 'next';
+  disabled: boolean;
+  buttonProps: CarouselControlButtonProps;
+  icon: ReactNode;
+};
+export type CarouselDotRenderProps = {
+  index: number;
+  selected: boolean;
+  buttonProps: CarouselControlButtonProps;
+};
 
 export type CarouselApi = NonNullable<UseEmblaCarouselType[1]>;
 export type CarouselClassNames = Partial<
@@ -61,6 +78,9 @@ export interface CarouselProps<T> extends Omit<
   arrows?: boolean;
   arrowPlacement?: 'outside' | 'overlay';
   dots?: boolean;
+  /** Return a complete native-button-compatible control; forward buttonProps. */
+  renderArrow?: (props: CarouselArrowRenderProps) => ReactNode;
+  renderDot?: (props: CarouselDotRenderProps) => ReactNode;
   loop?: boolean;
   align?: 'start' | 'center';
   dragFree?: boolean;
@@ -88,6 +108,8 @@ export function Carousel<T>({
   arrows = true,
   arrowPlacement = 'outside',
   dots = false,
+  renderArrow,
+  renderDot,
   loop = false,
   align = 'start',
   dragFree = false,
@@ -374,66 +396,84 @@ export function Carousel<T>({
           classNames?.controls,
         )}
       >
-        {arrows && (
-          <>
-            <button
-              type="button"
-              aria-label={t('carousel.previous')}
-              disabled={!canPrev}
-              data-testid={partTestId(testId, 'prev')}
-              className={cn(
+        {arrows &&
+          (['previous', 'next'] as const).map((direction) => {
+            const previous = direction === 'previous';
+            const disabled = previous ? !canPrev : !canNext;
+            const buttonProps: CarouselControlButtonProps = {
+              type: 'button',
+              'aria-label': t(previous ? 'carousel.previous' : 'carousel.next'),
+              disabled,
+              'data-testid': partTestId(testId, previous ? 'prev' : 'next'),
+              className: cn(
                 buttonClass,
                 arrowPlacement === 'overlay' &&
-                  'absolute left-2 top-1/2 -translate-y-1/2',
-                classNames?.prev,
-              )}
-              onClick={() => navigate(() => api?.scrollPrev(reduced))}
-            >
+                  (previous
+                    ? 'absolute left-2 top-1/2 -translate-y-1/2'
+                    : 'absolute right-2 top-1/2 -translate-y-1/2'),
+                previous ? classNames?.prev : classNames?.next,
+              ),
+              onClick: () => {
+                if (!disabled)
+                  navigate(() =>
+                    previous ? api?.scrollPrev(reduced) : api?.scrollNext(reduced),
+                  );
+              },
+            };
+            const icon = previous ? (
               <KitIcon
                 name="chevronLeft"
                 builtin={{ outline: ChevronLeftIcon, bold: ChevronLeftBoldIcon }}
               />
-            </button>
-            <button
-              type="button"
-              aria-label={t('carousel.next')}
-              disabled={!canNext}
-              data-testid={partTestId(testId, 'next')}
-              className={cn(
-                buttonClass,
-                arrowPlacement === 'overlay' &&
-                  'absolute right-2 top-1/2 -translate-y-1/2',
-                classNames?.next,
-              )}
-              onClick={() => navigate(() => api?.scrollNext(reduced))}
-            >
+            ) : (
               <KitIcon
                 name="chevronRight"
                 builtin={{ outline: ChevronRightIcon, bold: ChevronRightBoldIcon }}
               />
-            </button>
-          </>
-        )}
+            );
+
+            return (
+              <Fragment key={direction}>
+                {renderArrow ? (
+                  renderArrow({ direction, disabled, buttonProps, icon })
+                ) : (
+                  <button {...buttonProps}>{icon}</button>
+                )}
+              </Fragment>
+            );
+          })}
         {dots && (
           <div
             data-testid={partTestId(testId, 'dots')}
             className={cn('flex flex-wrap justify-center gap-1', classNames?.dots)}
           >
-            {snaps.map((_, dot) => (
-              <button
-                key={dot}
-                type="button"
-                aria-label={t('carousel.goTo', { index: dot + 1 })}
-                aria-current={selected === dot ? 'true' : undefined}
-                data-testid={partTestId(testId, 'dot', dot)}
-                className={cn(
-                  'flex size-8 items-center justify-center rounded-full after:h-2 after:w-2 after:rounded-full after:bg-line after:transition-all motion-reduce:after:transition-none aria-[current=true]:after:w-5 aria-[current=true]:after:bg-brand-700',
+            {snaps.map((_, dot) => {
+              const active = selected === dot;
+              const buttonProps: CarouselControlButtonProps = {
+                type: 'button',
+                'aria-label': t('carousel.goTo', { index: dot + 1 }),
+                'aria-current': active ? 'true' : undefined,
+                'data-testid': partTestId(testId, 'dot', dot),
+                className: cn(
+                  'flex size-8 items-center justify-center rounded-full',
+                  !renderDot &&
+                    'after:h-2 after:w-2 after:rounded-full after:bg-line after:transition-all motion-reduce:after:transition-none aria-[current=true]:after:w-5 aria-[current=true]:after:bg-brand-700',
                   focusRingClassName,
                   classNames?.dot,
-                )}
-                onClick={() => navigate(() => api?.scrollTo(dot, reduced))}
-              />
-            ))}
+                ),
+                onClick: () => navigate(() => api?.scrollTo(dot, reduced)),
+              };
+
+              return (
+                <Fragment key={dot}>
+                  {renderDot ? (
+                    renderDot({ index: dot, selected: active, buttonProps })
+                  ) : (
+                    <button {...buttonProps} />
+                  )}
+                </Fragment>
+              );
+            })}
           </div>
         )}
         {autoplay && (
