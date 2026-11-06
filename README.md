@@ -416,3 +416,19 @@ loading. Supply stable keys, container sizing when needed, and host-owned loadin
 state. See [Data display](https://react-ui-one-rose.vercel.app/?path=/docs/guides-data-display--docs)
 and [bundle measurements](https://react-ui-one-rose.vercel.app/?path=/docs/reference-entry-points-bundle-size--docs).
 Both new subpaths use included runtime dependencies and require no extra peers.
+
+## Formatting helpers
+
+Import `formatDate`, `formatCurrency` and `formatNumber` from `@itclabs/react-ui/format` in server or client code. Options accept an explicit locale (default `vi-VN`) and a missing-value fallback (default `—`). Currency requires a code; instant dates default to UTC. See Reference → Format helpers in Storybook for full examples.
+
+```ts
+import { formatDate, formatCurrency, formatNumber } from '@itclabs/react-ui/format';
+
+formatNumber(1234567.89, { locale: 'vi-VN' });
+formatCurrency(19.9, 'USD', { locale: 'en-US' });
+formatDate('2026-11-06T08:30:00Z', { timeZone: 'Asia/Ho_Chi_Minh' });
+```
+
+### Built-in theme presets
+
+Import `forestTheme`, `oceanTheme`, `violetTheme`, `slateTheme` or `emberTheme` (earthy orange) from `@itclabs/react-ui/theme/presets`. Each provides `.light` and `.dark` UIProvider configurations. Use `theme={emberTheme[mode]}` with the same mode as ThemeToggle. Presets are isolated from root imports; one named light/dark palette is approximately 813 bytes gzip. Import `themePresets` from the same entry only when offering all five palettes. See Guides → Theming for the complete example.

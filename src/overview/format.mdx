@@ -1,0 +1,84 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Reference/Format helpers" />
+
+# Format helpers
+
+Import pure formatting helpers from **`@itclabs/react-ui/format`**. This entry has no React dependency or client directive and works in server code, browser code and table cell renderers. The functions are also available from the root export. They wrap native Intl and do not change the original value.
+
+## Numbers and currency
+
+```tsx
+import { formatNumber, formatCurrency } from '@itclabs/react-ui/format';
+
+export function Summary() {
+  return (
+    <dl>
+      <dt>Quantity</dt>
+      <dd>{formatNumber(1234567.89, { locale: 'vi-VN' })}</dd>
+      <dt>Price</dt>
+      <dd>{formatCurrency(125000, 'VND', { locale: 'vi-VN' })}</dd>
+      <dt>Price in USD</dt>
+      <dd>{formatCurrency(19.9, 'USD', { locale: 'en-US' })}</dd>
+      <dt>Rate</dt>
+      <dd>{formatNumber(0.25, { locale: 'en-US', style: 'percent' })}</dd>
+    </dl>
+  );
+}
+```
+
+`formatNumber(value, options?)` accepts a number, null or undefined and native `Intl.NumberFormatOptions`, plus `locale` and `fallback`. `formatCurrency(value, currency, options?)` requires an explicit currency code such as `VND`, `USD` or `EUR`; locale does not choose the denomination. Currency fraction defaults follow Intl (for example VND has no minor fraction). Formatting is not currency conversion, financial rounding or storage: keep calculations and original numeric data in the host.
+
+## Dates and time zones
+
+```tsx
+import { formatDate } from '@itclabs/react-ui/format';
+
+export function Dates() {
+  return (
+    <dl>
+      <dt>Calendar date</dt>
+      <dd>{formatDate('2026-11-06', { locale: 'vi-VN', dateStyle: 'long' })}</dd>
+      <dt>Event time</dt>
+      <dd>
+        {formatDate('2026-11-06T08:30:00Z', {
+          locale: 'vi-VN',
+          timeZone: 'Asia/Ho_Chi_Minh',
+          dateStyle: 'medium',
+          timeStyle: 'short',
+        })}
+      </dd>
+    </dl>
+  );
+}
+```
+
+`formatDate(value, options?)` accepts Date, epoch milliseconds, an ISO calendar date (`YYYY-MM-DD`), an ISO datetime with `Z` or an explicit `±HH:MM` offset, null or undefined. Local strings such as `06/11/2026` and datetimes without a time-zone offset are rejected as ambiguous. Invalid calendar dates such as February 30 are missing values.
+
+A date-only string is a calendar day and is formatted in UTC to preserve that day, even if options contain another timeZone. Instants (Date, epoch milliseconds or ISO datetimes) default to UTC; pass `timeZone` for application-local display. Time-zone behavior does not depend on the server's or browser's local setting. Native Intl options include `dateStyle`, `timeStyle` and granular fields; do not combine styles with incompatible granular fields.
+
+## Missing values and locale ownership
+
+All helpers default to `locale="vi-VN"` and `fallback="—"`. Null, undefined, invalid dates and nonfinite numbers use the fallback. Zero is a real number, and epoch `0` is a real instant. Override `fallback` with your application's missing-value copy. Invalid formatter configuration (for example an invalid currency code or timeZone) throws; it is not silently hidden as missing data.
+
+Pure helpers do not read UIProvider, navigator or global locale. For UI formatting, pass the current provider locale explicitly:
+
+```tsx
+'use client';
+
+import { useUILocale } from '@itclabs/react-ui';
+import { formatCurrency } from '@itclabs/react-ui/format';
+
+export function Price({ amount }: { amount: number | null }) {
+  const { locale } = useUILocale();
+
+  return (
+    <span>
+      {formatCurrency(amount, 'VND', {
+        locale: locale.code,
+        fallback: 'Not available',
+      })}
+    </span>
+  );
+}
+```

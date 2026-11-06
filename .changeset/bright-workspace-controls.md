@@ -9,3 +9,7 @@ Expose useDataTable, DataTableRoot and DataTablePagination for shared controller
 Draw raised Sidebar active-item borders inside their rounded bounds so overflow-clipped navigation regions and groups do not cut their contours.
 
 Add dashed Button/IconButton variants and dashed DropdownMenu entries/submenu triggers, with semantic tone support. Expand consumer utility-class and editor IntelliSense documentation.
+
+Add stateless formatDate, formatCurrency and formatNumber helpers on the server-safe format subpath, with explicit locale/currency/time-zone options and documented missing-value handling.
+
+Add optional Forest, Ocean, Violet, Slate and Ember orange light/dark token presets on the isolated theme/presets entry, with contrast coverage, an interactive guide and reproducible bundle measurements.
