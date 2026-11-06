@@ -6,7 +6,13 @@ import { useUILocale } from '../../i18n/provider';
 import { cn } from '../../components/common';
 import { focusRingClassName } from '../../components/common/focus-ring';
 import type { DataTableProps } from './types';
-import { useDataTable } from './use-data-table';
+import {
+  useDataTable,
+  type DataTableView as DataTableController,
+} from './use-data-table';
+export { useDataTable } from './use-data-table';
+export type { DataTableView as DataTableController } from './use-data-table';
+export { DataTablePagination, type DataTablePaginationProps } from './footer';
 import { DataTableToolbar } from './toolbar';
 import { DataTableFeedback } from './feedback';
 import { DataTableHeader } from './header';
@@ -22,8 +28,19 @@ export type { DataTableState } from './state';
 export type { DataTableAlign } from './align';
 
 export function DataTable<T>(props: DataTableProps<T>) {
+  const controller = useDataTable(props);
+
+  return <DataTableRoot controller={controller} />;
+}
+
+/** Render a controller once; share it with standalone pagination in a host footer. */
+export function DataTableRoot<T>({
+  controller: view,
+}: {
+  controller: DataTableController<T>;
+}) {
   const { t } = useUILocale();
-  const view = useDataTable(props);
+  const props = view.props;
   const { className } = props;
   const {
     classNames,
@@ -102,10 +119,29 @@ export function DataTable<T>(props: DataTableProps<T>) {
           <DataTableToolbar view={view} />
         )}
         {error && <DataTableFeedback view={view} />}
+        {paginated &&
+          (props.paginationPlacement === 'top' ||
+            props.paginationPlacement === 'both') && (
+            <DataTableFooter
+              view={view}
+              placement="top"
+              variant={props.topPaginationVariant ?? 'compact'}
+              data-testid={partTestId(view.testId, 'top')}
+            />
+          )}
         <div
           data-testid={partTestId(view.testId, 'scrollArea')}
           ref={scrollRef}
-          style={stickyHeader ? { maxHeight } : undefined}
+          style={{
+            ...(stickyHeader ? { maxHeight } : {}),
+            ...(view.minPageHeight
+              ? {
+                  minHeight: stickyHeader
+                    ? `min(${maxHeight}, ${view.minPageHeight}px)`
+                    : view.minPageHeight,
+                }
+              : {}),
+          }}
           className={cn(
             'overflow-auto focus-visible:-outline-offset-2',
             focusRingClassName,
@@ -116,6 +152,7 @@ export function DataTable<T>(props: DataTableProps<T>) {
           tabIndex={0}
         >
           <table
+            ref={view.tableRef}
             data-testid={partTestId(view.testId, 'table')}
             style={
               resizable
@@ -144,7 +181,10 @@ export function DataTable<T>(props: DataTableProps<T>) {
             <DataTableBody view={view} />
           </table>
         </div>
-        {paginated && <DataTableFooter view={view} />}
+        {paginated &&
+          (props.paginationPlacement === undefined ||
+            props.paginationPlacement === 'bottom' ||
+            props.paginationPlacement === 'both') && <DataTableFooter view={view} />}
       </div>
     </Provider>
   );

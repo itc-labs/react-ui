@@ -120,3 +120,14 @@ export const LoadingInteraction: Story = {
     await expect(button.querySelectorAll('svg')).toHaveLength(1);
   },
 };
+
+export const Tones: Story = {
+  tags: ['variants'],
+  render: () => (
+    <div className="flex flex-wrap gap-3">
+      {(['info', 'success', 'warning', 'danger'] as const).map((tone) => (
+        <IconButton key={tone} icon="close" label={tone} tone={tone} variant="ghost" />
+      ))}
+    </div>
+  ),
+};

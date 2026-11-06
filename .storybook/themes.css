@@ -24,3 +24,21 @@
   --spacing-control-lg: 2.5rem;
   --font-sans: 'Avenir Next', 'Segoe UI', system-ui, sans-serif;
 }
+
+/* Controlled ThemeToggle example; the host owns these palette overrides. */
+[data-color-mode='dark'] {
+  color-scheme: dark;
+  --color-canvas: #161e1b;
+  --color-surface: #202d27;
+  --color-sidebar: #28382f;
+  --color-ink: #e5eee7;
+  --color-muted: #b1c2b6;
+  --color-line: #42564a;
+  --color-control-border: #7b9283;
+  --color-brand-50: #293f31;
+  --color-brand-100: #354e3c;
+  --color-brand-500: #90b681;
+  --color-brand-700: #a1cc90;
+  --color-brand-800: #b7dda7;
+  --color-on-brand: #152319;
+}

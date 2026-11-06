@@ -2,7 +2,14 @@ import { createRowReorder } from '@itclabs/react-ui/dnd';
 import { useEffect, useState } from 'react';
 import { expect, userEvent, waitFor, within } from 'storybook/test';
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { DataTable, type ColumnDef, type DataTableState } from './index';
+import {
+  DataTable,
+  DataTableRoot,
+  DataTablePagination,
+  useDataTable,
+  type ColumnDef,
+  type DataTableState,
+} from './index';
 
 type Example = { id: string; label: string; state: string };
 const columns: ColumnDef<Example, unknown>[] = [
@@ -292,6 +299,7 @@ export const ClientPagination: Story = {
       columns={columns}
       rowId={(row) => row.id}
       pagination
+      paginationPlacement="both"
     />
   ),
   play: async ({ canvasElement }) => {
@@ -302,7 +310,7 @@ export const ClientPagination: Story = {
     await userEvent.click(
       within(document.body).getByRole('menuitemradio', { name: '20 rows' }),
     );
-    await expect(canvas.getByText('Page 1 / 3')).toBeVisible();
+    await expect(canvas.getAllByText('Page 1 / 3')[0]!).toBeVisible();
     await expect(canvas.getByText('Lorem ipsum 01')).toBeVisible();
   },
 };
@@ -633,4 +641,71 @@ export const StableBordersAfterSorting: Story = {
     expect(lastRowMoved).toBe(true);
     await expect(table).toHaveAttribute('aria-busy', 'false');
   },
+};
+
+export const PaginationPlacement: Story = {
+  tags: ['!dev', '!autodocs', 'regression'],
+  render: () => (
+    <DataTable
+      caption="Paginated list"
+      columns={columns}
+      rows={pageRows.slice(0, 23)}
+      rowId={(row) => row.id}
+      pagination
+      paginationPlacement="both"
+      verticalAlign="middle"
+      data-testid="placed"
+    />
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const footer = canvas.getByTestId('placed-footer');
+    const top = canvas.getByTestId('placed-top-footer');
+    const scrollArea = canvas.getByTestId('placed-scrollArea');
+    const initialTop = footer.getBoundingClientRect().top;
+    await userEvent.click(within(footer).getByRole('button', { name: 'Last page' }));
+    await expect(
+      canvas.getByRole('table').querySelectorAll('tbody [data-row-id]'),
+    ).toHaveLength(3);
+    await expect(within(top).getByText('Page 3 / 3')).toBeInTheDocument();
+    await expect(within(top).getByRole('button', { name: 'Next page' })).toBeDisabled();
+    await waitFor(() =>
+      expect(
+        Math.abs(footer.getBoundingClientRect().top - initialTop),
+      ).toBeLessThanOrEqual(1),
+    );
+    await expect(scrollArea.querySelectorAll('[data-row-id]')).toHaveLength(3);
+    await userEvent.click(within(top).getByRole('button', { name: 'Previous page' }));
+    await expect(within(footer).getByText('Page 2 / 3')).toBeInTheDocument();
+  },
+};
+
+function ExternalPaginationExample() {
+  const controller = useDataTable({
+    caption: 'Paginated list',
+    columns,
+    rows: pageRows.slice(0, 23),
+    rowId: (row: Example) => row.id,
+    pagination: true,
+    paginationPlacement: 'none',
+    'data-testid': 'external-table',
+  });
+
+  return (
+    <div className="grid gap-4">
+      <DataTableRoot controller={controller} />
+      <footer className="sticky bottom-0 z-10 rounded-panel border border-line bg-surface shadow-floating">
+        <DataTablePagination
+          controller={controller}
+          data-testid="external-pagination"
+          className="border-t-0"
+        />
+      </footer>
+    </div>
+  );
+}
+
+export const ExternalPagination: Story = {
+  tags: ['!dev', '!autodocs', 'regression'],
+  render: () => <ExternalPaginationExample />,
 };

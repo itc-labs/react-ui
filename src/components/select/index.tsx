@@ -189,6 +189,10 @@ export function Select(props: SelectProps) {
                   cursor: disabled ? 'not-allowed' : searchable ? 'text' : 'pointer',
                   minHeight: undefined,
                 }),
+                option: (base, state) => ({
+                  ...base,
+                  cursor: state.isDisabled ? 'not-allowed' : 'pointer',
+                }),
                 menuList: (base) => ({ ...base, maxHeight: undefined }),
                 menuPortal: (base) => ({
                   ...base,

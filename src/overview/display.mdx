@@ -399,3 +399,47 @@ loaders, retry and empty states. Built-in loading, retry and empty copy follows
 the locale. See [VirtualList stories](?path=/docs/modules-virtuallist--docs),
 [Product grid](?path=/story/modules-virtuallist--product-grid), and
 [Window scrolling](?path=/story/modules-virtuallist--window-scrolling-page).
+
+## Table pagination outside the table
+
+Use `paginationPlacement="both"` for compact top navigation plus full bottom pagination. Paginated tables retain their measured page height by default; set `preservePageHeight={false}` for natural height. Use `verticalAlign="middle"` for compact rows with actions.
+
+For a sticky or fixed application footer, share one controller. The host owns positioning and any space reserved for a fixed footer.
+
+```tsx
+import {
+  DataTableRoot,
+  DataTablePagination,
+  useDataTable,
+  type ColumnDef,
+} from '@itclabs/react-ui';
+
+type RecordRow = { id: string; name: string };
+const rows: RecordRow[] = Array.from({ length: 23 }, (_, index) => ({
+  id: String(index + 1),
+  name: `Lorem ipsum ${index + 1}`,
+}));
+const columns: ColumnDef<RecordRow, unknown>[] = [
+  { accessorKey: 'name', header: 'Name' },
+];
+
+export function RecordList() {
+  const controller = useDataTable({
+    rows,
+    columns,
+    rowId: (row) => row.id,
+    caption: 'Records',
+    pagination: true,
+    paginationPlacement: 'none',
+  });
+
+  return (
+    <div className="grid gap-4">
+      <DataTableRoot controller={controller} />
+      <footer className="sticky bottom-0 z-10 bg-surface">
+        <DataTablePagination controller={controller} />
+      </footer>
+    </div>
+  );
+}
+```

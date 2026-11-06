@@ -75,6 +75,14 @@ type BaseProps<T> = {
   stickyHeader?: boolean;
   maxHeight?: string;
   skeletonRows?: number;
+  /** Default bottom. Choose none when rendering DataTablePagination outside the table. */
+  paginationPlacement?: 'top' | 'bottom' | 'both' | 'none';
+  /** Top defaults to compact previous/next controls. Bottom defaults to page numbers. */
+  topPaginationVariant?: 'compact' | 'full';
+  /** Preserve the largest measured page height until count, page size or filters change. Defaults true for paginated tables. */
+  preservePageHeight?: boolean;
+  /** Apply consistently to body, selection, reorder and loading cells. */
+  verticalAlign?: 'top' | 'middle' | 'bottom';
   error?: string;
   onRetry?: () => void;
   pageSizeOptions?: readonly number[];

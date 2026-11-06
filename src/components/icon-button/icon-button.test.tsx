@@ -29,3 +29,19 @@ it('anchors a badge to the glyph and announces it in the accessible name', () =>
   expect(hidden).toContain('aria-label="Notifications"');
   expect(hidden).not.toContain('data-overlap');
 });
+
+it('supports semantic tones independently of the visual variant and preserves caller classes', () => {
+  const html = renderToStaticMarkup(
+    <IconButton
+      icon="close"
+      label="Delete"
+      variant="ghost"
+      tone="danger"
+      className="rounded-full"
+    />,
+  );
+  expect(html).toContain('text-danger-700');
+  expect(html).toContain('hover:bg-danger-50');
+  expect(html).toContain('rounded-full');
+  expect(html).not.toContain('tone="');
+});

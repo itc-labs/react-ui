@@ -128,3 +128,29 @@ The unlayered provider rule wins over defaults in `@layer theme`. For unlayered 
 To switch themes by selector, replace `:root` with `[data-theme='name']` on `<html>`. This covers portals and recalculates derived roles and shadows. Check WCAG AA contrast for text/background pairs and control borders. Reserve `line` for decoration and `control-border` for controls.
 
 <Source code={customThemeCSS} language="css" />
+
+## Appearance control
+
+ThemeToggle provides icon, button and switch appearances. Keep the chosen mode in host state; apply your own CSS palette to the document root so portalled overlays follow. Persistence and system preferences remain host decisions. The control does not change document attributes itself.
+
+```tsx
+import { useEffect, useState } from 'react';
+import { ThemeToggle, type ThemeMode } from '@itclabs/react-ui';
+
+export function AppearanceSettings() {
+  const [mode, setMode] = useState<ThemeMode>('light');
+  useEffect(() => {
+    const previous = document.documentElement.dataset.colorMode;
+    document.documentElement.dataset.colorMode = mode;
+
+    return () => {
+      if (previous === undefined) delete document.documentElement.dataset.colorMode;
+      else document.documentElement.dataset.colorMode = previous;
+    };
+  }, [mode]);
+
+  return <ThemeToggle value={mode} onValueChange={setMode} appearance="switch" />;
+}
+```
+
+Define your dark CSS token overrides under `[data-color-mode='dark']`. See the ThemeToggle Playground for a working sample palette.

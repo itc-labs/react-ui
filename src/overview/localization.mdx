@@ -100,3 +100,27 @@ The locale provider adds no wrapper DOM and does not set `html.lang` or `dir`. T
 Locale codes and catalog JSON can cross server boundaries. Configure date-library locales containing functions in a client module. Since 0.4, built-in dictionaries are message-only; they do not load date-library locale functions. The kit includes Vietnamese and English dictionaries; RTL layout support is not guaranteed.
 
 Business schemas should return issue codes/parameters or use the application's current locale. Pass translated errors into fields: the kit does not translate arbitrary backend strings. Consumer-provided Toast and EmptyState titles and descriptions follow the same rule. See [Forms](?path=/docs/guides-forms--docs) and [Providers & adapters](?path=/docs/guides-providers-adapters--docs).
+
+## Language switcher
+
+Use flags supplied by the host and native-language labels. With two options, auto mode shows compact language codes such as `en | vi` in a segmented control, without flags. Set `shortLabel` on an option to override its compact text; full labels remain available to assistive technology. With more options it opens a radio menu. Use `mode="segmented"` explicitly for a segmented choice or `mode="toggle"` for the single-button shortcut. Set `mode="dropdown"` to use a menu for two options too. The host still owns translation catalogs and persistence. Add each language's catalog through UIProvider translations; unprovided strings use the configured fallback locale.
+
+```tsx
+import { useState } from 'react';
+import { UIProvider, LanguageSwitcher, type LanguageOption } from '@itclabs/react-ui';
+
+const languages: LanguageOption[] = [
+  { value: 'en-US', label: 'English', flag: '🇺🇸' },
+  { value: 'vi-VN', label: 'Tiếng Việt', flag: '🇻🇳' },
+];
+
+export function LanguageSettings() {
+  const [locale, setLocale] = useState('en-US');
+
+  return (
+    <UIProvider locale={locale}>
+      <LanguageSwitcher value={locale} onValueChange={setLocale} options={languages} />
+    </UIProvider>
+  );
+}
+```

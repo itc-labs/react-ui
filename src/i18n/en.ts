@@ -1,4 +1,10 @@
 export const enMessages = {
+  'language.label': 'Language',
+  'language.switchTo': 'Switch to {language}',
+  'theme.light': 'Light mode',
+  'theme.dark': 'Dark mode',
+  'theme.switchToLight': 'Switch to light mode',
+  'theme.switchToDark': 'Switch to dark mode',
   'virtualList.empty': 'No items found',
   'virtualList.loadMore': 'Load more',
   'virtualList.retry': 'Retry',

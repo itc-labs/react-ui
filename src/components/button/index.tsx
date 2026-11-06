@@ -1,4 +1,5 @@
 'use client';
+import { buttonToneClasses, type UITone } from '../common/tone';
 import { interactiveTrigger } from '../common/interactive-trigger';
 import type { TestIdProps } from '../common/testing';
 
@@ -22,6 +23,8 @@ const button = cva(
         secondary: 'border border-line bg-surface text-ink hover:bg-hover',
         ghost: 'text-ink hover:bg-hover-strong',
         danger: 'bg-danger-700 text-on-brand hover:bg-danger-800',
+        soft: 'bg-brand-100 text-brand-800 hover:bg-brand-50',
+        outline: 'border border-brand-700 bg-surface text-brand-700 hover:bg-brand-50',
       },
       size: {
         sm: 'h-control-sm px-3 text-ui-sm',
@@ -36,6 +39,7 @@ const button = cva(
 export type ButtonProps = (ComponentProps<'button'> &
   VariantProps<typeof button> & {
     /** Defaults to the surrounding `Form` submission state for `type="submit"`. */
+    tone?: UITone;
     loading?: boolean;
     loadingLabel?: string;
     classNames?: SlotClasses<'root' | 'spinner'>;
@@ -44,6 +48,7 @@ export type ButtonProps = (ComponentProps<'button'> &
 
 export function Button({
   variant,
+  tone,
   size,
   loading: loadingProp,
   disabled,
@@ -66,6 +71,16 @@ export function Button({
       aria-busy={loading || undefined}
       className={cn(
         button({ variant, size }),
+        tone &&
+          buttonToneClasses[tone][
+            variant === 'ghost'
+              ? 'ghost'
+              : variant === 'secondary' || variant === 'outline'
+                ? 'outline'
+                : variant === 'soft'
+                  ? 'soft'
+                  : 'solid'
+          ],
         loading && 'disabled:cursor-wait',
         classNames?.root,
         className,
