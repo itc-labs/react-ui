@@ -60,8 +60,7 @@
       transform: translateX(400%);
     }
   }
-  --font-sans:
-    'Be Vietnam Pro', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-sans: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
   --spacing-chart-height: 18rem;
   --color-chart-1: #365c42;
   --color-chart-2: #28799a;

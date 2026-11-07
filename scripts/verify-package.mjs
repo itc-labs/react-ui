@@ -267,9 +267,29 @@ for (const selector of [
   '.pod-toast',
   '.pod-rich-text',
   '.reactEasyCrop_Container',
-  '@font-face',
 ])
   assert.ok(css.includes(selector), `Missing CSS: ${selector}`);
+assert.doesNotMatch(
+  css,
+  /@font-face|\.woff2?\b/,
+  'Default CSS must not load web fonts',
+);
+for (const entry of ['fonts', 'fonts-800']) {
+  const file = `dist/theme/${entry}.css`;
+  const fontCss = tarball
+    ? execFileSync('tar', ['-xOf', resolve(tarball), `package/${file}`], {
+        encoding: 'utf8',
+      })
+    : await readFile(resolve(root, file), 'utf8');
+  assert.match(fontCss, /@font-face/, `Missing font faces: ${entry}`);
+  if (entry === 'fonts') assert.match(fontCss, /--font-sans:\s*["']?Be Vietnam Pro/);
+  for (const [, asset] of fontCss.matchAll(/url\(["']?([^)"']+)["']?\)/g)) {
+    assert.ok(
+      files.has(`dist/theme/${asset.replace(/^\.\//, '')}`),
+      `Missing font asset: ${asset}`,
+    );
+  }
+}
 for (const [, asset] of css.matchAll(/url\((?:["']?)([^)"']+)(?:["']?)\)/g)) {
   if (/^(?:data:|https?:)/.test(asset)) continue;
   assert.ok(
@@ -277,6 +297,7 @@ for (const [, asset] of css.matchAll(/url\((?:["']?)([^)"']+)(?:["']?)\)/g)) {
     `Missing CSS asset: ${asset}`,
   );
 }
+assert.ok(files.has('dist/theme/be-vietnam-pro-LICENSE.txt'));
 assert.ok(files.has('THIRD_PARTY_NOTICES.md'));
 const notices = tarball
   ? execFileSync('tar', ['-xOf', resolve(tarball), 'package/THIRD_PARTY_NOTICES.md'], {

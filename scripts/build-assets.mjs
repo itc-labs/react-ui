@@ -51,3 +51,28 @@ await build({
     },
   },
 });
+
+// Publish opt-in font sheets with local URLs for hosts without CSS import resolution.
+await build({
+  configFile: false,
+  base: './',
+  root,
+  build: {
+    outDir: resolve(root, 'dist/theme'),
+    emptyOutDir: false,
+    cssMinify: true,
+    cssCodeSplit: true,
+    assetsInlineLimit: 0,
+    rolldownOptions: {
+      input: ['fonts', 'fonts-800'].map((name) =>
+        resolve(root, 'src/theme', `${name}.css`),
+      ),
+      output: { assetFileNames: '[name][extname]' },
+    },
+  },
+});
+
+await cp(
+  resolve(root, 'node_modules/@fontsource/be-vietnam-pro/LICENSE'),
+  resolve(root, 'dist/theme/be-vietnam-pro-LICENSE.txt'),
+);
