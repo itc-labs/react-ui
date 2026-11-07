@@ -56,7 +56,7 @@ it('emits interaction utilities as overridable role variables with unchanged def
 
 it('resets stock colors and keeps the full stylesheet optional with ordered layers', async () => {
   const themeDirectory = dirname(fileURLToPath(import.meta.url));
-  const compiler = await compile('@import "./styles.css";', {
+  const compilerOptions: NonNullable<Parameters<typeof compile>[1]> = {
     base: themeDirectory,
     loadStylesheet: async (id, base) => {
       const require = createRequire(resolve(base, 'theme-loader.cjs'));
@@ -64,7 +64,8 @@ it('resets stock colors and keeps the full stylesheet optional with ordered laye
 
       return { path, base: dirname(path), content: readFileSync(path, 'utf8') };
     },
-  });
+  };
+  const compiler = await compile('@import "./styles.css";', compilerOptions);
   const css = compiler.build([
     'text-red-500',
     'bg-white',
@@ -84,8 +85,13 @@ it('resets stock colors and keeps the full stylesheet optional with ordered laye
   expect(css).toContain('.Toastify__toast');
   expect(css).toContain('.reactEasyCrop_Container');
   expect(css).toContain('.ui-overlay-motion');
-  expect(css).toContain('font-weight: 700');
-  expect(css).not.toContain('font-weight: 800');
+  expect(css).not.toContain('@font-face');
+  expect(css).toContain('--font-sans: system-ui');
+  const fonts = await compile('@import "./fonts.css";', compilerOptions);
+  const fontCSS = fonts.build([]);
+  expect(fontCSS).toContain('Be Vietnam Pro');
+  expect(fontCSS).toContain('font-weight: 700');
+  expect(fontCSS).not.toContain('font-weight: 800');
   expect(css).toContain('background: var(--color-canvas)');
 
   const tokens = readFileSync(new URL('./tokens.css', import.meta.url), 'utf8');

@@ -72,7 +72,7 @@
     "build-storybook": "storybook build --disable-telemetry",
     "test": "vitest run --fsModuleCachePath ./.cache/vitest",
     "generate:icons": "node scripts/generate-ui-icons.mjs",
-    "build": "vite build --config vite.build.config.ts && tsc -p tsconfig.build.json && node scripts/build-assets.mjs",
+    "build": "vite build --config vite.build.config.ts && tsc -p tsconfig.build.json --incremental false && node scripts/build-assets.mjs",
     "prepack": "pnpm run build",
     "test:package": "node scripts/verify-package.mjs",
     "format": "prettier --write . && node scripts/format-function-spacing.mjs --write",

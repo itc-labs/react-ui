@@ -45,7 +45,13 @@ The theme registers the kit's own class sources, so no `@source` pointing into `
 import '@itclabs/react-ui/ui.css';
 ```
 
-Use one of the two, not both.
+Use one of the two, not both. Both use the system font stack by default. To enable the bundled Be Vietnam Pro font, import its stylesheet after your UI styles:
+
+```css
+@import '@itclabs/react-ui/theme/fonts.css';
+```
+
+For a JavaScript entry, use `import '@itclabs/react-ui/theme/fonts.css';` after `ui.css`. This loads weights 400–700 and sets `--font-sans`. Import `theme/fonts-800.css` as well if you need weight 800. Existing apps can add this import to retain their previous typography.
 
 ## Providers
 
@@ -295,7 +301,7 @@ Slider, OptionGroup, QuantityInput, and ColorPicker are core controls with autom
 | `@itclabs/react-ui/transfer`                           | Transfer with searchable virtualized lists, automatic FormField binding and opt-in drag and drop through createTransferDnd; no optional peers.                                                                               |
 | `@itclabs/react-ui/rich-text-view`                     | Sanitized HTML display with Editor typography; no optional peers.                                                                                                                                                            |
 | `@itclabs/react-ui/editor`, `/chart`, `/avatar-upload` | Optional features with optional peer dependencies                                                                                                                                                                            |
-| `@itclabs/react-ui/theme/styles.css`                   | Full theme for Tailwind v4 hosts (`tokens`, `fonts`, `base`, `vendor`, `motion` entries also available)                                                                                                                      |
+| `@itclabs/react-ui/theme/styles.css`                   | Full theme for Tailwind v4 hosts with system fonts (`tokens`, `fonts`, `base`, `vendor`, `motion` entries also available)                                                                                                    |
 | `@itclabs/react-ui/ui.css`                             | Precompiled stylesheet for hosts without Tailwind                                                                                                                                                                            |
 
 ## Optional features
