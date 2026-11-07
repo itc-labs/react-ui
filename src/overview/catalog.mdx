@@ -131,15 +131,16 @@ Compositions of components for recurring interface patterns. The application sup
 
 ## Templates
 
-Workspace structure and complete layout examples. WorkspaceShell is exported by the package; ApplicationLayout and CalendarPage are story compositions to adapt in your application.
+Workspace structure and complete layout examples. WorkspaceShell and DashboardShell are exported by the package; ApplicationLayout and CalendarPage are story compositions to adapt in your application.
 
 ### Workspace layouts
 
-| Name              | Purpose                                                                 | Story docs                                                |
-| ----------------- | ----------------------------------------------------------------------- | --------------------------------------------------------- |
-| WorkspaceShell    | Arrange sidebar, header, and main content slots.                        | [Examples](?path=/docs/templates-workspaceshell--docs)    |
-| ApplicationLayout | Demonstrate sidebar or top navigation with a user menu and page header. | [Examples](?path=/docs/templates-applicationlayout--docs) |
-| CalendarPage      | Demonstrate an event calendar within a workspace layout.                | [Examples](?path=/docs/templates-calendarpage--docs)      |
+| Name              | Purpose                                                                               | Story docs                                                            |
+| ----------------- | ------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| WorkspaceShell    | Arrange sidebar, header, and main content slots.                                      | [Examples](?path=/docs/templates-workspaceshell--docs)                |
+| DashboardShell    | Assemble responsive sidebar navigation, a sticky toolbar, and an avatar account menu. | [Examples](?path=/story/templates-applicationlayout--sales-dashboard) |
+| ApplicationLayout | Compose app navigation and dashboards for sales, fulfillment, and service health.     | [Examples](?path=/docs/templates-applicationlayout--docs)             |
+| CalendarPage      | Demonstrate an event calendar within a workspace layout.                              | [Examples](?path=/docs/templates-calendarpage--docs)                  |
 
 The component Calendar selects dates. The module Calendar manages events and is exported as `EventCalendar` from the root and `/modules`, or as `Calendar` from `/calendar`. See [Event calendar](?path=/docs/guides-event-calendar--docs).
 

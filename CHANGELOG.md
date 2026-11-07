@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.13.0
+
+### Minor Changes
+
+- Export DashboardShell for application templates with responsive sidebar navigation, a sticky header, and an avatar account menu. Includes inset, classic, and floating layout examples for sales, fulfillment, and service health.
+
+- Add the Sidebar `itemVariant="indicator"` style with a thin accent line and a tinted background for the active navigation item in both expanded and collapsed layouts.
+
 ## 0.12.0
 
 ### Minor Changes

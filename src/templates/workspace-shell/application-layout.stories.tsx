@@ -1,12 +1,24 @@
 import { UIProvider } from '../../theme/provider';
-import { useCallback, useState, type ComponentProps } from 'react';
+import {
+  useCallback,
+  useRef,
+  useState,
+  type ComponentProps,
+  type ReactNode,
+} from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, userEvent, within } from 'storybook/test';
 import { WorkspaceShell } from './index';
-import { Sidebar, type SidebarEntry } from '../../modules/sidebar';
+import { DashboardShell } from '@itclabs/react-ui/templates';
+import { Sidebar, type SidebarEntry, type SidebarProps } from '../../modules/sidebar';
 import { Navbar, type NavbarItem } from '../../modules/navbar';
 import { UserMenu } from '../../modules/user-menu';
 import { PageHeader } from '../../modules/page-header';
+import { DataTable, type ColumnDef } from '../../modules/data-table';
+import { Button } from '../../components/button';
+import { Chart, type ChartPoint } from '@itclabs/react-ui/chart';
+import { Timeline } from '../../components/timeline';
+import { Alert } from '../../components/alert';
 import { ProgressList } from '../../modules/progress-list';
 import { Progress } from '../../components/progress';
 import { Tag } from '../../components/tag';
@@ -271,6 +283,416 @@ export const TopNavigationLayout: Story = {
   tags: ['example'],
   render: () => <ApplicationExample topNavigation />,
 };
+type DashboardSection = Pick<
+  Extract<SidebarEntry, { type?: 'item' }>,
+  'id' | 'label' | 'icon'
+>;
+
+function DashboardLayout({
+  title,
+  sections,
+  variant,
+  sidebarAppearance,
+  children,
+}: {
+  title: string;
+  sections: readonly DashboardSection[];
+  variant: NonNullable<ComponentProps<typeof WorkspaceShell>['variant']>;
+  sidebarAppearance: Pick<
+    SidebarProps,
+    'tone' | 'itemVariant' | 'defaultCollapsed' | 'expandOnHover'
+  >;
+  children: ReactNode;
+}) {
+  const [activeSection, setActiveSection] = useState(sections[0]?.id);
+  const content = useRef<HTMLDivElement>(null);
+
+  const [notice, setNotice] = useState('');
+
+  const selectSection = (section: DashboardSection) => {
+    setActiveSection(section.id);
+    content.current
+      ?.querySelector(`#${section.id}`)
+      ?.scrollIntoView({ block: 'start' });
+  };
+
+  return (
+    <DashboardShell
+      variant={variant}
+      sidebar={{
+        ...sidebarAppearance,
+        navigationLabel: `${title} navigation`,
+        header: { title, logo: <HomeIcon /> },
+        items: sections.map((section) => ({
+          ...section,
+          active: section.id === activeSection,
+          onSelect: () => selectSection(section),
+        })),
+      }}
+      account={{
+        name: 'Alex Morgan',
+        description: 'Workspace admin',
+        items: [
+          {
+            id: 'account',
+            label: 'Account details',
+            onSelect: () => setNotice('Alex Morgan · alex@example.com'),
+          },
+          {
+            id: 'overview',
+            label: 'Back to overview',
+            onSelect: () => {
+              const overview = sections[0];
+              if (overview) selectSection(overview);
+            },
+          },
+        ],
+      }}
+      classNames={{ main: variant === 'inset' ? 'max-w-6xl' : 'max-w-none' }}
+      header={<span className="font-semibold">{title}</span>}
+    >
+      <div ref={content}>{children}</div>
+      <p role="status" className="text-ui-sm text-muted">
+        {notice}
+      </p>
+    </DashboardShell>
+  );
+}
+
+type DashboardMetric = { label: string; value: string; detail: string };
+
+function DashboardMetrics({
+  items,
+  layout,
+}: {
+  items: readonly DashboardMetric[];
+  layout: 'strip' | 'tiles';
+}) {
+  return (
+    <dl
+      className={
+        layout === 'strip'
+          ? 'm-0 grid divide-y divide-line border-y border-line sm:grid-cols-3 sm:divide-x sm:divide-y-0'
+          : 'm-0 grid gap-3 sm:grid-cols-3'
+      }
+    >
+      {items.map(({ label, value, detail }) => (
+        <div
+          key={label}
+          className={
+            layout === 'strip'
+              ? 'px-4 py-4 sm:px-5'
+              : 'border border-line bg-surface p-4'
+          }
+        >
+          <dt className="text-ui-sm font-medium text-muted">{label}</dt>
+          <dd className="mt-1 text-heading font-semibold text-ink tabular-nums">
+            {value}
+          </dd>
+          <dd className="mt-1 text-ui-sm text-muted">{detail}</dd>
+        </div>
+      ))}
+    </dl>
+  );
+}
+
+const salesByDay = [12, 15, 11, 19, 17, 24, 20, 18, 23, 21, 26, 24, 32, 29].map(
+  (orders, index) => ({
+    day: index + 1,
+    online: orders,
+    retail: 5 + (index % 4) * 2,
+  }),
+);
+const currency = new Intl.NumberFormat('en-US', {
+  style: 'currency',
+  currency: 'USD',
+  maximumFractionDigits: 0,
+});
+
+function SalesDashboardExample() {
+  const [days, setDays] = useState<7 | 14>(7);
+  const sales = salesByDay.slice(-days);
+  const online = sales.reduce((total, day) => total + day.online, 0);
+  const retail = sales.reduce((total, day) => total + day.retail, 0);
+  const revenue = online * 48 + retail * 36;
+  const trend = sales.map((day) => ({
+    id: String(day.day),
+    label: `Nov ${day.day}`,
+    values: { revenue: day.online * 48 + day.retail * 36 },
+  }));
+
+  return (
+    <DashboardLayout
+      title="Commerce workspace"
+      variant="inset"
+      sidebarAppearance={{ itemVariant: 'indicator' }}
+      sections={[
+        { id: 'sales-overview', label: 'Overview', icon: HomeIcon },
+        { id: 'sales-revenue', label: 'Revenue', icon: FolderIcon },
+        { id: 'sales-channels', label: 'Sales channels', icon: SettingsIcon },
+      ]}
+    >
+      <PageHeader
+        id="sales-overview"
+        className="mb-6 scroll-mt-20"
+        classNames={{ title: 'text-heading', description: 'mt-2' }}
+        title="Sales overview"
+        description="Track revenue, order volume, and sales channels."
+        action={
+          <div role="group" aria-label="Date range" className="flex gap-2">
+            {([7, 14] as const).map((range) => (
+              <Button
+                key={range}
+                variant={days === range ? 'soft' : 'outline'}
+                aria-pressed={days === range}
+                onClick={() => setDays(range)}
+              >
+                {range} days
+              </Button>
+            ))}
+          </div>
+        }
+      />
+      <div className="grid gap-5">
+        <DashboardMetrics
+          layout="strip"
+          items={[
+            {
+              label: 'Revenue',
+              value: currency.format(revenue),
+              detail: `Last ${days} days`,
+            },
+            {
+              label: 'Orders',
+              value: String(online + retail),
+              detail: 'Across both channels',
+            },
+            {
+              label: 'Average order value',
+              value: currency.format(revenue / (online + retail)),
+              detail: 'Revenue per order',
+            },
+          ]}
+        />
+        <div className="grid gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+          <Card
+            id="sales-revenue"
+            className="scroll-mt-20 rounded-control shadow-none"
+            title="Revenue trend"
+          >
+            <Chart
+              type="area"
+              label="Daily revenue"
+              data={trend}
+              series={[{ id: 'revenue', label: 'Revenue' }]}
+              valueFormatter={(value) => currency.format(value)}
+              height={240}
+            />
+          </Card>
+          <Card
+            id="sales-channels"
+            className="scroll-mt-20 rounded-control shadow-none"
+            title="Orders by channel"
+          >
+            <Chart
+              type="donut"
+              label="Orders by channel"
+              data={[
+                { id: 'online', label: 'Online', value: online },
+                { id: 'retail', label: 'Retail', value: retail },
+              ]}
+              height={240}
+            />
+          </Card>
+        </div>
+      </div>
+    </DashboardLayout>
+  );
+}
+
+export const SalesDashboard: Story = {
+  tags: ['example'],
+  render: () => <SalesDashboardExample />,
+};
+
+const fulfillmentQueue = [
+  { id: 'ORD-104', owner: 'Alex Morgan', stage: 'Picking', due: '10:30' },
+  { id: 'ORD-103', owner: 'Jamie Chen', stage: 'Packing', due: '11:15' },
+  { id: 'ORD-102', owner: 'Sam Rivera', stage: 'Ready', due: '12:00' },
+];
+const fulfillmentColumns: ColumnDef<(typeof fulfillmentQueue)[number], unknown>[] = [
+  { accessorKey: 'id', header: 'Order' },
+  { accessorKey: 'owner', header: 'Assignee' },
+  {
+    accessorKey: 'stage',
+    header: 'Stage',
+    cell: ({ row }) => (
+      <Tag tone={row.original.stage === 'Ready' ? 'success' : 'info'}>
+        {row.original.stage}
+      </Tag>
+    ),
+  },
+  { accessorKey: 'due', header: 'Due' },
+];
+
+export const OperationsDashboard: Story = {
+  tags: ['example'],
+  render: () => (
+    <DashboardLayout
+      title="Fulfillment workspace"
+      variant="classic"
+      sidebarAppearance={{ tone: 'dark', itemVariant: 'raised' }}
+      sections={[
+        { id: 'operations-overview', label: 'Overview', icon: HomeIcon },
+        { id: 'operations-orders', label: 'Order queue', icon: FolderIcon },
+        { id: 'operations-stations', label: 'Stations', icon: SettingsIcon },
+      ]}
+    >
+      <PageHeader
+        id="operations-overview"
+        className="mb-6 scroll-mt-20"
+        classNames={{ title: 'text-heading', description: 'mt-2' }}
+        title="Fulfillment overview"
+        description="Track today’s output and see what is due next."
+      />
+      <div className="grid gap-5">
+        <DashboardMetrics
+          layout="tiles"
+          items={[
+            { label: 'Ready for pickup', value: '24', detail: 'Today' },
+            { label: 'In progress', value: '18', detail: 'Across active stations' },
+            { label: 'Due within an hour', value: '3', detail: 'Priority orders' },
+          ]}
+        />
+        <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+          <Card
+            id="operations-orders"
+            className="scroll-mt-20 rounded-none p-4 shadow-none"
+            title="Next orders due"
+          >
+            <DataTable
+              caption="Next orders due"
+              className="rounded-none border-0 shadow-none"
+              rows={fulfillmentQueue}
+              columns={fulfillmentColumns}
+              rowId={(row) => row.id}
+              filterable
+            />
+          </Card>
+          <Card
+            id="operations-stations"
+            className="scroll-mt-20 rounded-none p-4 shadow-none"
+            title="Station throughput"
+            description="Orders processed against today's target."
+          >
+            <ProgressList
+              items={[
+                { id: 'picking', label: 'Picking', value: 42, max: 50 },
+                { id: 'packing', label: 'Packing', value: 32, max: 50 },
+                { id: 'dispatch', label: 'Dispatch', value: 24, max: 50 },
+              ]}
+            />
+          </Card>
+        </div>
+      </div>
+    </DashboardLayout>
+  ),
+};
+
+const serviceSamples: ChartPoint[] = [
+  { id: '09', label: '09:00', values: { rate: 96, errors: 0.3, latency: 125 } },
+  { id: '10', label: '10:00', values: { rate: 120, errors: 0.4, latency: 142 } },
+  { id: '11', label: '11:00', values: { rate: 184, errors: 1.2, latency: 218 } },
+  { id: '12', label: '12:00', values: { rate: 145, errors: 0.6, latency: 164 } },
+  { id: '13', label: '13:00', values: { rate: 132, errors: 0.4, latency: 148 } },
+];
+const serviceMetrics = [
+  { id: 'rate', label: 'Request rate', unit: ' req/s' },
+  { id: 'errors', label: 'Error rate', unit: '%' },
+  { id: 'latency', label: 'P95 latency', unit: ' ms' },
+] as const;
+
+export const ServiceHealthDashboard: Story = {
+  tags: ['example'],
+  render: () => (
+    <DashboardLayout
+      title="Service operations"
+      variant="floating"
+      sidebarAppearance={{ defaultCollapsed: true, itemVariant: 'subtle' }}
+      sections={[
+        { id: 'service-overview', label: 'Overview', icon: HomeIcon },
+        { id: 'service-metrics', label: 'API metrics', icon: SettingsIcon },
+        { id: 'service-incidents', label: 'Incidents', icon: FolderIcon },
+      ]}
+    >
+      <PageHeader
+        id="service-overview"
+        className="mb-6 scroll-mt-20"
+        classNames={{ title: 'text-heading', description: 'mt-2' }}
+        title="Service health"
+        description="Monitor the API and review recent incidents."
+        action={<Tag tone="success">Operational</Tag>}
+      />
+      <div className="grid gap-5">
+        <Alert variant="inline" tone="info" title="Incident resolved">
+          API latency returned to its normal range at 12:00 UTC.
+        </Alert>
+        <div
+          id="service-metrics"
+          className="grid scroll-mt-20 divide-y divide-line border-y border-line md:grid-cols-3 md:divide-x md:divide-y-0"
+        >
+          {serviceMetrics.map(({ id, label, unit }) => (
+            <Card
+              key={id}
+              title={label}
+              className="rounded-none border-0 bg-transparent p-4 shadow-none"
+            >
+              <p className="mb-2 text-heading font-semibold text-ink tabular-nums">
+                {serviceSamples.at(-1)?.values[id]}
+                {unit}
+              </p>
+              <Chart
+                type="line"
+                label={label}
+                data={serviceSamples}
+                series={[{ id, label }]}
+                valueFormatter={(value) => `${value}${unit}`}
+                height={160}
+                legend={false}
+              />
+            </Card>
+          ))}
+        </div>
+        <Card
+          id="service-incidents"
+          className="scroll-mt-20 rounded-none border-0 bg-transparent px-0 shadow-none"
+          title="Incident timeline"
+          description="All times in UTC."
+        >
+          <Timeline
+            items={[
+              {
+                id: 'resolved',
+                title: 'Latency returned to normal',
+                time: '12:00',
+                status: 'success',
+                statusLabel: 'Resolved',
+              },
+              {
+                id: 'detected',
+                title: 'Elevated API latency detected',
+                time: '11:00',
+                status: 'warning',
+                statusLabel: 'Investigating',
+              },
+            ]}
+          />
+        </Card>
+      </div>
+    </DashboardLayout>
+  ),
+};
+
 export const CustomClasses: Story = {
   tags: ['customization'],
   render: () => (

@@ -38,15 +38,53 @@ clickable application demo; [TopNavigationLayout](?path=/story/templates-applica
 combines a Navbar mega menu, underline indicator, and UserMenu. These demos use
 host state and a UiLink adapter without a framework dependency.
 
+## Dashboard application shell
+
+`DashboardShell` combines responsive sidebar navigation, a sticky header, and an avatar account menu. Pass navigation and account items from your app, put toolbar controls in `headerActions`, and render the page as children. Choose `inset`, `classic`, or `floating` to match the dashboard layout.
+
+```tsx
+import { DashboardShell } from '@itclabs/react-ui/templates';
+
+export function ReportsLayout() {
+  return (
+    <DashboardShell
+      variant="classic"
+      sidebar={{
+        header: { title: 'Workspace' },
+        currentPath: '/reports',
+        items: [
+          { id: 'overview', label: 'Overview', href: '/' },
+          { id: 'reports', label: 'Reports', href: '/reports' },
+        ],
+      }}
+      header="Reports"
+      account={{
+        name: 'Alex Morgan',
+        items: [
+          { id: 'profile', label: 'Profile', href: '/account' },
+          { id: 'settings', label: 'Settings', href: '/settings' },
+        ],
+      }}
+    >
+      <h1>Reports</h1>
+    </DashboardShell>
+  );
+}
+```
+
+Compare [Sales](?path=/story/templates-applicationlayout--sales-dashboard), [Operations](?path=/story/templates-applicationlayout--operations-dashboard), and [Service Health](?path=/story/templates-applicationlayout--service-health-dashboard).
+
 ## Sidebar variants
 
-| Prop            | Values                             | Default   | Purpose                                                            |
-| --------------- | ---------------------------------- | --------- | ------------------------------------------------------------------ |
-| `variant`       | `sidebar`, `floating`              | `sidebar` | Full-height navigation or a rounded floating surface.              |
-| `collapsible`   | `icon`, `offcanvas`, `none`        | `icon`    | Collapse to a rail, hide the desktop sidebar, or keep it expanded. |
-| `tone`          | `default`, `dark`, `brand`         | `default` | Scoped sidebar colors.                                             |
-| `itemVariant`   | `raised`, `subtle`, `bar`, `solid` | `raised`  | Active and hover treatment for navigation items.                   |
-| `expandOnHover` | boolean                            | `false`   | Preview an icon rail without changing its layout width.            |
+| Prop            | Values                                          | Default   | Purpose                                                            |
+| --------------- | ----------------------------------------------- | --------- | ------------------------------------------------------------------ |
+| `variant`       | `sidebar`, `floating`                           | `sidebar` | Full-height navigation or a rounded floating surface.              |
+| `collapsible`   | `icon`, `offcanvas`, `none`                     | `icon`    | Collapse to a rail, hide the desktop sidebar, or keep it expanded. |
+| `tone`          | `default`, `dark`, `brand`                      | `default` | Scoped sidebar colors.                                             |
+| `itemVariant`   | `raised`, `subtle`, `bar`, `indicator`, `solid` | `raised`  | Active and hover treatment for navigation items.                   |
+| `expandOnHover` | boolean                                         | `false`   | Preview an icon rail without changing its layout width.            |
+
+Set `itemVariant="indicator"` for a thin accent line at the leading edge and a lightly tinted background on the active item. See the [expanded and collapsed layouts](?path=/story/modules-sidebar--active-indicator) and the [active sub item](?path=/story/modules-sidebar--active-sub-item-indicator).
 
 Pair `Sidebar variant="floating"` with `WorkspaceShell variant="floating"`.
 For offcanvas navigation, keep `SidebarTrigger` outside the sidebar so users can

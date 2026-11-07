@@ -1,6 +1,6 @@
 export * from './components';
 export * from './modules';
-export * from './templates';
+export * from './templates/workspace-shell';
 export * from './theme';
 export { UIProvider, useTheme } from './theme/provider';
 export * from './i18n';

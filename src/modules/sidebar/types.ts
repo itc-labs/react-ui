@@ -125,7 +125,7 @@ export type SidebarProps<TAccess = unknown> = ComponentProps<'aside'> &
     variant?: 'sidebar' | 'floating';
     collapsible?: 'icon' | 'offcanvas' | 'none';
     tone?: 'default' | 'dark' | 'brand';
-    itemVariant?: 'raised' | 'subtle' | 'bar' | 'solid';
+    itemVariant?: 'raised' | 'subtle' | 'bar' | 'indicator' | 'solid';
     header?: ReactNode | SidebarBrand;
     search?: ReactNode | SidebarSearch;
     footer?: ReactNode;

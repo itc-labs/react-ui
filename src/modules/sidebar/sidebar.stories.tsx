@@ -288,7 +288,10 @@ export const Playground: Story = {
   argTypes: {
     variant: { control: 'select', options: ['sidebar', 'floating'] },
     tone: { control: 'select', options: ['default', 'dark', 'brand'] },
-    itemVariant: { control: 'select', options: ['raised', 'subtle', 'bar', 'solid'] },
+    itemVariant: {
+      control: 'select',
+      options: ['raised', 'subtle', 'bar', 'indicator', 'solid'],
+    },
     collapsible: { control: 'select', options: ['icon', 'offcanvas', 'none'] },
   },
   render: (args: SidebarProps) => (
@@ -670,7 +673,7 @@ export const Variants: Story = {
     docs: {
       description: {
         story:
-          'Compare variant and tone, then itemVariant for hover and active rows: raised, subtle, bar and solid.',
+          'Compare variant and tone, then itemVariant for hover and active rows: raised, subtle, bar, indicator and solid.',
       },
     },
   },
@@ -700,19 +703,81 @@ export const Variants: Story = {
         )}
       </div>
       <div className="flex flex-wrap gap-6">
-        {(['raised', 'subtle', 'bar', 'solid'] as const).map((itemVariant) => (
-          <div key={itemVariant}>
-            <p className="mb-2 text-ui-sm">{itemVariant}</p>
-            <Sidebar
-              itemVariant={itemVariant}
-              items={railItems}
-              className="static h-96"
-            />
-          </div>
-        ))}
+        {(['raised', 'subtle', 'bar', 'indicator', 'solid'] as const).map(
+          (itemVariant) => (
+            <div key={itemVariant}>
+              <p className="mb-2 text-ui-sm">{itemVariant}</p>
+              <Sidebar
+                itemVariant={itemVariant}
+                items={railItems}
+                className="static h-96"
+              />
+            </div>
+          ),
+        )}
       </div>
     </div>
   ),
+};
+
+export const ActiveIndicator: Story = {
+  tags: ['!dev', '!autodocs', 'example'],
+  render: () => (
+    <div className="flex flex-wrap gap-6 bg-canvas p-4">
+      <Sidebar
+        aria-label="Expanded navigation"
+        itemVariant="indicator"
+        items={railItems}
+        className="static h-96"
+      />
+      <Sidebar
+        aria-label="Collapsed navigation"
+        itemVariant="indicator"
+        items={railItems}
+        collapsed
+        className="static h-96"
+      />
+    </div>
+  ),
+};
+
+export const ActiveSubItemIndicator: Story = {
+  tags: ['!dev', '!autodocs', 'example'],
+  render: () => {
+    const items: SidebarEntry[] = [
+      { id: 'overview', label: 'Overview', href: '/', icon: HomeIcon },
+      {
+        id: 'settings',
+        type: 'submenu',
+        label: 'Settings',
+        icon: SettingsIcon,
+        items: [
+          { id: 'profile', label: 'Profile', href: '/settings/profile' },
+          { id: 'team', label: 'Team', href: '/settings/team' },
+        ],
+      },
+    ];
+
+    return (
+      <div className="flex flex-wrap gap-6 bg-canvas p-4">
+        <Sidebar
+          aria-label="Expanded navigation"
+          itemVariant="indicator"
+          items={items}
+          currentPath="/settings/profile"
+          className="static h-96"
+        />
+        <Sidebar
+          aria-label="Collapsed navigation"
+          itemVariant="indicator"
+          items={items}
+          currentPath="/settings/profile"
+          collapsed
+          className="static h-96"
+        />
+      </div>
+    );
+  },
 };
 
 function HeaderToolsExample() {
