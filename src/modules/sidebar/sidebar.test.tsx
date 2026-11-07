@@ -189,7 +189,7 @@ it.each(['default', 'dark', 'brand'] as const)(
   },
 );
 
-it.each(['raised', 'subtle', 'bar', 'solid'] as const)(
+it.each(['raised', 'subtle', 'bar', 'indicator', 'solid'] as const)(
   'applies %s styles to links, submenu triggers and collapsed rail',
   async (itemVariant) => {
     const entries: SidebarEntry[] = [
@@ -217,16 +217,25 @@ it.each(['raised', 'subtle', 'bar', 'solid'] as const)(
     expect(host.querySelector('aside')?.dataset.itemVariant).toBe(itemVariant);
     expect(expanded.classList.contains('shadow-panel')).toBe(itemVariant === 'raised');
     expect(expanded.classList.contains('before:w-1')).toBe(itemVariant === 'bar');
+    expect(expanded.classList.contains('before:w-0.5')).toBe(
+      itemVariant === 'indicator',
+    );
     expect(
       expanded.classList.contains('bg-[var(--sidebar-solid-bg,var(--color-accent))]'),
     ).toBe(itemVariant === 'solid');
     expect(
       host.querySelector('[data-testid="styles-submenu-branch"] button')?.className,
     ).toContain('focus-visible:');
+    expect(
+      host
+        .querySelector('[data-testid="styles-submenu-branch"] button')
+        ?.classList.contains('before:w-0.5'),
+    ).toBe(false);
     await act(async () => render(true));
     const rail = host.querySelector('[aria-current="page"]')!;
     expect(rail.classList.contains('shadow-panel')).toBe(itemVariant === 'raised');
     expect(rail.classList.contains('before:w-1')).toBe(itemVariant === 'bar');
+    expect(rail.classList.contains('before:w-0.5')).toBe(itemVariant === 'indicator');
   },
 );
 

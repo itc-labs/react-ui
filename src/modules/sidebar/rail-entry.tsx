@@ -138,6 +138,7 @@ export function SidebarRailEntry({
     'relative mx-auto flex size-9 shrink-0 items-center justify-center rounded-control p-2 disabled:opacity-50',
     focusRingClassName,
     sidebarItemClasses(variant, active),
+    variant === 'indicator' && 'w-full focus-visible:-outline-offset-2',
     classNames?.item,
     item.className,
   );

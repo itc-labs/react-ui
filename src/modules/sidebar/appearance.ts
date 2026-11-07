@@ -43,6 +43,10 @@ export function sidebarItemClasses(
   variant: NonNullable<SidebarProps['itemVariant']>,
   active: boolean,
 ) {
+  if (variant === 'indicator')
+    return active
+      ? 'relative rounded-none bg-[var(--sidebar-tint,color-mix(in_srgb,var(--color-accent)_12%,transparent))] font-medium text-[var(--sidebar-active-fg,var(--color-ink))] before:pointer-events-none before:absolute before:inset-y-0 before:start-0 before:w-0.5 before:bg-[var(--sidebar-accent,var(--color-accent))]'
+      : 'rounded-none text-[var(--sidebar-muted,var(--color-muted))] hover:bg-[var(--sidebar-hover,color-mix(in_srgb,var(--color-surface)_60%,transparent))] hover:text-[var(--sidebar-fg,var(--color-ink))]';
   if (!active)
     return variant === 'bar'
       ? 'text-[var(--sidebar-muted,var(--color-muted))] hover:text-[var(--sidebar-fg,var(--color-ink))]'

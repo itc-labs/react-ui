@@ -266,6 +266,8 @@ export function Sidebar<TAccess = unknown>({
         data-testid={partTestId(id, 'content')}
         className={cn(
           'min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden',
+          // Extend the navigation to the panel edges while keeping header and footer padding.
+          itemVariant === 'indicator' && !mobile && (rail ? '-mx-2' : '-mx-3'),
           classNames?.content,
         )}
       >
