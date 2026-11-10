@@ -2,3 +2,10 @@
 @import '@fontsource/be-vietnam-pro/500.css';
 @import '@fontsource/be-vietnam-pro/600.css';
 @import '@fontsource/be-vietnam-pro/700.css';
+
+@layer theme {
+  :root {
+    --font-sans:
+      'Be Vietnam Pro', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+}

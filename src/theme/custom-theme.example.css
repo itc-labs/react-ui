@@ -67,8 +67,7 @@
   --color-chart-6: #40877b;
 
   /* Typography and text scale */
-  --font-sans:
-    'Be Vietnam Pro', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-sans: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
   --text-heading: 1.5rem;
   --text-heading--line-height: 1.3333333333;
   --text-title: 1.875rem;

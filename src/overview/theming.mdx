@@ -72,7 +72,7 @@ The default Tailwind palette is reset to the kit palette. Use `line` for decorat
 
 <Canvas of={Tokens.Typography} />
 
-The self-hosted Be Vietnam Pro font includes weights 400–700; weight 800 has a separate entry. Use `text-control` for controls, `text-ui-sm` for metadata, `text-section` / `text-heading` / `text-title` for headings, and `text-display` for large titles.
+The default is the system font stack. Import `theme/fonts.css` after your UI stylesheet to enable self-hosted Be Vietnam Pro at weights 400–700. Weight 800 has a separate entry. Use `text-control` for controls, `text-ui-sm` for metadata, `text-section` / `text-heading` / `text-title` for headings, and `text-display` for large titles.
 
 ### Motion, control sizes, and overlay layers
 
@@ -96,7 +96,7 @@ For entry points and the compiled CSS option, see [Getting started](?path=/docs/
 
 ## Replace the font
 
-Omit `fonts.css`, load your application's font, and override `--font-sans`:
+Load your application's font and override `--font-sans`:
 
 ```css
 @layer theme, base, toastify, components, utilities;
