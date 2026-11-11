@@ -2,6 +2,7 @@
 import { useControl } from '../context';
 import { DatePicker, type DatePickerProps } from '../../../components/date-picker';
 import { TimePicker, type TimePickerProps } from '../../../components/time-picker';
+import { MonthPicker, type MonthPickerProps } from '../../../components/month-picker';
 import {
   DateRangePicker,
   type DateRangePickerProps,
@@ -18,6 +19,26 @@ export function DateField(
 
   return (
     <DatePicker
+      {...props}
+      name={field.name}
+      value={field.state.value || null}
+      onValueChange={(value) => field.handleChange(value ?? '')}
+      onBlur={field.handleBlur}
+      {...(error ? { error } : {})}
+    />
+  );
+}
+
+export function MonthField(
+  props: Omit<
+    MonthPickerProps,
+    'value' | 'defaultValue' | 'name' | 'onValueChange' | 'onBlur' | 'error'
+  >,
+) {
+  const { field, error } = useControl();
+
+  return (
+    <MonthPicker
       {...props}
       name={field.name}
       value={field.state.value || null}

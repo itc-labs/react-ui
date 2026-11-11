@@ -27,6 +27,7 @@ export * from './breadcrumb';
 export * from './calendar';
 export * from './date-picker';
 export * from './date-range-picker';
+export * from './month-picker';
 export * from './time-picker';
 export * from './calendar/model';
 export * from './avatar';

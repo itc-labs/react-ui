@@ -198,8 +198,9 @@ for (const [name, limit] of Object.entries({
   Form: 22_000,
   DataTable: 90_000,
   Calendar: 100_000,
-  // Semantic tones, workspace controls and pagination add about 2.7 KB gzip.
-  Root: 282_000,
+  // Semantic tones, workspace controls and pagination add about 2.7 KB gzip;
+  // MonthPicker and its bound MonthField add about 1.7 KB gzip.
+  Root: 284_500,
   ColorPicker: 54_300,
 })) {
   if (sizes[name].gzip >= limit) {

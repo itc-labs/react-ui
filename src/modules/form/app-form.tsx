@@ -5,7 +5,7 @@ import { SubmitButton } from './submit-button';
 import { TextField, TextAreaField } from './fields/text';
 import { SelectField, MultiSelectField } from './fields/select';
 import { CheckboxField, SwitchField, RadioGroupField } from './fields/choice';
-import { DateField, TimeField, DateRangeField } from './fields/date-time';
+import { DateField, MonthField, TimeField, DateRangeField } from './fields/date-time';
 import { UploadField } from './fields/media';
 import { NumberField, PasswordField, OTPField } from './fields/input';
 export const { useAppForm } = createFormHook({
@@ -23,6 +23,7 @@ export const { useAppForm } = createFormHook({
     SwitchField,
     RadioGroupField,
     DateField,
+    MonthField,
     TimeField,
     DateRangeField,
     UploadField,

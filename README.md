@@ -196,7 +196,7 @@ export function ProfileForm({
 }
 ```
 
-Kit value controls (`Select`, `NumberInput`, `DatePicker`, …) bind automatically; `NumberInput` uses `number | null`, where `null` means empty. See [Guides/Forms](https://react-ui-one-rose.vercel.app/?path=/docs/guides-forms--docs) for custom wrappers, async submit and the optional `form.AppField` bound fields.
+Kit value controls (`Select`, `NumberInput`, `DatePicker`, `MonthPicker`, …) bind automatically; `NumberInput` uses `number | null`, where `null` means empty. See [Guides/Forms](https://react-ui-one-rose.vercel.app/?path=/docs/guides-forms--docs) for custom wrappers, async submit and the optional `form.AppField` bound fields.
 
 ### Menus and dialogs
 

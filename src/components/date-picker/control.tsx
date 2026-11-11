@@ -44,6 +44,8 @@ export function PickerControl({
   open,
   onOpenChange,
   onClear,
+  clearLabel,
+  popoverLabel,
   children,
 }: PickerFieldProps & {
   id: string;
@@ -52,6 +54,10 @@ export function PickerControl({
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onClear?: (() => void) | undefined;
+  /** Accessible name of the clear button; defaults to the date message. */
+  clearLabel?: string;
+  /** Popover name when the field has no string label or aria-label. */
+  popoverLabel?: string;
   children: ReactNode;
 } & { 'data-testid'?: string | undefined }) {
   const { t } = useUILocale();
@@ -151,7 +157,7 @@ export function PickerControl({
           {onClear && text && (
             <KitIconButton
               data-testid={partTestId(testId, 'clear')}
-              label={t('date.clear')}
+              label={clearLabel ?? t('date.clear')}
               icon="close"
               builtin={{ outline: CloseIcon, bold: CloseBoldIcon }}
               variant="ghost"
@@ -174,7 +180,9 @@ export function PickerControl({
           align="start"
           collisionPadding={16}
           aria-label={
-            typeof label === 'string' ? label : (ariaLabel ?? t('date.placeholder'))
+            typeof label === 'string'
+              ? label
+              : (ariaLabel ?? popoverLabel ?? t('date.placeholder'))
           }
           onOpenAutoFocus={(event) => event.preventDefault()}
           onInteractOutside={() => {
