@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.14.0
+
+### Minor Changes
+
+- [#41](https://github.com/itc-labs/react-ui/pull/41) [`503124b`](https://github.com/itc-labs/react-ui/commit/503124b9302eba71039cad6a8b8afec67ea662d7) Thanks [@vungbt](https://github.com/vungbt)! - Add `MonthPicker` for month-only `YYYY-MM` values such as billing periods. It shares the DatePicker field and popover, shows a localized 3×4 month grid with year navigation, `min`/`max` bounds, current-month and clear actions, and grid keyboard navigation. Use it with `FormField` or the new `field.MonthField` bound field.
+
+- [#38](https://github.com/itc-labs/react-ui/pull/38) [`af91bfb`](https://github.com/itc-labs/react-ui/commit/af91bfb07d44ffdf29295f4759580044c5843cf4) Thanks [@vungbt](https://github.com/vungbt)! - Use system fonts by default in both UI stylesheets. Import `@itclabs/react-ui/theme/fonts.css` after the UI stylesheet to keep Be Vietnam Pro. Both optional font stylesheets ship with self-hosted assets.
+
+### Patch Changes
+
+- [#42](https://github.com/itc-labs/react-ui/pull/42) [`9137ecc`](https://github.com/itc-labs/react-ui/commit/9137ecc5a8024c54d61e5090139c0a5019dc2de0) Thanks [@vungbt](https://github.com/vungbt)! - Ship the DatePicker/DateRangePicker calendar styles in `theme/styles.css` and `ui.css`. They were only imported from JavaScript, which the library build drops, so the calendar popup rendered unstyled in apps.
+
+- [#40](https://github.com/itc-labs/react-ui/pull/40) [`e900f02`](https://github.com/itc-labs/react-ui/commit/e900f02891a23c367e821f4b6ba5269604cd303f) Thanks [@vungbt](https://github.com/vungbt)! - Sidebar: a flat item list keeps the tight in-group spacing. The nav no longer puts `gap-5` between every top-level entry; only group boundaries get the 20px space, so grouped menus look the same as before. Group roots now carry `data-sidebar-group`.
+
 ## 0.13.0
 
 ### Minor Changes
