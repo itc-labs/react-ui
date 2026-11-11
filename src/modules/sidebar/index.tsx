@@ -275,7 +275,12 @@ export function Sidebar<TAccess = unknown>({
           <SidebarNav
             aria-label={navigationLabel}
             data-testid={partTestId(id, 'nav')}
-            className={cn('gap-5', classNames?.nav)}
+            // Items stay as tight as inside a group; only group boundaries get the 20px gap
+            // (2px gap + 18px margin), so a flat item list is not spread out.
+            className={cn(
+              'gap-0.5 [&>[data-sidebar-group]+*]:mt-4.5 [&>[data-sidebar-group]:not(:first-child)]:mt-4.5',
+              classNames?.nav,
+            )}
           >
             <SidebarEntries
               items={visibleItems ?? []}
@@ -472,7 +477,7 @@ export function SidebarGroup({
   ...props
 }: ComponentProps<'div'> & { label?: ReactNode; labelClassName?: string }) {
   return (
-    <div {...props} className={cn('min-w-0', className)}>
+    <div data-sidebar-group="" {...props} className={cn('min-w-0', className)}>
       {label != null && (
         <p
           className={cn(
