@@ -64,6 +64,7 @@ export function SidebarEntryGroup({
         item.onOpenChange?.(next);
       }}
       data-testid={testId}
+      data-sidebar-group=""
       className={cn('min-w-0', classNames?.group, item.className)}
     >
       <Collapsible.Trigger

@@ -351,3 +351,54 @@ it('supports controlled header triggers, preserves refs and allows click cancell
   await act(async () => ref.current!.click());
   expect(onCollapsedChange).not.toHaveBeenCalled();
 });
+
+it('keeps flat items as tight as group items and spaces only group boundaries', async () => {
+  await act(async () =>
+    root.render(
+      <Sidebar
+        data-testid="spacing"
+        currentPath="/"
+        items={[
+          { id: 'home', label: 'Home', href: '/', exact: true },
+          { id: 'rooms', label: 'Rooms', href: '/rooms' },
+          {
+            id: 'monthly',
+            type: 'group',
+            label: 'Monthly',
+            items: [{ id: 'bills', label: 'Bills', href: '/bills' }],
+          },
+          {
+            id: 'more',
+            type: 'group',
+            label: 'More',
+            collapsible: true,
+            items: [{ id: 'reports', label: 'Reports', href: '/reports' }],
+          },
+        ]}
+      />,
+    ),
+  );
+
+  const nav = host.querySelector('[data-testid="spacing-nav"]');
+  const classes = nav?.className.split(' ') ?? [];
+
+  // Flat items use the in-group gap (gap-0.5), not the old gap-5 between every entry.
+  expect(classes).toContain('gap-0.5');
+  expect(classes).not.toContain('gap-5');
+  expect(classes).toContain('[&>[data-sidebar-group]+*]:mt-4.5');
+  expect(classes).toContain('[&>[data-sidebar-group]:not(:first-child)]:mt-4.5');
+  // Plain and collapsible groups both mark their root so the nav can space them.
+  expect(
+    host
+      .querySelector('[data-testid="spacing-group-monthly"]')
+      ?.hasAttribute('data-sidebar-group'),
+  ).toBe(true);
+  expect(
+    host
+      .querySelector('[data-testid="spacing-group-more"]')
+      ?.hasAttribute('data-sidebar-group'),
+  ).toBe(true);
+  expect(
+    nav?.querySelector(':scope > [data-testid="spacing-item-home"]'),
+  ).not.toBeNull();
+});
