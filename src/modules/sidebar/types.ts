@@ -126,6 +126,10 @@ export type SidebarProps<TAccess = unknown> = ComponentProps<'aside'> &
     collapsible?: 'icon' | 'offcanvas' | 'none';
     tone?: 'default' | 'dark' | 'brand';
     itemVariant?: 'raised' | 'subtle' | 'bar' | 'indicator' | 'solid';
+    /** `caps`: small uppercase group labels, so they read as headings rather than items. */
+    groupLabel?: 'default' | 'caps';
+    /** Draw a hairline between top-level groups. */
+    groupDividers?: boolean;
     header?: ReactNode | SidebarBrand;
     search?: ReactNode | SidebarSearch;
     footer?: ReactNode;

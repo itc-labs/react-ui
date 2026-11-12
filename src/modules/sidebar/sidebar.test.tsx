@@ -402,3 +402,68 @@ it('keeps flat items as tight as group items and spaces only group boundaries', 
     nav?.querySelector(':scope > [data-testid="spacing-item-home"]'),
   ).not.toBeNull();
 });
+
+it('styles group labels as caps headings, divides groups and accents the indicator icon', async () => {
+  await act(async () =>
+    root.render(
+      <Sidebar
+        data-testid="caps"
+        currentPath="/bills"
+        itemVariant="indicator"
+        groupLabel="caps"
+        groupDividers
+        items={[
+          { id: 'home', label: 'Home', href: '/', exact: true },
+          {
+            id: 'monthly',
+            type: 'group',
+            label: 'Monthly',
+            items: [{ id: 'bills', label: 'Bills', href: '/bills' }],
+          },
+          {
+            id: 'more',
+            type: 'group',
+            label: 'More',
+            collapsible: true,
+            items: [{ id: 'reports', label: 'Reports', href: '/reports' }],
+          },
+        ]}
+      />,
+    ),
+  );
+
+  const nav = host.querySelector('[data-testid="caps-nav"]');
+  const classes = nav?.className ?? '';
+
+  expect(classes).toContain('[&_[data-sidebar-group-label]]:uppercase');
+  expect(classes).toContain('[&>[data-sidebar-group]:not(:first-child)]:border-t');
+  // Plain and collapsible group labels are both targeted.
+  expect(nav?.querySelectorAll('[data-sidebar-group-label]').length).toBe(2);
+  expect(host.querySelector('[aria-current="page"]')?.className).toContain(
+    '[&_svg]:text-[var(--sidebar-accent,var(--color-accent))]',
+  );
+});
+
+it('keeps the default group label style when no option is set', async () => {
+  await act(async () =>
+    root.render(
+      <Sidebar
+        data-testid="plain"
+        currentPath="/"
+        items={[
+          {
+            id: 'g',
+            type: 'group',
+            label: 'G',
+            items: [{ id: 'a', label: 'A', href: '/' }],
+          },
+        ]}
+      />,
+    ),
+  );
+
+  const classes = host.querySelector('[data-testid="plain-nav"]')?.className ?? '';
+
+  expect(classes).not.toContain('uppercase');
+  expect(classes).not.toContain('border-t');
+});
