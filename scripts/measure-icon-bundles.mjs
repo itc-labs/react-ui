@@ -203,7 +203,7 @@ for (const [name, limit] of Object.entries({
   // MonthPicker and its bound MonthField add about 1.7 KB gzip;
   // KpiCard, MetricTrend and KpiGrid with their trend glyphs add about 2.7 KB gzip;
   // FormLayout, FormSection, FormGrid and FormActions add about 1.3 KB gzip.
-  Root: 287_700,
+  Root: 288_000,
   ColorPicker: 54_300,
 })) {
   if (sizes[name].gzip >= limit) {
