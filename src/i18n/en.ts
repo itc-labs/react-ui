@@ -151,6 +151,11 @@ export const enMessages = {
   'progress.empty': 'No progress data yet.',
   'progress.total': 'Total: {total}',
 
+  'trend.up': 'Increase',
+  'trend.down': 'Decrease',
+  'trend.flat': 'No change',
+  'kpi.missing': 'Not available',
+
   'tag.remove': 'Remove {label}',
   'badge.dot': 'New notifications',
   'badge.count': {

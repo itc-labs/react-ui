@@ -72,6 +72,7 @@ type ChartBaseProps = Omit<ComponentProps<'figure'>, 'children' | 'title'> & {
   tooltip?: boolean;
   /** The equivalent table is always available to screen readers. */
   showDataTable?: boolean;
+  /** Formats tooltip, table and axis values; defaults to the UI locale. */
   valueFormatter?: (value: number) => string;
   classNames?: ChartClassNames;
   'data-testid'?: string;
@@ -83,6 +84,11 @@ type CartesianProps = {
   grid?: boolean;
   xAxis?: boolean;
   yAxis?: boolean;
+  /**
+   * Formats numeric axis ticks only, for example compact "40 tr" labels.
+   * Tooltips, the legend and the data table keep `valueFormatter`.
+   */
+  axisValueFormatter?: (value: number) => string;
 };
 
 type CurveProps = {

@@ -160,6 +160,52 @@ export const MissingAndZero: Story = {
   },
 };
 
+const revenue: ChartPoint[] = [
+  { id: 'jul', label: 'T7', values: { alpha: 28_500_000, beta: 12_000_000 } },
+  { id: 'aug', label: 'T8', values: { alpha: 34_200_000, beta: 15_750_000 } },
+  { id: 'sep', label: 'T9', values: { alpha: 40_000_000, beta: 18_300_000 } },
+  { id: 'oct', label: 'T10', values: { alpha: 37_800_000, beta: 21_400_000 } },
+];
+const money = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' });
+const compactMoney = new Intl.NumberFormat('vi-VN', {
+  notation: 'compact',
+  maximumFractionDigits: 1,
+});
+
+export const LongValues: Story = {
+  tags: ['example'],
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'The value axis grows to fit its longest formatted tick. Use axisValueFormatter for compact ticks while tooltips and the data table keep the full valueFormatter output.',
+      },
+    },
+  },
+  render: () => (
+    <div className="grid gap-8 lg:grid-cols-2">
+      <Chart
+        type="bar"
+        label="Full currency ticks"
+        title="valueFormatter"
+        data={revenue}
+        series={series}
+        valueFormatter={(value) => money.format(value)}
+      />
+      <Chart
+        type="line"
+        label="Compact axis ticks"
+        title="axisValueFormatter"
+        data={revenue}
+        series={series}
+        dots
+        valueFormatter={(value) => money.format(value)}
+        axisValueFormatter={(value) => compactMoney.format(value)}
+      />
+    </div>
+  ),
+};
+
 function RetryExample() {
   const [failed, setFailed] = useState(true);
 
