@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.17.0
+
+### Minor Changes
+
+- [#47](https://github.com/itc-labs/react-ui/pull/47) [`3368533`](https://github.com/itc-labs/react-ui/commit/33685336eb7c0fb7b02abb824404ad3237e28c4c) Thanks [@vungbt](https://github.com/vungbt)! - Add the `--color-table-header` token (`bg-table-header`) for the DataTable header row. It defaults to the canvas colour, so tables look the same; apps whose pages sit on the canvas can give the header its own colour instead of blending into the page.
+
 ## 0.16.0
 
 ### Minor Changes
