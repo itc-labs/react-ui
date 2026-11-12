@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.19.0
+
+### Minor Changes
+
+- [#51](https://github.com/itc-labs/react-ui/pull/51) [`7adbe68`](https://github.com/itc-labs/react-ui/commit/7adbe68d2523b2e02a63abf981a63a68d127be17) Thanks [@vungbt](https://github.com/vungbt)! - Add form layout building blocks: `FormLayout` (readable max width), `FormSection` (titled `section` or `fieldset`, plain or card), `FormGrid` / `FormGridItem` (container-responsive field grid of up to four columns with clamped spans) and `FormActions` (end-aligned action bar with a `start` slot, phone stacking and an optional sticky footer). They are exported next to `Form`.
+
 ## 0.18.0
 
 ### Minor Changes
