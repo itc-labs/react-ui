@@ -20,7 +20,8 @@ export function sidebarToneStyle(
       : 'var(--color-muted)',
     '--sidebar-hover': contrast
       ? `color-mix(in srgb, ${foreground} 12%, transparent)`
-      : 'color-mix(in srgb, var(--color-surface) 60%, transparent)',
+      : // Ink-based so hover shows on any sidebar colour, including one equal to the surface.
+        'color-mix(in srgb, var(--color-ink) 6%, transparent)',
     '--sidebar-active-bg': contrast
       ? `color-mix(in srgb, ${foreground} 18%, transparent)`
       : 'var(--color-surface)',
@@ -46,11 +47,11 @@ export function sidebarItemClasses(
   if (variant === 'indicator')
     return active
       ? 'relative rounded-none bg-[var(--sidebar-tint,color-mix(in_srgb,var(--color-accent)_12%,transparent))] font-medium text-[var(--sidebar-active-fg,var(--color-ink))] before:pointer-events-none before:absolute before:inset-y-0 before:start-0 before:w-0.5 before:bg-[var(--sidebar-accent,var(--color-accent))]'
-      : 'rounded-none text-[var(--sidebar-muted,var(--color-muted))] hover:bg-[var(--sidebar-hover,color-mix(in_srgb,var(--color-surface)_60%,transparent))] hover:text-[var(--sidebar-fg,var(--color-ink))]';
+      : 'rounded-none text-[var(--sidebar-muted,var(--color-muted))] hover:bg-[var(--sidebar-hover,color-mix(in_srgb,var(--color-ink)_6%,transparent))] hover:text-[var(--sidebar-fg,var(--color-ink))]';
   if (!active)
     return variant === 'bar'
       ? 'text-[var(--sidebar-muted,var(--color-muted))] hover:text-[var(--sidebar-fg,var(--color-ink))]'
-      : 'text-[var(--sidebar-muted,var(--color-muted))] hover:bg-[var(--sidebar-hover,color-mix(in_srgb,var(--color-surface)_60%,transparent))] hover:text-[var(--sidebar-fg,var(--color-ink))]';
+      : 'text-[var(--sidebar-muted,var(--color-muted))] hover:bg-[var(--sidebar-hover,color-mix(in_srgb,var(--color-ink)_6%,transparent))] hover:text-[var(--sidebar-fg,var(--color-ink))]';
   switch (variant) {
     case 'subtle':
       return 'bg-[var(--sidebar-tint,color-mix(in_srgb,var(--color-accent)_12%,transparent))] font-medium text-[var(--sidebar-accent,var(--color-accent))]';

@@ -108,7 +108,8 @@ export function WorkspaceMain({ className, ...props }: ComponentProps<'main'>) {
   return (
     <main
       {...props}
-      className={cn('mx-auto max-w-6xl px-5 py-8 sm:px-8 sm:py-10 lg:px-10', className)}
+      // Fills the workspace column; constrain readable pages (forms, articles) at the page level.
+      className={cn('w-full min-w-0 px-5 py-8 sm:px-8 sm:py-10 lg:px-10', className)}
     />
   );
 }

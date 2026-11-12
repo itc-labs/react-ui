@@ -65,7 +65,7 @@ In Next, the app may use `<SidebarItem asChild active icon={...}><Link href="/it
 
 ## Theme and overrides
 
-`--container-sidebar: 13rem`, `--container-sidebar-collapsed: 4rem` and `--container-workspace: 100rem` define the default layout dimensions. WorkspaceShell consumes them; cn registers the container names for consumer max-width overrides. All parts accept className/native props. Header actions and main content are slots, not product-specific props.
+`--container-sidebar: 13rem`, `--container-sidebar-collapsed: 4rem` and `--container-workspace: 100rem` define the default layout dimensions. WorkspaceShell consumes them; cn registers the container names for consumer max-width overrides. `WorkspaceMain` fills the workspace column (no max width); constrain readable pages such as forms at the page level. All parts accept className/native props. Header actions and main content are slots, not product-specific props.
 
 ## Submenus
 
