@@ -4,6 +4,7 @@ import { useSidebarState } from './use-sidebar-state';
 import type { SidebarProps } from './types';
 import { KitIconButton } from '../../components/icon-button/kit-icon-button';
 import { PanelLeftIcon } from '../../components/icon/outline/panel-left';
+import { Tooltip } from '../../components/tooltip';
 import { useUILocale } from '../../i18n/provider';
 
 type SidebarState = { collapsed: boolean; toggle: () => void; id: string };
@@ -32,26 +33,32 @@ export type SidebarTriggerProps = Omit<
   React.ComponentProps<typeof KitIconButton>,
   'icon' | 'builtin' | 'label'
 > &
-  Pick<SidebarProps, 'collapsed' | 'onCollapsedChange'> & { label?: string };
+  Pick<SidebarProps, 'collapsed' | 'onCollapsedChange'> & {
+    label?: string;
+    /** Show a tooltip on hover/focus: `true` repeats the accessible label; a node replaces it. */
+    tooltip?: boolean | ReactNode;
+  };
 
 /** Use a SidebarProvider, or pass the same controlled state as the Sidebar. */
 export function SidebarTrigger({
   collapsed: controlled,
   onCollapsedChange,
   label,
+  tooltip,
   onClick,
   ...props
 }: SidebarTriggerProps) {
   const context = useContext(SidebarContext);
   const collapsed = controlled ?? context?.collapsed ?? false;
   const { t } = useUILocale();
+  const name = label ?? t(collapsed ? 'sidebar.expand' : 'sidebar.collapse');
 
-  return (
+  const button = (
     <KitIconButton
       {...props}
       icon={PanelLeftIcon}
       variant={props.variant ?? 'ghost'}
-      label={label ?? t(collapsed ? 'sidebar.expand' : 'sidebar.collapse')}
+      label={name}
       aria-expanded={!collapsed}
       aria-controls={props['aria-controls'] ?? context?.id}
       disabled={props.disabled ?? (!context && !onCollapsedChange)}
@@ -62,5 +69,13 @@ export function SidebarTrigger({
         else context?.toggle();
       }}
     />
+  );
+
+  return tooltip === undefined || tooltip === false || tooltip === null ? (
+    button
+  ) : (
+    <Tooltip content={tooltip === true ? name : tooltip} side="bottom">
+      {button}
+    </Tooltip>
   );
 }

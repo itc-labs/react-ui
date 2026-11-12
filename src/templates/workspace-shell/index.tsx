@@ -1,5 +1,13 @@
 import type { ComponentProps, ReactNode } from 'react';
 import { type SlotClasses, cn } from '../../components/common';
+import { SidebarTrigger } from '../../modules/sidebar/context';
+
+/**
+ * `true` renders the desktop SidebarTrigger (with a tooltip) before the breadcrumb;
+ * pass a node to supply your own trigger. Below lg the Sidebar keeps its drawer
+ * trigger, so the default trigger is hidden there.
+ */
+export type WorkspaceSidebarToggle = boolean | ReactNode;
 
 export function WorkspaceShell({
   sidebar,
@@ -9,10 +17,13 @@ export function WorkspaceShell({
   children,
   className,
   variant = 'inset',
+  sidebarToggle,
   ...props
 }: Omit<ComponentProps<'div'>, 'content'> & {
   sidebar?: ReactNode;
   header?: ReactNode;
+  /** Render the sidebar collapse toggle at the start of the header; see WorkspaceHeader. */
+  sidebarToggle?: WorkspaceSidebarToggle;
   content?: ReactNode;
   classNames?: SlotClasses<'root' | 'body' | 'header' | 'main'>;
   /** `inset` raises the page into a rounded card beside the sidebar; `classic` divides them with a rule; `floating` leaves the page flat beside a floating sidebar. */
@@ -41,10 +52,15 @@ export function WorkspaceShell({
       )}
     >
       {sidebar}
-      {content !== undefined || header !== undefined ? (
+      {content !== undefined || header !== undefined || sidebarToggle ? (
         <WorkspaceBody className={classNames?.body}>
-          {header != null && (
-            <WorkspaceHeader className={classNames?.header}>{header}</WorkspaceHeader>
+          {(header != null || sidebarToggle) && (
+            <WorkspaceHeader
+              className={classNames?.header}
+              sidebarToggle={sidebarToggle}
+            >
+              {header}
+            </WorkspaceHeader>
           )}
           <WorkspaceMain className={classNames?.main}>
             {content ?? children}
@@ -77,12 +93,25 @@ export function WorkspaceHeader({
   children,
   className,
   actionsClassName,
+  sidebarToggle,
   ...props
 }: ComponentProps<'header'> & {
   breadcrumb?: ReactNode;
   actions?: ReactNode;
   actionsClassName?: string;
+  /**
+   * Place the desktop sidebar collapse toggle before the breadcrumb. Use inside a
+   * SidebarProvider and set `collapseToggle="none"` on the Sidebar.
+   */
+  sidebarToggle?: WorkspaceSidebarToggle;
 }) {
+  const toggle =
+    sidebarToggle === true ? (
+      <SidebarTrigger tooltip className="hidden shrink-0 lg:inline-flex" />
+    ) : sidebarToggle === false ? null : (
+      sidebarToggle
+    );
+
   return (
     <header
       {...props}
@@ -91,8 +120,20 @@ export function WorkspaceHeader({
         className,
       )}
     >
-      {breadcrumb}
-      {children}
+      {toggle != null ? (
+        <>
+          {toggle}
+          <div className="flex min-w-0 flex-1 flex-wrap items-center justify-between gap-3">
+            {breadcrumb}
+            {children}
+          </div>
+        </>
+      ) : (
+        <>
+          {breadcrumb}
+          {children}
+        </>
+      )}
       {actions != null && (
         <div
           className={cn('flex shrink-0 flex-wrap items-center gap-2', actionsClassName)}

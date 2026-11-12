@@ -144,6 +144,12 @@ export type SidebarProps<TAccess = unknown> = ComponentProps<'aside'> &
     onCollapsedChange?: (collapsed: boolean) => void;
     /** Opt-in key chord, e.g. mod+b. Ignored in editable controls. */
     toggleShortcut?: string;
+    /**
+     * Where the desktop collapse toggle lives. `sidebar` (default) renders it in the
+     * sidebar header; `none` omits it so a SidebarTrigger elsewhere (for example
+     * WorkspaceHeader's `sidebarToggle`) owns collapsing. State and shortcut remain.
+     */
+    collapseToggle?: 'sidebar' | 'none';
     collapseLabel?: string;
     expandLabel?: string;
     /** A native button or ref/props-forwarding control, e.g. IconButton. */

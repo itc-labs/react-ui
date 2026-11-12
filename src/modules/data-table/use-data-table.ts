@@ -167,10 +167,14 @@ export function useDataTable<T>(props: DataTableProps<T>) {
     state.sorting,
     state.columnVisibility,
   ]);
+  // Stale rows from the previous request (more than one page) or a loading
+  // state must not grow the preserved height for the new scope.
+  const pageSettled = !loading && visibleRows.length <= state.pagination.pageSize;
   const minPageHeight = usePageHeight(
     tableRef,
     (props.preservePageHeight ?? true) && paginated,
     heightScope,
+    pageSettled,
   );
 
   return {

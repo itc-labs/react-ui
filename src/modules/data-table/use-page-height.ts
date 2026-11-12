@@ -2,11 +2,19 @@
 
 import { useEffect, useState, type RefObject } from 'react';
 
-/** Measure actual content, retaining no rows and fabricating no empty records. */
+/**
+ * Measure actual content, retaining no rows and fabricating no empty records.
+ *
+ * Only settled pages are measured: while a server request is loading the table
+ * may still show the previous page (for example 50 stale rows after switching to
+ * 10 rows per page) or skeleton placeholders, and recording that height would
+ * keep the scroll area tall after the real page arrives.
+ */
 export function usePageHeight(
   ref: RefObject<HTMLTableElement | null>,
   enabled: boolean,
   scope: string,
+  settled = true,
 ) {
   const [measurement, setMeasurement] = useState({ scope, height: 0, width: 0 });
 
@@ -15,6 +23,7 @@ export function usePageHeight(
     if (!enabled || !element) return;
 
     const measure = () => {
+      if (!settled) return;
       const bounds = element.getBoundingClientRect();
       const height = Math.ceil(bounds.height);
       const width = Math.round(bounds.width);
@@ -44,7 +53,7 @@ export function usePageHeight(
     observer.observe(element);
 
     return () => observer.disconnect();
-  }, [ref, enabled, scope]);
+  }, [ref, enabled, scope, settled]);
 
   return enabled && measurement.scope === scope ? measurement.height : 0;
 }

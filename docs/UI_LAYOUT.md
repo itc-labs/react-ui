@@ -61,6 +61,42 @@ import {
 </WorkspaceShell>;
 ```
 
+### Collapse toggle beside the breadcrumb
+
+By default the desktop collapse toggle sits in the Sidebar header. For the common admin layout with the toggle next to the breadcrumb, wrap the shell in `SidebarProvider`, set `collapseToggle="none"` on Sidebar and `sidebarToggle` on WorkspaceShell or WorkspaceHeader. `sidebarToggle` renders a `SidebarTrigger` with a tooltip before the breadcrumb; its `aria-controls`, `aria-expanded` and localized collapse/expand label follow the provider's sidebar. The Sidebar keeps `toggleShortcut`. Below `lg` the default trigger is hidden and the Sidebar's own drawer button opens navigation, so there is only one mobile trigger. Pass a node, such as `<SidebarTrigger tooltip="Toggle navigation" />`, to supply your own trigger.
+
+```tsx
+import {
+  Breadcrumb,
+  Sidebar,
+  SidebarProvider,
+  WorkspaceShell,
+  type SidebarEntry,
+} from '@itclabs/react-ui';
+
+const items: SidebarEntry[] = [{ id: 'home', label: 'Overview', href: '/' }];
+
+export function AppLayout() {
+  return (
+    <SidebarProvider>
+      <WorkspaceShell
+        sidebar={
+          <Sidebar
+            items={items}
+            currentPath="/"
+            collapseToggle="none"
+            toggleShortcut="mod+b"
+          />
+        }
+        sidebarToggle
+        header={<Breadcrumb items={[{ key: 'home', title: 'Overview' }]} />}
+        content={<h1>Overview</h1>}
+      />
+    </SidebarProvider>
+  );
+}
+```
+
 In Next, the app may use `<SidebarItem asChild active icon={...}><Link href="/items">Items</Link></SidebarItem>` or BreadcrumbLink asChild. Radix Slot preserves a single anchor and forwards consumer link props; the kit never imports next/link. A current-page label without a destination can use an asChild span, when no link is needed. Active route and breadcrumb derivation belong to the app, not the UI kit.
 
 ## Theme and overrides

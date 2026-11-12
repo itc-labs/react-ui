@@ -79,7 +79,7 @@ type BaseProps<T> = {
   paginationPlacement?: 'top' | 'bottom' | 'both' | 'none';
   /** Top defaults to compact previous/next controls. Bottom defaults to page numbers. */
   topPaginationVariant?: 'compact' | 'full';
-  /** Preserve the largest measured page height until count, page size or filters change. Defaults true for paginated tables. */
+  /** Preserve the largest measured page height until count, page size, filters, sorting or visible columns change, so paging keeps the footer steady (a shorter last page keeps the full-page height). Only settled pages (not loading, at most one page of rows) are measured. Defaults true for paginated tables. */
   preservePageHeight?: boolean;
   /** Apply consistently to body, selection, reorder and loading cells. */
   verticalAlign?: 'top' | 'middle' | 'bottom';
