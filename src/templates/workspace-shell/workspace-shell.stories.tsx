@@ -1,6 +1,13 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { expect, userEvent, within } from 'storybook/test';
 import { WorkspaceShell, WorkspaceBody, WorkspaceHeader, WorkspaceMain } from './index';
-import { Sidebar, SidebarGroup, SidebarItem, SidebarNav } from '../../modules/sidebar';
+import {
+  Sidebar,
+  SidebarGroup,
+  SidebarItem,
+  SidebarNav,
+  SidebarProvider,
+} from '../../modules/sidebar';
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -103,6 +110,90 @@ export const HeaderSlots: Story = {
       <span className="text-muted">Lorem ipsum dolor sit amet.</span>
     </WorkspaceHeader>
   ),
+};
+
+export const SidebarToggleInHeader: Story = {
+  name: 'Sidebar toggle in header',
+  tags: ['example'],
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Wrap the shell in SidebarProvider, set `collapseToggle="none"` on Sidebar and `sidebarToggle` on the shell (or WorkspaceHeader) to place the desktop collapse toggle before the breadcrumb. The Sidebar keeps its shortcut (mod+b here); below lg the drawer keeps its own menu button.',
+      },
+    },
+  },
+  render: () => (
+    <SidebarProvider>
+      <WorkspaceShell
+        sidebar={
+          <Sidebar
+            collapseToggle="none"
+            toggleShortcut="mod+b"
+            header={{ title: 'Lorem ipsum', subtitle: 'Workspace' }}
+            items={[
+              {
+                id: 'workspace',
+                type: 'group',
+                label: 'Workspace',
+                items: [
+                  {
+                    id: 'current',
+                    icon: 'home',
+                    active: true,
+                    href: '#shell-toggle-current',
+                    label: 'Current page',
+                  },
+                  {
+                    id: 'other',
+                    icon: 'search',
+                    href: '#shell-toggle',
+                    label: 'Search',
+                  },
+                ],
+              },
+            ]}
+          />
+        }
+        sidebarToggle
+        header={
+          <>
+            <Breadcrumb
+              items={[
+                { key: 'home', title: 'Workspace', href: '#shell-toggle-current' },
+                { key: 'current', title: 'Current page' },
+              ]}
+            />
+            <Button variant="secondary" size="sm" onClick={() => {}}>
+              Example action
+            </Button>
+          </>
+        }
+        content={
+          <>
+            <h1 id="shell-toggle-current" className="text-title font-semibold">
+              Lorem ipsum dolor sit amet
+            </h1>
+            <p className="mt-4 text-control text-muted">
+              Consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore.
+            </p>
+          </>
+        }
+      />
+    </SidebarProvider>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const toggle = canvas.getByRole('button', { name: 'Collapse sidebar' });
+    await userEvent.click(toggle);
+    await expect(canvasElement.querySelector('aside')).toHaveAttribute(
+      'data-collapsed',
+      'true',
+    );
+    await expect(toggle).toHaveAttribute('aria-expanded', 'false');
+    await userEvent.click(toggle);
+    await expect(toggle).toHaveAttribute('aria-expanded', 'true');
+  },
 };
 
 export const CustomClasses: Story = {

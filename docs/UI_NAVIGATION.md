@@ -565,6 +565,14 @@ shared desktop collapse state; its optional `collapsed`, `defaultCollapsed` and
 trigger visible on desktop with `className="hidden lg:inline-flex"`. The mobile
 Drawer retains its menu trigger and independent open state.
 
+To move the desktop collapse toggle out of the sidebar header, for example beside
+the breadcrumb, set `collapseToggle="none"` (default `"sidebar"`) on Sidebar and
+`sidebarToggle` on WorkspaceShell or WorkspaceHeader inside the same
+SidebarProvider. Collapse state, `toggleShortcut` and the mobile Drawer trigger are
+unchanged; when collapsing moves focus out of the sidebar it goes to the external
+trigger. `SidebarTrigger` accepts `tooltip` (`true` repeats its label, or a node).
+See [layout](UI_LAYOUT.md#collapse-toggle-beside-the-breadcrumb).
+
 Alternatively, pass the same `collapsed` and `onCollapsedChange` to Sidebar and
 SidebarTrigger, give Sidebar an `id`, and set the trigger's `aria-controls` to that
 ID. Avoid overriding Sidebar's state when using provider-owned triggers.

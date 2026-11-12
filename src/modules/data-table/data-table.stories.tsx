@@ -61,10 +61,10 @@ const pageRows: Example[] = Array.from({ length: 57 }, (_, index) => ({
   state: index % 2 ? 'Dolor sit amet' : 'Consectetur adipiscing',
 }));
 
-function ServerExample() {
+function ServerExample({ pageSize = 10 }: { pageSize?: number }) {
   const [state, setState] = useState<DataTableState>({
     sorting: [],
-    pagination: { pageIndex: 0, pageSize: 10 },
+    pagination: { pageIndex: 0, pageSize },
   });
   const [page, setPage] = useState<Example[]>([]);
   const [loading, setLoading] = useState(true);
@@ -312,6 +312,36 @@ export const ClientPagination: Story = {
     );
     await expect(canvas.getAllByText('Page 1 / 3')[0]!).toBeVisible();
     await expect(canvas.getByText('Lorem ipsum 01')).toBeVisible();
+  },
+};
+
+export const ServerPageSizeChange: Story = {
+  name: 'Server page size change',
+  tags: ['!dev', '!autodocs', 'regression'],
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'The previous page stays visible while the next request loads. The preserved page height only measures settled pages, so switching from 50 to 10 rows shrinks the table instead of keeping the 50-row height.',
+      },
+    },
+  },
+  render: () => <ServerExample pageSize={50} />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(await canvas.findByText('Lorem ipsum 50')).toBeVisible();
+    await userEvent.click(canvas.getByRole('button', { name: 'Rows per page' }));
+    await userEvent.click(
+      within(document.body).getByRole('menuitemradio', { name: '10 rows' }),
+    );
+    await waitFor(() => expect(canvas.queryByText('Lorem ipsum 11')).toBeNull());
+    const scroll = canvas.getByRole('region', { name: 'Server pagination example' });
+    const table = scroll.querySelector('table')!;
+    await waitFor(() =>
+      expect(scroll.getBoundingClientRect().height).toBeLessThanOrEqual(
+        table.getBoundingClientRect().height + 2,
+      ),
+    );
   },
 };
 

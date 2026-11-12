@@ -40,6 +40,16 @@ export type {
 
 const noop = () => {};
 
+/** A SidebarTrigger outside the aside, e.g. in WorkspaceHeader, that controls it. */
+function findExternalTrigger(aside: HTMLElement | null, sidebarId: string) {
+  return Array.from(
+    document.querySelectorAll<HTMLButtonElement>('button[aria-controls]'),
+  ).find(
+    (button) =>
+      button.getAttribute('aria-controls') === sidebarId && !aside?.contains(button),
+  );
+}
+
 export function Sidebar<TAccess = unknown>({
   expandOnHover = false,
   sections,
@@ -66,6 +76,7 @@ export function Sidebar<TAccess = unknown>({
   defaultCollapsed,
   onCollapsedChange,
   toggleShortcut,
+  collapseToggle = 'sidebar',
   collapseLabel,
   expandLabel,
   mobileTrigger,
@@ -106,14 +117,7 @@ export function Sidebar<TAccess = unknown>({
 
   useLayoutEffect(() => {
     if (!offcanvas || !asideRef.current?.contains(document.activeElement)) return;
-    const trigger = Array.from(
-      document.querySelectorAll<HTMLButtonElement>('button[aria-controls]'),
-    ).find(
-      (button) =>
-        button.getAttribute('aria-controls') === sidebarId &&
-        !asideRef.current?.contains(button),
-    );
-    trigger?.focus();
+    findExternalTrigger(asideRef.current, sidebarId)?.focus();
   }, [offcanvas, sidebarId]);
 
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -185,7 +189,10 @@ export function Sidebar<TAccess = unknown>({
     if (!sections || !collapsed || hover.expanded) return;
     const panel = document.getElementById(`${sidebarId}-panel`);
     if (panel?.contains(document.activeElement))
-      asideRef.current?.querySelector<HTMLElement>('[data-sidebar-toggle]')?.focus();
+      (
+        asideRef.current?.querySelector<HTMLElement>('[data-sidebar-toggle]') ??
+        findExternalTrigger(asideRef.current, sidebarId)
+      )?.focus();
   }, [sections, collapsed, hover.expanded, sidebarId]);
 
   const renderHeader = (rail: boolean, id: string | undefined, mobile = false) => (
@@ -207,7 +214,7 @@ export function Sidebar<TAccess = unknown>({
           />
         </div>
       )}
-      {!mobile && collapsible !== 'none' && (
+      {!mobile && collapsible !== 'none' && collapseToggle !== 'none' && (
         <KitIconButton
           data-sidebar-toggle=""
           icon={PanelLeftIcon}

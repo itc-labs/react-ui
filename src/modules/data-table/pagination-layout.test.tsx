@@ -229,3 +229,102 @@ it('clamps a removed server page once data settles, while leaving loading and er
     pagination: { pageIndex: 0, pageSize: 10 },
   });
 });
+
+it('resets the preserved server height when the page size shrinks while stale rows load', () => {
+  const { pagination: _pagination, ...base } = props;
+  const many = Array.from({ length: 60 }, (_, i) => ({ id: String(i + 1) }));
+
+  const render = (pageSize: number, pageRows: typeof many, loading = false) =>
+    act(() =>
+      root.render(
+        <UIProvider locale="en-US">
+          <DataTable
+            {...base}
+            mode="server"
+            rowCount={60}
+            rows={pageRows}
+            loading={loading}
+            state={{ sorting: [], pagination: { pageIndex: 0, pageSize } }}
+            onStateChange={() => {}}
+          />
+        </UIProvider>,
+      ),
+    );
+
+  height = 1500;
+  render(50, many.slice(0, 50));
+  const scroll = within(host).getByTestId('records-scrollArea');
+  expect(scroll.style.minHeight).toBe('1500px');
+
+  // The host switched to 10 rows per page; the previous 50 rows stay visible
+  // while the request loads and must not be recorded for the new page size.
+  render(10, many.slice(0, 50), true);
+
+  act(() => resized());
+
+  expect(scroll.style.minHeight).toBe('');
+
+  height = 300;
+  render(10, many.slice(0, 10));
+  expect(host.querySelectorAll('tbody [data-row-id]')).toHaveLength(10);
+  expect(scroll.style.minHeight).toBe('300px');
+});
+
+it('ignores more rows than one page even when the server host does not report loading', () => {
+  const { pagination: _pagination, ...base } = props;
+  const many = Array.from({ length: 60 }, (_, i) => ({ id: String(i + 1) }));
+
+  const render = (pageSize: number, pageRows: typeof many) =>
+    act(() =>
+      root.render(
+        <UIProvider locale="en-US">
+          <DataTable
+            {...base}
+            mode="server"
+            rowCount={60}
+            rows={pageRows}
+            state={{ sorting: [], pagination: { pageIndex: 0, pageSize } }}
+            onStateChange={() => {}}
+          />
+        </UIProvider>,
+      ),
+    );
+
+  height = 1500;
+  render(50, many.slice(0, 50));
+  render(10, many.slice(0, 50));
+  const scroll = within(host).getByTestId('records-scrollArea');
+  expect(scroll.style.minHeight).toBe('');
+
+  height = 300;
+  render(10, many.slice(0, 10));
+  expect(scroll.style.minHeight).toBe('300px');
+});
+
+it('resets the preserved client height when the page size changes from 50 to 10', () => {
+  const many = Array.from({ length: 60 }, (_, i) => ({ id: String(i + 1) }));
+
+  const render = (pageSize: number) =>
+    act(() =>
+      root.render(
+        <UIProvider locale="en-US">
+          <DataTable
+            {...props}
+            rows={many}
+            state={{ sorting: [], pagination: { pageIndex: 0, pageSize } }}
+            onStateChange={() => {}}
+          />
+        </UIProvider>,
+      ),
+    );
+
+  height = 1500;
+  render(50);
+  const scroll = within(host).getByTestId('records-scrollArea');
+  expect(scroll.style.minHeight).toBe('1500px');
+
+  height = 300;
+  render(10);
+  expect(host.querySelectorAll('tbody [data-row-id]')).toHaveLength(10);
+  expect(scroll.style.minHeight).toBe('300px');
+});
