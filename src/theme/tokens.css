@@ -80,6 +80,8 @@
   --color-canvas: #f5f5ef;
   --color-surface: #fcfcf8;
   --color-sidebar: #e9eddf;
+  /* DataTable header row; defaults to the canvas, override when pages sit on the canvas. */
+  --color-table-header: var(--color-canvas);
   --color-ink: #203932;
   --color-muted: #5c6c63;
   --color-line: #dde2d7;
