@@ -3,6 +3,7 @@ export const themeColors = Object.freeze({
   canvas: 'var(--color-canvas)',
   surface: 'var(--color-surface)',
   sidebar: 'var(--color-sidebar)',
+  tableHeader: 'var(--color-table-header)',
   ink: 'var(--color-ink)',
   muted: 'var(--color-muted)',
   line: 'var(--color-line)',

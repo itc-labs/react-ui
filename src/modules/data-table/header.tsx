@@ -36,7 +36,7 @@ export function DataTableHeader<T>({
     <thead
       data-testid={partTestId(view.testId, 'thead')}
       className={cn(
-        'border-b border-line bg-canvas text-muted',
+        'border-b border-line bg-table-header text-muted',
         stickyHeader && 'sticky top-0 z-10',
         classNames?.thead,
         className,
