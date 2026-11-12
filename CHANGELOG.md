@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.15.0
+
+### Minor Changes
+
+- [#43](https://github.com/itc-labs/react-ui/pull/43) [`6182c7b`](https://github.com/itc-labs/react-ui/commit/6182c7b2e9720f2109cac36dbfba36fedf9950b8) Thanks [@vungbt](https://github.com/vungbt)! - `WorkspaceMain` now fills the workspace column instead of capping content at `max-w-6xl` and centring it, so app pages no longer leave wide empty margins; constrain readable pages (forms, articles) at the page level. Sidebar item hover now tints with the ink colour (`--sidebar-hover`), so it stays visible when the sidebar colour equals the surface.
+
 ## 0.14.0
 
 ### Minor Changes
