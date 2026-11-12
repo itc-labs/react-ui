@@ -36,6 +36,8 @@ export function ChartPlot({ config, model, formatValue, missingLabel }: PlotProp
   const radial = config.type === 'pie' || config.type === 'donut';
   const horizontal = config.type === 'bar' && config.orientation === 'horizontal';
   const classes = config.classNames;
+  const formatTick =
+    ('axisValueFormatter' in config && config.axisValueFormatter) || formatValue;
   const tooltip =
     config.tooltip !== false ? (
       <Tooltip
@@ -82,7 +84,7 @@ export function ChartPlot({ config, model, formatValue, missingLabel }: PlotProp
         axisLine={false}
         tickMargin={10}
         tick={{ fill: colors.muted, fontSize: 'var(--text-ui-sm)' }}
-        {...(horizontal ? { tickFormatter: formatValue } : {})}
+        {...(horizontal ? { tickFormatter: formatTick } : {})}
         className={cn(classes?.axis)}
       />
       <YAxis
@@ -91,10 +93,12 @@ export function ChartPlot({ config, model, formatValue, missingLabel }: PlotProp
         {...(horizontal ? { dataKey: 'label' as const } : {})}
         tickLine={false}
         axisLine={false}
-        width={horizontal ? 88 : 64}
+        // Numeric ticks size the axis to the longest formatted label; category
+        // labels keep a fixed width so long names wrap instead of taking the plot.
+        width={horizontal ? 88 : 'auto'}
         tickMargin={8}
         tick={{ fill: colors.muted, fontSize: 'var(--text-ui-sm)' }}
-        {...(!horizontal ? { tickFormatter: formatValue } : {})}
+        {...(!horizontal ? { tickFormatter: formatTick } : {})}
         className={cn(classes?.axis)}
       />
     </>

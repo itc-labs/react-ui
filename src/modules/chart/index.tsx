@@ -48,6 +48,7 @@ export function Chart(props: ChartProps) {
     grid: _grid,
     xAxis: _xAxis,
     yAxis: _yAxis,
+    axisValueFormatter: _axisValueFormatter,
     curve: _curve,
     dots: _dots,
     stacked: _stacked,

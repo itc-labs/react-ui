@@ -176,7 +176,8 @@ for (const [name, limit] of Object.entries({
   // New collection feedback messages also enter the shared locale catalogs.
   QuantityInput: 21_200,
   OptionGroup: 52_000,
-  JsonView: 22_000,
+  // Trend and KPI locale messages add about 60 gzip bytes to every locale consumer.
+  JsonView: 22_100,
   // About 10% above the measured display subpath fixtures.
   CodeView: 50_000,
   // DOMPurify plus shared class merging, with about 10% headroom.
@@ -199,8 +200,9 @@ for (const [name, limit] of Object.entries({
   DataTable: 90_000,
   Calendar: 100_000,
   // Semantic tones, workspace controls and pagination add about 2.7 KB gzip;
-  // MonthPicker and its bound MonthField add about 1.7 KB gzip.
-  Root: 284_500,
+  // MonthPicker and its bound MonthField add about 1.7 KB gzip;
+  // KpiCard, MetricTrend and KpiGrid with their trend glyphs add about 2.7 KB gzip.
+  Root: 286_400,
   ColorPicker: 54_300,
 })) {
   if (sizes[name].gzip >= limit) {

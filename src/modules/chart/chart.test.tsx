@@ -311,6 +311,70 @@ it('keeps missing values explicit in keyboard/mouse tooltip content and uses sta
   expect(host.querySelector('[role="tooltip"]')).toBeNull();
 });
 
+it('formats axis ticks with axisValueFormatter and sizes the value axis to its labels', async () => {
+  // jsdom has no text layout: approximate each tick label at 7px per character.
+  vi.spyOn(SVGElement.prototype, 'getBoundingClientRect').mockImplementation(function (
+    this: SVGElement,
+  ) {
+    const width = (this.textContent?.length ?? 0) * 7;
+
+    return {
+      width,
+      height: 16,
+      x: 0,
+      y: 0,
+      top: 0,
+      left: 0,
+      right: width,
+      bottom: 16,
+      toJSON: () => ({}),
+    };
+  });
+
+  const money = [
+    { id: 'jan', label: 'Jan', values: { observed: 40_000_000 } },
+    { id: 'feb', label: 'Feb', values: { observed: 12_500_000 } },
+  ];
+
+  const valueFormatter = (value: number) => `${value.toLocaleString('vi-VN')} ₫`;
+
+  const render = (axisValueFormatter?: (value: number) => string) => (
+    <Chart
+      type="bar"
+      label="Example"
+      data={money}
+      series={[series[0]!]}
+      showDataTable
+      data-testid="chart"
+      valueFormatter={valueFormatter}
+      {...(axisValueFormatter ? { axisValueFormatter } : {})}
+    />
+  );
+
+  const ticks = () =>
+    Array.from(host.querySelectorAll('.recharts-yAxis-tick-labels text')).map(
+      (tick) => tick.textContent,
+    );
+
+  // The plot starts after the chart margin (4px) and the measured axis.
+  const plotLeft = () =>
+    Number(host.querySelector('.recharts-cartesian-grid line')?.getAttribute('x1'));
+
+  await act(async () => root.render(render()));
+  expect(ticks()).toContain('40.000.000 ₫');
+  // 12 characters * 7px + tick size 6 + tick margin 8: wider than the old fixed 64px.
+  expect(plotLeft()).toBe(4 + 12 * 7 + 14);
+
+  await act(async () => root.render(render((value) => `${value / 1_000_000} tr`)));
+  expect(ticks()).toContain('40 tr');
+  expect(ticks().join(' ')).not.toContain('₫');
+  expect(plotLeft()).toBe(4 + 5 * 7 + 14);
+  expect(
+    host.querySelector('[data-testid="chart-cell-jan-observed"]')?.textContent,
+  ).toBe('40.000.000 ₫');
+  expect(host.querySelector('figure')?.hasAttribute('axisValueFormatter')).toBe(false);
+});
+
 // Compile-time coverage: options for one chart type cannot leak into another.
 const invalidPie: ChartProps = {
   type: 'pie',

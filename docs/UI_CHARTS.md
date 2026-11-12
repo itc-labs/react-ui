@@ -28,9 +28,9 @@ function Example() {
 
 | type  | Data                                             | Options                                                     |
 | ----- | ------------------------------------------------ | ----------------------------------------------------------- |
-| line  | `ChartPoint[]` and `ChartSeries[]`               | curve, dots, grid/xAxis/yAxis                               |
-| area  | `ChartPoint[]` and `ChartSeries[]`               | curve, stacked, grid/xAxis/yAxis                            |
-| bar   | `ChartPoint[]` and `ChartSeries[]`               | stacked, orientation, grid/xAxis/yAxis                      |
+| line  | `ChartPoint[]` and `ChartSeries[]`               | curve, dots, grid/xAxis/yAxis, axisValueFormatter           |
+| area  | `ChartPoint[]` and `ChartSeries[]`               | curve, stacked, grid/xAxis/yAxis, axisValueFormatter        |
+| bar   | `ChartPoint[]` and `ChartSeries[]`               | stacked, orientation, grid/xAxis/yAxis, axisValueFormatter  |
 | pie   | `ChartSlice[]`: id, label, value, optional color | legend, tooltip                                             |
 | donut | Same slices as pie                               | innerRadius fraction of outer radius, from 0 to less than 1 |
 
@@ -44,7 +44,7 @@ Omit color to use the six shared chart tokens; default assignment follows stable
 
 The chart follows its container width with ResizeObserver. Default plot height is the chart-height token (18rem). Use positive finite `height` for a numeric height or override the viewport class. The tooltip is kept within the plot and inherits the same CSS scope. Animations are disabled, including tooltip animation, for predictable data changes and reduced-motion behavior.
 
-`valueFormatter` applies to numeric axis ticks, tooltip values and the equivalent table. The default uses the current UIProvider locale. Labels/ISO values are not translated by the chart. Axis labels may be abbreviated or hidden by the rendering engine in narrow layouts; the data table retains complete labels and values.
+`valueFormatter` applies to numeric axis ticks, tooltip values and the equivalent table. The default uses the current UIProvider locale. Cartesian charts also accept `axisValueFormatter`, which formats numeric axis ticks only, so long values can use compact ticks (for example `40 Tr` from `Intl.NumberFormat('vi-VN', { notation: 'compact' })`) while tooltips, the legend and the table keep the full `valueFormatter` output. The numeric Y axis sizes itself to its longest formatted tick (Recharts `width="auto"`), so values such as `40.000.000 ₫` are not clipped; the category axis of horizontal bars keeps a fixed width and wraps long labels. Labels/ISO values are not translated by the chart. Axis labels may be abbreviated or hidden by the rendering engine in narrow layouts; the data table retains complete labels and values.
 
 ## State and accessibility
 
@@ -58,9 +58,9 @@ Typed classNames cover root/caption/title/description, viewport/plot, grid/axis/
 
 ## Storybook and verification
 
-Modules/Chart includes editable Cartesian Playground, all five variants, states, stacked/horizontal examples, missing-versus-zero, retry, narrow containers and CustomClasses/useTheme. The Playground type control is limited to Cartesian modes because radial types require a different data shape; Variants provides the radial recipes.
+Modules/Chart includes editable Cartesian Playground, all five variants, states, stacked/horizontal examples, long currency values with compact axis ticks, missing-versus-zero, retry, narrow containers and CustomClasses/useTheme. The Playground type control is limited to Cartesian modes because radial types require a different data shape; Variants provides the radial recipes.
 
-Tests cover data semantics, invalid identities/slices, all five actual SVG renderers, resize, native/class/selector contracts, localization, status replacement and tooltip rows. Compile-time cases reject mismatched type-specific props. Source-builder tests compile the stories against public exports. Builds/jsdom checks are separate from browser playback and layout review.
+Tests cover data semantics, invalid identities/slices, all five actual SVG renderers, measured value-axis width and axis-only tick formatting, resize, native/class/selector contracts, localization, status replacement and tooltip rows. Compile-time cases reject mismatched type-specific props. Source-builder tests compile the stories against public exports. Builds/jsdom checks are separate from browser playback and layout review.
 
 References: [Recharts sizing](https://recharts.github.io/en-US/api/ResponsiveContainer/), [Line gaps](https://recharts.github.io/en-US/api/Line/), [Pie](https://recharts.github.io/en-US/api/Pie/).
 
@@ -121,3 +121,50 @@ All three forward React 19 root refs, native root props and optional `data-testi
 The base selector targets the progressbar for both Progress variants, section for ProgressList, and figure for SegmentedProgress. All parts derive suffixes through `partTestId`, with no selectors emitted without a base. Progress variant suffixes match their non-root slots. Lists use `-list`, `-row-{id}`, `-progress-{id}`, `-secondary-{id}`, `-empty`; nested Progress parts append their suffix to `-progress-{id}`. SegmentedProgress uses `-track`, `-segment-{id}`, `-summary`, `-legend`, `-legend-{id}`, `-swatch-{id}`, `-label-{id}`, `-value-{id}`, `-empty`. Dynamic IDs are URI-encoded.
 
 Colocated stories cover editable Playgrounds, tones, states, sizes, thresholds/rankings, custom center content, narrow layouts/long labels and CustomClasses. Tests cover normalization, percent/segment computations, thresholds, ARIA, locale formatting, sorting, stable colors, refs and customization. Browser layout, reduced-motion playback and assistive technology review remain separate from static/unit checks.
+
+## KPI cards
+
+`KpiCard`, `MetricTrend` and `KpiGrid` are modules exported from the root entry and `@itclabs/react-ui/modules`, with no optional peers. The application formats values; the cards perform no calculations.
+
+```tsx
+import { KpiCard, KpiGrid, Tag } from '@itclabs/react-ui';
+
+export function Overview() {
+  return (
+    <KpiGrid columns={4} aria-label="Tổng quan">
+      <KpiCard
+        tone="success"
+        icon="banknotes"
+        badge={
+          <Tag tone="success" size="sm">
+            +8,2%
+          </Tag>
+        }
+        label="Doanh thu"
+        value="1.284"
+        unit="tỷ đồng"
+        trend={{ value: -3.9, intent: 'positive', label: 'so với kỳ 10/2026' }}
+        href="/reports"
+      />
+      <KpiCard
+        tone="info"
+        icon="chart"
+        label="Tỷ lệ hoàn thành"
+        value="83,6"
+        unit="%"
+        progress={83.6}
+      />
+    </KpiGrid>
+  );
+}
+```
+
+`KpiCard` requires `label` and a formatted `value`; `0` is displayed and `null`/`undefined` shows the localized missing text (`missingValueLabel` overrides it). `tone` is the shared `UITone` set (`brand` by default, `info`, `success`, `warning`, `danger`, `neutral`) and colors the 3px top bar, the icon tile and the corner decoration. `icon` accepts an icon name or glyph; `badge` is non-interactive header content such as a Tag. `hint` adds a muted supporting line. `compact` tightens spacing and removes the decoration; `density="dashboard"` uses a smaller value and clamps the label to two lines.
+
+`trend` takes MetricTrend data: a signed `value` whose sign selects the direction (or an explicit `direction`), an `intent` (`positive`, `negative`, `neutral`; defaults to up = positive, down = negative), an optional `valueFormatter` that receives the absolute change (default: locale percentage, `3.9` → `3,9%`), a trailing `label` and optional `children` that replace the value and label. Intent colors the arrow and value, so a decrease such as lower costs can read as good. Screen readers hear the localized `trend.up`/`trend.down`/`trend.flat` word first; pass `directionLabel=""` when visible text already states the direction. `MetricTrend` can also be used on its own.
+
+`progress` is a 0–100 percentage rendered with `Progress`: values are clamped, `0` is shown, and the progressbar is named by a string `label`, `progressLabel` or the localized progress label. The neutral tone uses the brand progress color.
+
+`href` makes the whole card a link through the UIProvider link component; `onClick` (without `href`) makes it a button. The action is a transparent overlay named by the label and value (`aria-labelledby`) and described by the trend and hint, so the progressbar keeps its semantics and no block content is nested in the link. Interactive cards gain the floating shadow on hover and a focus outline on keyboard focus. Do not put interactive content in `badge` of a clickable card. `loading` replaces the content with Skeleton placeholders, sets `aria-busy`, announces `loadingLabel` (default `common.loading`) and removes the action.
+
+`KpiGrid` wraps its children in a container-query grid: one column, two from a medium container width and up to `columns` (1–6, default 4) on wide containers. Cards in a row share the same height. Classes and selectors are listed in [UI_CUSTOM_CLASSES.md](UI_CUSTOM_CLASSES.md) and [UI_TESTING.md](UI_TESTING.md).

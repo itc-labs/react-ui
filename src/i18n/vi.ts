@@ -149,6 +149,11 @@ export const viMessages = {
   'progress.empty': 'Chưa có dữ liệu tiến độ.',
   'progress.total': 'Tổng: {total}',
 
+  'trend.up': 'Tăng',
+  'trend.down': 'Giảm',
+  'trend.flat': 'Không đổi',
+  'kpi.missing': 'Chưa có',
+
   'tag.remove': 'Xóa {label}',
   'badge.dot': 'Thông báo mới',
   'badge.count': { other: '{count} thông báo chưa đọc' },

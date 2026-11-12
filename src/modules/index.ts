@@ -11,6 +11,7 @@ export * from './navbar';
 
 export * from './progress-list';
 export * from './segmented-progress';
+export * from './kpi-card';
 export * from './user-menu';
 export * from './calendar/engine';
 export { Calendar as EventCalendar } from './calendar';
