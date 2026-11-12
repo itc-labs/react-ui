@@ -283,9 +283,13 @@ export const Playground: Story = {
     variant: 'sidebar',
     tone: 'default',
     itemVariant: 'raised',
+    groupLabel: 'default',
+    groupDividers: false,
     collapsible: 'icon',
   },
   argTypes: {
+    groupLabel: { control: 'select', options: ['default', 'caps'] },
+    groupDividers: { control: 'boolean' },
     variant: { control: 'select', options: ['sidebar', 'floating'] },
     tone: { control: 'select', options: ['default', 'dark', 'brand'] },
     itemVariant: {

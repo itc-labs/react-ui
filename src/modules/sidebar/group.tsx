@@ -70,6 +70,7 @@ export function SidebarEntryGroup({
       <Collapsible.Trigger
         ref={triggerRef}
         data-testid={partTestId(testId, 'trigger')}
+        data-sidebar-group-label=""
         className={cn(
           'group mb-1 flex w-full items-center gap-2 rounded-control px-2.5 text-left text-ui-sm font-medium text-[var(--sidebar-muted,var(--color-muted))]',
           focusRingClassName,

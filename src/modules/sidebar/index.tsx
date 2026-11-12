@@ -50,6 +50,8 @@ export function Sidebar<TAccess = unknown>({
   collapsible = 'icon',
   tone = 'default',
   itemVariant = 'raised',
+  groupLabel = 'default',
+  groupDividers = false,
   style,
   ref,
   header,
@@ -279,6 +281,10 @@ export function Sidebar<TAccess = unknown>({
             // (2px gap + 18px margin), so a flat item list is not spread out.
             className={cn(
               'gap-0.5 [&>[data-sidebar-group]+*]:mt-4.5 [&>[data-sidebar-group]:not(:first-child)]:mt-4.5',
+              groupDividers &&
+                '[&>[data-sidebar-group]:not(:first-child)]:mt-3 [&>[data-sidebar-group]:not(:first-child)]:border-t [&>[data-sidebar-group]:not(:first-child)]:border-[var(--sidebar-border,var(--color-line))] [&>[data-sidebar-group]:not(:first-child)]:pt-3',
+              groupLabel === 'caps' &&
+                '[&_[data-sidebar-group-label]]:text-[0.6875rem] [&_[data-sidebar-group-label]]:font-semibold [&_[data-sidebar-group-label]]:uppercase [&_[data-sidebar-group-label]]:tracking-wider',
               classNames?.nav,
             )}
           >
@@ -480,6 +486,7 @@ export function SidebarGroup({
     <div data-sidebar-group="" {...props} className={cn('min-w-0', className)}>
       {label != null && (
         <p
+          data-sidebar-group-label=""
           className={cn(
             'mb-1 px-2.5 text-ui-sm font-medium text-[var(--sidebar-muted,var(--color-muted))] break-words',
             labelClassName,
