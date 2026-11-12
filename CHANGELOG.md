@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.18.0
+
+### Minor Changes
+
+- [#49](https://github.com/itc-labs/react-ui/pull/49) [`0904f7c`](https://github.com/itc-labs/react-ui/commit/0904f7c5dda443182130f89b391883ca0b506ab8) Thanks [@vungbt](https://github.com/vungbt)! - Sidebar: `groupLabel="caps"` renders small uppercase group labels so they read as headings rather than menu items, and `groupDividers` draws a hairline between top-level groups. The active `indicator` item now tints its icon with the sidebar accent, like the `raised` item. Group labels carry `data-sidebar-group-label`.
+
 ## 0.17.0
 
 ### Minor Changes
