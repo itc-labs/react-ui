@@ -93,6 +93,100 @@ Return or await the save promise inside `onSubmit` so submitting state covers th
 
 Keep validation errors next to controls; use persistent feedback for submission failures. See [Overlays & feedback](?path=/docs/guides-overlays-feedback--docs) for optional success notifications.
 
+## Form layout
+
+Do not stretch every field across the page. Size each field to its content and group related fields:
+
+- `FormLayout` limits the form to a readable width (`size`: `sm`, `md` (default), `lg` or `full`) and stacks its sections and action bar.
+- `FormSection` groups fields under an optional title, description and header `action`. It renders a `<section>` labelled by its title, or a `<fieldset>` named by a `<legend>` with `asFieldset` (use it for a related group such as an address or a choice set; `disabled` then disables every native control inside). `variant="card"` adds the surface panel; `titleAs` changes the heading level without changing its style.
+- `FormGrid` uses container queries: one column on narrow containers and up to `columns` (1–4, default 2) when its own width allows, in pages, drawers and dialogs alike. `FormField` can be a direct child; fields align at the top, so a hint or error on one field does not shift its neighbours. Wrap a field in `FormGridItem span` (1–4 or `'full'`) to span columns; spans never exceed the columns available at the current width.
+- `FormActions` places its children at the end with the primary action last, and back or destructive actions in `start`. On narrow containers the buttons stack at full width with the primary action on top. `sticky` keeps the bar at the bottom of the scroll container on a surface background above the safe area; `separator` draws a top border. Inside `Form`, give every non-submit button `type="button"`.
+
+```tsx
+import * as v from 'valibot';
+import {
+  Button,
+  DatePicker,
+  Form,
+  FormActions,
+  FormField,
+  FormGrid,
+  FormGridItem,
+  FormLayout,
+  FormSection,
+  NumberInput,
+  Select,
+  Textarea,
+  useAppForm,
+} from '@itclabs/react-ui';
+
+export function ContractForm({
+  rooms,
+  save,
+  back,
+}: {
+  rooms: { value: string; label: string }[];
+  save: (value: {
+    room: string;
+    startDate: string;
+    rent: number | null;
+    notes: string;
+  }) => Promise<void>;
+  back: () => void;
+}) {
+  const form = useAppForm({
+    defaultValues: { room: '', startDate: '', rent: null as number | null, notes: '' },
+    onSubmit: async ({ value }) => {
+      await save(value);
+    },
+  });
+
+  return (
+    <Form
+      form={form}
+      schema={{
+        room: v.pipe(v.string(), v.minLength(1, 'Select a room.')),
+        startDate: v.pipe(v.string(), v.minLength(1, 'Choose a start date.')),
+        rent: v.pipe(v.number('Enter the rent.'), v.minValue(0, 'Use zero or more.')),
+      }}
+    >
+      <FormLayout size="lg">
+        <FormSection variant="card" title="Room and term">
+          <FormGrid columns={2}>
+            <FormField name="room" label="Room" required>
+              <Select options={rooms} />
+            </FormField>
+            <FormField name="startDate" label="Start date" required>
+              <DatePicker />
+            </FormField>
+            <FormField name="rent" label="Monthly rent" required>
+              <NumberInput min={0} controls={false} endAddon="VND" />
+            </FormField>
+            <FormGridItem span="full">
+              <FormField name="notes" label="Notes">
+                <Textarea rows={3} />
+              </FormField>
+            </FormGridItem>
+          </FormGrid>
+        </FormSection>
+        <FormActions
+          sticky
+          start={
+            <Button type="button" variant="secondary" onClick={back}>
+              Back to list
+            </Button>
+          }
+        >
+          <Button type="submit">Save and continue</Button>
+        </FormActions>
+      </FormLayout>
+    </Form>
+  );
+}
+```
+
+In a `Dialog` or `Drawer`, pass `FormActions` as the `footer`, give `Form` an `id`, and connect the submit button with `form={id}` so the actions stay visible while the body scrolls. See [Form layout stories](?path=/docs/modules-form-layout--docs).
+
 ## Rating with FormField
 
 `Rating` binds automatically through `value` and `onValueChange`. Use zero for an unselected score and `allowHalf` for half-point choices. `allowClear` lets users select the current score again to reset it to zero; validate a positive minimum when a score is required. Arrow keys choose adjacent scores, while Home and End choose the first and last choices. For display only, use `readOnly` with `value` outside the form.
