@@ -51,7 +51,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'Compact thumbnails for one or many images, for table cells, detail panels and forms. Clicking a thumbnail opens the fullscreen Lightbox at that image with zoom and navigation; maxVisible collapses the rest into a "+N" tile. Set lightbox to false and use onOpen to handle clicks yourself. Import from @itclabs/react-ui/media-gallery.',
+          'Compact thumbnails for one or many images, for table cells, detail panels and forms. variant="stack" overlaps the tiles like an avatar group. Clicking a thumbnail opens the fullscreen Lightbox at that image with zoom and navigation; maxVisible collapses the rest into a "+N" tile. Set lightbox to false and use onOpen to handle clicks yourself. Import from @itclabs/react-ui/media-gallery.',
       },
     },
   },
@@ -89,6 +89,29 @@ export const States: Story = {
     <div className="grid gap-4">
       <ImagePreview items={[]} />
       <ImagePreview items={items.slice(0, 2)} lightbox={false} />
+    </div>
+  ),
+};
+export const Stacked: Story = {
+  tags: ['variants'],
+  render: () => (
+    <div className="grid gap-4">
+      {(['sm', 'md', 'lg', 'xl'] as const).map((size) => (
+        <ImagePreview
+          key={size}
+          items={items}
+          variant="stack"
+          size={size}
+          maxVisible={3}
+        />
+      ))}
+      <ImagePreview
+        items={items}
+        variant="stack"
+        shape="circle"
+        size="lg"
+        maxVisible={4}
+      />
     </div>
   ),
 };

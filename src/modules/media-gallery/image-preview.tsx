@@ -26,6 +26,8 @@ export type ImagePreviewProps = Omit<ComponentPropsWithRef<'div'>, 'children'> &
     items: readonly MediaItem[];
     size?: 'sm' | 'md' | 'lg' | 'xl';
     shape?: 'rounded' | 'circle';
+    /** `grid` lays tiles side by side; `stack` overlaps each tile over the previous one. */
+    variant?: 'grid' | 'stack';
     /** Thumbnails shown before a "+N" tile; every item stays reachable in the lightbox. */
     maxVisible?: number;
     /** Opens the fullscreen Lightbox on click (default). Set false to handle `onOpen` yourself. */
@@ -42,6 +44,12 @@ const sizes = {
   lg: 'size-16',
   xl: 'size-24',
 } as const;
+const overlaps = {
+  sm: 'not-first:-ms-3',
+  md: 'not-first:-ms-4',
+  lg: 'not-first:-ms-5',
+  xl: 'not-first:-ms-8',
+} as const;
 const pixels = { sm: 32, md: 48, lg: 64, xl: 96 } as const;
 const iconSizes = { sm: 16, md: 20, lg: 24, xl: 32 } as const;
 
@@ -50,6 +58,7 @@ export function ImagePreview({
   items,
   size = 'md',
   shape = 'rounded',
+  variant = 'grid',
   maxVisible,
   lightbox = true,
   onOpen,
@@ -78,6 +87,13 @@ export function ImagePreview({
     sizes[size],
     shape === 'circle' ? 'rounded-full' : 'rounded-control',
   );
+  const stacked = variant === 'stack';
+  const layerClassName = stacked
+    ? cn(
+        'ring-2 ring-surface hover:z-10 focus-visible:z-10 motion-safe:transition-transform hover:-translate-y-0.5',
+        overlaps[size],
+      )
+    : undefined;
 
   const show = (target: number, trigger: number) => {
     opener.current = trigger;
@@ -118,7 +134,12 @@ export function ImagePreview({
       aria-label={ariaLabel ?? t('imagePreview.label', { count: items.length })}
       {...props}
       data-testid={testId}
-      className={cn('flex flex-wrap items-center gap-2', classNames?.root, className)}
+      data-variant={variant}
+      className={cn(
+        stacked ? 'isolate flex items-center' : 'flex flex-wrap items-center gap-2',
+        classNames?.root,
+        className,
+      )}
     >
       {visible.map((item, itemIndex) => {
         const source =
@@ -170,7 +191,10 @@ export function ImagePreview({
             data-testid={partTestId(testId, 'item', item.id)}
             className={cn(
               tileClassName,
-              'cursor-zoom-in motion-safe:transition-shadow hover:ring-2 hover:ring-control-border',
+              'cursor-zoom-in',
+              stacked
+                ? layerClassName
+                : 'motion-safe:transition-shadow hover:ring-2 hover:ring-control-border',
               focusRingClassName,
               classNames?.item,
             )}
@@ -184,7 +208,7 @@ export function ImagePreview({
             role="img"
             aria-label={item.alt}
             data-testid={partTestId(testId, 'item', item.id)}
-            className={cn(tileClassName, classNames?.item)}
+            className={cn(tileClassName, layerClassName, classNames?.item)}
           >
             {content}
           </span>
@@ -203,6 +227,7 @@ export function ImagePreview({
           className={cn(
             tileClassName,
             'text-ui-sm font-medium text-ink enabled:cursor-zoom-in enabled:hover:bg-hover',
+            layerClassName,
             focusRingClassName,
             classNames?.more,
           )}
