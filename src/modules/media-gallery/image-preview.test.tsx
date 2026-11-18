@@ -145,3 +145,26 @@ it('applies size, shape and slot classes after defaults', () => {
   expect(part('image-a')!.className).toContain('object-contain');
   expect(item.parentElement!.className.endsWith('gap-4')).toBe(true);
 });
+
+it('overlaps tiles in the stack variant and keeps grid spacing by default', () => {
+  render({ maxVisible: 2 });
+  const grid = part('item-a')!.parentElement!;
+  expect(grid.getAttribute('data-variant')).toBe('grid');
+  expect(grid.className).toContain('gap-2');
+  expect(part('item-b')!.className).not.toContain('-ms-');
+
+  render({ variant: 'stack', size: 'lg', maxVisible: 2 });
+  const stack = part('item-a')!.parentElement!;
+  expect(stack.getAttribute('data-variant')).toBe('stack');
+  expect(stack.className).toContain('isolate');
+  expect(stack.className).not.toContain('gap-2');
+  for (const name of ['item-a', 'item-b', 'more']) {
+    expect(part(name)!.className).toContain('not-first:-ms-5');
+    expect(part(name)!.className).toContain('ring-surface');
+    expect(part(name)!.className).toContain('hover:z-10');
+  }
+
+  act(() => part('item-b')!.click());
+
+  expect(document.querySelector('[role="dialog"]')!.textContent).toContain('2 / 4');
+});
