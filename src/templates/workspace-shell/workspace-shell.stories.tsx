@@ -1,3 +1,4 @@
+import type { ComponentProps } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, userEvent, within } from 'storybook/test';
 import { WorkspaceShell, WorkspaceBody, WorkspaceHeader, WorkspaceMain } from './index';
@@ -194,6 +195,38 @@ export const SidebarToggleInHeader: Story = {
     await userEvent.click(toggle);
     await expect(toggle).toHaveAttribute('aria-expanded', 'true');
   },
+};
+
+type ShellVariantArgs = {
+  variant: NonNullable<ComponentProps<typeof WorkspaceShell>['variant']>;
+};
+
+export const Variants: StoryObj<ShellVariantArgs> = {
+  tags: ['example'],
+  parameters: { layout: 'fullscreen' },
+  args: { variant: 'inset' },
+  argTypes: {
+    variant: {
+      control: 'inline-radio',
+      options: ['inset', 'classic', 'floating', 'soft'],
+    },
+  },
+  render: ({ variant }: ShellVariantArgs) => (
+    <WorkspaceShell
+      variant={variant}
+      sidebar={
+        <Sidebar
+          header={{ title: 'Workspace' }}
+          items={[
+            { id: 'overview', label: 'Overview', href: '#overview', active: true },
+            { id: 'reports', label: 'Reports', href: '#reports' },
+          ]}
+        />
+      }
+      header={<span className="font-semibold">Overview</span>}
+      content={<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>}
+    />
+  ),
 };
 
 export const CustomClasses: Story = {

@@ -9,8 +9,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Avatar } from '../../../components/avatar';
 import { Button } from '../../../components/button';
-import { cn } from '../../../components/common';
-import { focusRingClassName } from '../../../components/common/focus-ring';
 import { BellIcon } from '../../../components/icon/outline/bell';
 import { IconButton } from '../../../components/icon-button';
 import { UiLink } from '../../../components/link-image-provider';
@@ -329,10 +327,7 @@ function NotificationRow({
     <button
       type="button"
       onClick={() => onSelect(item)}
-      className={cn(
-        'flex w-full items-start gap-3 border-b border-line px-4 py-3 text-left hover:bg-canvas',
-        focusRingClassName,
-      )}
+      className="flex w-full items-start gap-3 border-b border-line px-4 py-3 text-left hover:bg-canvas focus-visible:outline-2 focus-visible:outline-focus"
     >
       {item.actorName ? (
         <Avatar alt={item.actorName} size="sm" />
@@ -435,10 +430,7 @@ export function DemoNotifications({
         <div className="border-t border-line p-2 text-center">
           <UiLink
             href="/notifications"
-            className={cn(
-              'inline-block rounded-control px-3 py-1.5 text-ui-sm font-medium text-accent hover:bg-canvas',
-              focusRingClassName,
-            )}
+            className="inline-block rounded-control px-3 py-1.5 text-ui-sm font-medium text-accent hover:bg-canvas focus-visible:outline-2 focus-visible:outline-focus"
           >
             View all notifications
           </UiLink>

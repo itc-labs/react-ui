@@ -196,8 +196,7 @@ allowed. Keep Sidebar as a direct DOM child; providers/fragments are fine. When
 using an extra DOM wrapper, set the shell grid columns with `className` from host
 collapse state. Below lg the shell stacks the mobile trigger and body.
 
-Templates/ApplicationLayout composes a structured brand, footer UserMenu, icons,
-counts, a slim bar, PageHeader/Breadcrumb and Progress/ProgressList/Tag cards. Its
-TopNavigationLayout variant uses Navbar's mega menu and underline indicator without
-a sidebar. A local UiLink adapter changes host state for clickable fixture pages;
-no router, fetching or authentication is bundled.
+Templates/Dashboards holds complete layouts to copy. Default uses DashboardShell with
+no customization, and Top navigation uses Navbar's mega menu and underline indicator
+without a sidebar. Each template's code is one file with public imports and sample
+data to replace; no fetching or authentication is bundled.

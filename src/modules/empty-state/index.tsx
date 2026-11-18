@@ -1,7 +1,7 @@
 import type { TestIdProps } from '../../components/common/testing';
 import type { ComponentProps, ReactNode } from 'react';
 import { type SlotClasses, cn } from '../../components/common';
-import { Icon, type IconName } from '../../components/icon';
+import { Icon, type IconGlyph, type IconName } from '../../components/icon';
 import { Illustration } from '../../components/illustration';
 export type EmptyStateProps = (Omit<ComponentProps<'section'>, 'title'> & {
   title: ReactNode;
@@ -20,7 +20,7 @@ export type EmptyStateProps = (Omit<ComponentProps<'section'>, 'title'> & {
     | 'description'
     | 'actions'
   >;
-  icon?: IconName;
+  icon?: IconName | IconGlyph;
   illustration?: ReactNode;
   code?: ReactNode;
   size?: 'compact' | 'default';
@@ -80,7 +80,9 @@ export function EmptyState({
           )}
         >
           <Icon
-            name={icon ?? icons[variant]}
+            {...(typeof icon === 'function'
+              ? { glyph: icon }
+              : { name: icon ?? icons[variant] })}
             size={22}
             className={cn(
               variant === 'error' ? 'text-danger-700' : 'text-muted',

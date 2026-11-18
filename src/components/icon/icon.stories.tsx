@@ -73,23 +73,15 @@ export const Variants: Story = {
   tags: ['variants'],
   render: () => (
     <div className="grid gap-6">
-      {(
-        [
-          'search',
-          'user',
-          'calendar',
-          'delete',
-          'close',
-          'quote',
-          'sortAscending',
-        ] as const
-      ).map((name) => (
-        <div key={name} className="flex items-center gap-6">
-          <span className="w-32 text-ui-sm">{name}</span>
-          <Icon name={name} variant="outline" size={24} />
-          <Icon name={name} variant="bold" size={24} />
-        </div>
-      ))}
+      {(['search', 'calendar', 'close', 'quote', 'sortAscending'] as const).map(
+        (name) => (
+          <div key={name} className="flex items-center gap-6">
+            <span className="w-32 text-ui-sm">{name}</span>
+            <Icon name={name} variant="outline" size={24} />
+            <Icon name={name} variant="bold" size={24} />
+          </div>
+        ),
+      )}
     </div>
   ),
 };

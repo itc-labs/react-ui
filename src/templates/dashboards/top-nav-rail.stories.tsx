@@ -210,7 +210,7 @@ function TopNavRailPage({
                   ]}
                   height={300}
                   className="flex flex-1 flex-col"
-                  classNames={{ viewport: 'flex-1' }}
+                  classNames={{ viewport: 'flex-auto' }}
                   valueFormatter={(value) => demoCurrency.format(value)}
                   axisValueFormatter={(value) => `$${value / 1000}k`}
                 />

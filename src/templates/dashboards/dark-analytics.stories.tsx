@@ -161,7 +161,7 @@ function DarkAnalyticsPage({
               />
             </Card>
           )}
-          {showTraffic && <ChannelsCard distinctColors />}
+          {showTraffic && <ChannelsCard />}
         </div>
       )}
       {showSimulator && (

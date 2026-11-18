@@ -65,7 +65,12 @@ export function MenuEntries({
     const content = (
       <>
         {item.icon && (
-          <Icon name={item.icon} className={cn('size-4 shrink-0', classNames?.icon)} />
+          <Icon
+            {...(typeof item.icon === 'string'
+              ? { name: item.icon }
+              : { glyph: item.icon })}
+            className={cn('size-4 shrink-0', classNames?.icon)}
+          />
         )}
         <span className={cn('min-w-0 flex-1', classNames?.itemLabel)}>
           {item.label}

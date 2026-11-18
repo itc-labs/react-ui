@@ -147,7 +147,7 @@ export function RevenueCard({
     axisValueFormatter: (value: number) => `$${value / 1000}k`,
     height: 260,
     className: 'flex flex-1 flex-col',
-    classNames: { viewport: 'flex-1' },
+    classNames: { viewport: 'flex-auto' },
   };
 
   return (
@@ -170,13 +170,7 @@ export function RevenueCard({
 }
 
 /** Traffic sources as a donut. */
-export function ChannelsCard({
-  className,
-  distinctColors = false,
-}: {
-  className?: string;
-  distinctColors?: boolean;
-}) {
+export function ChannelsCard({ className }: { className?: string }) {
   return (
     <Card
       title="Traffic sources"
@@ -187,18 +181,14 @@ export function ChannelsCard({
       <Chart
         type="donut"
         label="Traffic sources"
-        data={
-          distinctColors
-            ? demoChannels.map((slice, index) => ({
-                ...slice,
-                color: `var(--color-chart-${index + 1})`,
-              }))
-            : demoChannels
-        }
+        data={demoChannels.map((slice, index) => ({
+          ...slice,
+          color: `var(--color-chart-${index + 1})`,
+        }))}
         valueFormatter={(value) => `${value}%`}
         height={220}
         className="flex flex-1 flex-col"
-        classNames={{ viewport: 'flex-1' }}
+        classNames={{ viewport: 'flex-auto' }}
       />
     </Card>
   );

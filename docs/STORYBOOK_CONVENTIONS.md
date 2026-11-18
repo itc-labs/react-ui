@@ -34,6 +34,15 @@ Write the purpose and essential behavior in plain Vietnamese. Keep names of comp
 
 Use `Meta<typeof Component>` / `StoryObj<typeof meta>` where args describe the public component. A composed generic Form or DataTable story may use `Meta` / `StoryObj` and typed JSX/schema fixtures instead of inventing runtime args to satisfy required form state. Do not use a demo component as the documented API. Overview MDX should link to these examples, not repeat multiple copies of the same gallery.
 
+## Copyable source
+
+The code panel must work when pasted into a host application. `.storybook/readable-source.ts` builds it:
+
+- Imports use public entry points only. Catalog icon names become glyph imports, because a host does not register the full catalog as Storybook does.
+- Dashboard templates become one file: story args are fixed to their defaults, `DemoApp` is removed, and the `__demo` blocks they use are written out as sample code. Keep `__demo` free of private kit imports.
+- Stories driven only by args keep live Controls output and gain their import.
+- Optional packages are named in an `Install first` comment.
+
 ## Verification
 
 Run formatting, typecheck, unit tests and the Storybook build. The source-builder tests parse and typecheck expanded snippets, including shared meta.render. The authoring test checks public copy, regression tags and visible-story budgets. These checks do not replace browser visual review or browser play execution.

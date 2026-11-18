@@ -1,8 +1,18 @@
-import { relative, resolve, isAbsolute, sep } from 'node:path';
+import { dirname, relative, resolve, isAbsolute, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import ts from 'typescript';
 import { format } from 'prettier';
 import type { Plugin } from 'vite';
+import {
+  foldArgs,
+  glyphFor,
+  publicModule,
+  readArgValues,
+  templateSource,
+  withoutUnused,
+  withPublicIcons,
+  withRequirements,
+} from './template-source.ts';
 
 function unwrap(node: ts.Expression): ts.Expression {
   return ts.isSatisfiesExpression(node) ||
@@ -107,6 +117,31 @@ export async function storyExamples(
       continue;
     const render = property(story, 'render') ?? property(meta, 'render');
     const component = property(meta, 'component');
+    if (
+      isKitStory &&
+      sourcePath.startsWith(`templates${sep}dashboards${sep}`) &&
+      render &&
+      ts.isArrowFunction(unwrap(render))
+    ) {
+      const values = readArgValues(property(meta, 'args'), property(story, 'args'));
+
+      result[name] = await format(
+        withRequirements(
+          withoutUnused(
+            withPublicIcons(
+              templateSource(
+                code,
+                filename,
+                unwrap(render) as ts.ArrowFunction,
+                values!,
+              ),
+            ),
+          ),
+        ),
+        { parser: 'typescript', singleQuote: true, printWidth: 88, tabWidth: 2 },
+      );
+      continue;
+    }
     // Real component/args stories already have useful dynamic Storybook source.
     if (
       !render &&
@@ -200,20 +235,133 @@ export async function storyExamples(
     const helpers = [...declarations]
       .filter(([id]) => included.has(id))
       .map(([, declaration]) => declaration.code);
-    const usage = ts.isIdentifier(expression) ? expression.text : 'StoryExample';
-    const body = ts.isIdentifier(expression)
-      ? ''
-      : `const StoryExample = ${print(expression)};`;
-    const entry = args.length
-      ? `const exampleProps = { ${args.map((arg) => `...(${print(arg)} as const)`).join(', ')} } as const;\nexport default function ExampleUsage() { return <${usage} {...exampleProps} />; }`
-      : `export default ${usage};`;
+    const exampleName = declarations.has(`${name}Example`)
+      ? `${name}Preview`
+      : `${name}Example`;
+    const values = args.length ? readArgValues(...args) : undefined;
+    const inlineRender =
+      values &&
+      ts.isArrowFunction(unwrap(expression)) &&
+      (unwrap(expression) as ts.ArrowFunction).parameters.length === 1 &&
+      ts.isIdentifier((unwrap(expression) as ts.ArrowFunction).parameters[0]!.name)
+        ? foldArgs(unwrap(expression) as ts.ArrowFunction, {
+            values,
+            spread: 'expand',
+            isArgsParameter: (parameter) =>
+              parameter === (unwrap(expression) as ts.ArrowFunction).parameters[0],
+          })
+        : undefined;
+    const usage = ts.isIdentifier(expression) ? expression.text : 'StoryRender';
+    const attributes = values
+      ? [...values]
+          .map(([key, value]) =>
+            value.kind === ts.SyntaxKind.TrueKeyword
+              ? key
+              : ts.isStringLiteral(value) && !/["\\\n]/.test(value.text)
+                ? `${key}="${value.text}"`
+                : `${key}={${print(value)}}`,
+          )
+          .join(' ')
+      : '';
+    const body = inlineRender
+      ? `const ${exampleName} = ${print(inlineRender)};`
+      : ts.isIdentifier(expression)
+        ? ''
+        : args.length
+          ? `const StoryRender = ${print(expression)};`
+          : `const ${exampleName} = ${print(expression)};`;
+    const entry = inlineRender
+      ? `export default ${exampleName};`
+      : args.length
+        ? values
+          ? `export default function ${exampleName}() { return <${usage} ${attributes} />; }`
+          : `const props = { ${args.map((arg) => `...(${print(arg)} as const)`).join(', ')} } as const;\nexport default function ${exampleName}() { return <${usage} {...props} />; }`
+        : ts.isIdentifier(expression)
+          ? `export default ${usage};`
+          : `export default ${exampleName};`;
     result[name] = await format(
-      [...imports, ...helpers, body, entry].filter(Boolean).join('\n\n'),
+      (isKitStory
+        ? (source: string) => withRequirements(withoutUnused(withPublicIcons(source)))
+        : String)([...imports, ...helpers, body, entry].filter(Boolean).join('\n\n')),
       { parser: 'typescript', singleQuote: true, printWidth: 88, tabWidth: 2 },
     );
   }
 
   return result;
+}
+
+/** Catalog icons a story's controls can print, so live source can import them. */
+function storyGlyphs(code: string) {
+  const names = code.matchAll(/\bicon\w*\s*[:=]\s*['"]([a-zA-Z0-9]+)['"]/g);
+
+  return Object.fromEntries(
+    [...names].flatMap(([, name]) => {
+      const glyph = glyphFor(name!);
+
+      return glyph ? [[name!, glyph]] : [];
+    }),
+  );
+}
+
+/** Dynamic stories keep live Controls output and gain the import a host needs to paste it. */
+export function dynamicSourceImports(
+  code: string,
+  filename: string,
+  generated: string[],
+) {
+  const file = ts.createSourceFile(
+    filename,
+    code,
+    ts.ScriptTarget.Latest,
+    true,
+    ts.ScriptKind.TSX,
+  );
+  let component: string | undefined;
+  const stories: string[] = [];
+
+  for (const statement of file.statements) {
+    if (!ts.isVariableStatement(statement)) continue;
+
+    for (const declaration of statement.declarationList.declarations) {
+      if (!ts.isIdentifier(declaration.name) || !declaration.initializer) continue;
+
+      if (declaration.name.text === 'meta') {
+        const value = property(declaration.initializer, 'component');
+        if (value) component = value.getText().replace(/<.*$/, '');
+      } else if (
+        statement.modifiers?.some(
+          (item) => item.kind === ts.SyntaxKind.ExportKeyword,
+        ) &&
+        !generated.includes(declaration.name.text) &&
+        !property(declaration.initializer, 'render') &&
+        !property(
+          property(property(declaration.initializer, 'parameters'), 'docs'),
+          'source',
+        )
+      )
+        stories.push(declaration.name.text);
+    }
+  }
+
+  if (!component || !/^[A-Z]/.test(component)) return {};
+
+  const imported = file.statements.find(
+    (statement) =>
+      ts.isImportDeclaration(statement) &&
+      statement.importClause?.namedBindings &&
+      ts.isNamedImports(statement.importClause.namedBindings) &&
+      statement.importClause.namedBindings.elements.some(
+        (item) => item.name.text === component,
+      ),
+  ) as ts.ImportDeclaration | undefined;
+  const path = (imported?.moduleSpecifier as ts.StringLiteral | undefined)?.text;
+  if (!path?.startsWith('.')) return {};
+
+  const module = publicModule(resolve(dirname(filename), path));
+
+  return Object.fromEntries(
+    stories.map((story) => [story, `import { ${component} } from '${module}';`]),
+  );
 }
 
 export function readableSourcePlugin(): Plugin {
@@ -229,8 +377,19 @@ export function readableSourcePlugin(): Plugin {
             `Object.assign(${name}, { parameters: { ...${name}.parameters, docs: { ...${name}.parameters?.docs, source: { ...${name}.parameters?.docs?.source, code: ${JSON.stringify(example)}, language: 'tsx', type: 'code' } } } });`,
         )
         .join('\n');
+      const dynamic = Object.entries(
+        dynamicSourceImports(code, id, Object.keys(examples)),
+      )
+        .map(
+          ([name, line]) =>
+            `Object.assign(${name}, { parameters: { ...${name}.parameters, docs: { ...${name}.parameters?.docs, source: { ...${name}.parameters?.docs?.source, transform: (source) => __pasteableSource(source, ${JSON.stringify({ line, story: name, glyphs: storyGlyphs(code) })}) } } } });`,
+        )
+        .join('\n');
+      const helper = dynamic
+        ? `import { pasteableSource as __pasteableSource } from ${JSON.stringify(fileURLToPath(new URL('./dynamic-source.ts', import.meta.url)))};`
+        : '';
 
-      return { code: `${code}\n${append}`, map: null };
+      return { code: `${helper}\n${code}\n${append}\n${dynamic}`, map: null };
     },
   };
 }

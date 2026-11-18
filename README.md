@@ -282,7 +282,7 @@ Slider, OptionGroup, QuantityInput, and ColorPicker are core controls with autom
 | `@itclabs/react-ui`                                    | Everything in the core kit: components, modules, templates, providers and helpers                                                                                                                                                             |
 | `@itclabs/react-ui/components`                         | Controls: Button, IconButton, Input, Select, Tag, Badge, Dialog, Drawer, DropdownMenu, Tabs, Tooltip, OptionGroup, QuantityInput, ColorPicker, Rating, JsonView, Divider, Kbd, DescriptionList, Timeline, Slider, Progress (linear/circular)… |
 | `@itclabs/react-ui/modules`                            | Compositions: Form, DataTable, Sidebar, Navbar, Pagination, EmptyState, PageHeader, ProgressList, KpiCard…                                                                                                                                    |
-| `@itclabs/react-ui/templates`                          | Page layouts with slots (WorkspaceShell)                                                                                                                                                                                                      |
+| `@itclabs/react-ui/templates`                          | Page layouts with slots (WorkspaceShell, DashboardShell)                                                                                                                                                                                      |
 | `@itclabs/react-ui/navigation`                         | Router-agnostic `matchPath`, `resolveActiveNav`, `filterNavByAccess` (no React)                                                                                                                                                               |
 | `@itclabs/react-ui/carousel`                           | Responsive Carousel with multi-row items, hero slides, autoplay and drag scrolling; isolated from all barrels                                                                                                                                 |
 | `@itclabs/react-ui/media-gallery`                      | MediaGallery and Lightbox for images/video, responsive thumbnails, fullscreen viewing and zoom; isolated from all barrels                                                                                                                     |
@@ -405,12 +405,16 @@ Sanitization defaults to true and runs after mount. SSR and the initial client r
 
 ## Navigation, drag and drop, and large collections
 
-Sidebar supports floating surfaces, icon/offcanvas/fixed expansion, default/dark/brand
-tones and raised/subtle/bar/solid item styles. SidebarProvider shares collapse state
+Sidebar supports floating surfaces, icon/offcanvas/fixed expansion, default/soft/dark/brand
+appearances and raised/subtle/bar/indicator/solid/pill item styles. SidebarProvider shares collapse state
 with SidebarTrigger; WorkspaceShell supports a matching floating layout. Header
 workspace switching, search launchers, collapsible groups, item actions, hover
 previews and two-tier sections are documented in the
 [Navigation guide](https://react-ui-one-rose.vercel.app/?path=/docs/guides-navigation--docs).
+
+Storybook's **Templates/Dashboards** section has nine dashboard layouts, starting with
+Default. Copy a template's code as one complete file, install the packages named at the
+top, and replace the sample data with your API.
 
 Import sorting compositions and opt-in Transfer/DataTable plugins from
 `@itclabs/react-ui/dnd`. Keep item IDs stable and apply callback results to host

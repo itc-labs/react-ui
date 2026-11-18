@@ -1,7 +1,7 @@
 import type { ComponentProps, ReactNode } from 'react';
 import type { DropdownMenu as Primitive } from 'radix-ui';
 import type { SlotClasses, TestIdProps } from '../common';
-import type { IconName } from '../icon';
+import type { IconGlyph, IconName } from '../icon';
 
 interface MenuEntryBase {
   id: string;
@@ -11,7 +11,7 @@ interface MenuSelectable extends MenuEntryBase {
   label: ReactNode;
   disabled?: boolean;
   variant?: 'default' | 'dashed';
-  icon?: IconName;
+  icon?: IconName | IconGlyph;
   shortcut?: ReactNode;
   textValue?: string;
 }

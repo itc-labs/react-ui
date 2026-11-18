@@ -162,7 +162,7 @@ Item paths retain stable type/id segments and derive `-icon`, `-label`, `-badge`
 Mobile item paths start under `-drawer`, with `-drawer-sidebarHeader` for the brand header inside the body, avoiding duplicate selectors.
 
 See Modules/Sidebar's Playground, Variants and Offcanvas stories, and
-Templates/ApplicationLayout for clickable sidebar and top-navigation layouts.
+Templates/Dashboards for complete sidebar and top-navigation layouts.
 
 ## Permission filtering and route protection
 
