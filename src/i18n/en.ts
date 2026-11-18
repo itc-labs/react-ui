@@ -84,6 +84,8 @@ export const enMessages = {
   'timeline.status.warning': 'Warning',
   'timeline.status.danger': 'Danger',
 
+  'descriptionList.empty': 'Not set',
+
   'kbd.command': 'Command',
   'kbd.control': 'Control',
   'kbd.controlShort': 'Ctrl',

@@ -69,6 +69,7 @@ export * from './color-picker';
 
 export * from './divider';
 export * from './kbd';
+export * from './description-list';
 
 export * from './timeline';
 
