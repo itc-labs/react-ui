@@ -12,6 +12,7 @@ import { useUILocale } from '../../i18n/provider';
 import { filterNavByAccess, resolveActiveNav } from '../navigation';
 import { HeaderEntries } from './entries';
 import { headerNodes } from './model';
+import { resolveNavbarAppearance } from './appearance';
 import type { NavbarProps } from './types';
 export type {
   NavbarProps,
@@ -26,7 +27,13 @@ export function Navbar<TAccess = unknown>({
   brand,
   brandHref,
   switcher,
-  activeIndicator = 'underline',
+  appearance,
+  tone: toneProp,
+  itemVariant: itemVariantProp,
+  density: densityProp,
+  align = 'start',
+  topbar,
+  activeIndicator,
   items,
   actions,
   secondary,
@@ -43,6 +50,13 @@ export function Navbar<TAccess = unknown>({
   'data-testid': testId,
   ...props
 }: NavbarProps<TAccess>) {
+  const { tone, itemVariant, density, floating } = resolveNavbarAppearance({
+    ...(appearance !== undefined ? { appearance } : {}),
+    ...(toneProp !== undefined ? { tone: toneProp } : {}),
+    ...(itemVariantProp !== undefined ? { itemVariant: itemVariantProp } : {}),
+    ...(densityProp !== undefined ? { density: densityProp } : {}),
+    ...(activeIndicator !== undefined ? { activeIndicator } : {}),
+  });
   const currentPath = useRouterPath(currentPathProp);
 
   const { t } = useUILocale();
@@ -83,113 +97,142 @@ export function Navbar<TAccess = unknown>({
       {...props}
       data-testid={testId}
       data-elevated={elevateOnScroll && scrolled}
+      data-navbar-tone={tone}
+      data-navbar-density={density}
+      data-navbar-align={align}
+      data-appearance={appearance ?? 'default'}
+      data-item-variant={itemVariant}
+      data-navbar-floating={floating}
       className={cn(
-        'relative z-header w-full min-w-0 flex-1 border-b border-line bg-surface text-ink',
+        'navbar-root relative z-header min-w-0 border-b border-[var(--navbar-border)] bg-[var(--navbar-bg)] text-[var(--navbar-fg)] data-[navbar-tone=transparent]:border-transparent',
         sticky && 'sticky top-0',
         elevateOnScroll && scrolled && 'shadow-panel',
         classNames?.root,
         className,
       )}
     >
+      {topbar != null && (
+        <div
+          data-testid={partTestId(testId, 'topbar')}
+          className={cn('navbar-topbar', classNames?.topbar)}
+        >
+          {topbar}
+        </div>
+      )}
       <div
         data-testid={partTestId(testId, 'inner')}
-        className={cn(
-          'flex min-h-16 min-w-0 items-center gap-4 px-5',
-          classNames?.inner,
-        )}
+        className={cn('navbar-inner', classNames?.inner)}
       >
-        <NavbarBrandBlock
-          brand={brand}
-          {...(brandHref ? { brandHref } : {})}
-          {...(classNames ? { classNames } : {})}
-          data-testid={testId}
-        />
-        {switcher != null && (
-          <div
-            data-testid={partTestId(testId, 'switcher')}
-            className={cn('hidden shrink-0 lg:block', classNames?.switcher)}
-          >
-            {switcher}
-          </div>
-        )}
+        <div className="navbar-brand-group">
+          <NavbarBrandBlock
+            brand={brand}
+            {...(brandHref ? { brandHref } : {})}
+            {...(classNames ? { classNames } : {})}
+            data-testid={testId}
+          />
+          {switcher != null && (
+            <div
+              data-testid={partTestId(testId, 'switcher')}
+              className={cn('hidden shrink-0 lg:block', classNames?.switcher)}
+            >
+              {switcher}
+            </div>
+          )}
+        </div>
         <NavigationMenu.Root
           aria-label={navigationLabel ?? t('navbar.navigation')}
           data-testid={partTestId(testId, 'nav')}
           className={cn(
-            'relative hidden min-w-0 self-stretch lg:flex lg:items-stretch [&>div]:flex',
+            'navbar-nav relative hidden min-w-0 self-stretch lg:flex lg:items-stretch [&>div]:flex',
             classNames?.nav,
           )}
         >
-          <NavigationMenu.List className="flex h-full items-stretch gap-1">
+          <NavigationMenu.List className="navbar-menu flex h-full items-stretch gap-1">
             <HeaderEntries
               nodes={visible}
               activePath={activePath}
               testId={testId}
               classNames={classNames}
-              activeIndicator={activeIndicator}
+              {...(activeIndicator ? { activeIndicator } : {})}
+              itemVariant={itemVariant}
+              density={density}
               topLevel
             />
           </NavigationMenu.List>
         </NavigationMenu.Root>
         <div
           data-testid={partTestId(testId, 'actions')}
-          className={cn('ml-auto flex items-center gap-2', classNames?.actions)}
+          className={cn(
+            'navbar-actions flex min-w-0 items-center justify-end gap-2',
+            classNames?.actions,
+          )}
         >
           {actions}
         </div>
-        <Drawer
-          open={mobileOpen}
-          onOpenChange={setMobileOpen}
-          title={drawerTitle ?? t('navbar.navigation')}
-          side="left"
-          {...(testId ? { 'data-testid': partTestId(testId, 'drawer')! } : {})}
-          className={classNames?.drawer ?? ''}
-          trigger={
-            <KitIconButton
-              icon={MenuIcon}
-              variant="ghost"
-              label={mobileTriggerLabel ?? t('navbar.openMenu')}
-              data-testid={partTestId(testId, 'mobileTrigger')}
-              className={cn('lg:hidden', classNames?.mobileTrigger)}
-            />
-          }
-        >
-          <div className="mb-4 grid gap-4">
-            <NavbarBrandBlock
-              brand={brand}
-              {...(brandHref ? { brandHref } : {})}
-              {...(classNames ? { classNames } : {})}
-              data-testid={partTestId(testId, 'drawer')}
-            />
-            {switcher != null && (
-              <div
-                data-testid={partTestId(testId, 'drawerSwitcher')}
-                className={classNames?.switcher}
-              >
-                {switcher}
-              </div>
-            )}
-          </div>
-          <nav
-            aria-label={navigationLabel ?? t('navbar.navigation')}
-            data-testid={partTestId(testId, 'drawerNav')}
-            className={cn('grid gap-1', classNames?.nav)}
+        <div className="navbar-mobile-control">
+          <Drawer
+            open={mobileOpen}
+            onOpenChange={setMobileOpen}
+            title={drawerTitle ?? t('navbar.navigation')}
+            side="left"
+            {...(testId ? { 'data-testid': partTestId(testId, 'drawer')! } : {})}
+            className={classNames?.drawer ?? ''}
+            trigger={
+              <KitIconButton
+                icon={MenuIcon}
+                variant="ghost"
+                label={mobileTriggerLabel ?? t('navbar.openMenu')}
+                data-testid={partTestId(testId, 'mobileTrigger')}
+                className={cn(
+                  'shrink-0 text-inherit',
+                  align !== 'split' && 'lg:hidden',
+                  classNames?.mobileTrigger,
+                )}
+              />
+            }
           >
-            <HeaderEntries
-              nodes={visible}
-              activePath={activePath}
-              testId={partTestId(testId, 'drawer')}
-              classNames={classNames}
-              mobile
-              onNavigate={() => setMobileOpen(false)}
-            />
-          </nav>
-        </Drawer>
+            <div className="mb-4 grid gap-4">
+              <NavbarBrandBlock
+                brand={brand}
+                {...(brandHref ? { brandHref } : {})}
+                {...(classNames ? { classNames } : {})}
+                data-testid={partTestId(testId, 'drawer')}
+              />
+              {switcher != null && (
+                <div
+                  data-testid={partTestId(testId, 'drawerSwitcher')}
+                  className={classNames?.switcher}
+                >
+                  {switcher}
+                </div>
+              )}
+            </div>
+            <nav
+              aria-label={navigationLabel ?? t('navbar.navigation')}
+              data-testid={partTestId(testId, 'drawerNav')}
+              className={cn('grid gap-1', classNames?.nav)}
+            >
+              <HeaderEntries
+                nodes={visible}
+                activePath={activePath}
+                testId={partTestId(testId, 'drawer')}
+                classNames={classNames}
+                itemVariant={itemVariant}
+                density={density}
+                mobile
+                onNavigate={() => setMobileOpen(false)}
+              />
+            </nav>
+          </Drawer>
+        </div>
       </div>
       {secondary != null && (
         <div
           data-testid={partTestId(testId, 'secondary')}
-          className={cn('border-t border-line px-5 py-2', classNames?.secondary)}
+          className={cn(
+            'navbar-secondary border-t border-[var(--navbar-border)] px-5 py-2',
+            classNames?.secondary,
+          )}
         >
           {secondary}
         </div>

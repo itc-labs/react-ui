@@ -95,7 +95,8 @@ it('forwards the header ref and native props, highlights the winning branch and 
   expect(
     byId('drawer-item-settings-item-profile-link').getAttribute('aria-current'),
   ).toBe('page');
-  expect(byId('drawer-item-settings').hasAttribute('open')).toBe(true);
+  // The drawer opens on the active branch, with a way back to the top level.
+  expect(byId('drawer-back')).not.toBeNull();
   await act(async () => render('/'));
   expect(byId('item-home-link').getAttribute('aria-current')).toBe('page');
   expect(byId('item-settings-trigger').dataset.active).toBe('false');
@@ -118,6 +119,7 @@ it('prunes denied links, empty sections and empty groups on permission changes',
   expect(document.body.textContent).not.toContain('Admin');
   expect(document.body.textContent).not.toContain('Private');
   expect(document.body.textContent).not.toContain('Team');
+  await act(async () => byId('drawer-item-resources-trigger').click());
   expect(document.body.textContent).toContain('Help');
   await act(async () =>
     root.render(
@@ -302,7 +304,8 @@ it('renders named and direct glyph icons for links, dropdowns and mega items on 
     icon: item.id === 'home' ? HomeIcon : ('settings' as const),
   }));
   await act(async () =>
-    root.render(<Navbar items={decorated} currentPath="/help" data-testid="navbar" />),
+    // A top-level page keeps the drawer on its first level, where every icon is listed.
+    root.render(<Navbar items={decorated} currentPath="/" data-testid="navbar" />),
   );
   for (const item of decorated)
     expect(byId(`item-${item.id}-icon`).tagName.toLowerCase()).toBe('svg');
@@ -332,7 +335,8 @@ it('shows exactly one underline for the active top-level branch and supports pil
   expect(byId('item-resources-activeIndicator')).toBeNull();
   await act(async () => render('/', 'pill'));
   expect(host.querySelectorAll('[data-testid$="-activeIndicator"]')).toHaveLength(0);
-  expect(byId('item-home-link').className).toContain('data-[active=true]:bg-selected');
+  expect(byId('item-home-link').className).toContain('rounded-full');
+  expect(byId('item-home-link').className).toContain('bg-[var(--navbar-active-bg)]');
   await act(async () => render('/unmatched'));
   expect(host.querySelectorAll('[data-testid$="-activeIndicator"]')).toHaveLength(0);
 });

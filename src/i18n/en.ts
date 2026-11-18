@@ -189,6 +189,8 @@ export const enMessages = {
   'userMenu.open': 'Open user menu for {name}',
   'navbar.navigation': 'Main navigation',
   'navbar.openMenu': 'Open navigation menu',
+  'navbar.back': 'Back to {label}',
+  'navbar.backToMenu': 'Back to menu',
   'sidebar.sections': 'Navigation sections',
   'sidebar.sectionCount': {
     one: '{count} notification',

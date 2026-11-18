@@ -1,0 +1,258 @@
+/* Tone variables stay on the header; dropdown panels keep their surface tokens. */
+@layer components {
+  [data-navbar-tone] {
+    --navbar-bg: var(--color-surface);
+    --navbar-fg: var(--color-ink);
+    --navbar-muted: var(--color-muted);
+    --navbar-hover: color-mix(in srgb, var(--navbar-fg) 6%, transparent);
+    --navbar-active-bg: var(--color-ink);
+    --navbar-active-fg: var(--color-surface);
+    --navbar-border: var(--color-line);
+    --navbar-accent: var(--color-accent);
+    --navbar-height: 4rem;
+    --navbar-topbar-bg: var(--color-sidebar-dark);
+    --navbar-topbar-fg: var(--color-sidebar-dark-ink);
+  }
+
+  [data-navbar-tone='dark'],
+  [data-navbar-tone='brand'],
+  [data-navbar-tone='transparent'] {
+    --navbar-fg: var(--color-on-brand);
+    --navbar-muted: color-mix(in srgb, var(--navbar-fg) 75%, transparent);
+    --navbar-hover: color-mix(in srgb, var(--navbar-fg) 15%, transparent);
+    --navbar-active-bg: var(--navbar-fg);
+    --navbar-active-fg: var(--color-sidebar-dark);
+    --navbar-border: color-mix(in srgb, var(--navbar-fg) 30%, transparent);
+    --navbar-accent: var(--navbar-fg);
+  }
+
+  /* These tones sit on dark backgrounds even when the host theme flips on-brand. */
+  [data-navbar-tone='dark'],
+  [data-navbar-tone='transparent'] {
+    --navbar-fg: var(--color-sidebar-dark-ink);
+  }
+
+  [data-navbar-tone='dark'] {
+    --navbar-bg: var(--color-sidebar-dark);
+    --navbar-topbar-bg: var(--navbar-bg);
+  }
+
+  [data-navbar-tone='brand'] {
+    --navbar-bg: var(--color-accent);
+    --navbar-active-fg: var(--color-accent);
+    --navbar-topbar-bg: var(--color-brand-800);
+  }
+
+  [data-navbar-tone='transparent'] {
+    --navbar-bg: transparent;
+    border-color: transparent;
+  }
+
+  /* Mega panels: light by default; a dark bar opens a panel in its own colours. */
+  [data-navbar-tone] {
+    --navbar-panel-bg: var(--color-surface);
+    --navbar-panel-fg: var(--color-ink);
+    --navbar-panel-muted: var(--color-muted);
+    --navbar-panel-border: var(--color-line);
+    --navbar-panel-accent: var(--color-accent);
+  }
+
+  [data-navbar-tone='dark'] {
+    --navbar-panel-bg: var(--navbar-bg);
+    --navbar-panel-fg: var(--navbar-fg);
+    --navbar-panel-muted: var(--navbar-muted);
+    --navbar-panel-border: var(--navbar-border);
+    --navbar-panel-accent: var(--navbar-fg);
+  }
+
+  [data-navbar-density='compact'] {
+    --navbar-height: 3rem;
+  }
+
+  [data-navbar-density='comfortable'] {
+    --navbar-height: 5rem;
+  }
+
+  .navbar-root {
+    width: 100%;
+  }
+
+  .navbar-inner {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    align-items: center;
+    min-width: 0;
+    min-height: var(--navbar-height);
+    gap: 0.5rem;
+    padding-inline: 1.25rem;
+  }
+
+  .navbar-brand-group {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    gap: 1rem;
+  }
+
+  .navbar-brand-group > :first-child {
+    min-width: 0;
+    flex-shrink: 1;
+    overflow: hidden;
+  }
+
+  .navbar-brand-group strong {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .navbar-actions {
+    flex-wrap: nowrap;
+  }
+
+  .navbar-topbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem 1rem;
+    padding: 0.5rem 1.25rem;
+    background: var(--navbar-topbar-bg);
+    color: var(--navbar-topbar-fg);
+    font-size: var(--text-xs);
+  }
+
+  .navbar-topbar > * {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .navbar-secondary {
+    background: var(--navbar-hover);
+  }
+
+  [data-navbar-floating='true'] {
+    width: calc(100% - 2rem);
+    max-width: calc(100% - 2rem);
+    margin: 1rem auto;
+    border: 0;
+    border-radius: 9999px;
+    box-shadow: var(--shadow-floating);
+  }
+
+  [data-navbar-floating='true'].sticky {
+    top: 1rem;
+  }
+
+  [data-navbar-floating='true'] .navbar-inner {
+    padding-inline: 0.75rem;
+  }
+
+  [data-navbar-floating='true'] .navbar-topbar {
+    border-radius: 1.5rem 1.5rem 0 0;
+  }
+
+  [data-navbar-align='split'] .navbar-inner {
+    grid-template-columns: 2.5rem minmax(0, 1fr) auto;
+  }
+
+  [data-navbar-align='split'] .navbar-brand-group {
+    grid-column: 2;
+    grid-row: 1;
+    justify-content: center;
+  }
+
+  [data-navbar-align='split'] .navbar-actions {
+    grid-column: 3;
+    grid-row: 1;
+  }
+
+  [data-navbar-align='split'] .navbar-mobile-control {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  @media (min-width: 64rem) {
+    .navbar-inner {
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      gap: 1rem;
+    }
+
+    .navbar-mobile-control {
+      display: none;
+    }
+
+    [data-navbar-align='center'] .navbar-inner {
+      grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    }
+
+    [data-navbar-align='center'] .navbar-nav,
+    [data-navbar-align='split'] .navbar-nav {
+      justify-self: center;
+    }
+
+    [data-navbar-align='split'] .navbar-mobile-control {
+      display: block;
+    }
+
+    [data-navbar-align='split'] .navbar-inner {
+      grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+      row-gap: 0;
+    }
+
+    [data-navbar-align='split'] .navbar-nav {
+      grid-column: 1 / -1;
+      grid-row: 2;
+      border-top: 1px solid var(--navbar-border);
+      width: 100%;
+      justify-content: center;
+    }
+
+    [data-navbar-floating='true'][data-navbar-align='center'] {
+      width: fit-content;
+    }
+
+    [data-navbar-floating='true'][data-navbar-align='center'] .navbar-inner {
+      grid-template-columns: auto auto auto;
+    }
+
+    [data-item-variant='ghost'][data-navbar-align='center'] .navbar-nav {
+      align-self: center;
+      border: 1px solid var(--navbar-border);
+      border-radius: 9999px;
+      background: var(--navbar-hover);
+      padding: 0.25rem;
+    }
+
+    [data-item-variant='ghost'][data-navbar-align='center']
+      .navbar-menu
+      > li
+      > :first-child {
+      border-radius: 9999px;
+    }
+  }
+}
+
+/*
+ * Outside the layers on purpose: ghost buttons and icon buttons in the actions of a dark,
+ * brand or transparent bar take the bar's text colour, which a utility class would otherwise win.
+ */
+:is(
+    [data-navbar-tone='dark'],
+    [data-navbar-tone='brand'],
+    [data-navbar-tone='transparent']
+  )
+  :is(.navbar-actions, .navbar-topbar)
+  [data-variant='ghost'] {
+  color: var(--navbar-fg);
+}
+
+:is(
+    [data-navbar-tone='dark'],
+    [data-navbar-tone='brand'],
+    [data-navbar-tone='transparent']
+  )
+  :is(.navbar-actions, .navbar-topbar)
+  [data-variant='ghost']:hover {
+  background: var(--navbar-hover);
+}

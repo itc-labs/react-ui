@@ -98,6 +98,7 @@ export function Button({
         href={href}
         {...(target ? { target } : {})}
         {...(rel ? { rel } : {})}
+        data-variant={variant ?? 'primary'}
         className={classes}
       >
         {children}
@@ -110,6 +111,7 @@ export function Button({
       type={type}
       disabled={disabled || loading}
       aria-busy={loading || undefined}
+      data-variant={variant ?? 'primary'}
       className={classes}
     >
       {loading && (
