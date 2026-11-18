@@ -1,7 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { Button } from '../../components/button';
 import { ActivityIcon } from '../../components/icon/outline/activity';
-import { LockIcon } from '../../components/icon/outline/lock';
 import { ChartPieIcon } from '../../components/icon/outline/chart-pie';
 import { HomeIcon } from '../../components/icon/outline/home';
 import { ReceiptIcon } from '../../components/icon/outline/receipt';
@@ -65,23 +63,11 @@ function TopNavigation({ showMetrics, showCharts, showTable }: TopNavigationArgs
       topbar={
         <Navbar
           sticky={false}
-          itemVariant="pill"
-          align="center"
           brand={{ title: 'Northwind', logo: <ActivityIcon />, href: '/dashboard' }}
           items={navigation}
           navigationLabel="Main navigation"
-          className="border-0 bg-transparent"
           actions={
             <>
-              <Button
-                href="/settings/workspace"
-                variant="secondary"
-                size="sm"
-                className="hidden rounded-full xl:inline-flex"
-              >
-                <LockIcon />
-                Billing workspace
-              </Button>
               <DemoNotifications />
               <UserMenu {...demoAccount} compact />
             </>
@@ -119,7 +105,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'A dashboard without a sidebar: a centred Navbar with solid pill items and a mega menu, a workspace chip, notifications and the account menu in a full-width topbar.',
+          'The starting point without a sidebar: Navbar with its default appearance, alignment and underline, a mega menu, notifications and the account menu, and no custom classes. Copy it when the project only needs a standard top navigation.',
       },
     },
   },

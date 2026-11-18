@@ -161,6 +161,8 @@ export function WorkspaceShell({
               className={cn(
                 'sticky top-0 z-20 flex min-h-[var(--workspace-topbar-height)] shrink-0 items-center gap-3 border-b border-line bg-surface px-4 sm:px-6',
                 'group-data-[variant=inset]/shell:border-b-0 lg:group-data-[variant=inset]/shell:bg-sidebar',
+                // A Navbar draws its own surface, border and padding.
+                'has-[>.navbar-root]:border-b-0 has-[>.navbar-root]:bg-transparent has-[>.navbar-root]:p-0 sm:has-[>.navbar-root]:p-0',
                 classNames?.topbar,
               )}
             >
