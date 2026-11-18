@@ -146,7 +146,13 @@ function ColumnsPanel<TAccess>({
     (child) => child.section && child.role !== 'featured',
   );
   const footer = children.find((child) => child.role === 'footer');
-  const columns = Math.max(1, item.columns ?? Math.min(sections.length, 5));
+  const footerLinks = footer?.items?.length ?? 0;
+  // The footer row lines up under the sections; extra footer links add columns rather than wrap.
+  const columns = Math.max(
+    1,
+    item.columns ?? Math.min(sections.length, 5),
+    footerLinks,
+  );
   // Grid tracks depend on data, so they are set inline; everything else uses tokens.
   const tracks = {
     gridTemplateColumns: `${featured ? 'minmax(10rem,14rem) ' : ''}repeat(${columns}, minmax(0, 1fr))`,

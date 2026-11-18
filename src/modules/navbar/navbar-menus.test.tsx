@@ -213,3 +213,28 @@ it('opens the mobile drawer on the current page branch', async () => {
     )!.getAttribute('aria-current'),
   ).toBe('page');
 });
+
+it('keeps every footer link on one row when there are more links than sections', async () => {
+  await act(async () =>
+    root.render(
+      <Navbar
+        data-testid="navbar"
+        items={[
+          {
+            id: 'men',
+            type: 'mega',
+            label: 'Men',
+            sections: [{ id: 'shoes', title: 'Shoes', items: [] }],
+            footer: [
+              { id: 'a', label: 'A', href: '/a' },
+              { id: 'b', label: 'B', href: '/b' },
+            ],
+          },
+        ]}
+      />,
+    ),
+  );
+  await openTrigger('item-men');
+
+  expect(byId('item-men-footer')!.style.gridTemplateColumns).toContain('repeat(2,');
+});

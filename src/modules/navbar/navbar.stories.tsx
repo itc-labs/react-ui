@@ -146,6 +146,17 @@ const kangiMen: NavbarItem = {
         (label) => ({ id: `sport-${label}`, label, href: `/men/sport/${label}` }),
       ),
     },
+    {
+      id: 'color',
+      title: 'Shop by color',
+      items: [
+        'Elemental Pink',
+        'University Red',
+        'Electric Blue',
+        'Mink Brown',
+        'Black and Sail',
+      ].map((label) => ({ id: `color-${label}`, label, href: `/men/color/${label}` })),
+    },
   ],
   footer: [
     { id: 'all-shoes', label: "All Men's Shoes", href: '/men/shoes' },
