@@ -8,6 +8,7 @@ import {
   useSyncExternalStore,
 } from 'react';
 import { cn, partTestId } from '../common';
+import { useRouterPath } from '../link-image-provider';
 import { attachTopLoaderClient, topLoader } from './client';
 import { createTopLoaderScope } from './scope';
 import { isTopLoaderNavigation } from './links';
@@ -103,7 +104,7 @@ const duration = (value: number, fallback: number) =>
 export function TopLoaderProvider({
   children,
   client = topLoader,
-  currentPath,
+  currentPath: currentPathProp,
   trackLinks = false,
   delay = 100,
   minimumDuration = 300,
@@ -112,6 +113,8 @@ export function TopLoaderProvider({
   trickleInterval = 800,
   ...props
 }: TopLoaderProviderProps) {
+  const currentPath = useRouterPath(currentPathProp);
+
   const [scope] = useState(createTopLoaderScope);
   const previousPath = useRef(currentPath);
 

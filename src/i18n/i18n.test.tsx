@@ -162,6 +162,8 @@ it('keeps default visible/accessible literals in dictionaries instead of compone
       if (
         !file.endsWith('.tsx') ||
         /\.(stories|test)\.tsx$/.test(file) ||
+        // Story-only demo helpers (`__*` folders) are excluded from the package build.
+        /\/__[^/]+\//.test(file) ||
         /\/icon\/(outline|bold|shared)\//.test(file)
       )
         continue;

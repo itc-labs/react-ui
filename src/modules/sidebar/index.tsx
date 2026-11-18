@@ -1,5 +1,6 @@
 'use client';
 import {
+  useCallback,
   useContext,
   useEffect,
   useId,
@@ -12,14 +13,21 @@ import {
 import { useComposedRefs } from '../../components/common/refs';
 import { cn, partTestId } from '../../components/common';
 import { Drawer } from '../../components/drawer';
+import { useRouterPath } from '../../components/link-image-provider';
 import { PanelLeftIcon } from '../../components/icon/outline/panel-left';
 import { MenuIcon } from '../../components/icon/outline/menu';
 import { KitIconButton } from '../../components/icon-button/kit-icon-button';
 import { useUILocale } from '../../i18n/provider';
+import { UserMenu } from '../user-menu';
 import { filterNavByAccess, resolveActiveNav } from '../navigation';
-import { SidebarContext, SidebarAppearanceContext } from './context';
-import { sidebarToneStyle } from './appearance';
+import {
+  SidebarContext,
+  SidebarAppearanceContext,
+  WorkspaceLayoutContext,
+} from './context';
+import { resolveSidebarAppearance } from './appearance';
 import { SidebarEntries } from './entries';
+import { SIDEBAR_DESKTOP_QUERY, SidebarNav } from './nav';
 import { SidebarSearchControl, isSidebarSearch } from './search';
 import { useSidebarShortcut } from './use-sidebar-state';
 import { SidebarSections } from './sections';
@@ -36,6 +44,7 @@ export type {
   SidebarSearch,
   SidebarWorkspaceSwitcher,
   SidebarItemAction,
+  SidebarAppearance,
 } from './types';
 
 const noop = () => {};
@@ -56,20 +65,24 @@ export function Sidebar<TAccess = unknown>({
   section: controlledSection,
   defaultSection,
   onSectionChange,
-  variant = 'sidebar',
+  variant: variantProp,
   collapsible = 'icon',
-  tone = 'default',
-  itemVariant = 'raised',
+  appearance: appearanceProp,
+  tone: toneProp,
+  itemVariant: itemVariantProp,
+  density: densityProp,
   groupLabel = 'default',
   groupDividers = false,
   style,
   ref,
   header,
   footer,
+  footerItems,
+  account,
   search,
   items,
   navigationLabel,
-  currentPath,
+  currentPath: currentPathProp,
   isActive,
   canAccess,
   collapsed: controlledCollapsed,
@@ -88,7 +101,19 @@ export function Sidebar<TAccess = unknown>({
   classNames,
   ...props
 }: SidebarProps<TAccess>) {
+  const currentPath = useRouterPath(currentPathProp);
+
   const { t } = useUILocale();
+  const shellVariant = useContext(WorkspaceLayoutContext);
+  // Inside WorkspaceShell the sidebar follows the shell unless its own props say otherwise.
+  const variant = variantProp ?? (shellVariant === 'floating' ? 'floating' : 'sidebar');
+  const appearance = appearanceProp ?? (shellVariant === 'soft' ? 'soft' : undefined);
+  const { tone, itemVariant, density } = resolveSidebarAppearance({
+    appearance,
+    tone: toneProp,
+    itemVariant: itemVariantProp,
+    density: densityProp,
+  });
   const searchConfig = isSidebarSearch(search) ? search : undefined;
   useSidebarShortcut(searchConfig?.shortcut, searchConfig?.onOpen ?? noop);
   const context = useContext(SidebarContext);
@@ -96,14 +121,21 @@ export function Sidebar<TAccess = unknown>({
   const sidebarId = props.id ?? context?.id ?? generatedId;
   const asideRef = useRef<HTMLElement>(null);
   const composedRef = useComposedRefs(asideRef, ref);
+  // Precedence: the `collapsed` prop, then a SidebarProvider, then local state.
+  // onCollapsedChange always reports; an uncontrolled sidebar also updates its provider.
+  const sharedCollapsed = controlledCollapsed ?? context?.collapsed;
+  const contextToggle = context?.toggle;
+  const reportCollapsed = useCallback(
+    (next: boolean) => {
+      onCollapsedChange?.(next);
+      if (controlledCollapsed === undefined) contextToggle?.();
+    },
+    [onCollapsedChange, controlledCollapsed, contextToggle],
+  );
   const state = useSidebarState({
-    ...(controlledCollapsed === undefined && !context
-      ? {}
-      : { collapsed: controlledCollapsed ?? context!.collapsed }),
+    ...(sharedCollapsed === undefined ? {} : { collapsed: sharedCollapsed }),
     ...(defaultCollapsed === undefined ? {} : { defaultCollapsed }),
-    ...(onCollapsedChange || context
-      ? { onCollapsedChange: onCollapsedChange ?? (() => context?.toggle()) }
-      : {}),
+    onCollapsedChange: reportCollapsed,
     ...(toggleShortcut && collapsible !== 'none' ? { toggleShortcut } : {}),
   });
   const collapsed = collapsible !== 'none' && state.collapsed;
@@ -120,13 +152,16 @@ export function Sidebar<TAccess = unknown>({
     findExternalTrigger(asideRef.current, sidebarId)?.focus();
   }, [offcanvas, sidebarId]);
 
-  const [mobileOpen, setMobileOpen] = useState(false);
+  const [localMobileOpen, setLocalMobileOpen] = useState(false);
+  // A SidebarProvider shares the drawer state with SidebarMobileTrigger in the page header.
+  const mobileOpen = context?.mobileOpen ?? localMobileOpen;
+  const setMobileOpen = context?.setMobileOpen ?? setLocalMobileOpen;
 
-  useEffect(() => setMobileOpen(false), [currentPath]);
+  useEffect(() => setMobileOpen(false), [currentPath, setMobileOpen]);
 
   useEffect(() => {
     if (typeof window.matchMedia !== 'function') return;
-    const media = window.matchMedia('(min-width: 64rem)');
+    const media = window.matchMedia(SIDEBAR_DESKTOP_QUERY);
 
     const close = () => {
       if (media.matches) setMobileOpen(false);
@@ -135,7 +170,7 @@ export function Sidebar<TAccess = unknown>({
     media.addEventListener('change', close);
 
     return () => media.removeEventListener('change', close);
-  }, []);
+  }, [setMobileOpen]);
 
   const visibleSections = sections?.map((section) => ({
     ...section,
@@ -160,10 +195,6 @@ export function Sidebar<TAccess = unknown>({
     id: string | undefined;
   }>({ path: currentPath, id: undefined });
 
-  useEffect(() => {
-    setSelection({ path: currentPath, id: undefined });
-  }, [currentPath]);
-
   const sectionId =
     controlledSection ??
     (selection.path === currentPath ? selection.id : undefined) ??
@@ -181,9 +212,21 @@ export function Sidebar<TAccess = unknown>({
     ? (activeSection?.items ?? [])
     : items &&
       filterNavByAccess(items, (access, item) => !canAccess || canAccess(access, item));
-  const activePath = visibleItems
-    ? resolveActiveNav(visibleItems, currentPath ?? '', isActive)
-    : [];
+  const visibleFooterItems =
+    footerItems &&
+    filterNavByAccess(
+      footerItems,
+      (access, item) => !canAccess || canAccess(access, item),
+    );
+  // Resolve once across both lists so only one row is current.
+  const activePath =
+    visibleItems || visibleFooterItems
+      ? resolveActiveNav(
+          [...(visibleItems ?? []), ...(visibleFooterItems ?? [])],
+          currentPath ?? '',
+          isActive,
+        )
+      : [];
 
   useLayoutEffect(() => {
     if (!sections || !collapsed || hover.expanded) return;
@@ -238,16 +281,59 @@ export function Sidebar<TAccess = unknown>({
     </div>
   );
 
-  const renderFooter = (id: string | undefined) =>
-    footer != null && (
+  const renderFooter = (
+    id: string | undefined,
+    rail = false,
+    onNavigate?: () => void,
+  ) =>
+    (footer != null || visibleFooterItems?.length || account) && (
       <div
         data-testid={partTestId(id, 'footer')}
         className={cn(
-          'grid min-w-0 shrink-0 text-ui-sm text-[var(--sidebar-muted,var(--color-muted))] [&>*]:min-w-0',
+          'grid min-w-0 shrink-0 gap-2 text-ui-sm text-[var(--sidebar-muted,var(--color-muted))] [&>*]:min-w-0',
           classNames?.footer,
         )}
       >
+        {!!visibleFooterItems?.length && (
+          <SidebarNav
+            aria-label={t('sidebar.secondary')}
+            data-testid={partTestId(id, 'footerNav')}
+            className={cn(
+              'gap-0.5',
+              // A hairline separates pinned entries from the scrolling navigation above.
+              (visibleItems?.length || sections) &&
+                'border-t border-[var(--sidebar-border,var(--color-line))] pt-3',
+              classNames?.footerNav,
+            )}
+          >
+            <SidebarEntries
+              items={visibleFooterItems}
+              activePath={activePath}
+              testId={id}
+              classNames={classNames}
+              collapsed={rail}
+              {...(onNavigate ? { onNavigate } : {})}
+            />
+          </SidebarNav>
+        )}
         {footer}
+        {account && (
+          <UserMenu
+            collapseOnMobile={false}
+            {...account}
+            data-testid={account['data-testid'] ?? partTestId(id, 'account')}
+            className={cn(
+              'w-full border-transparent bg-transparent text-[var(--sidebar-fg)] hover:bg-[var(--sidebar-hover)]',
+              rail && 'justify-center px-0',
+              account.className,
+            )}
+            classNames={{
+              ...account.classNames,
+              details: cn(rail && 'sr-only', account.classNames?.details),
+              chevron: cn(rail && 'hidden', account.classNames?.chevron),
+            }}
+          />
+        )}
       </div>
     );
 
@@ -277,6 +363,8 @@ export function Sidebar<TAccess = unknown>({
           'min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden',
           // Extend the navigation to the panel edges while keeping header and footer padding.
           itemVariant === 'indicator' && !mobile && (rail ? '-mx-2' : '-mx-3'),
+          // Let the pill's edge bar reach the sidebar edge in both the expanded panel and the rail.
+          itemVariant === 'pill' && !mobile && (rail ? '-me-2 pe-2' : '-me-3 pe-3'),
           classNames?.content,
         )}
       >
@@ -308,65 +396,78 @@ export function Sidebar<TAccess = unknown>({
           children
         )}
       </div>
-      {(!sections || mobile) && renderFooter(id)}
+      {(!sections || mobile) &&
+        renderFooter(id, rail, mobile ? () => setMobileOpen(false) : undefined)}
     </>
   );
 
-  return (
-    <SidebarAppearanceContext.Provider value={itemVariant}>
-      <div className="p-3 lg:hidden">
-        <Drawer
-          title={drawerTitle ?? navigationLabel ?? t('sidebar.label')}
-          side="left"
-          open={mobileOpen}
-          onOpenChange={setMobileOpen}
-          trigger={
-            mobileTrigger ?? (
+  const mobileDrawer = (
+    <Drawer
+      title={drawerTitle ?? navigationLabel ?? t('sidebar.label')}
+      side="left"
+      open={mobileOpen}
+      onOpenChange={setMobileOpen}
+      {...(mobileTrigger === false
+        ? {}
+        : {
+            trigger: mobileTrigger ?? (
               <KitIconButton
                 label={mobileTriggerLabel ?? t('sidebar.open')}
                 icon={MenuIcon}
                 variant="ghost"
               />
-            )
-          }
-          triggerAsChild
-          {...(testId ? { 'data-testid': partTestId(testId, 'drawer')! } : {})}
-          contentProps={{ style: sidebarToneStyle(tone) }}
-          className={cn(
-            'bg-[var(--sidebar-bg)] text-[var(--sidebar-fg)]',
-            classNames?.drawer,
-          )}
-          classNames={{
-            trigger: classNames?.mobileTrigger ?? '',
-            body: 'flex min-h-0 flex-1 flex-col overflow-hidden',
-            header: 'shrink-0',
-          }}
+            ),
+            triggerAsChild: true,
+          })}
+      {...(testId ? { 'data-testid': partTestId(testId, 'drawer')! } : {})}
+      // Data attributes are valid on the content element; the props type omits them.
+      contentProps={
+        {
+          'data-sidebar-tone': tone,
+          'data-sidebar-density': density,
+        } as Record<string, string>
+      }
+      className={cn(
+        'bg-[var(--sidebar-bg)] text-[var(--sidebar-fg)]',
+        classNames?.drawer,
+      )}
+      classNames={{
+        trigger: classNames?.mobileTrigger ?? '',
+        body: 'flex min-h-0 flex-1 flex-col overflow-hidden',
+        header: 'shrink-0',
+      }}
+    >
+      <div className="flex min-h-0 flex-1 flex-col gap-4">
+        {visibleSections && (
+          <SidebarSections
+            sections={visibleSections}
+            value={sectionId}
+            onChange={selectSection}
+            panelId={`${sidebarId}-mobile-panel`}
+            testId={partTestId(testId, 'drawer')}
+            classNames={classNames}
+            mobile
+          />
+        )}
+        <div
+          role={sections ? 'region' : undefined}
+          aria-labelledby={sections ? `${sidebarId}-mobile-section-title` : undefined}
+          id={`${sidebarId}-mobile-panel`}
+          className="flex min-h-0 flex-1 flex-col gap-4"
         >
-          <div className="flex min-h-0 flex-1 flex-col gap-4">
-            {visibleSections && (
-              <SidebarSections
-                sections={visibleSections}
-                value={sectionId}
-                onChange={selectSection}
-                panelId={`${sidebarId}-mobile-panel`}
-                testId={partTestId(testId, 'drawer')}
-                classNames={classNames}
-                mobile
-              />
-            )}
-            <div
-              role={sections ? 'region' : undefined}
-              aria-labelledby={
-                sections ? `${sidebarId}-mobile-section-title` : undefined
-              }
-              id={`${sidebarId}-mobile-panel`}
-              className="flex min-h-0 flex-1 flex-col gap-4"
-            >
-              {body(false, partTestId(testId, 'drawer'), true)}
-            </div>
-          </div>
-        </Drawer>
+          {body(false, partTestId(testId, 'drawer'), true)}
+        </div>
       </div>
+    </Drawer>
+  );
+
+  return (
+    <SidebarAppearanceContext.Provider value={itemVariant}>
+      {mobileTrigger === false ? (
+        mobileDrawer
+      ) : (
+        <div className="p-3 lg:hidden">{mobileDrawer}</div>
+      )}
       <aside
         {...props}
         data-testid={testId}
@@ -393,15 +494,18 @@ export function Sidebar<TAccess = unknown>({
         data-variant={variant}
         data-collapsible={collapsible}
         data-tone={tone}
+        data-sidebar-tone={tone}
+        data-sidebar-density={density}
+        data-appearance={appearance ?? 'default'}
         data-item-variant={itemVariant}
         inert={offcanvas}
         aria-hidden={offcanvas || undefined}
-        style={{ ...sidebarToneStyle(tone), ...style }}
+        style={style}
         className={cn(
-          'group/sidebar sticky top-0 hidden h-dvh min-w-0 flex-col gap-4 overflow-hidden bg-[var(--sidebar-bg)] text-[var(--sidebar-fg)] p-3 lg:flex motion-safe:transition-[width] motion-safe:duration-[var(--motion-duration-normal)]',
+          'group/sidebar sticky top-[var(--workspace-topbar-height,0px)] hidden h-[calc(100dvh-var(--workspace-topbar-height,0px))] min-w-0 flex-col gap-4 overflow-hidden bg-[var(--sidebar-bg)] text-[var(--sidebar-fg)] p-3 lg:flex motion-safe:transition-[width] motion-safe:duration-[var(--motion-duration-normal)]',
           collapsed ? 'w-sidebar-collapsed px-2' : 'w-sidebar',
           variant === 'floating' &&
-            'top-2 m-2 h-[calc(100dvh-1rem)] rounded-panel border border-[var(--sidebar-border)] shadow-panel',
+            'top-[calc(var(--workspace-topbar-height,0px)+0.5rem)] m-2 h-[calc(100dvh-1rem-var(--workspace-topbar-height,0px))] rounded-panel border border-[var(--sidebar-border)] shadow-panel',
           hover.expanded && 'z-[var(--z-index-popover)] overflow-visible',
           offcanvas && 'm-0 w-0 border-0 p-0',
           classNames?.root,
@@ -439,7 +543,7 @@ export function Sidebar<TAccess = unknown>({
                   testId={testId}
                   classNames={classNames}
                 />
-                <div className="mt-auto">{renderFooter(testId)}</div>
+                <div className="mt-auto">{renderFooter(testId, true)}</div>
               </div>
               <div
                 role="region"
@@ -449,7 +553,8 @@ export function Sidebar<TAccess = unknown>({
                 aria-labelledby={`${sidebarId}-section-title`}
                 data-testid={partTestId(testId, 'sectionPanel')}
                 className={cn(
-                  'flex min-h-0 min-w-0 flex-1 flex-col gap-4 border-l border-[var(--sidebar-border)] pl-3',
+                  // ml-2 keeps the active rail tile off the panel's dividing rule.
+                  'ml-2 flex min-h-0 min-w-0 flex-1 flex-col gap-4 border-l border-[var(--sidebar-border)] pl-3',
                   collapsed && !hover.expanded && 'hidden',
                   classNames?.sectionPanel,
                 )}
@@ -466,49 +571,13 @@ export function Sidebar<TAccess = unknown>({
   );
 }
 
-export function SidebarNav({
-  className,
-  'aria-label': label,
-  ...props
-}: ComponentProps<'nav'>) {
-  const { t } = useUILocale();
-
-  return (
-    <nav
-      {...props}
-      aria-label={label ?? t('sidebar.label')}
-      className={cn('grid gap-1', className)}
-    />
-  );
-}
-
-export function SidebarGroup({
-  label,
-  children,
-  className,
-  labelClassName,
-  ...props
-}: ComponentProps<'div'> & { label?: ReactNode; labelClassName?: string }) {
-  return (
-    <div data-sidebar-group="" {...props} className={cn('min-w-0', className)}>
-      {label != null && (
-        <p
-          data-sidebar-group-label=""
-          className={cn(
-            'mb-1 px-2.5 text-ui-sm font-medium text-[var(--sidebar-muted,var(--color-muted))] break-words',
-            labelClassName,
-          )}
-        >
-          {label}
-        </p>
-      )}
-      {children}
-    </div>
-  );
-}
-
+export { SidebarNav, SidebarGroup } from './nav';
 export { SidebarItem } from './item';
 export * from './submenu';
 
-export { SidebarProvider, SidebarTrigger } from './context';
-export type { SidebarProviderProps, SidebarTriggerProps } from './context';
+export { SidebarProvider, SidebarTrigger, SidebarMobileTrigger } from './context';
+export type {
+  SidebarProviderProps,
+  SidebarTriggerProps,
+  SidebarMobileTriggerProps,
+} from './context';

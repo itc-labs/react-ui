@@ -148,12 +148,22 @@ function VirtualCollection<T>({
   useLayoutEffect(() => {
     if (!element || !list) return;
 
-    const update = () =>
-      setGeometry({
-        width: list.getBoundingClientRect().width,
+    const update = () => {
+      const rect = list.getBoundingClientRect();
+      const next = {
+        width: rect.width,
         viewport: window.innerWidth,
-        margin: list.getBoundingClientRect().top + window.scrollY,
-      });
+        margin: rect.top + window.scrollY,
+      };
+
+      setGeometry((current) =>
+        current.width === next.width &&
+        current.viewport === next.viewport &&
+        current.margin === next.margin
+          ? current
+          : next,
+      );
+    };
 
     update();
     const observer = new ResizeObserver(update);
@@ -197,11 +207,23 @@ function VirtualCollection<T>({
           (geometry.width - gap * (columnCount - 1)) / columnCount / aspectRatio,
         )
       : 56);
-  const focusedIndex = items.findIndex((item) => getItemKey(item) === focusedKey);
+  const focusedIndex =
+    focusedKey === undefined
+      ? -1
+      : items.findIndex((item) => getItemKey(item) === focusedKey);
+  const latestItemKey = useRef(getItemKey);
+
+  latestItemKey.current = getItemKey;
+
+  // Hosts often pass an inline getItemKey; only new items or columns invalidate measurements.
+  const rowKey = useCallback(
+    (index: number) => latestItemKey.current(items[index * columnCount]!),
+    [items, columnCount],
+  );
   const options = {
     count: Math.ceil(items.length / columnCount),
     estimateSize: () => rowSize,
-    getItemKey: (index: number) => getItemKey(items[index * columnCount]!),
+    getItemKey: rowKey,
     overscan,
     gap: grid ? gap : 0,
     rangeExtractor: (range: Parameters<typeof defaultRangeExtractor>[0]) =>

@@ -1,11 +1,13 @@
 // @vitest-environment jsdom
-import { act } from 'react';
+import { act, Profiler } from 'react';
+import { renderToStaticMarkup } from 'react-dom/server';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { Chart, type ChartProps } from './index';
 import { chartModel, chartColor } from './model';
 import { UIProvider } from '../../theme/provider';
 import { ChartTooltip } from './content';
+import { ChartResponsiveContainer } from './responsive';
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 const series = [
@@ -67,6 +69,7 @@ afterEach(() => {
   act(() => root.unmount());
 
   host.remove();
+  vi.useRealTimers();
   vi.unstubAllGlobals();
   vi.restoreAllMocks();
 });
@@ -146,6 +149,7 @@ it('rejects duplicate identities and negative slices while retaining zero-only s
 });
 
 it('renders all five chart types with actual SVG marks and responds to resize', async () => {
+  vi.useFakeTimers();
   for (const type of ['line', 'area', 'bar', 'pie', 'donut'] as const) {
     const props: ChartProps =
       type === 'pie' || type === 'donut'
@@ -182,8 +186,148 @@ it('renders all five chart types with actual SVG marks and responds to resize', 
       {} as ResizeObserver,
     ),
   );
+  await act(async () => vi.advanceTimersByTime(100));
   expect(host.querySelector('svg.recharts-surface')?.getAttribute('width')).toBe('280');
   expect(host.querySelector('[data-testid]')).toBeNull();
+});
+
+it.each(['line', 'area', 'bar', 'pie', 'donut'] as const)(
+  'coalesces animation frames for %s and applies final and ordinary resize dimensions',
+  async (type) => {
+    vi.useFakeTimers();
+    const commits = vi.fn();
+    const props: ChartProps =
+      type === 'pie' || type === 'donut'
+        ? { type, label: 'Example', data: [{ id: 'one', label: 'One', value: 4 }] }
+        : { type, label: 'Example', data, series };
+    await act(async () =>
+      root.render(
+        <Profiler id="chart" onRender={commits}>
+          <Chart {...props} />
+        </Profiler>,
+      ),
+    );
+    await act(async () => vi.advanceTimersByTime(100));
+    const container = host.querySelector('.recharts-responsive-container')!;
+    const resize = observers.get(container)!;
+
+    const notify = (width: number, height = 288) =>
+      resize(
+        [{ target: container, contentRect: { width, height } } as ResizeObserverEntry],
+        {} as ResizeObserver,
+      );
+
+    // Each notification has its own act boundary, so React batching cannot hide
+    // the old per-frame rendering. Exercise both expansion and contraction.
+    for (const direction of [1, -1]) {
+      commits.mockClear();
+      const start = direction === 1 ? 640 : 880;
+      for (let frame = 1; frame <= 30; frame++) {
+        await act(async () => {
+          notify(start + direction * frame * 8);
+          vi.advanceTimersByTime(16);
+        });
+      }
+      expect(commits).not.toHaveBeenCalled();
+      await act(async () => vi.advanceTimersByTime(100));
+      expect(commits.mock.calls.length).toBeGreaterThan(0);
+      expect(commits.mock.calls.length).toBeLessThan(6);
+      const svg = host.querySelector<SVGSVGElement>('svg.recharts-surface')!;
+      expect(svg.getAttribute('width')).toBe(String(start + direction * 240));
+      expect(svg.getAttribute('preserveAspectRatio')).toBe(
+        type === 'pie' || type === 'donut' ? 'xMidYMid meet' : 'none',
+      );
+      expect(svg.style.width).toBe('100%');
+      expect(host.querySelector<HTMLElement>('.recharts-wrapper')!.style.width).toBe(
+        '100%',
+      );
+    }
+    // A standalone container/window resize still updates both dimensions.
+    await act(async () => notify(420, 220));
+    await act(async () => vi.advanceTimersByTime(100));
+    const svg = host.querySelector('svg.recharts-surface')!;
+    expect(svg.getAttribute('width')).toBe('420');
+    expect(svg.getAttribute('height')).toBe('220');
+    // Pending layout work is removed when the plot unmounts.
+    const timers = vi.getTimerCount();
+    await act(async () => notify(400));
+    expect(vi.getTimerCount()).toBe(timers + 1);
+    await act(async () => root.render(null));
+    expect(vi.getTimerCount()).toBeLessThanOrEqual(timers);
+  },
+);
+
+it('applies reduced-motion resizes immediately, including preference changes', async () => {
+  vi.useFakeTimers();
+  const motion = new EventTarget();
+  const preference = Object.assign(motion, { matches: true });
+  vi.stubGlobal(
+    'matchMedia',
+    vi.fn(() => preference),
+  );
+  await act(async () =>
+    root.render(<Chart type="line" label="Example" data={data} series={series} />),
+  );
+  const container = host.querySelector('.recharts-responsive-container')!;
+  const resize = observers.get(container)!;
+
+  const notify = (width: number) =>
+    resize(
+      [
+        {
+          target: container,
+          contentRect: { width, height: 288 },
+        } as ResizeObserverEntry,
+      ],
+      {} as ResizeObserver,
+    );
+
+  const timers = vi.getTimerCount();
+  await act(async () => notify(480));
+  expect(host.querySelector('svg.recharts-surface')?.getAttribute('width')).toBe('480');
+  expect(vi.getTimerCount()).toBe(timers);
+  preference.matches = false;
+  await act(async () => notify(500));
+  expect(host.querySelector('svg.recharts-surface')?.getAttribute('width')).toBe('480');
+  await act(async () => {
+    preference.matches = true;
+    motion.dispatchEvent(new Event('change'));
+  });
+  expect(host.querySelector('svg.recharts-surface')?.getAttribute('width')).toBe('500');
+  expect(vi.getTimerCount()).toBe(timers);
+});
+
+it('cancels the pending resize timer and disconnects on unmount', async () => {
+  vi.useFakeTimers();
+  const disconnect = vi.fn();
+  vi.stubGlobal(
+    'ResizeObserver',
+    class {
+      constructor(private callback: ResizeObserverCallback) {}
+      observe(target: Element) {
+        observers.set(target, this.callback);
+      }
+      disconnect = disconnect;
+    },
+  );
+  await act(async () =>
+    root.render(
+      <ChartResponsiveContainer height={288}>
+        <div />
+      </ChartResponsiveContainer>,
+    ),
+  );
+  const container = host.querySelector('.recharts-responsive-container')!;
+  await act(async () =>
+    observers.get(container)!(
+      [{ contentRect: { width: 480, height: 288 } } as ResizeObserverEntry],
+      {} as ResizeObserver,
+    ),
+  );
+  expect(vi.getTimerCount()).toBe(1);
+  await act(async () => root.render(null));
+  expect(disconnect).toHaveBeenCalledOnce();
+  expect(vi.getTimerCount()).toBe(0);
 });
 
 it('forwards native attributes, merges caller classes and exposes stable equivalent table IDs', async () => {
@@ -393,3 +537,19 @@ const invalidBar: ChartProps = {
 };
 void invalidPie;
 void invalidBar;
+
+it('contains its screen-reader data table so narrow pages do not scroll sideways', () => {
+  const host = document.createElement('div');
+  host.innerHTML = renderToStaticMarkup(
+    <Chart
+      type="bar"
+      label="Lorem"
+      data={[{ id: 'a', label: 'A', values: { v: 1 } }]}
+      series={[{ id: 'v', label: 'V' }]}
+    />,
+  );
+  expect(host.querySelector('figure')!.className).toContain('relative');
+  const table = host.querySelector('table')!;
+  expect(table.className).not.toContain('sr-only');
+  expect(table.parentElement!.className).toBe('sr-only');
+});

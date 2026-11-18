@@ -137,6 +137,8 @@ const preview: Preview = {
           ],
           'Templates',
           [
+            'Dashboards',
+            ['Default', 'Top navigation', 'Centered pill', '*'],
             '*',
             [
               'Docs',

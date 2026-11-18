@@ -52,6 +52,8 @@ export {
   type UiImageProps,
   type UiLinkComponent,
   type UiImageComponent,
+  type UiRouter,
+  type UiRouterAdapter,
 } from './link-image-provider';
 
 export * from './modal';

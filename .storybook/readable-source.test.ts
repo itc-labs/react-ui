@@ -27,7 +27,7 @@ it('includes transitive helper dependencies and selected story arguments', async
     resolve('src/components/select/select.stories.tsx'),
   );
   expect(result.Disabled).toContain('const options');
-  expect(result.Disabled).toContain('disabled: true');
+  expect(result.Disabled).toContain('<Picker disabled />');
   expect(result.Custom).toContain('function Picker');
 });
 
@@ -78,6 +78,11 @@ it('parses examples from every current story without leaking CSF or interaction 
       expect(parsed.diagnostics ?? [], file).toEqual([]);
       expect(example).not.toContain('export const meta');
       expect(example).not.toContain('storybook/test');
+      expect(example, file).not.toMatch(/@\/demo|__demo|StoryExample|exampleProps/);
+      if (file.includes('/templates/dashboards/'))
+        expect(example, file).not.toMatch(
+          /\bDemo[A-Z]|useDemoPath|\bargs\b|from '\.\.?\//,
+        );
       count++;
     }
   }
@@ -92,7 +97,9 @@ it('parses examples from every current story without leaking CSF or interaction 
     noEmit: true,
     esModuleInterop: true,
     baseUrl: process.cwd(),
-    paths: { '@itclabs/react-ui': ['./src/index.ts'] },
+    paths: {
+      '@itclabs/react-ui': ['./src/index.ts'],
+    },
   };
   const host = ts.createCompilerHost(options);
   const read = host.getSourceFile.bind(host);
@@ -116,7 +123,7 @@ it('parses examples from every current story without leaking CSF or interaction 
         `${error.file?.fileName}: ${ts.flattenDiagnosticMessageText(error.messageText, ' ')}`,
     ),
   ).toEqual([]);
-}, 30_000); // Compiles every generated recipe; shared CI runners exceed the 5s unit-test default.
+}, 120_000); // Compiles every generated recipe; shared CI runners exceed the 5s unit-test default.
 
 it.each([
   resolve('../external/src/entry.stories.tsx'),

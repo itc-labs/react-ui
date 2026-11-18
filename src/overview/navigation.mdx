@@ -30,17 +30,15 @@ flat page divided from the sidebar by a rule; `variant="floating"` gives the sid
 and content separate rounded surfaces with a gap. The sidebar width comes from the
 `--container-sidebar` token (15rem).
 
-Try [Collapsible](?path=/story/modules-sidebar--collapsible),
-[CollapsedFlyout](?path=/story/modules-sidebar--collapsed-flyout), and
-[Offcanvas](?path=/story/modules-sidebar--offcanvas) below `lg`.
-[ApplicationLayout](?path=/story/templates-applicationlayout--playground) is a
-clickable application demo; [TopNavigationLayout](?path=/story/templates-applicationlayout--top-navigation-layout)
-combines a Navbar mega menu, underline indicator, and UserMenu. These demos use
-host state and a UiLink adapter without a framework dependency.
+Try the [Playground](?path=/story/modules-sidebar--playground) collapse toggle and
+[Offcanvas](?path=/story/modules-sidebar--offcanvas), including its header menu button below `lg`.
+Compare the shell variants in [WorkspaceShell](?path=/story/templates-workspaceshell--variants). The
+[Top navigation](?path=/story/templates-dashboards-top-navigation--playground) template combines a
+Navbar mega menu, underline indicator, and UserMenu without a sidebar.
 
 ## Dashboard application shell
 
-`DashboardShell` combines responsive sidebar navigation, a sticky header, and an avatar account menu. Pass navigation and account items from your app, put toolbar controls in `headerActions`, and render the page as children. Choose `inset`, `classic`, or `floating` to match the dashboard layout.
+`DashboardShell` combines responsive sidebar navigation, a sticky header, and an avatar account menu. Pass navigation and account items from your app, put toolbar controls in `headerActions`, and render the page as children. Choose `inset` (default), `classic`, `floating`, or `soft` to match the dashboard layout.
 
 ```tsx
 import { DashboardShell } from '@itclabs/react-ui/templates';
@@ -72,19 +70,97 @@ export function ReportsLayout() {
 }
 ```
 
-Compare [Sales](?path=/story/templates-applicationlayout--sales-dashboard), [Operations](?path=/story/templates-applicationlayout--operations-dashboard), and [Service Health](?path=/story/templates-applicationlayout--service-health-dashboard).
+Compare the dashboard templates: [Default](?path=/story/templates-dashboards-default--playground) (no customization), [Top navigation](?path=/story/templates-dashboards-top-navigation--playground) (default Navbar), [Centered pill](?path=/story/templates-dashboards-centered-pill--playground), [Storefront](?path=/story/templates-dashboards-storefront--playground), [Floating capsule](?path=/story/templates-dashboards-floating-capsule--playground), [Brand hero](?path=/story/templates-dashboards-brand-hero--playground), [Newsroom](?path=/story/templates-dashboards-newsroom--playground), [Merchandising](?path=/story/templates-dashboards-merchandising--playground), [Soft workspace](?path=/story/templates-dashboards-soft-workspace--playground), [Sidebar search](?path=/story/templates-dashboards-sidebar-search--playground), [Three column](?path=/story/templates-dashboards-three-column--playground), [Top nav rail](?path=/story/templates-dashboards-top-nav-rail--playground), [Dark analytics](?path=/story/templates-dashboards-dark-analytics--playground), [Messaging](?path=/story/templates-dashboards-messaging--playground) and [Floating cards](?path=/story/templates-dashboards-floating-cards--playground). Toggle regions in Controls to preview a smaller layout.
+
+## Use a dashboard template
+
+Open a template, choose **Show code**, and copy it. The code is one complete file that imports only public entry points.
+
+1. Install the packages named in the `Install first` comment at the top of the file.
+2. Mount `UIProvider` once at your application root, as described in [Getting started](?path=/docs/overview-getting-started--docs).
+3. Replace the blocks under `Sample data and blocks` with your API data and components.
+4. Keep the shell in your route layout and render the matching page through your router's outlet.
+
+Templates navigate with links and follow the current path through the [`link` and `router` adapters](?path=/docs/guides-providers-adapters--docs), so they work with any router. Without those adapters, links do a full page load and the sidebar shows no active item. Regions switched off in Controls are not part of the copied file; copy the code and delete the regions you do not need.
+
+## Notification bell
+
+Compose the bell from IconButton, Popover and VirtualList. `badge` shows the unread count, and `VirtualList` requests the next page as the user scrolls.
+
+```tsx
+import { IconButton, Popover, PopoverContent, PopoverTrigger } from '@itclabs/react-ui';
+import { BellIcon } from '@itclabs/react-ui/icons/outline/bell';
+import { VirtualList } from '@itclabs/react-ui/virtual-list';
+
+type Notification = { id: string; title: string };
+
+type NotificationBellProps = {
+  unreadCount: number;
+  items: readonly Notification[];
+  hasMore: boolean;
+  loading: boolean;
+  onOpenChange: (open: boolean) => void;
+  onLoadMore: () => void;
+};
+
+export function NotificationBell({
+  unreadCount,
+  items,
+  hasMore,
+  loading,
+  onOpenChange,
+  onLoadMore,
+}: NotificationBellProps) {
+  return (
+    <Popover onOpenChange={onOpenChange}>
+      <PopoverTrigger asChild>
+        <IconButton
+          icon={BellIcon}
+          variant="ghost"
+          label="Notifications"
+          badge={unreadCount}
+        />
+      </PopoverTrigger>
+      <PopoverContent align="end" collisionPadding={16} className="w-96 p-0">
+        <VirtualList
+          aria-label="Latest notifications"
+          items={items}
+          getItemKey={(item) => item.id}
+          renderItem={(item) => (
+            <p className="border-b border-line p-4">{item.title}</p>
+          )}
+          estimateSize={56}
+          height={360}
+          hasMore={hasMore}
+          loading={loading}
+          onLoadMore={onLoadMore}
+        />
+      </PopoverContent>
+    </Popover>
+  );
+}
+```
+
+Read the unread count from its own endpoint, because only part of the list is loaded. Load the list when the panel first opens, merge pages by `id`, and keep this state in the bell so a new notification does not re-render the page. Each dashboard template includes a working version with mark-as-read and retry.
 
 ## Sidebar variants
 
-| Prop            | Values                                          | Default   | Purpose                                                            |
-| --------------- | ----------------------------------------------- | --------- | ------------------------------------------------------------------ |
-| `variant`       | `sidebar`, `floating`                           | `sidebar` | Full-height navigation or a rounded floating surface.              |
-| `collapsible`   | `icon`, `offcanvas`, `none`                     | `icon`    | Collapse to a rail, hide the desktop sidebar, or keep it expanded. |
-| `tone`          | `default`, `dark`, `brand`                      | `default` | Scoped sidebar colors.                                             |
-| `itemVariant`   | `raised`, `subtle`, `bar`, `indicator`, `solid` | `raised`  | Active and hover treatment for navigation items.                   |
-| `expandOnHover` | boolean                                         | `false`   | Preview an icon rail without changing its layout width.            |
+| Prop            | Values                                                  | Default   | Purpose                                                                         |
+| --------------- | ------------------------------------------------------- | --------- | ------------------------------------------------------------------------------- |
+| `appearance`    | `default`, `soft`, `dark`, `brand`                      | `default` | Preset for tone, item style and density; start here.                            |
+| `density`       | `compact`, `default`, `comfortable`                     | preset    | Row height (32, 36 or 40px).                                                    |
+| `tone`          | `default`, `dark`, `brand`, `soft`                      | preset    | Scoped sidebar colours; overrides the preset.                                   |
+| `itemVariant`   | `raised`, `subtle`, `bar`, `indicator`, `solid`, `pill` | preset    | Active and hover treatment; overrides the preset.                               |
+| `variant`       | `sidebar`, `floating`                                   | `sidebar` | Full-height navigation or a rounded floating surface.                           |
+| `collapsible`   | `icon`, `offcanvas`, `none`                             | `icon`    | Collapse to a rail, hide the desktop sidebar, or keep it expanded.              |
+| `expandOnHover` | boolean                                                 | `false`   | Preview an icon rail without changing its layout width.                         |
+| `footerItems`   | `SidebarEntry[]`                                        | —         | Entries pinned above the footer (e.g. Settings), with the same active rules.    |
+| `account`       | `UserMenuProps`                                         | —         | Account menu at the bottom that adapts to the collapsed rail.                   |
+| `mobileTrigger` | node or `false`                                         | button    | `false` removes the built-in drawer button; use `SidebarMobileTrigger` instead. |
 
-Set `itemVariant="indicator"` for a thin accent line at the leading edge and a lightly tinted background on the active item. See the [expanded and collapsed layouts](?path=/story/modules-sidebar--active-indicator) and the [active sub item](?path=/story/modules-sidebar--active-sub-item-indicator).
+`itemVariant="indicator"` draws a thin accent line at the leading edge; `pill` (used by `appearance="soft"`) fills the current page with a rounded tint, keeps ancestors plain and marks the row with a bar at the sidebar edge. Items accept `description` (a tooltip beside the row, and under the label in the rail) and `trailing` (for example a plan mark). See [Variants](?path=/story/modules-sidebar--variants).
+
+Sidebar colours are CSS variables scoped by `data-sidebar-tone`. Retheme a tone in CSS, for example `[data-sidebar-tone='soft'] { --sidebar-tint: … }`, or set `--color-sidebar-soft` and `--color-sidebar-soft-active` in the theme.
 
 Pair `Sidebar variant="floating"` with `WorkspaceShell variant="floating"`.
 For offcanvas navigation, keep `SidebarTrigger` outside the sidebar so users can
@@ -132,7 +208,7 @@ export function FloatingWorkspace() {
 }
 ```
 
-See [Floating layout](?path=/story/modules-sidebar--floating-layout),
+See [Floating cards](?path=/story/templates-dashboards-floating-cards--playground),
 [Offcanvas](?path=/story/modules-sidebar--offcanvas), and
 [Variants](?path=/story/modules-sidebar--variants).
 

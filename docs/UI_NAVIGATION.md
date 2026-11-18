@@ -161,9 +161,8 @@ Item paths retain stable type/id segments and derive `-icon`, `-label`, `-badge`
 (and Badge's parts), `-tooltip`, submenu `-content` and rail parent `-link`.
 Mobile item paths start under `-drawer`, with `-drawer-sidebarHeader` for the brand header inside the body, avoiding duplicate selectors.
 
-See Modules/Sidebar's WithHeaderFooter, IconsAndCounts, Collapsible,
-CollapsedFlyout and Mobile stories, and Templates/ApplicationLayout for clickable
-sidebar and top-navigation layouts.
+See Modules/Sidebar's Playground, Variants and Offcanvas stories, and
+Templates/Dashboards for complete sidebar and top-navigation layouts.
 
 ## Permission filtering and route protection
 
@@ -223,7 +222,7 @@ Choose matchers/permissions for the host's route tree. Also verify authorization
 
 ### React Router host
 
-Read [useLocation](https://reactrouter.com/api/hooks/useLocation) inside the host router and pass its pathname. Configure a UIProvider link adapter mapping UiLink's `href` to React Router Link's `to`, forwarding native props and ref.
+Prefer the `router` adapter on `UIProvider`, which keeps Sidebar and Navbar on the current path without a prop. To pass the path yourself, read [useLocation](https://reactrouter.com/api/hooks/useLocation) inside the host router and pass its pathname. Configure a UIProvider link adapter mapping UiLink's `href` to React Router Link's `to`, forwarding native props and ref.
 
 ```tsx
 import { useLocation } from 'react-router';

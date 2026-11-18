@@ -7,6 +7,7 @@ import { themeTokenRule, validateThemeTokens } from './tokens';
 import type {
   UiLinkComponent,
   UiImageComponent,
+  UiRouterAdapter,
 } from '../components/link-image-provider';
 import { AdapterProvider } from '../components/link-image-provider/context';
 import { UILocaleProvider } from '../i18n/provider';
@@ -24,6 +25,7 @@ export function UIProvider({
   calendarLocales,
   link,
   image,
+  router,
   children,
 }: {
   theme?: UITheme;
@@ -34,6 +36,8 @@ export function UIProvider({
   messages?: Partial<UIMessages>;
   link?: UiLinkComponent;
   image?: UiImageComponent;
+  /** Hook that reads the host router; Sidebar, Navbar and TopLoader follow its path. */
+  router?: UiRouterAdapter;
   children: ReactNode;
 }) {
   const parent = useContext(ThemeContext);
@@ -80,10 +84,11 @@ export function UIProvider({
         {!parent.tokens && hasTokens && tokens && (
           <style>{themeTokenRule(tokens)}</style>
         )}
-        {link || image ? (
+        {link || image || router ? (
           <AdapterProvider
             {...(link ? { Link: link } : {})}
             {...(image ? { Image: image } : {})}
+            {...(router ? { useRouter: router } : {})}
           >
             {children}
           </AdapterProvider>

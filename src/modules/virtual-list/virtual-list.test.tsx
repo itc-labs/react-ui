@@ -361,3 +361,18 @@ it('switches loading-more feedback between spinner, placeholders, bar and custom
   });
   expect(loader().textContent).toBe('Custom');
 });
+
+it('does no list-wide work when a resize reports the same dimensions', async () => {
+  const getItemKey = vi.fn((item: string) => item);
+
+  await render({
+    items: Array.from({ length: 1000 }, (_, index) => `item-${index}`),
+    getItemKey,
+  });
+  getItemKey.mockClear();
+  await act(async () => window.dispatchEvent(new Event('resize')));
+  await act(async () => window.dispatchEvent(new Event('resize')));
+
+  // Only mounted rows may be read again; scanning all items would cost at least 1,000 calls.
+  expect(getItemKey.mock.calls.length).toBeLessThan(50);
+});

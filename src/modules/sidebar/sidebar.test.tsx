@@ -1,4 +1,6 @@
 // @vitest-environment jsdom
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { act, createRef } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { userEvent } from 'storybook/test';
@@ -163,7 +165,11 @@ it('keeps defaults and forwards floating appearance, refs and custom slots', asy
   expect(ref.current).toBe(aside);
   expect(aside.dataset.testid).toBe('appearance');
   expect(aside.classList.contains('m-2')).toBe(true);
-  expect(aside.classList.contains('h-[calc(100dvh-1rem)]')).toBe(true);
+  expect(
+    aside.classList.contains(
+      'h-[calc(100dvh-1rem-var(--workspace-topbar-height,0px))]',
+    ),
+  ).toBe(true);
   expect(aside.classList.contains('rounded-none')).toBe(true);
   expect(aside.classList.contains('rounded-panel')).toBe(false);
   expect(aside.classList.contains('custom-root')).toBe(true);
@@ -174,20 +180,41 @@ it('keeps defaults and forwards floating appearance, refs and custom slots', asy
   ).toBe(true);
 });
 
-it.each(['default', 'dark', 'brand'] as const)(
-  'scopes %s tone variables to the aside',
+it.each(['default', 'dark', 'brand', 'soft'] as const)(
+  'marks the aside and drawer with the %s tone instead of inline colours',
   async (tone) => {
     await act(async () => root.render(<Sidebar tone={tone} items={items} />));
     const aside = host.querySelector('aside')!;
     expect(aside.dataset.tone).toBe(tone);
-    expect(aside.style.getPropertyValue('--sidebar-bg')).toBe(
-      `var(--color-${tone === 'dark' ? 'ink' : tone === 'brand' ? 'accent' : 'sidebar'})`,
-    );
-    for (const name of ['fg', 'muted', 'hover', 'active-bg', 'active-fg', 'border'])
-      expect(aside.style.getPropertyValue(`--sidebar-${name}`)).not.toBe('');
-    expect(host.style.getPropertyValue('--sidebar-fg')).toBe('');
+    expect(aside.dataset.sidebarTone).toBe(tone);
+    expect(aside.getAttribute('style')).toBeNull();
   },
 );
+
+it('defines every tone variable in the sidebar stylesheet', () => {
+  const css = readFileSync(resolve(__dirname, 'sidebar.css'), 'utf8');
+  const start = css.indexOf('[data-sidebar-tone] {');
+  const base = css.slice(start, css.indexOf('}', start));
+  for (const name of [
+    'bg',
+    'fg',
+    'muted',
+    'hover',
+    'active-bg',
+    'active-fg',
+    'border',
+    'badge-ring',
+    'accent',
+    'tint',
+    'solid-bg',
+    'solid-fg',
+  ])
+    expect(base).toContain(`--sidebar-${name}:`);
+  for (const tone of ['dark', 'brand', 'soft'])
+    expect(css).toContain(`[data-sidebar-tone='${tone}']`);
+  expect(css).toContain('--sidebar-bg: var(--color-sidebar-soft);');
+  expect(css).toContain('--sidebar-tint: var(--color-sidebar-soft-active);');
+});
 
 it.each(['raised', 'subtle', 'bar', 'indicator', 'solid'] as const)(
   'applies %s styles to links, submenu triggers and collapsed rail',
@@ -238,6 +265,149 @@ it.each(['raised', 'subtle', 'bar', 'indicator', 'solid'] as const)(
     expect(rail.classList.contains('before:w-0.5')).toBe(itemVariant === 'indicator');
   },
 );
+
+it.each([
+  ['default', 'default', 'raised', 'default'],
+  ['soft', 'soft', 'pill', 'comfortable'],
+  ['dark', 'dark', 'raised', 'default'],
+  ['brand', 'brand', 'raised', 'default'],
+] as const)(
+  'resolves the %s appearance preset',
+  async (appearance, tone, itemVariant, density) => {
+    await act(async () =>
+      root.render(<Sidebar appearance={appearance} items={items} />),
+    );
+    const aside = host.querySelector('aside')!;
+    expect(aside.dataset.appearance).toBe(appearance);
+    expect(aside.dataset.sidebarTone).toBe(tone);
+    expect(aside.dataset.itemVariant).toBe(itemVariant);
+    expect(aside.dataset.sidebarDensity).toBe(density);
+  },
+);
+
+it('lets explicit tone, item variant and density override a preset', async () => {
+  await act(async () =>
+    root.render(
+      <Sidebar
+        appearance="soft"
+        tone="dark"
+        itemVariant="indicator"
+        density="compact"
+        items={items}
+      />,
+    ),
+  );
+  const aside = host.querySelector('aside')!;
+  expect(aside.dataset.sidebarTone).toBe('dark');
+  expect(aside.dataset.itemVariant).toBe('indicator');
+  expect(aside.dataset.sidebarDensity).toBe('compact');
+  const css = readFileSync(resolve(__dirname, 'sidebar.css'), 'utf8');
+  expect(css).toContain("[data-sidebar-density='compact']");
+  expect(css).toContain("[data-sidebar-density='comfortable']");
+  expect(host.querySelector('a')!.className).toContain(
+    'min-h-[var(--sidebar-row,2.25rem)]',
+  );
+});
+
+it('pill marks only the current page and drops nested guide rules', async () => {
+  await act(async () =>
+    root.render(
+      <Sidebar
+        itemVariant="pill"
+        data-testid="pill"
+        items={[
+          {
+            id: 'branch',
+            type: 'submenu',
+            label: 'Branch',
+            defaultOpen: true,
+            items: [
+              { id: 'child', label: 'Child', href: '/child', active: true },
+              { id: 'other', label: 'Other', href: '/other' },
+            ],
+          },
+        ]}
+      />,
+    ),
+  );
+  const current = host.querySelector('[aria-current="page"]')!;
+  expect(current.textContent).toBe('Child');
+  expect(current.className).toContain('font-semibold');
+  expect(current.className).toContain('bg-[var(--sidebar-tint');
+  const trigger = host.querySelector('[data-testid="pill-submenu-branch"] button')!;
+  expect(trigger.className).not.toContain('font-semibold');
+  expect(trigger.className).not.toContain('bg-[var(--sidebar-tint');
+  const other = Array.from(host.querySelectorAll('a')).find(
+    (a) => a.textContent === 'Other',
+  )!;
+  expect(other.className).toContain('text-[var(--sidebar-fg');
+  const body = host.querySelector('[data-testid="pill-submenu-branch-content"] > div')!;
+  expect(body.className).toContain('[--sidebar-indent:2.25rem]');
+  expect(current.className).toContain('ps-[calc(0.75rem+var(--sidebar-indent,0rem))]');
+  expect(current.className).toContain('after:-end-3');
+  expect(trigger.className).not.toContain('after:-end-3');
+  expect(host.querySelector('[data-testid="pill-content"]')!.className).toContain(
+    '-me-3',
+  );
+  expect(body.className).not.toContain('border-l');
+});
+
+it('keeps the pill edge bar at the rail edge when collapsed', async () => {
+  await act(async () =>
+    root.render(
+      <Sidebar
+        itemVariant="pill"
+        collapsed
+        data-testid="rail"
+        items={[
+          { id: 'home', label: 'Home', href: '/', active: true },
+          { id: 'files', label: 'Files', href: '/files' },
+        ]}
+      />,
+    ),
+  );
+  const other = host.querySelector('[data-testid="rail-item-files"]')!;
+  expect(other.className).not.toContain('after:');
+  const current = host.querySelector('[aria-current="page"]')!;
+  expect(current.className).toContain(
+    'after:-end-[calc((var(--container-sidebar-collapsed)-2.25rem)/2)]',
+  );
+  expect(current.className).not.toContain('after:-end-3');
+  expect(current.className).toContain('px-2');
+  expect(host.querySelector('[data-testid="rail-content"]')!.className).toContain(
+    '-me-2',
+  );
+});
+
+it('shows item descriptions in a tooltip and renders trailing marks outside the rail', async () => {
+  const entries: SidebarEntry[] = [
+    {
+      id: 'tickets',
+      label: 'Tickets',
+      href: '/tickets',
+      description: 'Lorem ipsum dolor',
+      trailing: <span data-mark="premium">P</span>,
+    },
+    { id: 'plain', label: 'Plain', href: '/plain' },
+  ];
+  await act(async () =>
+    root.render(<Sidebar items={entries} data-testid="described" />),
+  );
+  const link = host.querySelector('[data-testid="described-item-tickets"]')!;
+  expect(link.getAttribute('data-state')).toBe('closed');
+  expect(
+    host
+      .querySelector('[data-testid="described-item-plain"]')!
+      .hasAttribute('data-state'),
+  ).toBe(false);
+  expect(
+    host.querySelector('[data-testid="described-item-tickets-trailing"] [data-mark]'),
+  ).not.toBeNull();
+  await act(async () =>
+    root.render(<Sidebar items={entries} collapsed data-testid="described" />),
+  );
+  expect(host.querySelector('[data-mark]')).toBeNull();
+});
 
 it('ignores collapse state and shortcuts when collapsible is none', async () => {
   const onCollapsedChange = vi.fn();

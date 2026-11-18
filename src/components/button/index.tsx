@@ -4,7 +4,8 @@ import { interactiveTrigger } from '../common/interactive-trigger';
 import type { TestIdProps } from '../common/testing';
 
 import { useUILocale } from '../../i18n/provider';
-import { useContext, type ComponentProps } from 'react';
+import { useContext, type ComponentProps, type HTMLAttributeAnchorTarget } from 'react';
+import { UiLink, type UiLinkProps } from '../link-image-provider';
 import { FormStatusContext } from '../common/form-status';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { Spinner } from '../spinner';
@@ -45,6 +46,10 @@ export type ButtonProps = (ComponentProps<'button'> &
     loading?: boolean;
     loadingLabel?: string;
     classNames?: SlotClasses<'root' | 'spinner'>;
+    /** Renders a link through the host's `link` adapter instead of a button. */
+    href?: string | undefined;
+    target?: HTMLAttributeAnchorTarget | undefined;
+    rel?: string | undefined;
   }) &
   TestIdProps;
 
@@ -59,11 +64,46 @@ export function Button({
   classNames,
   children,
   loadingLabel,
+  href,
+  target,
+  rel,
   ...props
 }: ButtonProps) {
   const { t } = useUILocale();
   const formStatus = useContext(FormStatusContext);
   const loading = loadingProp ?? (type === 'submit' && Boolean(formStatus?.submitting));
+
+  const classes = cn(
+    button({ variant, size }),
+    tone &&
+      buttonToneClasses[tone][
+        variant === 'ghost'
+          ? 'ghost'
+          : variant === 'secondary' || variant === 'outline' || variant === 'dashed'
+            ? 'outline'
+            : variant === 'soft'
+              ? 'soft'
+              : 'solid'
+      ],
+    loading && 'disabled:cursor-wait',
+    classNames?.root,
+    className,
+  );
+
+  // A disabled or loading action has no destination, so it stays a disabled button.
+  if (href && !disabled && !loading)
+    return (
+      <UiLink
+        {...(props as unknown as Omit<UiLinkProps, 'href'>)}
+        href={href}
+        {...(target ? { target } : {})}
+        {...(rel ? { rel } : {})}
+        data-variant={variant ?? 'primary'}
+        className={classes}
+      >
+        {children}
+      </UiLink>
+    );
 
   return (
     <button
@@ -71,22 +111,8 @@ export function Button({
       type={type}
       disabled={disabled || loading}
       aria-busy={loading || undefined}
-      className={cn(
-        button({ variant, size }),
-        tone &&
-          buttonToneClasses[tone][
-            variant === 'ghost'
-              ? 'ghost'
-              : variant === 'secondary' || variant === 'outline' || variant === 'dashed'
-                ? 'outline'
-                : variant === 'soft'
-                  ? 'soft'
-                  : 'solid'
-          ],
-        loading && 'disabled:cursor-wait',
-        classNames?.root,
-        className,
-      )}
+      data-variant={variant ?? 'primary'}
+      className={classes}
     >
       {loading && (
         <Spinner

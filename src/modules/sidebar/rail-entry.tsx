@@ -99,6 +99,17 @@ export function SidebarEntryLabel({
               className={cn('ml-auto shrink-0', classNames?.badge)}
             />
           )}
+      {item.trailing != null && (
+        <span
+          data-testid={partTestId(testId, 'trailing')}
+          className={cn(
+            'ml-auto inline-flex shrink-0 items-center',
+            classNames?.trailing,
+          )}
+        >
+          {item.trailing}
+        </span>
+      )}
     </span>
   );
 }
@@ -118,9 +129,9 @@ export function SidebarRailEntry({
   const contentRef = useRef<HTMLDivElement>(null);
   // Pointer-opened flyouts focus the panel, so no focus ring flashes on the first link.
   const openedByPointer = useRef(false);
-  const [localOpen, setLocalOpen] = useState(
-    item.type === 'submenu' ? (item.defaultOpen ?? false) : false,
-  );
+  // The flyout always starts closed: defaultOpen describes the inline branch, and opening
+  // a popover when the sidebar collapses would cover the page.
+  const [localOpen, setLocalOpen] = useState(false);
   const open = item.type === 'submenu' ? (item.open ?? localOpen) : false;
 
   const changeOpen = (next: boolean) => {
@@ -139,13 +150,29 @@ export function SidebarRailEntry({
     focusRingClassName,
     sidebarItemClasses(variant, active),
     variant === 'indicator' && 'w-full focus-visible:-outline-offset-2',
+    // Pill keeps a centred icon tile; its edge bar moves out to the rail edge.
+    variant === 'pill' && 'px-2',
+    // Only the current row draws the edge bar; an after: utility on other rows would add an
+    // empty ::after flex item (and its gap) that pushes the icon off centre.
+    variant === 'pill' &&
+      active &&
+      'after:-end-[calc((var(--container-sidebar-collapsed)-2.25rem)/2)]',
     classNames?.item,
     item.className,
   );
 
   const tooltip = (child: ReactElement) => (
     <Tooltip
-      content={item.label}
+      content={
+        item.description != null ? (
+          <span className="grid gap-0.5">
+            <span className="font-semibold">{item.label}</span>
+            <span>{item.description}</span>
+          </span>
+        ) : (
+          item.label
+        )
+      }
       side="right"
       className={cn(classNames?.tooltip)}
       data-testid={partTestId(testId, 'tooltip')}

@@ -2,6 +2,7 @@ import type { ComponentProps, ReactNode } from 'react';
 import type { SlotClasses, TestIdProps } from '../../components/common';
 import type { BadgeProps } from '../../components/badge';
 import type { IconName, IconGlyph } from '../../components/icon';
+import type { UserMenuProps } from '../user-menu';
 
 type EntryBase<TAccess> = {
   id: string;
@@ -14,7 +15,11 @@ type EntryBase<TAccess> = {
 };
 type NavigationEntry<TAccess> = EntryBase<TAccess> & {
   icon?: IconName | IconGlyph;
+  /** Short help shown in a tooltip beside the expanded item. */
+  description?: ReactNode;
   badge?: number | Omit<BadgeProps, 'children'>;
+  /** Decorative content after the label and badge, e.g. a plan or premium mark. Hidden in the collapsed rail. */
+  trailing?: ReactNode;
   disabled?: boolean;
   actions?: SidebarItemAction[];
   onAdd?: () => void;
@@ -73,6 +78,7 @@ export type SidebarBrand = {
   subtitle?: ReactNode;
   href?: string;
 };
+export type SidebarAppearance = 'default' | 'soft' | 'dark' | 'brand';
 export type SidebarClassNames = SlotClasses<
   | 'root'
   | 'overlay'
@@ -94,6 +100,8 @@ export type SidebarClassNames = SlotClasses<
   | 'actionButton'
   | 'content'
   | 'footer'
+  | 'footerNav'
+  | 'account'
   | 'nav'
   | 'group'
   | 'groupLabel'
@@ -101,6 +109,7 @@ export type SidebarClassNames = SlotClasses<
   | 'icon'
   | 'label'
   | 'badge'
+  | 'trailing'
   | 'toggle'
   | 'tooltip'
   | 'flyout'
@@ -123,9 +132,18 @@ export type SidebarProps<TAccess = unknown> = ComponentProps<'aside'> &
     defaultSection?: string;
     onSectionChange?: (section: string) => void;
     variant?: 'sidebar' | 'floating';
+    /**
+     * Visual preset: `default` (raised rows), `soft` (tinted panel, pill rows, comfortable density),
+     * `dark` and `brand` (contrast panels). `tone`, `itemVariant` and `density` override a preset.
+     */
+    appearance?: SidebarAppearance;
+    /** Row height: `compact` 32px, `default` 36px, `comfortable` 40px. */
+    density?: 'compact' | 'default' | 'comfortable';
     collapsible?: 'icon' | 'offcanvas' | 'none';
-    tone?: 'default' | 'dark' | 'brand';
-    itemVariant?: 'raised' | 'subtle' | 'bar' | 'indicator' | 'solid';
+    /** `soft` tints the sidebar with the accent and keeps item text at full ink. */
+    tone?: 'default' | 'dark' | 'brand' | 'soft';
+    /** `pill`: rounded tinted active item with full-ink labels; pairs with `tone="soft"`. */
+    itemVariant?: 'raised' | 'subtle' | 'bar' | 'indicator' | 'solid' | 'pill';
     /** `caps`: small uppercase group labels, so they read as headings rather than items. */
     groupLabel?: 'default' | 'caps';
     /** Draw a hairline between top-level groups. */
@@ -133,6 +151,10 @@ export type SidebarProps<TAccess = unknown> = ComponentProps<'aside'> &
     header?: ReactNode | SidebarBrand;
     search?: ReactNode | SidebarSearch;
     footer?: ReactNode;
+    /** Entries pinned above the footer, e.g. Settings; same access and active rules as items. */
+    footerItems?: readonly SidebarEntry<TAccess>[];
+    /** Account menu at the bottom; adapts to the collapsed rail. */
+    account?: UserMenuProps;
     items?: readonly SidebarEntry<TAccess>[];
     /** Absolute host pathname; no router is imported. */
     currentPath?: string;
@@ -152,8 +174,11 @@ export type SidebarProps<TAccess = unknown> = ComponentProps<'aside'> &
     collapseToggle?: 'sidebar' | 'none';
     collapseLabel?: string;
     expandLabel?: string;
-    /** A native button or ref/props-forwarding control, e.g. IconButton. */
-    mobileTrigger?: ReactNode;
+    /**
+     * A native button or ref/props-forwarding control, e.g. IconButton. `false` renders no trigger:
+     * place SidebarMobileTrigger (inside a SidebarProvider) in the page header instead.
+     */
+    mobileTrigger?: ReactNode | false;
     mobileTriggerLabel?: string;
     drawerTitle?: string;
     classNames?: SidebarClassNames;

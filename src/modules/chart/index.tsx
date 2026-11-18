@@ -82,7 +82,8 @@ export function Chart(props: ChartProps) {
       aria-busy={loading || undefined}
       data-testid={testId}
       className={cn(
-        'grid min-w-0 content-start gap-4 text-control text-ink',
+        // relative contains the sr-only data table so it cannot widen narrow pages.
+        'relative grid min-w-0 content-start gap-4 text-control text-ink',
         classNames?.root,
         className,
       )}

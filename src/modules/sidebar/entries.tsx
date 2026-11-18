@@ -1,5 +1,7 @@
 'use client';
 
+import type { ReactElement } from 'react';
+import { Tooltip } from '../../components/tooltip';
 import { useUILocale } from '../../i18n/provider';
 import { cn, partTestId } from '../../components/common';
 import { SidebarEntryIcon, SidebarEntryLabel, SidebarRailEntry } from './rail-entry';
@@ -13,7 +15,7 @@ import {
   SidebarSubmenuContent,
 } from './submenu';
 import type { SidebarEntry } from './types';
-import type { SidebarProps } from './index';
+import type { SidebarProps } from './types';
 
 export function SidebarEntries({
   items,
@@ -78,6 +80,20 @@ export function SidebarEntries({
           <SidebarEntryLabel item={item} testId={id} classNames={classNames} />
         );
 
+        const described = (node: ReactElement) =>
+          item.description != null ? (
+            <Tooltip
+              content={item.description}
+              side="right"
+              className={cn(classNames?.tooltip)}
+              data-testid={partTestId(id, 'description')}
+            >
+              {node}
+            </Tooltip>
+          ) : (
+            node
+          );
+
         const select = () => {
           item.onSelect?.();
           onNavigate?.();
@@ -100,16 +116,18 @@ export function SidebarEntries({
               <SidebarItemRow item={item} testId={id} classNames={classNames}>
                 {item.href ? (
                   <SidebarSubmenuRow>
-                    <SidebarItem
-                      {...(!item.disabled ? { href: item.href } : {})}
-                      active={active}
-                      aria-disabled={item.disabled || undefined}
-                      {...(item.onSelect || onNavigate ? { onClick: select } : {})}
-                      className={classNames?.item}
-                      icon={icon}
-                    >
-                      {label}
-                    </SidebarItem>
+                    {described(
+                      <SidebarItem
+                        {...(!item.disabled ? { href: item.href } : {})}
+                        active={active}
+                        aria-disabled={item.disabled || undefined}
+                        {...(item.onSelect || onNavigate ? { onClick: select } : {})}
+                        className={classNames?.item}
+                        icon={icon}
+                      >
+                        {label}
+                      </SidebarItem>,
+                    )}
                     <SidebarSubmenuTrigger
                       iconOnly
                       aria-label={
@@ -129,17 +147,19 @@ export function SidebarEntries({
                     </SidebarSubmenuTrigger>
                   </SidebarSubmenuRow>
                 ) : (
-                  <SidebarSubmenuTrigger
-                    icon={icon}
-                    className={classNames?.submenuTrigger}
-                    classNames={{
-                      icon: classNames?.submenuIcon ?? '',
-                      label: cn('flex-1', classNames?.submenuLabel),
-                      chevron: classNames?.submenuChevron ?? '',
-                    }}
-                  >
-                    {label}
-                  </SidebarSubmenuTrigger>
+                  described(
+                    <SidebarSubmenuTrigger
+                      icon={icon}
+                      className={classNames?.submenuTrigger}
+                      classNames={{
+                        icon: classNames?.submenuIcon ?? '',
+                        label: cn('flex-1', classNames?.submenuLabel),
+                        chevron: classNames?.submenuChevron ?? '',
+                      }}
+                    >
+                      {label}
+                    </SidebarSubmenuTrigger>,
+                  )
                 )}
               </SidebarItemRow>
               <SidebarSubmenuContent
@@ -166,44 +186,48 @@ export function SidebarEntries({
               testId={id}
               classNames={classNames}
             >
-              <SidebarItem
-                asChild
-                active={active}
-                icon={icon}
-                className={cn(classNames?.item, item.className)}
-              >
-                <button
-                  type="button"
-                  disabled={item.disabled}
-                  onClick={select}
-                  data-testid={id}
+              {described(
+                <SidebarItem
+                  asChild
+                  active={active}
+                  icon={icon}
+                  className={cn(classNames?.item, item.className)}
                 >
-                  {label}
-                </button>
-              </SidebarItem>
+                  <button
+                    type="button"
+                    disabled={item.disabled}
+                    onClick={select}
+                    data-testid={id}
+                  >
+                    {label}
+                  </button>
+                </SidebarItem>,
+              )}
             </SidebarItemRow>
           );
 
         return (
           <SidebarItemRow key={item.id} item={item} testId={id} classNames={classNames}>
-            <SidebarItem
-              {...(!item.disabled && item.href ? { href: item.href } : {})}
-              data-testid={id}
-              {...((item.onSelect || onNavigate) && !item.disabled
-                ? { onClick: select }
-                : {})}
-              aria-disabled={item.disabled || undefined}
-              {...(item.disabled ? { tabIndex: -1 } : {})}
-              active={active}
-              icon={icon}
-              className={cn(
-                item.disabled && 'cursor-not-allowed opacity-50',
-                classNames?.item,
-                item.className,
-              )}
-            >
-              {label}
-            </SidebarItem>
+            {described(
+              <SidebarItem
+                {...(!item.disabled && item.href ? { href: item.href } : {})}
+                data-testid={id}
+                {...((item.onSelect || onNavigate) && !item.disabled
+                  ? { onClick: select }
+                  : {})}
+                aria-disabled={item.disabled || undefined}
+                {...(item.disabled ? { tabIndex: -1 } : {})}
+                active={active}
+                icon={icon}
+                className={cn(
+                  item.disabled && 'cursor-not-allowed opacity-50',
+                  classNames?.item,
+                  item.className,
+                )}
+              >
+                {label}
+              </SidebarItem>,
+            )}
           </SidebarItemRow>
         );
       })}

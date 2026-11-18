@@ -1,11 +1,18 @@
 'use client';
-import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
+import {
+  useEffect,
+  useId,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from 'react';
 import { Collapsible } from 'radix-ui';
 import { cn, partTestId } from '../../components/common';
 import { focusRingClassName } from '../../components/common/focus-ring';
 import { KitIcon } from '../../components/icon/kit-icon';
 import { ChevronDownIcon } from '../../components/icon/outline/chevron-down';
-import { SidebarGroup } from './index';
+import { SidebarGroup } from './nav';
 import type { SidebarEntry, SidebarClassNames } from './types';
 
 export function SidebarEntryGroup({
@@ -27,6 +34,7 @@ export function SidebarEntryGroup({
     Boolean(activeKey) || (item.defaultOpen ?? true),
   );
   const triggerRef = useRef<HTMLButtonElement>(null);
+  const triggerId = useId();
   const contentRef = useRef<HTMLDivElement>(null);
   const previousActiveKey = useRef(activeKey);
   const open = item.open ?? localOpen;
@@ -69,6 +77,7 @@ export function SidebarEntryGroup({
     >
       <Collapsible.Trigger
         ref={triggerRef}
+        id={triggerId}
         data-testid={partTestId(testId, 'trigger')}
         data-sidebar-group-label=""
         className={cn(
@@ -87,6 +96,8 @@ export function SidebarEntryGroup({
       <Collapsible.Content
         ref={contentRef}
         inert={!open}
+        role="group"
+        aria-labelledby={triggerId}
         data-testid={partTestId(testId, 'content')}
         className={cn('ui-submenu-motion overflow-hidden', classNames?.groupContent)}
       >

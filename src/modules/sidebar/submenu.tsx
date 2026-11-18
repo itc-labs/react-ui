@@ -133,8 +133,9 @@ export function SidebarSubmenuTrigger({
         focusRingClassName,
         iconOnly
           ? 'size-9 shrink-0 justify-center'
-          : 'min-h-9 w-full px-2.5 py-1.5 text-left',
-        sidebarItemClasses(variant, context.active),
+          : 'min-h-[var(--sidebar-row,2.25rem)] w-full px-2.5 py-1.5 text-left',
+        // Pill marks only the current page; ancestors keep plain rows.
+        sidebarItemClasses(variant, variant === 'pill' ? false : context.active),
         className,
       )}
     >
@@ -172,6 +173,7 @@ export function SidebarSubmenuContent({
   contentClassName?: string;
 }) {
   const context = useSubmenu();
+  const variant = useContext(SidebarAppearanceContext);
   const composedRef = useComposedRefs(context.content, ref);
 
   return (
@@ -181,11 +183,19 @@ export function SidebarSubmenuContent({
       ref={composedRef}
       inert={!context.open}
       {...(forceMount && !context.open ? { hidden: true } : {})}
-      className={cn('ui-submenu-motion overflow-hidden', className)}
+      className={cn(
+        'ui-submenu-motion overflow-hidden',
+        // Let the pill's edge bar reach the sidebar edge past this clipping box.
+        variant === 'pill' && '-me-3 pe-3',
+        className,
+      )}
     >
       <div
         className={cn(
-          'ml-[1.125rem] mt-0.5 grid min-w-0 gap-0.5 border-l border-[var(--sidebar-border,var(--color-line))] pb-1 pl-2.5',
+          'mt-0.5 grid min-w-0 gap-0.5 pb-1',
+          variant === 'pill'
+            ? '[--sidebar-indent:2.25rem]'
+            : 'ml-[1.125rem] border-l border-[var(--sidebar-border,var(--color-line))] pl-2.5',
           contentClassName,
         )}
       >

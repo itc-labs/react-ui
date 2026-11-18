@@ -189,6 +189,8 @@ export const enMessages = {
   'userMenu.open': 'Open user menu for {name}',
   'navbar.navigation': 'Main navigation',
   'navbar.openMenu': 'Open navigation menu',
+  'navbar.back': 'Back to {label}',
+  'navbar.backToMenu': 'Back to menu',
   'sidebar.sections': 'Navigation sections',
   'sidebar.sectionCount': {
     one: '{count} notification',
@@ -200,6 +202,7 @@ export const enMessages = {
   'sidebar.collapse': 'Collapse sidebar',
   'sidebar.expand': 'Expand sidebar',
   'sidebar.open': 'Open sidebar',
+  'sidebar.secondary': 'Secondary navigation',
   'sidebar.label': 'Main navigation',
   'stepper.label': 'Steps',
   'stepper.completed': ' — Completed',

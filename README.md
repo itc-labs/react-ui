@@ -119,6 +119,7 @@ export function UIRoot({ children }: { children: ReactNode }) {
 | ----------------- | ------------------------------------------------------------------------------------ |
 | `link`            | `UiLinkComponent`: host router link adapter; inherits when omitted                   |
 | `image`           | `UiImageComponent`: host image adapter; inherits when omitted                        |
+| `router`          | `UiRouterAdapter`: hook returning the host's current `pathname`                      |
 | `theme`           | `defineTheme({ tokens, icons })`: CSS token overrides and icon variant, size, packs  |
 | `locale`          | Locale code (`'vi-VN'` default, `'en-US'` built in) or a locale from `defineLocale`  |
 | `translations`    | Extra catalogs: `[{ locale: 'fr-FR', messages: { … } }]`; missing keys fall back     |
@@ -126,7 +127,7 @@ export function UIRoot({ children }: { children: ReactNode }) {
 | `messages`        | Per-key overrides for the active locale; explicit text props on components still win |
 | `calendarLocales` | date-fns locales for date pickers and the event calendar, keyed by locale code       |
 
-### Link and image adapters
+### Link, image and router adapters
 
 `link` and `image` let kit components (Sidebar, Navbar, Breadcrumb, Avatar…) render your router link and image component; without them they render `<a>` and `<img>`. Adapters receive `UiLinkProps` / `UiImageProps`, so any router works (for React Router, map `href` to `to`). Use a nested `<UIProvider link={ScopedLink}>` for a scoped override: it replaces the link adapter and inherits the image adapter. Define adapters in a client module; do not pass adapter functions across a server/client boundary.
 
@@ -134,7 +135,7 @@ export function UIRoot({ children }: { children: ReactNode }) {
 
 Components take plain props and data; no setup beyond the styles is required.
 
-Sidebar accepts host-provided `currentPath`, `isActive` and `canAccess`. See [navigation matching and route protection](docs/UI_NAVIGATION.md) for helpers and router recipes.
+Sidebar accepts `currentPath`, `isActive` and `canAccess`; with the `router` adapter it follows the current path on its own. See [navigation matching and route protection](docs/UI_NAVIGATION.md) for helpers and router recipes.
 
 ```tsx
 import { Button, Input, Select } from '@itclabs/react-ui';
@@ -282,7 +283,7 @@ Slider, OptionGroup, QuantityInput, and ColorPicker are core controls with autom
 | `@itclabs/react-ui`                                    | Everything in the core kit: components, modules, templates, providers and helpers                                                                                                                                                             |
 | `@itclabs/react-ui/components`                         | Controls: Button, IconButton, Input, Select, Tag, Badge, Dialog, Drawer, DropdownMenu, Tabs, Tooltip, OptionGroup, QuantityInput, ColorPicker, Rating, JsonView, Divider, Kbd, DescriptionList, Timeline, Slider, Progress (linear/circular)… |
 | `@itclabs/react-ui/modules`                            | Compositions: Form, DataTable, Sidebar, Navbar, Pagination, EmptyState, PageHeader, ProgressList, KpiCard…                                                                                                                                    |
-| `@itclabs/react-ui/templates`                          | Page layouts with slots (WorkspaceShell)                                                                                                                                                                                                      |
+| `@itclabs/react-ui/templates`                          | Page layouts with slots (WorkspaceShell, DashboardShell)                                                                                                                                                                                      |
 | `@itclabs/react-ui/navigation`                         | Router-agnostic `matchPath`, `resolveActiveNav`, `filterNavByAccess` (no React)                                                                                                                                                               |
 | `@itclabs/react-ui/carousel`                           | Responsive Carousel with multi-row items, hero slides, autoplay and drag scrolling; isolated from all barrels                                                                                                                                 |
 | `@itclabs/react-ui/media-gallery`                      | MediaGallery and Lightbox for images/video, responsive thumbnails, fullscreen viewing and zoom; isolated from all barrels                                                                                                                     |
@@ -405,12 +406,16 @@ Sanitization defaults to true and runs after mount. SSR and the initial client r
 
 ## Navigation, drag and drop, and large collections
 
-Sidebar supports floating surfaces, icon/offcanvas/fixed expansion, default/dark/brand
-tones and raised/subtle/bar/solid item styles. SidebarProvider shares collapse state
+Sidebar supports floating surfaces, icon/offcanvas/fixed expansion, default/soft/dark/brand
+appearances and raised/subtle/bar/indicator/solid/pill item styles. SidebarProvider shares collapse state
 with SidebarTrigger; WorkspaceShell supports a matching floating layout. Header
 workspace switching, search launchers, collapsible groups, item actions, hover
 previews and two-tier sections are documented in the
 [Navigation guide](https://react-ui-one-rose.vercel.app/?path=/docs/guides-navigation--docs).
+
+Storybook's **Templates/Dashboards** section has fifteen dashboard layouts, starting with
+Default. Copy a template's code as one complete file, install the packages named at the
+top, and replace the sample data with your API.
 
 Import sorting compositions and opt-in Transfer/DataTable plugins from
 `@itclabs/react-ui/dnd`. Keep item IDs stable and apply callback results to host
@@ -441,6 +446,6 @@ formatDate('2026-11-06T08:30:00Z', 'dd/MM/yyyy HH:mm', {
 
 ### Built-in theme presets
 
-Import `forestTheme`, `oceanTheme`, `violetTheme`, `slateTheme` or `emberTheme` (earthy orange) from `@itclabs/react-ui/theme/presets`. Each provides `.light` and `.dark` UIProvider configurations. Use `theme={emberTheme[mode]}` with the same mode as ThemeToggle. Presets are isolated from root imports; one named light/dark palette is approximately 813 bytes gzip. Import `themePresets` from the same entry only when offering all five palettes. See Guides → Theming for the complete example.
+The default tokens use a common neutral palette (slate greys with a blue primary); projects set their own brand through tokens. `forestTheme` reproduces the kit's earlier green default. Import `forestTheme`, `oceanTheme`, `violetTheme`, `slateTheme` or `emberTheme` (earthy orange) from `@itclabs/react-ui/theme/presets`. Each provides `.light` and `.dark` UIProvider configurations. Use `theme={emberTheme[mode]}` with the same mode as ThemeToggle. Presets are isolated from root imports; one named light/dark palette is approximately 813 bytes gzip. Import `themePresets` from the same entry only when offering all five palettes. See Guides → Theming for the complete example.
 
 For automatic UI locale, import `useFormatters` from `@itclabs/react-ui/hooks`. Its format functions default to the UIProvider locale and update on language changes. Hook defaults and per-call options are typed and overridable. `formatDate` defaults to `dd/MM/yyyy`, supports `DateFormat` presets/custom date-fns patterns, and retains its Intl options overload. Pure helpers remain server-safe and cannot read React context.

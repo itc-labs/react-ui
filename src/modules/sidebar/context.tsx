@@ -1,14 +1,26 @@
 'use client';
-import { createContext, useContext, useId, type ReactNode } from 'react';
+import { createContext, useContext, useId, useState, type ReactNode } from 'react';
 import { useSidebarState } from './use-sidebar-state';
 import type { SidebarProps } from './types';
 import { KitIconButton } from '../../components/icon-button/kit-icon-button';
 import { PanelLeftIcon } from '../../components/icon/outline/panel-left';
+import { MenuIcon } from '../../components/icon/outline/menu';
+import { cn } from '../../components/common';
 import { Tooltip } from '../../components/tooltip';
 import { useUILocale } from '../../i18n/provider';
 
-type SidebarState = { collapsed: boolean; toggle: () => void; id: string };
+type SidebarState = {
+  collapsed: boolean;
+  toggle: () => void;
+  id: string;
+  mobileOpen: boolean;
+  setMobileOpen: (open: boolean) => void;
+};
 export const SidebarContext = createContext<SidebarState | null>(null);
+/** Set by WorkspaceShell so a direct Sidebar can follow the shell variant. */
+export const WorkspaceLayoutContext = createContext<
+  'inset' | 'classic' | 'floating' | 'soft' | undefined
+>(undefined);
 export const SidebarAppearanceContext =
   createContext<NonNullable<SidebarProps['itemVariant']>>('raised');
 
@@ -21,9 +33,10 @@ export type SidebarProviderProps = Pick<
 export function SidebarProvider({ children, ...props }: SidebarProviderProps) {
   const state = useSidebarState(props);
   const id = useId();
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <SidebarContext.Provider value={{ ...state, id }}>
+    <SidebarContext.Provider value={{ ...state, id, mobileOpen, setMobileOpen }}>
       {children}
     </SidebarContext.Provider>
   );
@@ -77,5 +90,38 @@ export function SidebarTrigger({
     <Tooltip content={tooltip === true ? name : tooltip} side="bottom">
       {button}
     </Tooltip>
+  );
+}
+
+export type SidebarMobileTriggerProps = Omit<
+  React.ComponentProps<typeof KitIconButton>,
+  'icon' | 'builtin' | 'label'
+> & { label?: string };
+
+/** Opens the Sidebar's mobile drawer from the page header; hidden from lg. Use inside SidebarProvider with `mobileTrigger={false}` on the Sidebar. */
+export function SidebarMobileTrigger({
+  label,
+  onClick,
+  className,
+  ...props
+}: SidebarMobileTriggerProps) {
+  const context = useContext(SidebarContext);
+  const { t } = useUILocale();
+
+  return (
+    <KitIconButton
+      {...props}
+      icon={MenuIcon}
+      variant={props.variant ?? 'ghost'}
+      label={label ?? t('sidebar.open')}
+      aria-expanded={context?.mobileOpen ?? false}
+      aria-haspopup="dialog"
+      disabled={props.disabled ?? !context}
+      className={cn('lg:hidden', className)}
+      onClick={(event) => {
+        onClick?.(event);
+        if (!event.defaultPrevented) context?.setMobileOpen(true);
+      }}
+    />
   );
 }
