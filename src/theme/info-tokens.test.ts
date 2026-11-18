@@ -13,8 +13,8 @@ it('emits the two info shades and their utilities without restoring stock colors
     'bg-blue-50',
   ]);
 
-  expect(css).toContain('--color-info-50: #eaf3f8;');
-  expect(css).toContain('--color-info-700: #245b79;');
+  expect(css).toContain('--color-info-50: #f0f9ff;');
+  expect(css).toContain('--color-info-700: #0369a1;');
   expect(css).toContain('background-color: var(--color-info-50)');
   expect(css).toContain('color: var(--color-info-700)');
   expect(css).toContain('color-mix(in oklab, var(--color-info-700) 20%, transparent)');
