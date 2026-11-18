@@ -132,10 +132,6 @@
     overflow-wrap: anywhere;
   }
 
-  .navbar-secondary {
-    background: var(--navbar-hover);
-  }
-
   [data-navbar-floating='true'] {
     width: calc(100% - 2rem);
     max-width: calc(100% - 2rem);

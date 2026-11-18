@@ -230,7 +230,7 @@ export function Navbar<TAccess = unknown>({
         <div
           data-testid={partTestId(testId, 'secondary')}
           className={cn(
-            'navbar-secondary border-t border-[var(--navbar-border)] px-5 py-2',
+            'border-t border-[var(--navbar-border)] px-5 py-2',
             classNames?.secondary,
           )}
         >
