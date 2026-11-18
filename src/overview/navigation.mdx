@@ -30,9 +30,8 @@ flat page divided from the sidebar by a rule; `variant="floating"` gives the sid
 and content separate rounded surfaces with a gap. The sidebar width comes from the
 `--container-sidebar` token (15rem).
 
-Try [Collapsible](?path=/story/modules-sidebar--collapsible),
-[CollapsedFlyout](?path=/story/modules-sidebar--collapsed-flyout), and
-[Offcanvas](?path=/story/modules-sidebar--offcanvas) below `lg`.
+Try the [Playground](?path=/story/modules-sidebar--playground) collapse toggle and
+[Offcanvas](?path=/story/modules-sidebar--offcanvas), including its header menu button below `lg`.
 [ApplicationLayout](?path=/story/templates-applicationlayout--playground) is a
 clickable application demo; [TopNavigationLayout](?path=/story/templates-applicationlayout--top-navigation-layout)
 combines a Navbar mega menu, underline indicator, and UserMenu. These demos use
@@ -76,15 +75,22 @@ Compare [Sales](?path=/story/templates-applicationlayout--sales-dashboard), [Ope
 
 ## Sidebar variants
 
-| Prop            | Values                                          | Default   | Purpose                                                            |
-| --------------- | ----------------------------------------------- | --------- | ------------------------------------------------------------------ |
-| `variant`       | `sidebar`, `floating`                           | `sidebar` | Full-height navigation or a rounded floating surface.              |
-| `collapsible`   | `icon`, `offcanvas`, `none`                     | `icon`    | Collapse to a rail, hide the desktop sidebar, or keep it expanded. |
-| `tone`          | `default`, `dark`, `brand`                      | `default` | Scoped sidebar colors.                                             |
-| `itemVariant`   | `raised`, `subtle`, `bar`, `indicator`, `solid` | `raised`  | Active and hover treatment for navigation items.                   |
-| `expandOnHover` | boolean                                         | `false`   | Preview an icon rail without changing its layout width.            |
+| Prop            | Values                                                  | Default   | Purpose                                                                         |
+| --------------- | ------------------------------------------------------- | --------- | ------------------------------------------------------------------------------- |
+| `appearance`    | `default`, `soft`, `dark`, `brand`                      | `default` | Preset for tone, item style and density; start here.                            |
+| `density`       | `compact`, `default`, `comfortable`                     | preset    | Row height (32, 36 or 40px).                                                    |
+| `tone`          | `default`, `dark`, `brand`, `soft`                      | preset    | Scoped sidebar colours; overrides the preset.                                   |
+| `itemVariant`   | `raised`, `subtle`, `bar`, `indicator`, `solid`, `pill` | preset    | Active and hover treatment; overrides the preset.                               |
+| `variant`       | `sidebar`, `floating`                                   | `sidebar` | Full-height navigation or a rounded floating surface.                           |
+| `collapsible`   | `icon`, `offcanvas`, `none`                             | `icon`    | Collapse to a rail, hide the desktop sidebar, or keep it expanded.              |
+| `expandOnHover` | boolean                                                 | `false`   | Preview an icon rail without changing its layout width.                         |
+| `footerItems`   | `SidebarEntry[]`                                        | —         | Entries pinned above the footer (e.g. Settings), with the same active rules.    |
+| `account`       | `UserMenuProps`                                         | —         | Account menu at the bottom that adapts to the collapsed rail.                   |
+| `mobileTrigger` | node or `false`                                         | button    | `false` removes the built-in drawer button; use `SidebarMobileTrigger` instead. |
 
-Set `itemVariant="indicator"` for a thin accent line at the leading edge and a lightly tinted background on the active item. See the [expanded and collapsed layouts](?path=/story/modules-sidebar--active-indicator) and the [active sub item](?path=/story/modules-sidebar--active-sub-item-indicator).
+`itemVariant="indicator"` draws a thin accent line at the leading edge; `pill` (used by `appearance="soft"`) fills the current page with a rounded tint, keeps ancestors plain and marks the row with a bar at the sidebar edge. Items accept `description` (a tooltip beside the row, and under the label in the rail) and `trailing` (for example a plan mark). See [Variants](?path=/story/modules-sidebar--variants).
+
+Sidebar colours are CSS variables scoped by `data-sidebar-tone`. Retheme a tone in CSS, for example `[data-sidebar-tone='soft'] { --sidebar-tint: … }`, or set `--color-sidebar-soft` and `--color-sidebar-soft-active` in the theme.
 
 Pair `Sidebar variant="floating"` with `WorkspaceShell variant="floating"`.
 For offcanvas navigation, keep `SidebarTrigger` outside the sidebar so users can
@@ -132,7 +138,7 @@ export function FloatingWorkspace() {
 }
 ```
 
-See [Floating layout](?path=/story/modules-sidebar--floating-layout),
+See [ApplicationLayout](?path=/story/templates-applicationlayout--playground) (choose `floating`),
 [Offcanvas](?path=/story/modules-sidebar--offcanvas), and
 [Variants](?path=/story/modules-sidebar--variants).
 

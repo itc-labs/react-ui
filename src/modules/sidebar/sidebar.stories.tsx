@@ -5,6 +5,7 @@ import {
   Sidebar,
   SidebarProvider,
   SidebarTrigger,
+  SidebarMobileTrigger,
   type SidebarProps,
   type SidebarEntry,
   SidebarGroup,
@@ -42,13 +43,7 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-function SidebarExample({
-  longLabel = false,
-  asChild = false,
-}: {
-  longLabel?: boolean;
-  asChild?: boolean;
-}) {
+function SidebarExample({ asChild = false }: { asChild?: boolean }) {
   return (
     <div className="grid min-h-80 lg:grid-cols-[208px_minmax(0,1fr)]">
       <Sidebar header={<strong>Lorem ipsum</strong>} footer="Dolor sit amet.">
@@ -63,9 +58,7 @@ function SidebarExample({
               </SidebarItem>
             ) : (
               <SidebarItem active href="#sidebar-current" icon={<Icon name="search" />}>
-                {longLabel
-                  ? 'Lorem ipsum dolor sit amet consectetur adipiscing elit'
-                  : 'Current page'}
+                Current page
               </SidebarItem>
             )}
           </SidebarNav>
@@ -243,51 +236,19 @@ function ActiveBranchExample() {
   );
 }
 
-function SimpleSidebarExample({ longLabel = false }: { longLabel?: boolean }) {
-  return (
-    <div className="grid min-h-80 lg:grid-cols-[var(--container-sidebar)_minmax(0,1fr)]">
-      <Sidebar
-        header={<strong>Lorem ipsum</strong>}
-        footer="Dolor sit amet."
-        items={[
-          {
-            id: 'workspace',
-            type: 'group',
-            label: 'Workspace',
-            items: [
-              { id: 'home', href: '#sidebar-home', label: 'Overview', icon: 'folder' },
-              {
-                id: 'current',
-                href: '#sidebar-current',
-                label: longLabel
-                  ? 'Lorem ipsum dolor sit amet consectetur adipiscing elit'
-                  : 'Current page',
-                icon: 'search',
-                active: true,
-              },
-            ],
-          },
-        ]}
-      />
-      <div className="grid content-start gap-4 p-6">
-        <h2 id="sidebar-home">Lorem ipsum</h2>
-        <p id="sidebar-current">Dolor sit amet.</p>
-      </div>
-    </div>
-  );
-}
-
 export const Playground: Story = {
   tags: ['usage'],
   args: {
+    appearance: 'default',
+    density: 'default',
     variant: 'sidebar',
-    tone: 'default',
-    itemVariant: 'raised',
     groupLabel: 'default',
     groupDividers: false,
     collapsible: 'icon',
   },
   argTypes: {
+    appearance: { control: 'select', options: ['default', 'soft', 'dark', 'brand'] },
+    density: { control: 'select', options: ['compact', 'default', 'comfortable'] },
     groupLabel: { control: 'select', options: ['default', 'caps'] },
     groupDividers: { control: 'boolean' },
     variant: { control: 'select', options: ['sidebar', 'floating'] },
@@ -305,8 +266,18 @@ export const Playground: Story = {
       )}
       <Sidebar
         {...args}
-        header={{ title: 'Lorem ipsum', subtitle: 'Workspace' }}
+        header={{ title: 'Lorem ipsum', subtitle: 'Workspace', logo: <HomeIcon /> }}
         items={railItems}
+        footerItems={[
+          {
+            id: 'help',
+            label: 'Help',
+            href: '#sidebar-help',
+            icon: 'help',
+            description: 'Lorem ipsum dolor sit amet.',
+          },
+        ]}
+        account={{ name: 'Lorem Ipsum', description: 'lorem@example.com', items: [] }}
       />
     </SidebarProvider>
   ),
@@ -332,11 +303,6 @@ export const States: Story = {
       />
     </div>
   ),
-};
-
-export const LongLabel: Story = {
-  tags: ['!dev', '!autodocs', 'regression'],
-  render: () => <SimpleSidebarExample longLabel />,
 };
 
 async function navigationCanvas(canvasElement: HTMLElement) {
@@ -463,78 +429,6 @@ export const ControlledSubmenu: Story = {
   },
 };
 
-export const RouteActive: Story = {
-  tags: ['!dev', '!autodocs', 'regression'],
-  args: { currentPath: '/settings/team' },
-  argTypes: { currentPath: { control: 'text' } },
-  parameters: {
-    docs: {
-      description: {
-        story:
-          'Change currentPath in Controls to select the deepest matching link and expand the branch containing the current page.',
-      },
-    },
-  },
-  render: (args: SidebarProps) => (
-    <Sidebar
-      {...args}
-      items={[
-        { id: 'home', label: 'Overview', href: '/', exact: true },
-        {
-          id: 'settings',
-          type: 'submenu',
-          label: 'Settings',
-          href: '/settings',
-          items: [
-            { id: 'team', label: 'Team', href: '/settings/team' },
-            { id: 'profile', label: 'Profile', href: '/settings/profile' },
-          ],
-        },
-      ]}
-    />
-  ),
-};
-
-export const PermissionFiltered: Story = {
-  tags: ['!dev', '!autodocs', 'regression'],
-  parameters: {
-    docs: {
-      description: {
-        story:
-          'canAccess filters items and removes empty groups. The host must still protect routes and server data.',
-      },
-    },
-  },
-  render: () => (
-    <Sidebar
-      currentPath="/settings/profile"
-      canAccess={(access) => access === 'profile:read'}
-      items={[
-        { id: 'home', label: 'Overview', href: '/', exact: true },
-        {
-          id: 'profile',
-          label: 'Profile',
-          href: '/settings/profile',
-          access: 'profile:read',
-        },
-        {
-          id: 'admin',
-          type: 'group',
-          label: 'Administration',
-          items: [
-            {
-              id: 'users',
-              label: 'Users',
-              href: '/admin/users',
-              access: 'users:read',
-            },
-          ],
-        },
-      ]}
-    />
-  ),
-};
-
 const railItems: SidebarEntry[] = [
   {
     id: 'main',
@@ -628,18 +522,6 @@ function RailExample({
   );
 }
 
-export const WithHeaderFooter: Story = {
-  tags: ['!dev', '!autodocs', 'regression'],
-  render: () => <RailExample />,
-};
-export const IconsAndCounts: Story = {
-  tags: ['!dev', '!autodocs', 'regression'],
-  render: () => <Sidebar items={railItems} />,
-};
-export const Collapsible: Story = {
-  tags: ['!dev', '!autodocs', 'regression'],
-  render: () => <RailExample controlled />,
-};
 export const CollapsedFlyout: Story = {
   tags: ['!dev', '!autodocs', 'regression'],
   render: () => <RailExample initialCollapsed />,
@@ -677,111 +559,63 @@ export const Variants: Story = {
     docs: {
       description: {
         story:
-          'Compare variant and tone, then itemVariant for hover and active rows: raised, subtle, bar, indicator and solid.',
+          'Start from an appearance preset (default, soft, dark, brand); each sets tone, item style and density. Fine-tune with itemVariant (raised, subtle, bar, indicator, solid, pill) and density (compact, default, comfortable). variant="floating" detaches the panel.',
       },
     },
   },
   render: () => (
     <div className="grid gap-8 bg-canvas p-4">
       <div className="flex flex-wrap gap-6">
-        {(['sidebar', 'floating'] as const).map((variant) =>
-          (['default', 'dark', 'brand'] as const).map((tone) => (
-            <div key={`${variant}-${tone}`}>
-              <p className="mb-2 text-ui-sm">
-                {variant} / {tone}
-              </p>
-              <Sidebar
-                variant={variant}
-                tone={tone}
-                header={{
-                  title: 'Lorem ipsum',
-                  subtitle: 'Workspace',
-                  logo: <HomeIcon />,
-                }}
-                footer="Dolor sit amet."
-                items={railItems}
-                className="static h-96"
-              />
-            </div>
-          )),
-        )}
+        {(['default', 'soft', 'dark', 'brand'] as const).map((appearance) => (
+          <div key={appearance}>
+            <p className="mb-2 text-ui-sm">appearance="{appearance}"</p>
+            <Sidebar
+              appearance={appearance}
+              header={{
+                title: 'Lorem ipsum',
+                subtitle: 'Workspace',
+                logo: <HomeIcon />,
+              }}
+              items={railItems}
+              footerItems={[{ id: 'help', label: 'Help', href: '#help', icon: 'help' }]}
+              className="static h-96"
+            />
+          </div>
+        ))}
+        <div>
+          <p className="mb-2 text-ui-sm">variant="floating"</p>
+          <Sidebar
+            variant="floating"
+            header={{ title: 'Lorem ipsum', subtitle: 'Workspace', logo: <HomeIcon /> }}
+            items={railItems}
+            className="static h-96"
+          />
+        </div>
       </div>
       <div className="flex flex-wrap gap-6">
-        {(['raised', 'subtle', 'bar', 'indicator', 'solid'] as const).map(
+        {(['raised', 'subtle', 'bar', 'indicator', 'solid', 'pill'] as const).map(
           (itemVariant) => (
             <div key={itemVariant}>
-              <p className="mb-2 text-ui-sm">{itemVariant}</p>
+              <p className="mb-2 text-ui-sm">itemVariant="{itemVariant}"</p>
               <Sidebar
                 itemVariant={itemVariant}
                 items={railItems}
-                className="static h-96"
+                className="static h-80"
               />
             </div>
           ),
         )}
       </div>
-    </div>
-  ),
-};
-
-export const ActiveIndicator: Story = {
-  tags: ['!dev', '!autodocs', 'example'],
-  render: () => (
-    <div className="flex flex-wrap gap-6 bg-canvas p-4">
-      <Sidebar
-        aria-label="Expanded navigation"
-        itemVariant="indicator"
-        items={railItems}
-        className="static h-96"
-      />
-      <Sidebar
-        aria-label="Collapsed navigation"
-        itemVariant="indicator"
-        items={railItems}
-        collapsed
-        className="static h-96"
-      />
-    </div>
-  ),
-};
-
-export const ActiveSubItemIndicator: Story = {
-  tags: ['!dev', '!autodocs', 'example'],
-  render: () => {
-    const items: SidebarEntry[] = [
-      { id: 'overview', label: 'Overview', href: '/', icon: HomeIcon },
-      {
-        id: 'settings',
-        type: 'submenu',
-        label: 'Settings',
-        icon: SettingsIcon,
-        items: [
-          { id: 'profile', label: 'Profile', href: '/settings/profile' },
-          { id: 'team', label: 'Team', href: '/settings/team' },
-        ],
-      },
-    ];
-
-    return (
-      <div className="flex flex-wrap gap-6 bg-canvas p-4">
-        <Sidebar
-          aria-label="Expanded navigation"
-          itemVariant="indicator"
-          items={items}
-          currentPath="/settings/profile"
-          className="static h-96"
-        />
-        <Sidebar
-          aria-label="Collapsed navigation"
-          itemVariant="indicator"
-          items={items}
-          currentPath="/settings/profile"
-          collapsed
-          className="static h-96"
-        />
+      <div className="flex flex-wrap gap-6">
+        {(['compact', 'default', 'comfortable'] as const).map((density) => (
+          <div key={density}>
+            <p className="mb-2 text-ui-sm">density="{density}"</p>
+            <Sidebar density={density} items={railItems} className="static h-72" />
+          </div>
+        ))}
       </div>
-    );
-  },
+    </div>
+  ),
 };
 
 function HeaderToolsExample() {
@@ -1017,31 +851,6 @@ export const Sections: Story = {
   ),
 };
 
-export const SectionsCollapsed: Story = {
-  ...Sections,
-  tags: ['!dev', '!autodocs', 'regression'],
-  args: { ...Sections.args, defaultCollapsed: true },
-};
-
-export const ExpandOnHover: Story = {
-  tags: ['!dev', '!autodocs', 'regression'],
-  parameters: { layout: 'fullscreen' },
-  render: () => (
-    <WorkspaceShell
-      sidebar={
-        <Sidebar
-          expandOnHover
-          defaultCollapsed
-          header={{ title: 'Lorem ipsum', logo: <HomeIcon /> }}
-          items={sections[1]!.items}
-          currentPath="/files/team"
-        />
-      }
-      content={<p>Lorem ipsum dolor sit amet.</p>}
-    />
-  ),
-};
-
 export const Offcanvas: Story = {
   tags: ['example'],
   parameters: {
@@ -1049,7 +858,7 @@ export const Offcanvas: Story = {
     docs: {
       description: {
         story:
-          'Wrap the shell in SidebarProvider and put SidebarTrigger in the header so the desktop sidebar can be reopened. Below lg the sidebar opens in a Drawer from its own menu button; Escape returns focus to that button.',
+          'Wrap the shell in SidebarProvider and put SidebarTrigger in the header so the desktop sidebar can be reopened. Below lg, SidebarMobileTrigger in the same header opens the Drawer (the Sidebar sets mobileTrigger={false}); Escape returns focus to it.',
       },
     },
   },
@@ -1059,6 +868,7 @@ export const Offcanvas: Story = {
         sidebar={
           <Sidebar
             collapsible="offcanvas"
+            mobileTrigger={false}
             toggleShortcut="mod+b"
             items={railItems}
             header={{ title: 'Lorem ipsum' }}
@@ -1067,42 +877,13 @@ export const Offcanvas: Story = {
         header={
           <>
             <SidebarTrigger className="hidden lg:inline-flex" />
+            <SidebarMobileTrigger />
             <span>Workspace</span>
           </>
         }
         content={<p>Lorem ipsum dolor sit amet.</p>}
       />
     </SidebarProvider>
-  ),
-};
-
-export const FloatingLayout: Story = {
-  name: 'Floating layout',
-  tags: ['example'],
-  parameters: { layout: 'fullscreen' },
-  render: () => (
-    <WorkspaceShell
-      variant="floating"
-      sidebar={
-        <Sidebar
-          variant="floating"
-          tone="dark"
-          items={railItems}
-          header={{ title: 'Lorem ipsum', subtitle: 'Workspace', logo: <HomeIcon /> }}
-          footer="Dolor sit amet."
-        />
-      }
-      header={<span>Workspace</span>}
-      content={
-        <div className="grid gap-4">
-          <h1 className="text-xl font-semibold">Lorem ipsum</h1>
-          <p>Dolor sit amet, consectetur adipiscing elit.</p>
-          <div className="min-h-48 rounded-panel border border-line bg-surface p-6">
-            Lorem ipsum dolor sit amet.
-          </div>
-        </div>
-      }
-    />
   ),
 };
 
