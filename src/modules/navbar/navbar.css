@@ -223,13 +223,6 @@
       background: var(--navbar-hover);
       padding: 0.25rem;
     }
-
-    [data-item-variant='ghost'][data-navbar-align='center']
-      .navbar-menu
-      > li
-      > :first-child {
-      border-radius: 9999px;
-    }
   }
 }
 

@@ -350,13 +350,12 @@ export function HeaderEntries<TAccess>({
             className={cn(
               fullWidth ? 'static flex items-center' : 'relative flex items-center',
               classNames?.item,
-              item.className,
             )}
           >
             <NavigationMenu.Trigger
               data-testid={partTestId(id, 'trigger')}
               data-active={active}
-              className={cn(rowClasses, 'group', classNames?.trigger)}
+              className={cn(rowClasses, 'group', classNames?.trigger, item.className)}
             >
               <HeaderLabel item={item} className={classNames?.icon} testId={id} />
               <KitIcon

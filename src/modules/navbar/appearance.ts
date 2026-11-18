@@ -75,7 +75,8 @@ export function navbarItemClasses(
     variant === 'underline'
       ? 'h-full min-h-[var(--navbar-height,4rem)]'
       : 'rounded-control',
-    variant === 'pill' && 'rounded-full',
+    // Pill and ghost rows are capsules, so they sit inside rounded containers like a grouped menu.
+    (variant === 'pill' || variant === 'ghost') && 'rounded-full',
     active
       ? variant === 'underline'
         ? 'font-semibold text-[var(--navbar-accent,var(--color-accent))]'

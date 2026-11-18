@@ -152,6 +152,7 @@ const kangiMen: NavbarItem = {
     { id: 'all-clothing', label: "All Men's Clothing", href: '/men/clothing' },
     { id: 'all-accessories', label: "All Men's Accessories", href: '/men/accessories' },
     { id: 'all-sport', label: "All Men's Sport", href: '/men/sport' },
+    { id: 'all-men', label: "All Men's", href: '/men' },
   ],
 };
 
@@ -469,29 +470,91 @@ export const MegaMenus: Story = {
     </div>
   ),
 };
+/** Category row items; the drawer shows the same list below lg. */
+const storeItems: NavbarItem[] = [
+  {
+    ...himartCategories,
+    className:
+      'h-14 rounded-none bg-accent px-4 text-on-brand hover:bg-brand-800 hover:text-on-brand data-[state=open]:bg-brand-800 data-[state=open]:text-on-brand',
+  },
+  multiLevel,
+  { id: 'garden-tools', label: 'Garden tools', href: '/catalog/garden' },
+  { id: 'air', label: 'Air conditioners', href: '/catalog/air' },
+  { id: 'clothes', label: 'Clothes', href: '/catalog/clothes' },
+  {
+    id: 'bestsellers',
+    label: 'Bestsellers',
+    icon: FireIcon,
+    href: '/bestsellers',
+    className:
+      'ms-3 before:absolute before:-start-2 before:h-5 before:w-px before:bg-line',
+  },
+  { id: 'new', label: 'New', icon: SparklesIcon, href: '/new' },
+  { id: 'sales', label: 'Sales', icon: TagIcon, href: '/sales' },
+  { id: 'blog', label: 'Blog', href: '/blog' },
+];
+
+/** An icon action with a caption under it, as storefront headers show. */
+function CaptionAction({
+  icon,
+  label,
+  badge,
+}: {
+  icon: typeof UserIcon;
+  label: string;
+  badge?: number;
+}) {
+  return (
+    <Button
+      href={`/${label.toLowerCase()}`}
+      variant="ghost"
+      size="lg"
+      className="relative h-auto flex-col gap-0.5 px-2 py-1 text-xs font-medium"
+    >
+      <IconButton
+        icon={icon}
+        label={label}
+        variant="ghost"
+        size="sm"
+        tabIndex={-1}
+        aria-hidden="true"
+        className="pointer-events-none size-6"
+        {...(badge ? { badge } : {})}
+      />
+      {label}
+    </Button>
+  );
+}
+
 export const Storefront: Story = {
   tags: ['example'],
   parameters: {
     docs: {
       description: {
         story:
-          'A storefront header: a top bar for delivery notes and contacts, a search field and account actions, and a secondary row with the category mega menu.',
+          'A storefront header: a top bar for delivery notes and contacts, a wide search with captioned account actions, and a category row whose first item opens the category mega menu.',
       },
     },
   },
   render: (args: NavbarProps) => (
-    <div className="min-h-[44rem]">
+    <div className="min-h-[46rem]">
       <Navbar
         {...args}
         brand={{ title: 'HIMART', href: '/' }}
-        items={[]}
+        // The menu shows in the category row on desktop; this bar keeps it for the mobile drawer.
+        classNames={{
+          brandTitle: 'text-heading font-black italic tracking-tight',
+          nav: 'lg:hidden',
+          secondary: 'hidden p-0 lg:block',
+        }}
+        items={storeItems}
         topbar={
           <>
-            <span className="flex flex-wrap gap-x-4 gap-y-1">
+            <span className="flex flex-wrap items-center gap-x-3 gap-y-1 [&>span+span]:border-s [&>span+span]:border-current/30 [&>span+span]:ps-3">
               <span>Delivery in 24h</span>
               <span>Free delivery from $500</span>
-              <span>30 days for returns</span>
-              <span>600+ available products</span>
+              <span className="hidden sm:inline">30 days for returns</span>
+              <span className="hidden sm:inline">600+ available products</span>
             </span>
             <span className="flex flex-wrap gap-4">
               <a href="tel:+48290977318" className="inline-flex items-center gap-1.5">
@@ -499,7 +562,7 @@ export const Storefront: Story = {
               </a>
               <a
                 href="mailto:contact@himart.com"
-                className="inline-flex items-center gap-1.5"
+                className="hidden items-center gap-1.5 sm:inline-flex"
               >
                 <MailIcon className="size-4" /> contact@himart.com
               </a>
@@ -508,48 +571,36 @@ export const Storefront: Story = {
         }
         actions={
           <>
-            <div className="hidden w-[28rem] max-w-full items-center gap-2 md:flex">
+            <div className="me-4 hidden w-[30rem] max-w-full items-center rounded-control border border-control-border bg-surface p-1 ps-3 md:flex">
+              <SearchIcon className="size-4 shrink-0 text-muted" />
               <Input
                 aria-label="Search products"
-                icon="search"
                 placeholder="Search product, brand or category…"
                 rootClassName="min-w-0 flex-1"
+                className="border-0 shadow-none focus-visible:outline-0"
               />
-              <Button variant="secondary">Search</Button>
+              <Button variant="soft" size="sm" className="bg-canvas text-ink">
+                Search
+              </Button>
             </div>
-            <IconButton icon={UserIcon} label="Profile" variant="ghost" />
-            <IconButton icon={HeartIcon} label="Favorites" variant="ghost" />
-            <IconButton icon={CartIcon} label="Cart" variant="ghost" badge={2} />
+            <CaptionAction icon={UserIcon} label="Profile" />
+            <CaptionAction icon={HeartIcon} label="Favorites" />
+            <CaptionAction icon={CartIcon} label="Cart" badge={2} />
           </>
         }
         secondary={
-          <Navbar
-            sticky={false}
-            itemVariant="ghost"
-            density="compact"
-            className="border-0 bg-transparent"
-            classNames={{ inner: 'px-0' }}
-            currentPath="/catalog/power/drills"
-            items={[
-              himartCategories,
-              multiLevel,
-              { id: 'garden-tools', label: 'Garden tools', href: '/catalog/garden' },
-              { id: 'air', label: 'Air conditioners', href: '/catalog/air' },
-              { id: 'clothes', label: 'Clothes', href: '/catalog/clothes' },
-              {
-                id: 'bestsellers',
-                label: 'Bestsellers',
-                icon: FireIcon,
-                href: '/bestsellers',
-              },
-              { id: 'new', label: 'New', icon: SparklesIcon, href: '/new' },
-              { id: 'sales', label: 'Sales', icon: TagIcon, href: '/sales' },
-              { id: 'blog', label: 'Blog', href: '/blog' },
-            ]}
-            data-testid="categories"
-          />
+          <div className="bg-canvas">
+            <Navbar
+              sticky={false}
+              itemVariant="ghost"
+              className="border-0 bg-transparent"
+              classNames={{ inner: 'px-0 min-h-14' }}
+              currentPath="/catalog/construction"
+              items={storeItems}
+              data-testid="categories"
+            />
+          </div>
         }
-        classNames={{ secondary: 'px-0 py-0' }}
       />
     </div>
   ),
@@ -618,71 +669,90 @@ export const Appearances: Story = {
     docs: {
       description: {
         story:
-          'Presets set tone, item style, density and shape; tone, itemVariant, density and align override them. Pill with a centred menu, a floating dark capsule, a transparent bar over a brand hero, a split bar with the brand centred and the menu below, and a dark bar.',
+          'Presets set tone, item style, density and shape; tone, itemVariant, density and align override them. A solid pill on a centred menu, a floating dark capsule, a grouped menu on a brand hero, a split bar with the brand centred and the menu below, and a dark editorial bar.',
       },
     },
   },
   render: (args: NavbarProps) => (
-    <div className="grid gap-8 bg-canvas p-6">
+    <div className="grid gap-10 bg-canvas p-6">
       <Navbar
         {...args}
         sticky={false}
         itemVariant="pill"
         align="center"
         brand={{ title: 'Nodus', logo: <GridIcon /> }}
+        classNames={{ brandLogo: 'bg-transparent text-ink' }}
         items={appItems}
         currentPath="/auditlog"
         actions={
           <>
-            <Button variant="secondary" size="sm" className="hidden md:inline-flex">
+            <Button
+              variant="secondary"
+              size="sm"
+              className="hidden rounded-full md:inline-flex"
+            >
               <LockIcon /> Endpoint Privilege Management
             </Button>
             <Avatar alt="Greg Brown" size="sm" />
+            <IconButton
+              icon={GridIcon}
+              label="Apps"
+              variant="ghost"
+              badge={{ dot: true }}
+            />
           </>
         }
         className="border-0 bg-transparent"
         data-testid="pill"
       />
-      <Navbar
-        {...args}
-        sticky={false}
-        appearance="floating"
-        tone="dark"
-        align="center"
-        brand={{ title: 'Orbit' }}
-        items={[
-          { id: 'overview', label: 'Overview', href: '/overview' },
-          { id: 'analytics', label: 'Analytics', href: '/analytics' },
-          { id: 'customers', label: 'Customers', href: '/customers' },
-          { id: 'billing', label: 'Billing', href: '/billing' },
-          { id: 'settings', label: 'Settings', href: '/settings' },
-        ]}
-        currentPath="/overview"
-        actions={
-          <>
-            <IconButton
-              icon={SearchIcon}
-              label="Search"
-              variant="ghost"
-              size="sm"
-              className="hidden sm:inline-flex"
-            />
-            <IconButton
-              icon={BellIcon}
-              label="Notifications"
-              variant="ghost"
-              size="sm"
-              badge={{ dot: true }}
-            />
-            <Button size="sm" className="hidden sm:inline-flex">
-              + New report
-            </Button>
-            <Avatar alt="Alex Kim" size="sm" />
-          </>
-        }
-        data-testid="floating"
-      />
-      <div className="rounded-panel bg-accent p-4 pb-16">
+      <div className="grid justify-items-center rounded-panel bg-ink/90 py-6">
+        <Navbar
+          {...args}
+          sticky={false}
+          appearance="floating"
+          tone="dark"
+          align="center"
+          brand={{ title: 'Orbit' }}
+          items={[
+            { id: 'overview', label: 'Overview', href: '/overview' },
+            { id: 'analytics', label: 'Analytics', href: '/analytics' },
+            { id: 'customers', label: 'Customers', href: '/customers' },
+            { id: 'billing', label: 'Billing', href: '/billing' },
+            { id: 'settings', label: 'Settings', href: '/settings' },
+          ]}
+          currentPath="/overview"
+          actions={
+            <>
+              <span
+                aria-hidden="true"
+                className="hidden h-5 w-px bg-current/30 sm:block"
+              />
+              <IconButton
+                icon={SearchIcon}
+                label="Search"
+                variant="ghost"
+                size="sm"
+                className="hidden rounded-full sm:inline-flex"
+              />
+              <IconButton
+                icon={BellIcon}
+                label="Notifications"
+                variant="ghost"
+                size="sm"
+                className="rounded-full"
+                badge={{ dot: true }}
+              />
+              <Button size="sm" className="hidden rounded-full sm:inline-flex">
+                + New report
+              </Button>
+              <Avatar alt="Alex Kim" size="sm" />
+            </>
+          }
+          className="my-0"
+          data-testid="floating"
+        />
+      </div>
+      <div className="rounded-panel bg-accent px-4 pb-24 pt-4">
         <Navbar
           {...args}
           sticky={false}
@@ -690,19 +760,24 @@ export const Appearances: Story = {
           itemVariant="ghost"
           align="center"
           brand={{ title: 'Brisk', logo: <BoltIcon /> }}
+          classNames={{ brandLogo: 'size-8 bg-brand-50 text-accent' }}
           items={[
             { id: 'test', label: 'Test', href: '/test' },
             { id: 'rankings', label: 'Rankings', href: '/rankings' },
             { id: 'plans', label: 'Plans', href: '/plans' },
             { id: 'help', label: 'Help', href: '/help' },
           ]}
-          currentPath="/"
+          currentPath="/test"
           actions={
             <>
-              <Button variant="secondary" size="sm">
+              <Button variant="secondary" size="sm" className="rounded-full border-0">
                 Start free
               </Button>
-              <Button variant="ghost" size="sm" className="hidden sm:inline-flex">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="hidden rounded-full border border-current/40 sm:inline-flex"
+              >
                 Sign in
               </Button>
             </>
@@ -715,6 +790,10 @@ export const Appearances: Story = {
         sticky={false}
         align="split"
         brand={{ title: 'ambisius', subtitle: 'News' }}
+        classNames={{
+          brandTitle: 'text-heading font-bold',
+          brandSubtitle: 'text-center tracking-[0.3em]',
+        }}
         items={[
           { id: 'home', label: 'HOME', href: '/' },
           { id: 'news', label: 'NEWS', href: '/news' },
@@ -731,7 +810,7 @@ export const Appearances: Story = {
               variant="ghost"
               className="hidden sm:inline-flex"
             />
-            <Button variant="secondary" size="sm">
+            <Button variant="outline" size="sm" className="rounded-full">
               Masuk
             </Button>
           </>
@@ -745,9 +824,25 @@ export const Appearances: Story = {
         itemVariant="underline"
         align="center"
         brand={{ title: 'KĀNGI' }}
-        items={kangiItems.filter((item) => item.type !== 'mega')}
-        currentPath="/new"
-        actions={<IconButton icon={ShoppingBagIcon} label="Bag" variant="ghost" />}
+        items={kangiItems}
+        currentPath="/men"
+        actions={
+          <>
+            <IconButton
+              icon={SearchIcon}
+              label="Search"
+              variant="ghost"
+              className="hidden sm:inline-flex"
+            />
+            <IconButton icon={ShoppingBagIcon} label="Bag" variant="ghost" />
+            <IconButton
+              icon={UserIcon}
+              label="Account"
+              variant="ghost"
+              className="hidden sm:inline-flex"
+            />
+          </>
+        }
         data-testid="dark"
       />
     </div>
