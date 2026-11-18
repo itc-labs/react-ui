@@ -7,6 +7,7 @@ import {
   type ReactNode,
 } from 'react';
 import type { UiLinkProps } from '../../../components/link-image-provider';
+import type { UITheme } from '../../../theme';
 import { UIProvider } from '../../../theme/provider';
 
 const DemoPathContext = createContext<{
@@ -25,9 +26,12 @@ export function useDemoPath() {
 /** Keeps a fake current path and routes kit links through it, so navigation is clickable. */
 export function DemoApp({
   initialPath = '/dashboard',
+  theme,
   children,
 }: {
   initialPath?: string;
+  /** A theme or preset mode, e.g. `slateTheme.dark` from `@itclabs/react-ui/theme/presets`. */
+  theme?: UITheme;
   children: ReactNode;
 }) {
   const [path, setPath] = useState(initialPath);
@@ -56,7 +60,7 @@ export function DemoApp({
   );
 
   return (
-    <UIProvider link={DemoLink}>
+    <UIProvider link={DemoLink} {...(theme ? { theme } : {})}>
       <DemoPathContext.Provider value={{ path, navigate: setPath }}>
         {children}
       </DemoPathContext.Provider>
