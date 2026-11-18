@@ -334,7 +334,8 @@ function Messaging(args: MessagingArgs) {
           : { items: messagingNavigation }),
         currentPath: path,
         density: 'compact',
-        collapsible: 'offcanvas',
+        // Collapsing a two-tier sidebar keeps the icon rail (and its toggle) visible.
+        collapsible: 'icon',
         toggleShortcut: 'mod+b',
       }}
       account={demoAccount}
