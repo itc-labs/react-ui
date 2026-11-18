@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import { act } from 'react';
+import { renderToStaticMarkup } from 'react-dom/server';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { Chart, type ChartProps } from './index';
@@ -393,3 +394,19 @@ const invalidBar: ChartProps = {
 };
 void invalidPie;
 void invalidBar;
+
+it('contains its screen-reader data table so narrow pages do not scroll sideways', () => {
+  const host = document.createElement('div');
+  host.innerHTML = renderToStaticMarkup(
+    <Chart
+      type="bar"
+      label="Lorem"
+      data={[{ id: 'a', label: 'A', values: { v: 1 } }]}
+      series={[{ id: 'v', label: 'V' }]}
+    />,
+  );
+  expect(host.querySelector('figure')!.className).toContain('relative');
+  const table = host.querySelector('table')!;
+  expect(table.className).not.toContain('sr-only');
+  expect(table.parentElement!.className).toBe('sr-only');
+});

@@ -25,6 +25,9 @@
   --color-canvas: #f8fafc;
   --color-surface: #ffffff;
   --color-sidebar: #f1f5f9;
+  /* Sidebar `dark` appearance: stays dark in light and dark themes (ink flips in dark mode). */
+  --color-sidebar-dark: #0f172a;
+  --color-sidebar-dark-ink: #f8fafc;
   --color-sidebar-soft: var(--color-brand-50);
   --color-sidebar-soft-active: color-mix(
     in srgb,

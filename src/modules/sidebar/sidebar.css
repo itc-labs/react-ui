@@ -46,8 +46,8 @@
   }
 
   [data-sidebar-tone='dark'] {
-    --sidebar-bg: var(--color-ink);
-    --sidebar-fg: var(--color-surface);
+    --sidebar-bg: var(--color-sidebar-dark);
+    --sidebar-fg: var(--color-sidebar-dark-ink);
   }
 
   [data-sidebar-tone='brand'] {

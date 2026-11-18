@@ -64,11 +64,11 @@ export function ChartDataTable({
 }: TableProps) {
   const { t } = useUILocale();
 
-  return (
+  const table = (
     <table
       data-testid={partTestId(testId, 'table')}
       className={cn(
-        visible ? 'w-full border-collapse text-left text-ui-sm' : 'sr-only',
+        visible && 'w-full border-collapse text-left text-ui-sm',
         classNames?.table,
       )}
     >
@@ -137,6 +137,9 @@ export function ChartDataTable({
       </tbody>
     </table>
   );
+
+  // A table keeps its content width even when sr-only, so hide it inside a 1px clipped box.
+  return visible ? table : <div className="sr-only">{table}</div>;
 }
 
 interface TooltipProps extends ContentProps {
