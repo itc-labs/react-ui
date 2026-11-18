@@ -16,7 +16,6 @@ import type { SidebarEntry } from '../../modules/sidebar';
 import { UserMenu } from '../../modules/user-menu';
 import { DemoNotifications, OrdersTable } from './__demo/blocks';
 import { demoAccount, demoCurrency } from './__demo/data';
-import { useUiNavigate } from '../../components/link-image-provider';
 import { DemoApp } from './__demo/demo-app';
 
 type FloatingCardsArgs = {
@@ -283,8 +282,6 @@ function FloatingCardsPage({
 }
 
 function FloatingCards(args: FloatingCardsArgs) {
-  const navigate = useUiNavigate();
-
   return (
     <DashboardShell
       variant="floating"
@@ -311,7 +308,7 @@ function FloatingCards(args: FloatingCardsArgs) {
                 icon="messages"
                 label="Chat"
                 variant="ghost"
-                onClick={() => navigate('/messages')}
+                href="/messages"
               />
               <DemoNotifications />
               <UserMenu {...demoAccount} description="Admin" />

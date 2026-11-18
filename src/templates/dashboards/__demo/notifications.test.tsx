@@ -153,3 +153,71 @@ it('retries the page that failed', async () => {
   expect(current.status).toBe('ready');
   expect(current.items).toHaveLength(20);
 });
+
+it('starts over when the API is replaced', async () => {
+  const first = createDemoNotificationsApi(20);
+  const second = createDemoNotificationsApi(5);
+  const list = vi.spyOn(second, 'list');
+
+  await mount(first);
+  await settle(() => current.ensureLoaded());
+  await mount(second);
+  await settle(() => {});
+
+  expect(current.items).toHaveLength(0);
+  expect(current.status).toBe('idle');
+
+  await settle(() => current.ensureLoaded());
+
+  expect(list).toHaveBeenCalledOnce();
+  expect(current.items).toHaveLength(5);
+});
+
+it('keeps a notification received while mark-all-read fails', async () => {
+  const api = createDemoNotificationsApi();
+
+  let emit: (event: NotificationEvent) => void = () => {};
+
+  let reject: (reason: Error) => void = () => {};
+
+  vi.spyOn(api, 'subscribe').mockImplementation((listener) => {
+    emit = listener;
+
+    return () => {};
+  });
+
+  vi.spyOn(api, 'markAllRead').mockImplementation(
+    () =>
+      new Promise((_, fail) => {
+        reject = fail;
+      }),
+  );
+
+  await mount(api);
+  await settle(() => current.ensureLoaded());
+  await settle(() => current.markAllRead());
+  await settle(() => emit({ notification: record('live'), unreadCount: 4 }));
+  await settle(() => reject(new Error('offline')));
+
+  expect(current.items[0]!.id).toBe('live');
+  expect(current.items.filter((item) => !item.read)).toHaveLength(4);
+  expect(current.unreadCount).toBe(4);
+});
+
+it('ignores an unread count that is older than a realtime event', async () => {
+  const api = createDemoNotificationsApi();
+
+  let emit: (event: NotificationEvent) => void = () => {};
+
+  vi.spyOn(api, 'subscribe').mockImplementation((listener) => {
+    emit = listener;
+
+    return () => {};
+  });
+
+  await mount(api);
+  await act(async () => emit({ notification: record('live'), unreadCount: 4 }));
+  await settle(() => {});
+
+  expect(current.unreadCount).toBe(4);
+});

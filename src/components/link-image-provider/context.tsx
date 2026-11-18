@@ -4,7 +4,6 @@ import {
   useContext,
   useLayoutEffect,
   useMemo,
-  useRef,
   useState,
   type ReactNode,
 } from 'react';
@@ -26,29 +25,46 @@ function NativeImage(props: UiImageProps) {
 }
 
 export type RouterStore = {
-  current: UiRouter | undefined;
   subscribe: (listener: () => void) => () => void;
-  getPathname: () => string;
-  navigate: (href: string) => void;
-  notify: () => void;
+  getPathname: () => string | undefined;
+  seed: (pathname: string) => void;
+  publish: (pathname: string) => void;
 };
 
-/** Keeps the router outside React state, so only components reading the path re-render. */
+/** Keeps the path outside React state, so only components reading it re-render. */
 function createRouterStore(): RouterStore {
   const listeners = new Set<() => void>();
-  const store: RouterStore = {
-    current: undefined,
+  let current: string | undefined;
+
+  return {
     subscribe(listener) {
       listeners.add(listener);
 
       return () => listeners.delete(listener);
     },
-    getPathname: () => store.current?.pathname ?? '/',
-    navigate: (href) => store.current?.navigate(href),
-    notify: () => listeners.forEach((listener) => listener()),
-  };
+    getPathname: () => current,
+    seed(pathname) {
+      current ??= pathname;
+    },
+    publish(pathname) {
+      if (pathname === current) return;
 
-  return store;
+      current = pathname;
+
+      listeners.forEach((listener) => listener());
+    },
+  };
+}
+
+const adapterKeys = new WeakMap<UiRouterAdapter, number>();
+let nextAdapterKey = 0;
+
+function adapterKey(adapter: UiRouterAdapter) {
+  const key = adapterKeys.get(adapter) ?? nextAdapterKey++;
+
+  adapterKeys.set(adapter, key);
+
+  return key;
 }
 
 /** The only component that calls the host's hook; a route change re-renders just this. */
@@ -59,11 +75,13 @@ function RouterBridge({
   useRouter: UiRouterAdapter;
   store: RouterStore;
 }) {
-  const router = useRouter();
+  const { pathname } = useRouter();
 
-  store.current = router;
+  // The first value serves the initial render and SSR. Later values wait for commit, so a
+  // suspended route transition never reaches components still showing the previous page.
+  store.seed(pathname);
 
-  useLayoutEffect(() => store.notify(), [router.pathname, store]);
+  useLayoutEffect(() => store.publish(pathname), [pathname, store]);
 
   return null;
 }
@@ -89,10 +107,8 @@ export function AdapterProvider({
   children,
 }: AdapterProviderProps) {
   const parent = useContext(LinkImageContext);
-  // A hook must keep its place between renders, so the first adapter stays for this scope.
-  const adapter = useRef(useRouter).current;
-  const [store] = useState(() => (adapter ? createRouterStore() : undefined));
-  const router = store ?? parent.router;
+  const [store] = useState(createRouterStore);
+  const router = useRouter ? store : parent.router;
   const value = useMemo(
     () => ({
       Link: Link ?? parent.Link,
@@ -104,7 +120,10 @@ export function AdapterProvider({
 
   return (
     <LinkImageContext.Provider value={value}>
-      {adapter && store && <RouterBridge useRouter={adapter} store={store} />}
+      {useRouter && (
+        // A new adapter is a different hook, so it gets a new bridge instead of a new hook order.
+        <RouterBridge key={adapterKey(useRouter)} useRouter={useRouter} store={store} />
+      )}
       {children}
     </LinkImageContext.Provider>
   );

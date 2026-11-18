@@ -48,8 +48,6 @@ export {
   UiImage,
   useUiLink,
   useUiImage,
-  useUiNavigate,
-  useUiRouter,
   type UiLinkProps,
   type UiImageProps,
   type UiLinkComponent,

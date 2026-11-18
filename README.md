@@ -119,7 +119,7 @@ export function UIRoot({ children }: { children: ReactNode }) {
 | ----------------- | ------------------------------------------------------------------------------------ |
 | `link`            | `UiLinkComponent`: host router link adapter; inherits when omitted                   |
 | `image`           | `UiImageComponent`: host image adapter; inherits when omitted                        |
-| `router`          | `UiRouterAdapter`: hook returning the host's `pathname` and `navigate`               |
+| `router`          | `UiRouterAdapter`: hook returning the host's current `pathname`                      |
 | `theme`           | `defineTheme({ tokens, icons })`: CSS token overrides and icon variant, size, packs  |
 | `locale`          | Locale code (`'vi-VN'` default, `'en-US'` built in) or a locale from `defineLocale`  |
 | `translations`    | Extra catalogs: `[{ locale: 'fr-FR', messages: { … } }]`; missing keys fall back     |

@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { useState } from 'react';
+import { useState, useImperativeHandle, useRef, type Ref } from 'react';
 import { DashboardShell } from '@itclabs/react-ui/templates';
 import { Breadcrumb } from '../../components/breadcrumb';
 import { Avatar } from '../../components/avatar';
@@ -41,6 +41,113 @@ type MessagingArgs = {
   showMembers: boolean;
 };
 
+function MessageComposer({
+  sentCount,
+  onSend,
+}: {
+  sentCount: number;
+  onSend: (text: string) => void;
+}) {
+  const [draft, setDraft] = useState('Thanks for the review, @');
+  const [formatting, setFormatting] = useState<string[]>([]);
+
+  return (
+    <form
+      className="mt-auto min-w-0 rounded-panel border border-line bg-surface p-3 shadow-panel"
+      aria-label="Message composer"
+      onSubmit={(event) => {
+        event.preventDefault();
+        if (!draft.trim()) return;
+
+        onSend(draft.trim());
+
+        setDraft('');
+      }}
+    >
+      {draft.endsWith('@') && (
+        <div
+          className="mb-3 max-w-sm rounded-control border border-line bg-surface p-2 shadow-panel"
+          aria-label="Mention suggestions"
+        >
+          <p className="px-2 py-1 text-ui-sm text-muted">Mention a teammate</p>
+          {messagingMembers.slice(0, 3).map((member) => (
+            <Button
+              key={member.name}
+              variant="ghost"
+              size="sm"
+              className="w-full justify-start gap-2"
+              onClick={() => setDraft((current) => `${current}${member.name} `)}
+            >
+              <Avatar alt={member.name} size="sm" />
+              {member.name}
+            </Button>
+          ))}
+        </div>
+      )}
+      <Textarea
+        aria-label="Message UI-kit design"
+        rows={3}
+        value={draft}
+        onChange={(event) => setDraft(event.target.value)}
+        placeholder="Write a message… Type @ to mention someone"
+        className="resize-y border-0 shadow-none"
+      />
+      <div className="mt-3 flex flex-wrap items-center justify-between gap-3 border-t border-line pt-3">
+        <div className="flex gap-1" role="group" aria-label="Message formatting">
+          {(
+            [
+              { id: 'bold', icon: BoldIcon, label: 'Bold', marker: '**' },
+              { id: 'italic', icon: ItalicIcon, label: 'Italic', marker: '_' },
+              {
+                id: 'link',
+                icon: LinkIcon,
+                label: 'Insert link',
+                marker: '[Link](https://example.com)',
+              },
+            ] as const
+          ).map((action) => (
+            <IconButton
+              key={action.id}
+              variant="ghost"
+              size="sm"
+              icon={action.icon}
+              label={action.label}
+              aria-pressed={formatting.includes(action.id)}
+              onClick={() => {
+                setFormatting((current) =>
+                  current.includes(action.id)
+                    ? current.filter((id) => id !== action.id)
+                    : [...current, action.id],
+                );
+
+                setDraft((current) => `${current}${action.marker}`);
+              }}
+            />
+          ))}
+        </div>
+        <div className="flex gap-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              setDraft('');
+              setFormatting([]);
+            }}
+          >
+            Discard
+          </Button>
+          <Button type="submit" size="sm" disabled={!draft.trim()}>
+            Send message
+          </Button>
+        </div>
+      </div>
+      <p role="status" className="sr-only">
+        {sentCount ? `${sentCount} messages sent` : ''}
+      </p>
+    </form>
+  );
+}
+
 function MessagingPage({
   showComposer,
   showThread,
@@ -50,10 +157,8 @@ function MessagingPage({
   MessagingArgs,
   'showComposer' | 'showThread' | 'showLinkPreview' | 'showReactions'
 >) {
-  const [draft, setDraft] = useState('Thanks for the review, @');
   const [sent, setSent] = useState<string[]>([]);
   const [reactions, setReactions] = useState<string[]>([]);
-  const [formatting, setFormatting] = useState<string[]>([]);
   const [previewOpen, setPreviewOpen] = useState(false);
 
   const toggleReaction = (key: string) =>
@@ -189,108 +294,59 @@ function MessagingPage({
         </section>
       )}
       {showComposer && (
-        <form
-          className="mt-auto min-w-0 rounded-panel border border-line bg-surface p-3 shadow-panel"
-          aria-label="Message composer"
-          onSubmit={(event) => {
-            event.preventDefault();
-            if (!draft.trim()) return;
-
-            setSent((current) => [...current, draft.trim()]);
-
-            setDraft('');
-          }}
-        >
-          {draft.endsWith('@') && (
-            <div
-              className="mb-3 max-w-sm rounded-control border border-line bg-surface p-2 shadow-panel"
-              aria-label="Mention suggestions"
-            >
-              <p className="px-2 py-1 text-ui-sm text-muted">Mention a teammate</p>
-              {messagingMembers.slice(0, 3).map((member) => (
-                <Button
-                  key={member.name}
-                  variant="ghost"
-                  size="sm"
-                  className="w-full justify-start gap-2"
-                  onClick={() => setDraft((current) => `${current}${member.name} `)}
-                >
-                  <Avatar alt={member.name} size="sm" />
-                  {member.name}
-                </Button>
-              ))}
-            </div>
-          )}
-          <Textarea
-            aria-label="Message UI-kit design"
-            rows={3}
-            value={draft}
-            onChange={(event) => setDraft(event.target.value)}
-            placeholder="Write a message… Type @ to mention someone"
-            className="resize-y border-0 shadow-none"
-          />
-          <div className="mt-3 flex flex-wrap items-center justify-between gap-3 border-t border-line pt-3">
-            <div className="flex gap-1" role="group" aria-label="Message formatting">
-              {(
-                [
-                  { id: 'bold', icon: BoldIcon, label: 'Bold', marker: '**' },
-                  { id: 'italic', icon: ItalicIcon, label: 'Italic', marker: '_' },
-                  {
-                    id: 'link',
-                    icon: LinkIcon,
-                    label: 'Insert link',
-                    marker: '[Link](https://example.com)',
-                  },
-                ] as const
-              ).map((action) => (
-                <IconButton
-                  key={action.id}
-                  variant="ghost"
-                  size="sm"
-                  icon={action.icon}
-                  label={action.label}
-                  aria-pressed={formatting.includes(action.id)}
-                  onClick={() => {
-                    setFormatting((current) =>
-                      current.includes(action.id)
-                        ? current.filter((id) => id !== action.id)
-                        : [...current, action.id],
-                    );
-
-                    setDraft((current) => `${current}${action.marker}`);
-                  }}
-                />
-              ))}
-            </div>
-            <div className="flex gap-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  setDraft('');
-                  setFormatting([]);
-                }}
-              >
-                Discard
-              </Button>
-              <Button type="submit" size="sm" disabled={!draft.trim()}>
-                Send message
-              </Button>
-            </div>
-          </div>
-          <p role="status" className="sr-only">
-            {sent.length ? `${sent.length} messages sent` : ''}
-          </p>
-        </form>
+        <MessageComposer
+          sentCount={sent.length}
+          onSend={(text) => setSent((current) => [...current, text])}
+        />
       )}
     </div>
   );
 }
 
-function Messaging(args: MessagingArgs) {
+function BookmarkButton() {
   const [bookmarked, setBookmarked] = useState(false);
+
+  return (
+    <IconButton
+      icon="bookmark"
+      label={bookmarked ? 'Remove bookmark' : 'Bookmark channel'}
+      variant="ghost"
+      size="sm"
+      aria-pressed={bookmarked}
+      onClick={() => setBookmarked((value) => !value)}
+    />
+  );
+}
+
+type ChannelSearchHandle = { open: () => void };
+
+function ChannelSearch({ ref }: { ref: Ref<ChannelSearchHandle> }) {
   const [search, setSearch] = useState('');
   const [searchOpen, setSearchOpen] = useState(false);
+
+  useImperativeHandle(ref, () => ({ open: () => setSearchOpen(true) }), []);
+
+  return (
+    <Dialog open={searchOpen} onOpenChange={setSearchOpen} title="Search workspace">
+      <div className="grid gap-3">
+        <Input
+          aria-label="Search channels"
+          placeholder="Search channels…"
+          value={search}
+          onChange={(event) => setSearch(event.target.value)}
+        />
+        <p className="text-ui-sm text-muted">
+          {search
+            ? 'Try “UI-kit design” to jump to the channel in the tree.'
+            : 'Find channels, people and threads in this workspace.'}
+        </p>
+      </div>
+    </Dialog>
+  );
+}
+
+function Messaging(args: MessagingArgs) {
+  const channelSearch = useRef<ChannelSearchHandle>(null);
 
   return (
     <DashboardShell
@@ -303,7 +359,7 @@ function Messaging(args: MessagingArgs) {
         search: {
           placeholder: 'Search channels…',
           shortcut: 'mod+k',
-          onOpen: () => setSearchOpen(true),
+          onOpen: () => channelSearch.current?.open(),
         },
         ...(args.showRail
           ? { sections: messagingSections, defaultSection: 'northwind' }
@@ -326,14 +382,7 @@ function Messaging(args: MessagingArgs) {
                 { key: 'channel', title: 'UI-kit design' },
               ]}
             />
-            <IconButton
-              icon="bookmark"
-              label={bookmarked ? 'Remove bookmark' : 'Bookmark channel'}
-              variant="ghost"
-              size="sm"
-              aria-pressed={bookmarked}
-              onClick={() => setBookmarked((value) => !value)}
-            />
+            <BookmarkButton />
           </div>
         ) : undefined
       }
@@ -555,21 +604,7 @@ function Messaging(args: MessagingArgs) {
       }
     >
       <MessagingPage {...args} />
-      <Dialog open={searchOpen} onOpenChange={setSearchOpen} title="Search workspace">
-        <div className="grid gap-3">
-          <Input
-            aria-label="Search channels"
-            placeholder="Search channels…"
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
-          />
-          <p className="text-ui-sm text-muted">
-            {search
-              ? 'Try “UI-kit design” to jump to the channel in the tree.'
-              : 'Find channels, people and threads in this workspace.'}
-          </p>
-        </div>
-      </Dialog>
+      <ChannelSearch ref={channelSearch} />
     </DashboardShell>
   );
 }

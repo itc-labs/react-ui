@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, type RefObject } from 'react';
+import { useEffect, useRef, useState, type RefObject } from 'react';
 
 /**
  * Measure actual content, retaining no rows and fabricating no empty records.
@@ -16,7 +16,9 @@ export function usePageHeight(
   scope: string,
   settled = true,
 ) {
-  const [measurement, setMeasurement] = useState({ scope, height: 0, width: 0 });
+  const [measurement, setMeasurement] = useState({ scope, height: 0 });
+  // Width only decides when to reset the tallest page; a resize animation must not re-render rows.
+  const latest = useRef({ scope, height: 0, width: 0 });
 
   useEffect(() => {
     const element = ref.current;
@@ -29,18 +31,16 @@ export function usePageHeight(
       const width = Math.round(bounds.width);
       if (height <= 0 || width <= 0) return;
 
-      setMeasurement((previous) => {
-        const next =
-          previous.scope === scope && previous.width === width
-            ? Math.max(previous.height, height)
-            : height;
+      const previous = latest.current;
+      const next =
+        previous.scope === scope && previous.width === width
+          ? Math.max(previous.height, height)
+          : height;
 
-        return previous.scope === scope &&
-          previous.width === width &&
-          previous.height === next
-          ? previous
-          : { scope, height: next, width };
-      });
+      latest.current = { scope, height: next, width };
+      if (previous.scope === scope && previous.height === next) return;
+
+      setMeasurement({ scope, height: next });
     };
 
     measure();

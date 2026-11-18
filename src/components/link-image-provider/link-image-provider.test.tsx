@@ -1,6 +1,15 @@
 // @vitest-environment jsdom
 import { UIProvider } from '../../theme/provider';
-import { act, useSyncExternalStore } from 'react';
+import {
+  act,
+  createContext,
+  startTransition,
+  Suspense,
+  use,
+  useContext,
+  useState,
+  useSyncExternalStore,
+} from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { readFileSync, readdirSync } from 'node:fs';
@@ -9,8 +18,7 @@ import ts from 'typescript';
 import {
   UiLink,
   UiImage,
-  useUiNavigate,
-  useUiRouter,
+  useRouterPath,
   type UiLinkProps,
   type UiImageProps,
 } from './index';
@@ -244,7 +252,7 @@ function createRouter(initial: string) {
         () => pathname,
       );
 
-      return { pathname: value, navigate: () => {} };
+      return { pathname: value };
     },
   };
 }
@@ -305,40 +313,25 @@ it('prefers an explicit currentPath over the router adapter', async () => {
   expect(activeLabel()).toContain('Reports');
 });
 
-it('keeps Sidebar unselected without an adapter and reads the browser path by default', async () => {
-  let pathname = '';
-
-  function Reader() {
-    pathname = useUiRouter().pathname;
-
-    return null;
-  }
-
+it('keeps Sidebar unselected without an adapter', async () => {
   await act(async () =>
     root.render(
-      <>
-        <Sidebar items={[{ id: 'here', label: 'Here', href: location.pathname }]} />
-        <Reader />
-      </>,
+      <Sidebar items={[{ id: 'here', label: 'Here', href: location.pathname }]} />,
     ),
   );
 
   expect(activeLabel()).toBeNull();
-  expect(pathname).toBe(location.pathname);
 });
 
-it('gives navigate-only consumers a stable function and no route re-renders', async () => {
+it('does not re-render a fixed currentPath consumer on route changes', async () => {
   const router = createRouter('/home');
-  const navigate = vi.fn();
 
-  const useRouter = () => ({ ...router.useRouter(), navigate });
+  const useRouter = () => router.useRouter();
 
   const renders = vi.fn();
 
-  let go: (href: string) => void = () => {};
-
-  function Action() {
-    go = useUiNavigate();
+  function Reader() {
+    useRouterPath('/fixed');
     renders();
 
     return null;
@@ -347,14 +340,80 @@ it('gives navigate-only consumers a stable function and no route re-renders', as
   await act(async () =>
     root.render(
       <UIProvider router={useRouter}>
-        <Action />
+        <Reader />
       </UIProvider>,
     ),
   );
   await act(async () => router.go('/reports'));
 
-  go('/settings');
-
   expect(renders).toHaveBeenCalledTimes(1);
-  expect(navigate).toHaveBeenCalledWith('/settings');
+});
+
+it('publishes a route only after its transition commits', async () => {
+  const RouteContext = createContext('/home');
+
+  const useRouter = () => ({ pathname: useContext(RouteContext) });
+
+  let finish: () => void = () => {};
+
+  const pending = new Promise<void>((resolve) => {
+    finish = resolve;
+  });
+
+  let setRoute: (route: string) => void = () => {};
+
+  function Gate({ route }: { route: string }) {
+    if (route === '/reports') use(pending);
+
+    return <p>{route}</p>;
+  }
+
+  function App() {
+    const [route, update] = useState('/home');
+
+    setRoute = update;
+
+    return (
+      <RouteContext.Provider value={route}>
+        <UIProvider router={useRouter}>
+          <Sidebar items={routerItems} />
+          <Suspense fallback={null}>
+            <Gate route={route} />
+          </Suspense>
+        </UIProvider>
+      </RouteContext.Provider>
+    );
+  }
+
+  await act(async () => root.render(<App />));
+  await act(async () => startTransition(() => setRoute('/reports')));
+
+  expect(activeLabel()).toContain('Home');
+
+  await act(async () => finish());
+
+  expect(activeLabel()).toContain('Reports');
+});
+
+it('uses a replacement router adapter', async () => {
+  const useHome = () => ({ pathname: '/home' });
+
+  const useReports = () => ({ pathname: '/reports' });
+
+  await act(async () =>
+    root.render(
+      <UIProvider router={useHome}>
+        <Sidebar items={routerItems} />
+      </UIProvider>,
+    ),
+  );
+  await act(async () =>
+    root.render(
+      <UIProvider router={useReports}>
+        <Sidebar items={routerItems} />
+      </UIProvider>,
+    ),
+  );
+
+  expect(activeLabel()).toContain('Reports');
 });

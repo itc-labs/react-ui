@@ -44,6 +44,22 @@ const steps = [
   },
 ];
 
+function OverviewCalendar() {
+  const [date, setDate] = useState<string | null>('2026-11-18');
+
+  return (
+    <Card className="w-fit max-w-full">
+      <Calendar
+        value={date}
+        onValueChange={setDate}
+        defaultMonth="2026-11-01"
+        today="2026-11-18"
+        classNames={{ selects: 'hidden' }}
+      />
+    </Card>
+  );
+}
+
 function SoftWorkspace({
   accountPlacement,
   showOnboarding,
@@ -51,8 +67,6 @@ function SoftWorkspace({
   showCharts,
   showTransactions,
 }: SoftWorkspaceArgs) {
-  const [date, setDate] = useState<string | null>('2026-11-18');
-
   return (
     <DashboardShell
       variant="soft"
@@ -101,15 +115,7 @@ function SoftWorkspace({
       <div className="grid gap-6">
         {showOnboarding && (
           <div className="grid gap-6 xl:grid-cols-[auto_minmax(0,1fr)]">
-            <Card className="w-fit max-w-full">
-              <Calendar
-                value={date}
-                onValueChange={setDate}
-                defaultMonth="2026-11-01"
-                today="2026-11-18"
-                classNames={{ selects: 'hidden' }}
-              />
-            </Card>
+            <OverviewCalendar />
             <Card
               title="Get started with Northwind"
               description="Two steps to your first paid invoice."

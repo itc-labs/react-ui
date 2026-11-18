@@ -3,7 +3,6 @@ import { interactiveTrigger } from '../common/interactive-trigger';
 
 import {
   useContext,
-  useMemo,
   useSyncExternalStore,
   type ComponentProps,
   type ComponentType,
@@ -26,22 +25,13 @@ export type UiImageProps = Omit<
 };
 export type UiLinkComponent = ComponentType<UiLinkProps>;
 export type UiImageComponent = ComponentType<UiImageProps>;
-export type UiRouter = {
-  pathname: string;
-  navigate: (href: string) => void;
-};
-/** A hook that reads the host router. Define it outside components so its identity is stable. */
+export type UiRouter = { pathname: string };
+/** A hook that reads the host router's path. Define it outside components. */
 export type UiRouterAdapter = () => UiRouter;
 
-function subscribeToHistory(onChange: () => void) {
-  window.addEventListener('popstate', onChange);
+const subscribeToNothing = () => () => {};
 
-  return () => window.removeEventListener('popstate', onChange);
-}
-
-function browserNavigate(href: string) {
-  window.location.assign(href);
-}
+const getNoPath = () => undefined;
 
 export function useUiLink(): UiLinkComponent {
   return useContext(LinkImageContext).Link;
@@ -51,35 +41,10 @@ export function useUiImage(): UiImageComponent {
   return useContext(LinkImageContext).Image;
 }
 
-const getBrowserPath = () => window.location.pathname;
-
-const getServerPath = () => '/';
-
-const subscribeToNothing = () => () => {};
-
-const getNoPath = () => undefined;
-
-/** The current path and navigation. Re-renders on every route change. */
-export function useUiRouter(): UiRouter {
-  const store = useContext(LinkImageContext).router;
-  const pathname = useSyncExternalStore(
-    store?.subscribe ?? subscribeToHistory,
-    store?.getPathname ?? getBrowserPath,
-    store?.getPathname ?? getServerPath,
-  );
-  const navigate = store?.navigate ?? browserNavigate;
-
-  return useMemo(() => ({ pathname, navigate }), [pathname, navigate]);
-}
-
-/** A stable navigate function that does not re-render the caller when the route changes. */
-export function useUiNavigate() {
-  return useContext(LinkImageContext).router?.navigate ?? browserNavigate;
-}
-
-/** An explicit path wins; otherwise only a configured adapter supplies one. */
+/** An explicit path wins and needs no subscription; otherwise a configured adapter supplies it. */
 export function useRouterPath(currentPath?: string) {
-  const store = useContext(LinkImageContext).router;
+  const context = useContext(LinkImageContext).router;
+  const store = currentPath === undefined ? context : undefined;
   const pathname = useSyncExternalStore(
     store?.subscribe ?? subscribeToNothing,
     store?.getPathname ?? getNoPath,

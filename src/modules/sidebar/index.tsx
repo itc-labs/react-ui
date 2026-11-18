@@ -195,10 +195,6 @@ export function Sidebar<TAccess = unknown>({
     id: string | undefined;
   }>({ path: currentPath, id: undefined });
 
-  useEffect(() => {
-    setSelection({ path: currentPath, id: undefined });
-  }, [currentPath]);
-
   const sectionId =
     controlledSection ??
     (selection.path === currentPath ? selection.id : undefined) ??

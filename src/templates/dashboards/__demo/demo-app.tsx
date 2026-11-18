@@ -11,10 +11,7 @@ import type { UiLinkProps, UiRouter } from '../../../components/link-image-provi
 import type { UITheme } from '../../../theme';
 import { UIProvider } from '../../../theme/provider';
 
-const DemoRouterContext = createContext<UiRouter>({
-  pathname: '/dashboard',
-  navigate: () => {},
-});
+const DemoRouterContext = createContext<UiRouter>({ pathname: '/dashboard' });
 
 /** Stands in for the hook a host writes around its router. */
 function useDemoRouter() {
@@ -33,7 +30,7 @@ export function DemoApp({
   children: ReactNode;
 }) {
   const [path, setPath] = useState(initialPath);
-  const router = useMemo(() => ({ pathname: path, navigate: setPath }), [path]);
+  const router = useMemo(() => ({ pathname: path }), [path]);
   const DemoLink = useCallback(
     ({ href, onClick, ...props }: UiLinkProps) => (
       <a

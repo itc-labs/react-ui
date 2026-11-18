@@ -75,18 +75,28 @@ export function useNotifications(api: NotificationsApi, pageSize = 15) {
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [status, setStatus] = useState<NotificationsStatus>('idle');
   const request = useRef<AbortController | null>(null);
+  const revision = useRef(0);
 
   useEffect(() => {
     const controller = new AbortController();
+    const startedAt = revision.current;
+
+    setItems([]);
+    setUnreadCount(0);
+    setNextCursor(null);
+    setStatus('idle');
 
     api
       .getUnreadCount(controller.signal)
       .then((count) => {
-        if (!controller.signal.aborted) setUnreadCount(count);
+        if (!controller.signal.aborted && revision.current === startedAt)
+          setUnreadCount(count);
       })
       .catch(() => {});
 
     const unsubscribe = api.subscribe((event) => {
+      revision.current += 1;
+
       setItems((current) => {
         const rest = current.filter((item) => item.id !== event.notification.id);
 
@@ -99,6 +109,7 @@ export function useNotifications(api: NotificationsApi, pageSize = 15) {
     return () => {
       controller.abort();
       request.current?.abort();
+      request.current = null;
       unsubscribe();
     };
   }, [api]);
@@ -108,6 +119,7 @@ export function useNotifications(api: NotificationsApi, pageSize = 15) {
       if (request.current) return;
 
       const controller = new AbortController();
+      const startedAt = revision.current;
 
       request.current = controller;
       setStatus('loading');
@@ -120,7 +132,7 @@ export function useNotifications(api: NotificationsApi, pageSize = 15) {
           setItems((current) => mergeById(current, page.items));
 
           setNextCursor(page.nextCursor);
-          setUnreadCount(page.unreadCount);
+          if (revision.current === startedAt) setUnreadCount(page.unreadCount);
           setStatus('ready');
         })
         .catch(() => {
@@ -172,7 +184,9 @@ export function useNotifications(api: NotificationsApi, pageSize = 15) {
   );
 
   const markAllRead = useCallback(() => {
-    const previousItems = items;
+    const unreadIds = new Set(
+      items.filter((item) => !item.read).map((item) => item.id),
+    );
     const previousCount = unreadCount;
 
     setItems((current) => current.map((item) => ({ ...item, read: true })));
@@ -183,8 +197,14 @@ export function useNotifications(api: NotificationsApi, pageSize = 15) {
       .markAllRead()
       .then((result) => setUnreadCount(result.unreadCount))
       .catch(() => {
-        setItems(previousItems);
-        setUnreadCount(previousCount);
+        // Restore only these rows, so notifications received meanwhile stay in the list.
+        setItems((current) =>
+          current.map((item) =>
+            unreadIds.has(item.id) ? { ...item, read: false } : item,
+          ),
+        );
+
+        setUnreadCount((count) => Math.max(count, previousCount));
       });
   }, [api, items, unreadCount]);
 

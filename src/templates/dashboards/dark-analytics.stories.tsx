@@ -42,7 +42,6 @@ import {
   analyticsSeries,
   type AnalyticsProduct,
 } from './__demo/dark-analytics-data';
-import { useUiNavigate } from '../../components/link-image-provider';
 import { DemoApp } from './__demo/demo-app';
 
 type DarkAnalyticsArgs = {
@@ -92,6 +91,86 @@ const productColumns: ColumnDef<AnalyticsProduct, unknown>[] = [
   },
 ];
 
+function StrategySimulator() {
+  const [budget, setBudget] = useState(20);
+  const [conversion, setConversion] = useState(10);
+  const [retention, setRetention] = useState(5);
+  const projectedRevenue =
+    48291 * (1 + budget / 500) * (1 + conversion / 100) * (1 + retention / 100);
+
+  return (
+    <Card
+      title="Strategy simulator"
+      description="Explore a scenario for your next 30 days. Estimates are illustrative, based on November 2026 revenue."
+    >
+      <div className="grid min-w-0 gap-6 md:grid-cols-3">
+        <Slider
+          label="Marketing budget increase"
+          min={0}
+          max={100}
+          value={budget}
+          onValueChange={setBudget}
+          showValue="always"
+          formatValue={(value) => `${value}%`}
+        />
+        <Slider
+          label="Conversion improvement"
+          min={0}
+          max={50}
+          value={conversion}
+          onValueChange={setConversion}
+          showValue="always"
+          formatValue={(value) => `${value}%`}
+        />
+        <Slider
+          label="Retention improvement"
+          min={0}
+          max={30}
+          value={retention}
+          onValueChange={setRetention}
+          showValue="always"
+          formatValue={(value) => `${value}%`}
+        />
+      </div>
+      <p className="mt-6 text-ink" aria-live="polite">
+        Projected monthly revenue:{' '}
+        <strong className="text-accent tabular-nums">
+          {demoCurrency.format(projectedRevenue)}
+        </strong>
+      </p>
+    </Card>
+  );
+}
+
+function TopProductsCard() {
+  const [tableState, setTableState] = useState<DataTableState>({
+    sorting: [{ id: 'revenue', desc: true }],
+    pagination: { pageIndex: 0, pageSize: 5 },
+  });
+
+  return (
+    <Card
+      title="Top performing products"
+      description="October 20 – November 18, 2026 · ranked by revenue"
+      classNames={{ content: 'p-0' }}
+    >
+      <DataTable
+        caption="Top performing products"
+        className="border-0 shadow-none"
+        classNames={{ toolbar: 'px-0' }}
+        rows={analyticsProducts}
+        columns={productColumns}
+        rowId={(row) => row.id}
+        filterable
+        pagination
+        pageSizeOptions={[5, 10, 20]}
+        state={tableState}
+        onStateChange={setTableState}
+      />
+    </Card>
+  );
+}
+
 function DarkAnalyticsPage({
   showKpis,
   showRevenue,
@@ -100,18 +179,6 @@ function DarkAnalyticsPage({
   showRecommendations,
   showTable,
 }: DarkAnalyticsArgs) {
-  const navigate = useUiNavigate();
-
-  const [tableState, setTableState] = useState<DataTableState>({
-    sorting: [{ id: 'revenue', desc: true }],
-    pagination: { pageIndex: 0, pageSize: 5 },
-  });
-  const [budget, setBudget] = useState(20);
-  const [conversion, setConversion] = useState(10);
-  const [retention, setRetention] = useState(5);
-  const projectedRevenue =
-    48291 * (1 + budget / 500) * (1 + conversion / 100) * (1 + retention / 100);
-
   return (
     <div className="grid min-w-0 gap-6">
       {showKpis && (
@@ -166,48 +233,7 @@ function DarkAnalyticsPage({
           {showTraffic && <ChannelsCard />}
         </div>
       )}
-      {showSimulator && (
-        <Card
-          title="Strategy simulator"
-          description="Explore a scenario for your next 30 days. Estimates are illustrative, based on November 2026 revenue."
-        >
-          <div className="grid min-w-0 gap-6 md:grid-cols-3">
-            <Slider
-              label="Marketing budget increase"
-              min={0}
-              max={100}
-              value={budget}
-              onValueChange={setBudget}
-              showValue="always"
-              formatValue={(value) => `${value}%`}
-            />
-            <Slider
-              label="Conversion improvement"
-              min={0}
-              max={50}
-              value={conversion}
-              onValueChange={setConversion}
-              showValue="always"
-              formatValue={(value) => `${value}%`}
-            />
-            <Slider
-              label="Retention improvement"
-              min={0}
-              max={30}
-              value={retention}
-              onValueChange={setRetention}
-              showValue="always"
-              formatValue={(value) => `${value}%`}
-            />
-          </div>
-          <p className="mt-6 text-ink" aria-live="polite">
-            Projected monthly revenue:{' '}
-            <strong className="text-accent tabular-nums">
-              {demoCurrency.format(projectedRevenue)}
-            </strong>
-          </p>
-        </Card>
-      )}
+      {showSimulator && <StrategySimulator />}
       {showRecommendations && (
         <section aria-labelledby="recommendations-title" className="grid min-w-0 gap-4">
           <h2
@@ -229,7 +255,7 @@ function DarkAnalyticsPage({
                   className="mt-4"
                   size="sm"
                   variant="secondary"
-                  onClick={() => navigate(`/insights/${item.id}`)}
+                  href={`/insights/${item.id}`}
                 >
                   {item.action}
                 </Button>
@@ -238,34 +264,12 @@ function DarkAnalyticsPage({
           </div>
         </section>
       )}
-      {showTable && (
-        <Card
-          title="Top performing products"
-          description="October 20 – November 18, 2026 · ranked by revenue"
-          classNames={{ content: 'p-0' }}
-        >
-          <DataTable
-            caption="Top performing products"
-            className="border-0 shadow-none"
-            classNames={{ toolbar: 'px-0' }}
-            rows={analyticsProducts}
-            columns={productColumns}
-            rowId={(row) => row.id}
-            filterable
-            pagination
-            pageSizeOptions={[5, 10, 20]}
-            state={tableState}
-            onStateChange={setTableState}
-          />
-        </Card>
-      )}
+      {showTable && <TopProductsCard />}
     </div>
   );
 }
 
 function DarkAnalytics(args: DarkAnalyticsArgs) {
-  const navigate = useUiNavigate();
-
   const [workspace, setWorkspace] = useState('growth');
 
   return (
@@ -276,7 +280,7 @@ function DarkAnalytics(args: DarkAnalyticsArgs) {
       topbar={
         args.showTopbar ? (
           <>
-            <Button variant="ghost" onClick={() => navigate('/dashboard')}>
+            <Button variant="ghost" href="/dashboard">
               <ChartIcon /> Buildora
             </Button>
             <Input
@@ -285,10 +289,7 @@ function DarkAnalytics(args: DarkAnalyticsArgs) {
               icon="search"
               rootClassName="order-last w-full min-w-0 md:order-none md:w-auto md:flex-1 md:max-w-xl"
             />
-            <Button
-              className="ms-auto shrink-0"
-              onClick={() => navigate('/sources/new')}
-            >
+            <Button className="ms-auto shrink-0" href="/sources/new">
               Add data
             </Button>
             <DemoNotifications />
@@ -342,10 +343,10 @@ function DarkAnalytics(args: DarkAnalyticsArgs) {
                   { value: '90', label: 'Last 90 days' },
                 ]}
               />
-              <Button variant="secondary" onClick={() => navigate('/reports/export')}>
+              <Button variant="secondary" href="/reports/export">
                 Export
               </Button>
-              <Button variant="secondary" onClick={() => navigate('/reports/share')}>
+              <Button variant="secondary" href="/reports/share">
                 Share
               </Button>
             </div>

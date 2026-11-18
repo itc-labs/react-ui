@@ -16,7 +16,7 @@ All configuration props are optional; `children` is required. Adapter types are 
 | ----------------- | --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `link`            | `UiLinkComponent`     | Host link adapter; inherits when omitted, defaulting to native links.                                                                                                                                       |
 | `image`           | `UiImageComponent`    | Host image adapter; inherits when omitted, defaulting to native images.                                                                                                                                     |
-| `router`          | `UiRouterAdapter`     | Hook that returns the host's `pathname` and `navigate`; inherits when omitted. Sidebar, Navbar and TopLoaderProvider follow its path.                                                                       |
+| `router`          | `UiRouterAdapter`     | Hook that returns the host's current `pathname`; inherits when omitted. Sidebar, Navbar and TopLoaderProvider follow its path.                                                                              |
 | `theme`           | `UITheme`             | Optional readonly `icons` and `tokens` settings; inherits the parent theme.                                                                                                                                 |
 | `locale`          | `string \| UILocale`  | A locale code or an object containing `code`, readonly `messages`, and optional `calendarLocale`. Inherits the parent; defaults to `vi-VN`.                                                                 |
 | `translations`    | `UITranslations`      | A readonly array of `{ locale: string; messages: Readonly<Partial<UIMessages>> }`. Replaces the inherited catalog when supplied. Defaults to an empty catalog with built-in English and Vietnamese support. |
@@ -167,16 +167,13 @@ Keep the adapter's identity stable to avoid remounting links. Use the same provi
 
 ## Router adapter
 
-`router` connects the kit to the host router, in the same way `link` and `image` connect links and images. Define the hook outside components and mount `UIProvider` inside the router.
+`router` tells the kit which page is current, in the same way `link` and `image` connect links and images. It only reads the path: navigation goes through your `link` adapter, so the kit never depends on a router package. Define the hook outside components and mount `UIProvider` inside the router.
 
 ```tsx snippet
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 
 function useRouterAdapter() {
-  const { pathname } = useLocation();
-  const navigate = useNavigate();
-
-  return { pathname, navigate };
+  return { pathname: useLocation().pathname };
 }
 
 <UIProvider link={RouterUiLink} image={WebImage} router={useRouterAdapter}>
@@ -184,13 +181,8 @@ function useRouterAdapter() {
 </UIProvider>;
 ```
 
-In the Next.js App Router, return `usePathname()` and `useRouter().push` from the hook.
+In the Next.js App Router, return `{ pathname: usePathname() }`.
 
-Sidebar, Navbar and TopLoaderProvider then follow the current path; an explicit `currentPath` still wins. In your own components, use the hook that matches what the component needs:
+Sidebar, Navbar and TopLoaderProvider then follow the current path, and an explicit `currentPath` still wins. Only an internal bridge calls your hook, so a route change re-renders the components that show the path and not the provider's children. Without an adapter, pass `currentPath` yourself.
 
-| Hook              | Returns                    | Re-renders on route change |
-| ----------------- | -------------------------- | -------------------------- |
-| `useUiNavigate()` | A stable navigate function | No                         |
-| `useUiRouter()`   | `{ pathname, navigate }`   | Yes                        |
-
-Only an internal bridge calls your hook, so a route change does not re-render the provider's children. Without an adapter, `useUiRouter` reads the browser location, navigation performs a full page load, and Sidebar and Navbar keep using `currentPath`.
+To navigate from a control, give `Button` or `IconButton` an `href`; it renders through the `link` adapter. For navigation after logic, such as saving a form, use your router's own API.

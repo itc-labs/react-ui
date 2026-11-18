@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { useState } from 'react';
+import { useState, useImperativeHandle, useRef, type Ref } from 'react';
 import { DashboardShell } from '@itclabs/react-ui/templates';
 import { Chart } from '@itclabs/react-ui/chart';
 import { Button } from '../../components/button';
@@ -17,7 +17,6 @@ import { MessagesIcon } from '../../components/icon/outline/messages';
 import { ProgressList } from '../../modules/progress-list';
 import type { SidebarEntry } from '../../modules/sidebar';
 import { DemoNotifications, OrdersTable, PromoCard } from './__demo/blocks';
-import { useUiNavigate } from '../../components/link-image-provider';
 import { DemoApp } from './__demo/demo-app';
 import {
   demoAccount,
@@ -131,26 +130,115 @@ const cashFlowTabs = [
   { id: 'savings', label: 'Savings' },
 ];
 
+function EarningCard() {
+  const [period, setPeriod] = useState<string | null>('month');
+
+  return (
+    <Card
+      title="Earning overview"
+      description={period === 'year' ? 'January–November 2026' : 'November 1–18, 2026'}
+      classNames={{ header: 'flex-wrap', heading: 'min-w-0' }}
+      action={
+        <Select
+          aria-label="Earning period"
+          size="sm"
+          rootClassName="w-36"
+          value={period}
+          onValueChange={setPeriod}
+          searchable={false}
+          options={[
+            { value: 'month', label: 'This month' },
+            { value: 'year', label: 'Yearly' },
+          ]}
+        />
+      }
+    >
+      <p className="mb-4 text-heading font-semibold tabular-nums text-ink">
+        {demoCurrency.format(
+          (period === 'year' ? yearRevenue : novemberRevenue).reduce(
+            (total, point) => total + Number(point.values.revenue),
+            0,
+          ),
+        )}
+      </p>
+      <Chart
+        type="area"
+        label={
+          period === 'year'
+            ? 'Income by month in 2026 through November'
+            : 'Income every three days in November 2026'
+        }
+        data={period === 'year' ? yearRevenue : novemberRevenue}
+        series={[{ id: 'revenue', label: 'Income' }]}
+        height={240}
+        legend={false}
+        valueFormatter={(value) => demoCurrency.format(value)}
+        axisValueFormatter={(value) => `$${value / 1000}k`}
+      />
+    </Card>
+  );
+}
+
+type WorkspaceSearchHandle = { open: () => void };
+
+function WorkspaceSearch({ ref }: { ref: Ref<WorkspaceSearchHandle> }) {
+  const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState('');
+  const results = destinations.filter((entry) =>
+    String(entry.label).toLowerCase().includes(query.trim().toLowerCase()),
+  );
+
+  useImperativeHandle(ref, () => ({ open: () => setOpen(true) }), []);
+
+  return (
+    <Dialog
+      title="Search Ledgerly"
+      description="Find a page in your finance workspace."
+      open={open}
+      onOpenChange={setOpen}
+    >
+      <Input
+        aria-label="Search workspace pages"
+        icon="search"
+        placeholder="Search pages…"
+        value={query}
+        onChange={(event) => setQuery(event.target.value)}
+      />
+      <div
+        className="mt-4 grid max-h-72 gap-1 overflow-y-auto"
+        aria-label="Search results"
+      >
+        {results.map((entry) => (
+          <Button
+            key={entry.id}
+            variant="ghost"
+            className="justify-start"
+            {...('href' in entry && entry.href ? { href: entry.href } : {})}
+            onClick={() => {
+              setOpen(false);
+              setQuery('');
+            }}
+          >
+            {entry.label}
+          </Button>
+        ))}
+        {results.length === 0 && (
+          <p className="text-ui-sm text-muted" role="status">
+            No pages found. Try “Invoices” or “Subscriptions”.
+          </p>
+        )}
+      </div>
+    </Dialog>
+  );
+}
+
 function SidebarSearchPage({
   showEarning,
   showSpending,
   showCashFlow,
   showUpcoming,
   showTransactions,
-  searchOpen,
-  onSearchOpenChange,
-}: SidebarSearchArgs & {
-  searchOpen: boolean;
-  onSearchOpenChange: (open: boolean) => void;
-}) {
-  const navigate = useUiNavigate();
-
-  const [period, setPeriod] = useState<string | null>('month');
-  const [query, setQuery] = useState('');
-  const results = destinations.filter((entry) =>
-    String(entry.label).toLowerCase().includes(query.trim().toLowerCase()),
-  );
-
+}: SidebarSearchArgs) {
   return (
     <>
       <div className="grid min-w-0 gap-6">
@@ -158,52 +246,7 @@ function SidebarSearchPage({
           <div
             className={`grid min-w-0 gap-6 ${showEarning && showSpending ? 'xl:grid-cols-2' : ''}`}
           >
-            {showEarning && (
-              <Card
-                title="Earning overview"
-                description={
-                  period === 'year' ? 'January–November 2026' : 'November 1–18, 2026'
-                }
-                classNames={{ header: 'flex-wrap', heading: 'min-w-0' }}
-                action={
-                  <Select
-                    aria-label="Earning period"
-                    size="sm"
-                    rootClassName="w-36"
-                    value={period}
-                    onValueChange={setPeriod}
-                    searchable={false}
-                    options={[
-                      { value: 'month', label: 'This month' },
-                      { value: 'year', label: 'Yearly' },
-                    ]}
-                  />
-                }
-              >
-                <p className="mb-4 text-heading font-semibold tabular-nums text-ink">
-                  {demoCurrency.format(
-                    (period === 'year' ? yearRevenue : novemberRevenue).reduce(
-                      (total, point) => total + Number(point.values.revenue),
-                      0,
-                    ),
-                  )}
-                </p>
-                <Chart
-                  type="area"
-                  label={
-                    period === 'year'
-                      ? 'Income by month in 2026 through November'
-                      : 'Income every three days in November 2026'
-                  }
-                  data={period === 'year' ? yearRevenue : novemberRevenue}
-                  series={[{ id: 'revenue', label: 'Income' }]}
-                  height={240}
-                  legend={false}
-                  valueFormatter={(value) => demoCurrency.format(value)}
-                  axisValueFormatter={(value) => `$${value / 1000}k`}
-                />
-              </Card>
-            )}
+            {showEarning && <EarningCard />}
             {showSpending && (
               <Card
                 title="Spending overview"
@@ -283,11 +326,7 @@ function SidebarSearchPage({
                 description="Your next scheduled subscriptions"
                 classNames={{ header: 'flex-wrap' }}
                 action={
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => navigate('/subscriptions')}
-                  >
+                  <Button variant="ghost" size="sm" href="/subscriptions">
                     View all
                   </Button>
                 }
@@ -322,52 +361,12 @@ function SidebarSearchPage({
         )}
         {showTransactions && <OrdersTable title="Recent transactions" />}
       </div>
-      <Dialog
-        title="Search Ledgerly"
-        description="Find a page in your finance workspace."
-        open={searchOpen}
-        onOpenChange={onSearchOpenChange}
-      >
-        <Input
-          aria-label="Search workspace pages"
-          icon="search"
-          placeholder="Search pages…"
-          value={query}
-          onChange={(event) => setQuery(event.target.value)}
-        />
-        <div
-          className="mt-4 grid max-h-72 gap-1 overflow-y-auto"
-          aria-label="Search results"
-        >
-          {results.map((entry) => (
-            <Button
-              key={entry.id}
-              variant="ghost"
-              className="justify-start"
-              onClick={() => {
-                if ('href' in entry && entry.href) navigate(entry.href);
-                onSearchOpenChange(false);
-                setQuery('');
-              }}
-            >
-              {entry.label}
-            </Button>
-          ))}
-          {results.length === 0 && (
-            <p className="text-ui-sm text-muted" role="status">
-              No pages found. Try “Invoices” or “Subscriptions”.
-            </p>
-          )}
-        </div>
-      </Dialog>
     </>
   );
 }
 
 function SidebarSearch(args: SidebarSearchArgs) {
-  const navigate = useUiNavigate();
-
-  const [searchOpen, setSearchOpen] = useState(false);
+  const search = useRef<WorkspaceSearchHandle>(null);
 
   return (
     <DashboardShell
@@ -388,7 +387,7 @@ function SidebarSearch(args: SidebarSearchArgs) {
           ? {
               placeholder: 'Search workspace',
               shortcut: 'mod+k',
-              onOpen: () => setSearchOpen(true),
+              onOpen: () => search.current?.open(),
             }
           : undefined,
         footer: args.showPromo ? <PromoCard /> : undefined,
@@ -408,14 +407,14 @@ function SidebarSearch(args: SidebarSearchArgs) {
               size="sm"
               icon="help"
               label="Help"
-              onClick={() => navigate('/help')}
+              href="/help"
             />
             <IconButton
               variant="ghost"
               size="sm"
               icon="messages"
               label="Messages"
-              onClick={() => navigate('/messages')}
+              href="/messages"
             />
             <DemoNotifications />
           </>
@@ -424,11 +423,8 @@ function SidebarSearch(args: SidebarSearchArgs) {
       {...(args.showAccount ? { account: demoAccount } : {})}
       accountPlacement="header"
     >
-      <SidebarSearchPage
-        {...args}
-        searchOpen={args.showSearch && searchOpen}
-        onSearchOpenChange={setSearchOpen}
-      />
+      <SidebarSearchPage {...args} />
+      {args.showSearch && <WorkspaceSearch ref={search} />}
     </DashboardShell>
   );
 }

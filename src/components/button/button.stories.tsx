@@ -95,6 +95,29 @@ export const States: Story = {
   ),
 };
 
+export const AsLink: Story = {
+  tags: ['example'],
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Use href for navigation. The link renders through the UIProvider link adapter, so it keeps new-tab and keyboard behavior. A disabled or loading action stays a disabled button.',
+      },
+    },
+  },
+  render: () => (
+    <div className="flex flex-wrap gap-3">
+      <Button href="#reports">View reports</Button>
+      <Button href="#reports" variant="secondary">
+        Open details
+      </Button>
+      <Button href="#reports" disabled>
+        Unavailable
+      </Button>
+    </div>
+  ),
+};
+
 export const CustomClasses: Story = {
   tags: ['customization'],
   render: () => (

@@ -74,6 +74,86 @@ const metrics = [
   { label: 'Revenue', value: '$48,290', trend: 12.4, tone: 'brand' },
 ] as const;
 
+function BalanceCard({
+  showBalance,
+  showWallets,
+}: Pick<TopNavRailArgs, 'showBalance' | 'showWallets'>) {
+  const [currency, setCurrency] = useState('USD');
+  const formatBalance = new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency,
+    maximumFractionDigits: 0,
+  });
+
+  return (
+    <Card
+      title={showBalance ? 'Total balance' : 'Wallets'}
+      description={
+        showBalance ? 'Available across your wallets' : 'Your currency accounts'
+      }
+      action={
+        showBalance ? (
+          <Select
+            aria-label="Balance currency"
+            size="sm"
+            rootClassName="w-24 shrink-0"
+            options={wallets.map(({ currency: code }) => ({
+              value: code,
+              label: code,
+            }))}
+            value={currency}
+            onValueChange={(value) => value && setCurrency(value)}
+          />
+        ) : undefined
+      }
+      classNames={{ header: 'flex-wrap' }}
+    >
+      {showBalance && (
+        <div className="flex flex-wrap items-end justify-between gap-5">
+          <div className="grid gap-3">
+            <p className="text-display font-semibold text-ink tabular-nums">
+              {formatBalance.format(balances[currency]!)}
+            </p>
+            <p className="flex flex-wrap items-center gap-2">
+              <Tag tone="success">+8.2%</Tag>
+              <span>vs October · indicative exchange rates</span>
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <Button>Transfer</Button>
+            <Button variant="secondary">Request</Button>
+          </div>
+        </div>
+      )}
+      {showWallets && (
+        <div
+          className={`grid min-w-0 gap-4 md:grid-cols-3 ${showBalance ? 'mt-6' : ''}`}
+        >
+          {wallets.map((wallet) => (
+            <Card key={wallet.currency} className="bg-canvas p-4 shadow-none">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <h3 className="font-semibold text-ink">{wallet.currency}</h3>
+                <Tag size="sm" tone={wallet.active ? 'success' : 'neutral'}>
+                  {wallet.active ? 'Active' : 'Inactive'}
+                </Tag>
+              </div>
+              <p className="mt-1">{wallet.name}</p>
+              <p className="mt-4 text-section font-semibold text-ink tabular-nums">
+                {new Intl.NumberFormat('en-US', {
+                  style: 'currency',
+                  currency: wallet.currency,
+                  maximumFractionDigits: 0,
+                }).format(wallet.balance)}
+              </p>
+              <p className="mt-2">Monthly transfer limit · {wallet.limit}</p>
+            </Card>
+          ))}
+        </div>
+      )}
+    </Card>
+  );
+}
+
 function TopNavRailPage({
   showGreeting,
   showBalance,
@@ -84,13 +164,6 @@ function TopNavRailPage({
   showCards,
   showTable,
 }: TopNavRailArgs) {
-  const [currency, setCurrency] = useState('USD');
-  const formatBalance = new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency,
-    maximumFractionDigits: 0,
-  });
-
   return (
     <>
       {showGreeting && (
@@ -103,71 +176,7 @@ function TopNavRailPage({
       )}
       <div className="grid min-w-0 gap-6">
         {(showBalance || showWallets) && (
-          <Card
-            title={showBalance ? 'Total balance' : 'Wallets'}
-            description={
-              showBalance ? 'Available across your wallets' : 'Your currency accounts'
-            }
-            action={
-              showBalance ? (
-                <Select
-                  aria-label="Balance currency"
-                  size="sm"
-                  rootClassName="w-24 shrink-0"
-                  options={wallets.map(({ currency: code }) => ({
-                    value: code,
-                    label: code,
-                  }))}
-                  value={currency}
-                  onValueChange={(value) => value && setCurrency(value)}
-                />
-              ) : undefined
-            }
-            classNames={{ header: 'flex-wrap' }}
-          >
-            {showBalance && (
-              <div className="flex flex-wrap items-end justify-between gap-5">
-                <div className="grid gap-3">
-                  <p className="text-display font-semibold text-ink tabular-nums">
-                    {formatBalance.format(balances[currency]!)}
-                  </p>
-                  <p className="flex flex-wrap items-center gap-2">
-                    <Tag tone="success">+8.2%</Tag>
-                    <span>vs October · indicative exchange rates</span>
-                  </p>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  <Button>Transfer</Button>
-                  <Button variant="secondary">Request</Button>
-                </div>
-              </div>
-            )}
-            {showWallets && (
-              <div
-                className={`grid min-w-0 gap-4 md:grid-cols-3 ${showBalance ? 'mt-6' : ''}`}
-              >
-                {wallets.map((wallet) => (
-                  <Card key={wallet.currency} className="bg-canvas p-4 shadow-none">
-                    <div className="flex flex-wrap items-center justify-between gap-2">
-                      <h3 className="font-semibold text-ink">{wallet.currency}</h3>
-                      <Tag size="sm" tone={wallet.active ? 'success' : 'neutral'}>
-                        {wallet.active ? 'Active' : 'Inactive'}
-                      </Tag>
-                    </div>
-                    <p className="mt-1">{wallet.name}</p>
-                    <p className="mt-4 text-section font-semibold text-ink tabular-nums">
-                      {new Intl.NumberFormat('en-US', {
-                        style: 'currency',
-                        currency: wallet.currency,
-                        maximumFractionDigits: 0,
-                      }).format(wallet.balance)}
-                    </p>
-                    <p className="mt-2">Monthly transfer limit · {wallet.limit}</p>
-                  </Card>
-                ))}
-              </div>
-            )}
-          </Card>
+          <BalanceCard showBalance={showBalance} showWallets={showWallets} />
         )}
         {showMetrics && (
           <KpiGrid columns={4}>
