@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { NavigationMenu } from 'radix-ui';
 import { cn, partTestId } from '../../components/common';
 import { Drawer } from '../../components/drawer';
+import { useRouterPath } from '../../components/link-image-provider';
 import { MenuIcon } from '../../components/icon/outline/menu';
 import { KitIconButton } from '../../components/icon-button/kit-icon-button';
 import { NavbarBrandBlock } from './brand';
@@ -29,7 +30,7 @@ export function Navbar<TAccess = unknown>({
   items,
   actions,
   secondary,
-  currentPath,
+  currentPath: currentPathProp,
   isActive,
   canAccess,
   navigationLabel,
@@ -42,6 +43,8 @@ export function Navbar<TAccess = unknown>({
   'data-testid': testId,
   ...props
 }: NavbarProps<TAccess>) {
+  const currentPath = useRouterPath(currentPathProp);
+
   const { t } = useUILocale();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);

@@ -16,6 +16,7 @@ All configuration props are optional; `children` is required. Adapter types are 
 | ----------------- | --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `link`            | `UiLinkComponent`     | Host link adapter; inherits when omitted, defaulting to native links.                                                                                                                                       |
 | `image`           | `UiImageComponent`    | Host image adapter; inherits when omitted, defaulting to native images.                                                                                                                                     |
+| `router`          | `UiRouterAdapter`     | Hook that returns the host's `pathname` and `navigate`; inherits when omitted. Sidebar, Navbar and TopLoaderProvider follow its path.                                                                       |
 | `theme`           | `UITheme`             | Optional readonly `icons` and `tokens` settings; inherits the parent theme.                                                                                                                                 |
 | `locale`          | `string \| UILocale`  | A locale code or an object containing `code`, readonly `messages`, and optional `calendarLocale`. Inherits the parent; defaults to `vi-VN`.                                                                 |
 | `translations`    | `UITranslations`      | A readonly array of `{ locale: string; messages: Readonly<Partial<UIMessages>> }`. Replaces the inherited catalog when supplied. Defaults to an empty catalog with built-in English and Vietnamese support. |
@@ -78,7 +79,7 @@ export function UIRoot({ children }: { children: ReactNode }) {
 
 **Locale:** nested providers inherit omitted settings. Calendar maps merge, while a supplied translations array replaces the catalog. Message overrides merge for the same locale; switching locale code or supplying a different locale object resets inherited overrides. These settings apply to the React subtree.
 
-**Adapters:** a nested `UIProvider` replaces only the adapters supplied through `link` and `image`; each omitted adapter inherits from its parent. Use `<UIProvider link={ScopedLink}>` to override only links in a subtree while retaining the parent image adapter.
+**Adapters:** a nested `UIProvider` replaces only the adapters supplied through `link`, `image` and `router`; each omitted adapter inherits from its parent. Use `<UIProvider link={ScopedLink}>` to override only links in a subtree while retaining the parent image adapter.
 
 **Feedback:** each toast or modal provider has its own controller. One client can bind to only one mounted provider. Use `createToastClient()` and `createModalClient()` for independent application roots, and retain those clients for the root's lifetime. For a local subtree, set `client={null}` and call `useToast()` or `useModal()`; the default exported clients still target the root providers. Changing a modal provider's client or unmounting it settles pending modals as dismissed.
 
@@ -163,3 +164,33 @@ export function RouterAdapters({
 ```
 
 Keep the adapter's identity stable to avoid remounting links. Use the same provider configuration in tests and stories as in the host application, adding only the feedback providers a test needs.
+
+## Router adapter
+
+`router` connects the kit to the host router, in the same way `link` and `image` connect links and images. Define the hook outside components and mount `UIProvider` inside the router.
+
+```tsx snippet
+import { useLocation, useNavigate } from 'react-router-dom';
+
+function useRouterAdapter() {
+  const { pathname } = useLocation();
+  const navigate = useNavigate();
+
+  return { pathname, navigate };
+}
+
+<UIProvider link={RouterUiLink} image={WebImage} router={useRouterAdapter}>
+  {children}
+</UIProvider>;
+```
+
+In the Next.js App Router, return `usePathname()` and `useRouter().push` from the hook.
+
+Sidebar, Navbar and TopLoaderProvider then follow the current path; an explicit `currentPath` still wins. In your own components, use the hook that matches what the component needs:
+
+| Hook              | Returns                    | Re-renders on route change |
+| ----------------- | -------------------------- | -------------------------- |
+| `useUiNavigate()` | A stable navigate function | No                         |
+| `useUiRouter()`   | `{ pathname, navigate }`   | Yes                        |
+
+Only an internal bridge calls your hook, so a route change does not re-render the provider's children. Without an adapter, `useUiRouter` reads the browser location, navigation performs a full page load, and Sidebar and Navbar keep using `currentPath`.

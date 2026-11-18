@@ -16,7 +16,7 @@ import { Sidebar } from '../../modules/sidebar';
 import { UserMenu } from '../../modules/user-menu';
 import { DemoNotifications, OrdersTable } from './__demo/blocks';
 import { demoAccount, demoCurrency, demoNavigation, demoRevenue } from './__demo/data';
-import { DemoApp, useDemoPath } from './__demo/demo-app';
+import { DemoApp } from './__demo/demo-app';
 
 type TopNavRailArgs = {
   showTopbar: boolean;
@@ -297,8 +297,6 @@ function TopNavRailPage({
 }
 
 function TopNavRail(args: TopNavRailArgs) {
-  const { path } = useDemoPath();
-
   return (
     <WorkspaceShell
       variant="floating"
@@ -312,7 +310,6 @@ function TopNavRail(args: TopNavRailArgs) {
             sticky={false}
             brand={{ title: 'Finexo', logo: <WalletIcon />, href: '/dashboard' }}
             items={navigation}
-            currentPath={path}
             activeIndicator="pill"
             navigationLabel="Finexo navigation"
             className="rounded-panel border-0"
@@ -352,7 +349,6 @@ function TopNavRail(args: TopNavRailArgs) {
             // The topbar Navbar owns mobile navigation; avoid a second menu button.
             mobileTrigger={false}
             items={railItems}
-            currentPath={path}
             collapsible="icon"
             defaultCollapsed
             collapseToggle="none"

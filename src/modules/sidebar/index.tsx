@@ -13,6 +13,7 @@ import {
 import { useComposedRefs } from '../../components/common/refs';
 import { cn, partTestId } from '../../components/common';
 import { Drawer } from '../../components/drawer';
+import { useRouterPath } from '../../components/link-image-provider';
 import { PanelLeftIcon } from '../../components/icon/outline/panel-left';
 import { MenuIcon } from '../../components/icon/outline/menu';
 import { KitIconButton } from '../../components/icon-button/kit-icon-button';
@@ -81,7 +82,7 @@ export function Sidebar<TAccess = unknown>({
   search,
   items,
   navigationLabel,
-  currentPath,
+  currentPath: currentPathProp,
   isActive,
   canAccess,
   collapsed: controlledCollapsed,
@@ -100,6 +101,8 @@ export function Sidebar<TAccess = unknown>({
   classNames,
   ...props
 }: SidebarProps<TAccess>) {
+  const currentPath = useRouterPath(currentPathProp);
+
   const { t } = useUILocale();
   const shellVariant = useContext(WorkspaceLayoutContext);
   // Inside WorkspaceShell the sidebar follows the shell unless its own props say otherwise.

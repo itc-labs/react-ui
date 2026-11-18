@@ -48,10 +48,14 @@ export {
   UiImage,
   useUiLink,
   useUiImage,
+  useUiNavigate,
+  useUiRouter,
   type UiLinkProps,
   type UiImageProps,
   type UiLinkComponent,
   type UiImageComponent,
+  type UiRouter,
+  type UiRouterAdapter,
 } from './link-image-provider';
 
 export * from './modal';

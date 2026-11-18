@@ -16,7 +16,7 @@ import { Textarea } from '../../components/textarea';
 import { BoldIcon } from '../../components/icon/outline/bold';
 import { ItalicIcon } from '../../components/icon/outline/italic';
 import { LinkIcon } from '../../components/icon/outline/link';
-import { DemoApp, useDemoPath } from './__demo/demo-app';
+import { DemoApp } from './__demo/demo-app';
 import { demoAccount } from './__demo/data';
 import {
   messagingActivity,
@@ -288,7 +288,6 @@ function MessagingPage({
 }
 
 function Messaging(args: MessagingArgs) {
-  const { path } = useDemoPath();
   const [bookmarked, setBookmarked] = useState(false);
   const [search, setSearch] = useState('');
   const [searchOpen, setSearchOpen] = useState(false);
@@ -309,7 +308,6 @@ function Messaging(args: MessagingArgs) {
         ...(args.showRail
           ? { sections: messagingSections, defaultSection: 'northwind' }
           : { items: messagingNavigation }),
-        currentPath: path,
         density: 'compact',
         // Collapsing a two-tier sidebar keeps the icon rail (and its toggle) visible.
         collapsible: 'icon',

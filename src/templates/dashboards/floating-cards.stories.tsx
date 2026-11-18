@@ -16,7 +16,8 @@ import type { SidebarEntry } from '../../modules/sidebar';
 import { UserMenu } from '../../modules/user-menu';
 import { DemoNotifications, OrdersTable } from './__demo/blocks';
 import { demoAccount, demoCurrency } from './__demo/data';
-import { DemoApp, useDemoPath } from './__demo/demo-app';
+import { useUiNavigate } from '../../components/link-image-provider';
+import { DemoApp } from './__demo/demo-app';
 
 type FloatingCardsArgs = {
   showTopbar: boolean;
@@ -282,7 +283,7 @@ function FloatingCardsPage({
 }
 
 function FloatingCards(args: FloatingCardsArgs) {
-  const { path, navigate } = useDemoPath();
+  const navigate = useUiNavigate();
 
   return (
     <DashboardShell
@@ -335,7 +336,6 @@ function FloatingCards(args: FloatingCardsArgs) {
           { id: 'logout', label: 'Logout', href: '/logout', icon: 'logout' },
         ],
         density: args.density,
-        currentPath: path,
       }}
       header={
         args.showHeader ? (

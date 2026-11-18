@@ -222,7 +222,7 @@ Choose matchers/permissions for the host's route tree. Also verify authorization
 
 ### React Router host
 
-Read [useLocation](https://reactrouter.com/api/hooks/useLocation) inside the host router and pass its pathname. Configure a UIProvider link adapter mapping UiLink's `href` to React Router Link's `to`, forwarding native props and ref.
+Prefer the `router` adapter on `UIProvider`, which keeps Sidebar and Navbar on the current path without a prop. To pass the path yourself, read [useLocation](https://reactrouter.com/api/hooks/useLocation) inside the host router and pass its pathname. Configure a UIProvider link adapter mapping UiLink's `href` to React Router Link's `to`, forwarding native props and ref.
 
 ```tsx
 import { useLocation } from 'react-router';

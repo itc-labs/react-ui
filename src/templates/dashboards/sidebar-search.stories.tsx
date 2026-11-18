@@ -17,7 +17,8 @@ import { MessagesIcon } from '../../components/icon/outline/messages';
 import { ProgressList } from '../../modules/progress-list';
 import type { SidebarEntry } from '../../modules/sidebar';
 import { DemoNotifications, OrdersTable, PromoCard } from './__demo/blocks';
-import { DemoApp, useDemoPath } from './__demo/demo-app';
+import { useUiNavigate } from '../../components/link-image-provider';
+import { DemoApp } from './__demo/demo-app';
 import {
   demoAccount,
   demoCurrency,
@@ -142,7 +143,8 @@ function SidebarSearchPage({
   searchOpen: boolean;
   onSearchOpenChange: (open: boolean) => void;
 }) {
-  const { navigate } = useDemoPath();
+  const navigate = useUiNavigate();
+
   const [period, setPeriod] = useState<string | null>('month');
   const [query, setQuery] = useState('');
   const results = destinations.filter((entry) =>
@@ -363,7 +365,8 @@ function SidebarSearchPage({
 }
 
 function SidebarSearch(args: SidebarSearchArgs) {
-  const { path, navigate } = useDemoPath();
+  const navigate = useUiNavigate();
+
   const [searchOpen, setSearchOpen] = useState(false);
 
   return (
@@ -379,7 +382,6 @@ function SidebarSearch(args: SidebarSearchArgs) {
           subtitle: 'Finance workspace',
           logo: <WalletIcon />,
         },
-        currentPath: path,
         items: args.showNavigation ? navigation : [],
         footerItems: args.showFooterLinks ? demoFooterNavigation : [],
         search: args.showSearch

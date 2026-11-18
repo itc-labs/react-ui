@@ -16,7 +16,7 @@ import {
   OrdersTable,
   RevenueCard,
 } from './__demo/blocks';
-import { DemoApp, useDemoPath } from './__demo/demo-app';
+import { DemoApp } from './__demo/demo-app';
 import { demoAccount, demoFooterNavigation, demoNavigation } from './__demo/data';
 
 type SoftWorkspaceArgs = {
@@ -51,7 +51,6 @@ function SoftWorkspace({
   showCharts,
   showTransactions,
 }: SoftWorkspaceArgs) {
-  const { path } = useDemoPath();
   const [date, setDate] = useState<string | null>('2026-11-18');
 
   return (
@@ -66,7 +65,6 @@ function SoftWorkspace({
         },
         items: demoNavigation,
         footerItems: demoFooterNavigation,
-        currentPath: path,
         toggleShortcut: 'mod+b',
       }}
       account={demoAccount}

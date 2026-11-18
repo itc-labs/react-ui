@@ -10,7 +10,7 @@ import {
   OrdersTable,
   RevenueCard,
 } from './__demo/blocks';
-import { DemoApp, useDemoPath } from './__demo/demo-app';
+import { DemoApp } from './__demo/demo-app';
 import { demoAccount, demoFooterNavigation, demoNavigation } from './__demo/data';
 
 type DefaultDashboardArgs = {
@@ -24,8 +24,6 @@ function DefaultDashboard({
   showCharts,
   showTable,
 }: DefaultDashboardArgs) {
-  const { path } = useDemoPath();
-
   return (
     <DashboardShell
       sidebar={{
@@ -37,7 +35,6 @@ function DefaultDashboard({
         },
         items: demoNavigation,
         footerItems: demoFooterNavigation,
-        currentPath: path,
       }}
       account={demoAccount}
       header={

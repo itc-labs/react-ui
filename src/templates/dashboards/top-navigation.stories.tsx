@@ -15,7 +15,7 @@ import {
   OrdersTable,
   RevenueCard,
 } from './__demo/blocks';
-import { DemoApp, useDemoPath } from './__demo/demo-app';
+import { DemoApp } from './__demo/demo-app';
 import { demoAccount } from './__demo/data';
 
 type TopNavigationArgs = {
@@ -57,8 +57,6 @@ const navigation: NavbarItem[] = [
 ];
 
 function TopNavigation({ showMetrics, showCharts, showTable }: TopNavigationArgs) {
-  const { path } = useDemoPath();
-
   return (
     <WorkspaceShell
       variant="classic"
@@ -67,7 +65,6 @@ function TopNavigation({ showMetrics, showCharts, showTable }: TopNavigationArgs
           sticky={false}
           brand={{ title: 'Northwind', logo: <ActivityIcon />, href: '/dashboard' }}
           items={navigation}
-          currentPath={path}
           activeIndicator="underline"
           navigationLabel="Main navigation"
           className="w-full border-0"

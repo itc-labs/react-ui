@@ -3,24 +3,22 @@ import {
   createContext,
   useCallback,
   useContext,
+  useMemo,
   useState,
   type ReactNode,
 } from 'react';
-import type { UiLinkProps } from '../../../components/link-image-provider';
+import type { UiLinkProps, UiRouter } from '../../../components/link-image-provider';
 import type { UITheme } from '../../../theme';
 import { UIProvider } from '../../../theme/provider';
 
-const DemoPathContext = createContext<{
-  path: string;
-  navigate: (path: string) => void;
-}>({
-  path: '/dashboard',
+const DemoRouterContext = createContext<UiRouter>({
+  pathname: '/dashboard',
   navigate: () => {},
 });
 
-/** Current demo path and a navigate function, as a host router would provide. */
-export function useDemoPath() {
-  return useContext(DemoPathContext);
+/** Stands in for the hook a host writes around its router. */
+function useDemoRouter() {
+  return useContext(DemoRouterContext);
 }
 
 /** Keeps a fake current path and routes kit links through it, so navigation is clickable. */
@@ -35,6 +33,7 @@ export function DemoApp({
   children: ReactNode;
 }) {
   const [path, setPath] = useState(initialPath);
+  const router = useMemo(() => ({ pathname: path, navigate: setPath }), [path]);
   const DemoLink = useCallback(
     ({ href, onClick, ...props }: UiLinkProps) => (
       <a
@@ -60,10 +59,10 @@ export function DemoApp({
   );
 
   return (
-    <UIProvider link={DemoLink} {...(theme ? { theme } : {})}>
-      <DemoPathContext.Provider value={{ path, navigate: setPath }}>
+    <DemoRouterContext.Provider value={router}>
+      <UIProvider link={DemoLink} router={useDemoRouter} {...(theme ? { theme } : {})}>
         {children}
-      </DemoPathContext.Provider>
-    </UIProvider>
+      </UIProvider>
+    </DemoRouterContext.Provider>
   );
 }

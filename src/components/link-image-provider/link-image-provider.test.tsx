@@ -1,12 +1,19 @@
 // @vitest-environment jsdom
 import { UIProvider } from '../../theme/provider';
-import { act } from 'react';
+import { act, useSyncExternalStore } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { readFileSync, readdirSync } from 'node:fs';
 import { resolve } from 'node:path';
 import ts from 'typescript';
-import { UiLink, UiImage, type UiLinkProps, type UiImageProps } from './index';
+import {
+  UiLink,
+  UiImage,
+  useUiNavigate,
+  useUiRouter,
+  type UiLinkProps,
+  type UiImageProps,
+} from './index';
 import { Breadcrumb } from '../breadcrumb';
 import { Sidebar } from '../../modules/sidebar';
 
@@ -215,4 +222,139 @@ it('lets the image adapter own Avatar source loading and keeps fallback/error be
     ),
   );
   expect(host.querySelector('img')).not.toBeNull();
+});
+
+function createRouter(initial: string) {
+  let pathname = initial;
+  const listeners = new Set<() => void>();
+
+  return {
+    go(next: string) {
+      pathname = next;
+
+      listeners.forEach((listener) => listener());
+    },
+    useRouter() {
+      const value = useSyncExternalStore(
+        (listener) => {
+          listeners.add(listener);
+
+          return () => listeners.delete(listener);
+        },
+        () => pathname,
+      );
+
+      return { pathname: value, navigate: () => {} };
+    },
+  };
+}
+
+const routerItems = [
+  { id: 'home', label: 'Home', href: '/home' },
+  { id: 'reports', label: 'Reports', href: '/reports' },
+];
+
+const activeLabel = () =>
+  document.querySelector('[aria-current="page"]')?.textContent ?? null;
+
+it('lets Sidebar follow the router adapter and re-renders only router consumers', async () => {
+  const router = createRouter('/home');
+
+  const useRouter = () => router.useRouter();
+
+  const pageRenders = vi.fn();
+
+  function Page() {
+    pageRenders();
+
+    return <p>Page</p>;
+  }
+
+  const page = <Page />;
+
+  await act(async () =>
+    root.render(
+      <UIProvider router={useRouter}>
+        <Sidebar items={routerItems} />
+        {page}
+      </UIProvider>,
+    ),
+  );
+
+  expect(activeLabel()).toContain('Home');
+
+  await act(async () => router.go('/reports'));
+
+  expect(activeLabel()).toContain('Reports');
+  expect(pageRenders).toHaveBeenCalledTimes(1);
+});
+
+it('prefers an explicit currentPath over the router adapter', async () => {
+  const router = createRouter('/home');
+
+  const useRouter = () => router.useRouter();
+
+  await act(async () =>
+    root.render(
+      <UIProvider router={useRouter}>
+        <Sidebar items={routerItems} currentPath="/reports" />
+      </UIProvider>,
+    ),
+  );
+
+  expect(activeLabel()).toContain('Reports');
+});
+
+it('keeps Sidebar unselected without an adapter and reads the browser path by default', async () => {
+  let pathname = '';
+
+  function Reader() {
+    pathname = useUiRouter().pathname;
+
+    return null;
+  }
+
+  await act(async () =>
+    root.render(
+      <>
+        <Sidebar items={[{ id: 'here', label: 'Here', href: location.pathname }]} />
+        <Reader />
+      </>,
+    ),
+  );
+
+  expect(activeLabel()).toBeNull();
+  expect(pathname).toBe(location.pathname);
+});
+
+it('gives navigate-only consumers a stable function and no route re-renders', async () => {
+  const router = createRouter('/home');
+  const navigate = vi.fn();
+
+  const useRouter = () => ({ ...router.useRouter(), navigate });
+
+  const renders = vi.fn();
+
+  let go: (href: string) => void = () => {};
+
+  function Action() {
+    go = useUiNavigate();
+    renders();
+
+    return null;
+  }
+
+  await act(async () =>
+    root.render(
+      <UIProvider router={useRouter}>
+        <Action />
+      </UIProvider>,
+    ),
+  );
+  await act(async () => router.go('/reports'));
+
+  go('/settings');
+
+  expect(renders).toHaveBeenCalledTimes(1);
+  expect(navigate).toHaveBeenCalledWith('/settings');
 });

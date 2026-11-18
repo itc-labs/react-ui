@@ -189,7 +189,7 @@ for (const [name, limit] of Object.entries({
   // Fullscreen media adds Dialog focus management and image zoom controls.
   MediaGallery: 54_800,
   // Shared reorder instructions and disabled reasons are included in locale consumers.
-  Lightbox: 42_300,
+  Lightbox: 42_400,
   Button: 21_000,
   Spinner: 20_000,
   Dialog: 38_000,
@@ -203,7 +203,7 @@ for (const [name, limit] of Object.entries({
   // MonthPicker and its bound MonthField add about 1.7 KB gzip;
   // KpiCard, MetricTrend and KpiGrid with their trend glyphs add about 2.7 KB gzip;
   // FormLayout, FormSection, FormGrid and FormActions add about 1.3 KB gzip.
-  Root: 289_900,
+  Root: 290_200,
   ColorPicker: 54_300,
 })) {
   if (sizes[name].gzip >= limit) {

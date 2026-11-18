@@ -26,7 +26,8 @@ import { UsersIcon } from '../../components/icon/outline/users';
 import type { SidebarEntry } from '../../modules/sidebar';
 import { DemoNotifications } from './__demo/blocks';
 import { demoAccount } from './__demo/data';
-import { DemoApp, useDemoPath } from './__demo/demo-app';
+import { useUiNavigate } from '../../components/link-image-provider';
+import { DemoApp } from './__demo/demo-app';
 
 type ThreeColumnArgs = {
   showTopbar: boolean;
@@ -132,7 +133,8 @@ function ThreeColumnPage({
   showRounds,
   showInterviewOverview,
 }: Pick<ThreeColumnArgs, 'showRounds' | 'showInterviewOverview'>) {
-  const { navigate } = useDemoPath();
+  const navigate = useUiNavigate();
+
   const [saved, setSaved] = useState(initialQuestion);
   const [draft, setDraft] = useState(initialQuestion);
   const [message, setMessage] = useState('');
@@ -302,7 +304,8 @@ function ThreeColumnPage({
 }
 
 function ThreeColumn(args: ThreeColumnArgs) {
-  const { path, navigate } = useDemoPath();
+  const navigate = useUiNavigate();
+
   const hasAside =
     args.showAside &&
     (args.showNotifications || args.showInterviewers || args.showSections);
@@ -319,7 +322,6 @@ function ThreeColumn(args: ThreeColumnArgs) {
         navigationLabel: 'Hiring navigation',
         header: { title: 'Hiring', subtitle: 'People & talent' },
         items: navigation,
-        currentPath: path,
         collapsible: args.showSidebar ? 'icon' : 'offcanvas',
         ...(!args.showSidebar
           ? { collapsed: true, mobileTrigger: false as const }

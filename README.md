@@ -119,6 +119,7 @@ export function UIRoot({ children }: { children: ReactNode }) {
 | ----------------- | ------------------------------------------------------------------------------------ |
 | `link`            | `UiLinkComponent`: host router link adapter; inherits when omitted                   |
 | `image`           | `UiImageComponent`: host image adapter; inherits when omitted                        |
+| `router`          | `UiRouterAdapter`: hook returning the host's `pathname` and `navigate`               |
 | `theme`           | `defineTheme({ tokens, icons })`: CSS token overrides and icon variant, size, packs  |
 | `locale`          | Locale code (`'vi-VN'` default, `'en-US'` built in) or a locale from `defineLocale`  |
 | `translations`    | Extra catalogs: `[{ locale: 'fr-FR', messages: { … } }]`; missing keys fall back     |
@@ -126,7 +127,7 @@ export function UIRoot({ children }: { children: ReactNode }) {
 | `messages`        | Per-key overrides for the active locale; explicit text props on components still win |
 | `calendarLocales` | date-fns locales for date pickers and the event calendar, keyed by locale code       |
 
-### Link and image adapters
+### Link, image and router adapters
 
 `link` and `image` let kit components (Sidebar, Navbar, Breadcrumb, Avatar…) render your router link and image component; without them they render `<a>` and `<img>`. Adapters receive `UiLinkProps` / `UiImageProps`, so any router works (for React Router, map `href` to `to`). Use a nested `<UIProvider link={ScopedLink}>` for a scoped override: it replaces the link adapter and inherits the image adapter. Define adapters in a client module; do not pass adapter functions across a server/client boundary.
 
@@ -134,7 +135,7 @@ export function UIRoot({ children }: { children: ReactNode }) {
 
 Components take plain props and data; no setup beyond the styles is required.
 
-Sidebar accepts host-provided `currentPath`, `isActive` and `canAccess`. See [navigation matching and route protection](docs/UI_NAVIGATION.md) for helpers and router recipes.
+Sidebar accepts `currentPath`, `isActive` and `canAccess`; with the `router` adapter it follows the current path on its own. See [navigation matching and route protection](docs/UI_NAVIGATION.md) for helpers and router recipes.
 
 ```tsx
 import { Button, Input, Select } from '@itclabs/react-ui';

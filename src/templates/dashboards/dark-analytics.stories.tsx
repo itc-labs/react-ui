@@ -42,7 +42,8 @@ import {
   analyticsSeries,
   type AnalyticsProduct,
 } from './__demo/dark-analytics-data';
-import { DemoApp, useDemoPath } from './__demo/demo-app';
+import { useUiNavigate } from '../../components/link-image-provider';
+import { DemoApp } from './__demo/demo-app';
 
 type DarkAnalyticsArgs = {
   mode: 'dark' | 'light';
@@ -99,7 +100,8 @@ function DarkAnalyticsPage({
   showRecommendations,
   showTable,
 }: DarkAnalyticsArgs) {
-  const { navigate } = useDemoPath();
+  const navigate = useUiNavigate();
+
   const [tableState, setTableState] = useState<DataTableState>({
     sorting: [{ id: 'revenue', desc: true }],
     pagination: { pageIndex: 0, pageSize: 5 },
@@ -262,7 +264,8 @@ function DarkAnalyticsPage({
 }
 
 function DarkAnalytics(args: DarkAnalyticsArgs) {
-  const { path, navigate } = useDemoPath();
+  const navigate = useUiNavigate();
+
   const [workspace, setWorkspace] = useState('growth');
 
   return (
@@ -303,7 +306,6 @@ function DarkAnalytics(args: DarkAnalyticsArgs) {
           <Sidebar
             {...(args.showHeader ? { mobileTrigger: false as const } : {})}
             appearance={args.mode === 'dark' ? 'default' : 'dark'}
-            currentPath={path}
             navigationLabel="Analytics navigation"
             items={navigation}
             header={{

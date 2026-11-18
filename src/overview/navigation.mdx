@@ -81,7 +81,7 @@ Open a template, choose **Show code**, and copy it. The code is one complete fil
 3. Replace the blocks under `Sample data and blocks` with your API data and components.
 4. Keep the shell in your route layout and render the matching page through your router's outlet.
 
-Templates read the current path with `useLocation` and `useNavigate` from `react-router-dom`. With another router, replace those two hooks. Regions switched off in Controls are not part of the copied file; copy the code and delete the regions you do not need.
+Templates use `useUiNavigate` and the shells follow the current path through the [`router` adapter](?path=/docs/guides-providers-adapters--docs), so they work with any router. Without the adapter, links do a full page load and the sidebar shows no active item. Regions switched off in Controls are not part of the copied file; copy the code and delete the regions you do not need.
 
 ## Notification bell
 

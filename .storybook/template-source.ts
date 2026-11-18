@@ -16,7 +16,6 @@ const optionalPeers: Record<string, string[]> = {
   '@itclabs/react-ui/chart': ['recharts', 'react-is'],
   '@itclabs/react-ui/editor': ['@tiptap/react', '@tiptap/pm', '@tiptap/starter-kit'],
   '@itclabs/react-ui/avatar-upload': ['react-easy-crop'],
-  'react-router-dom': ['react-router-dom'],
   valibot: ['valibot'],
 };
 
@@ -900,14 +899,6 @@ export function templateSource(
     .join('\n\n');
 
   output = output
-    .replace(/const \{([^}]*)\} = useDemoPath\(\);/g, (_, fields: string) =>
-      [
-        /\bpath\b/.test(fields) ? 'const { pathname: path } = useLocation();' : '',
-        /\bnavigate\b/.test(fields) ? 'const navigate = useNavigate();' : '',
-      ]
-        .filter(Boolean)
-        .join('\n'),
-    )
     .replace(/\bDemoNotifications\b/g, 'NotificationBell')
     .replace(/\bDemoOrderStatus\b/g, 'OrderStatus')
     .replace(/\bDemoOrder\b/g, 'Order')
@@ -924,9 +915,6 @@ export function templateSource(
     imports.set('@itclabs/react-ui', kit);
   }
 
-  const router = ['useLocation', 'useNavigate'].filter((hook) =>
-    new RegExp(`\\b${hook}\\(`).test(output),
-  );
   const lines = [...imports]
     .sort(([left], [right]) => left.localeCompare(right))
     .map(([module, entry]) => {
@@ -937,9 +925,6 @@ export function templateSource(
 
       return `import { ${items.join(', ')} } from '${module}';`;
     });
-
-  if (router.length)
-    lines.push(`import { ${router.join(', ')} } from 'react-router-dom';`);
 
   return `${lines.join('\n')}\n\n${output}`;
 }

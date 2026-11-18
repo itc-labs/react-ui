@@ -113,14 +113,6 @@ it('parses examples from every current story without leaking CSF or interaction 
           ts.ScriptKind.TSX,
         )
       : read(file, languageVersion, onError, shouldCreateNew);
-  const routerStub = resolve('__story_example_router.d.ts');
-  virtual.set(
-    routerStub,
-    `declare module 'react-router-dom' {
-      export function useLocation(): { pathname: string };
-      export function useNavigate(): (path: string) => void;
-    }`,
-  );
   const program = ts.createProgram([...virtual.keys()], options, host);
   const errors = ts
     .getPreEmitDiagnostics(program)
