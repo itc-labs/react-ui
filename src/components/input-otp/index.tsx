@@ -5,7 +5,7 @@ import type { TestIdProps } from '../common/testing';
 
 import { partTestId } from '../common/testing';
 
-import { useId, type ComponentProps, type ReactNode } from 'react';
+import { useId, useState, type ComponentProps, type ReactNode } from 'react';
 import { OTPInput, REGEXP_ONLY_DIGITS } from 'input-otp';
 import { cn, fieldDescription, type SlotClasses, type ControlSize } from '../common';
 import { useUILocale } from '../../i18n/provider';
@@ -52,6 +52,8 @@ export function InputOTP({
   rootClassName,
   classNames,
   onValueChange,
+  value,
+  defaultValue,
   'aria-describedby': describedBy,
   'aria-invalid': invalid,
   ...props
@@ -59,6 +61,11 @@ export function InputOTP({
   const generated = useId();
   const controlId = id ?? generated;
   const { t } = useUILocale();
+  // input-otp forwards defaultValue to the native input next to value, which React rejects.
+  const [uncontrolled, setUncontrolled] = useState(
+    typeof defaultValue === 'string' ? defaultValue : '',
+  );
+  const controlled = value !== undefined;
   if (!Number.isInteger(length) || length < 1 || length > 12)
     throw new RangeError('OTP length must be an integer between 1 and 12.');
 
@@ -102,7 +109,12 @@ export function InputOTP({
         pasteTransformer={
           props.pasteTransformer ?? ((value) => value.replace(/[\s-]/g, ''))
         }
-        {...(onValueChange ? { onChange: onValueChange } : {})}
+        value={controlled ? value : uncontrolled}
+        onChange={(next: string) => {
+          if (!controlled) setUncontrolled(next);
+
+          onValueChange?.(next);
+        }}
         aria-label={
           props['aria-label'] ?? (typeof label === 'string' ? label : t('otp.label'))
         }

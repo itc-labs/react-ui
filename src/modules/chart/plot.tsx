@@ -13,7 +13,6 @@ import {
   LineChart,
   Pie,
   PieChart,
-  ResponsiveContainer,
   Tooltip,
   XAxis,
   YAxis,
@@ -22,6 +21,7 @@ import { cn } from '../../components/common';
 import type { ChartProps } from './types';
 import type { ChartModel, ChartRow } from './model';
 import { ChartTooltip } from './content';
+import { ChartResponsiveContainer } from './responsive';
 
 interface PlotProps {
   config: ChartProps;
@@ -62,6 +62,12 @@ export function ChartPlot({ config, model, formatValue, missingLabel }: PlotProp
   const common = {
     data: model.rows,
     accessibilityLayer: true,
+    // Fit the live container in CSS while the measured layout settles. The SVG
+    // viewBox scales existing marks without React work or overflow on shrink.
+    style: { width: '100%', height: '100%' },
+    // Pie and donut keep their shape; cartesian charts stretch until the layout settles.
+    preserveAspectRatio:
+      config.type === 'pie' || config.type === 'donut' ? 'xMidYMid meet' : 'none',
     'aria-label': config.label,
     margin: { top: 12, right: 16, bottom: 4, left: 4 },
   };
@@ -202,13 +208,8 @@ export function ChartPlot({ config, model, formatValue, missingLabel }: PlotProp
   }
 
   return (
-    <ResponsiveContainer
-      width="100%"
-      height="100%"
-      minWidth={0}
-      initialDimension={{ width: 320, height: config.height ?? 288 }}
-    >
+    <ChartResponsiveContainer height={config.height ?? 288}>
       {chart}
-    </ResponsiveContainer>
+    </ChartResponsiveContainer>
   );
 }
