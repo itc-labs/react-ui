@@ -25,6 +25,12 @@
   --color-canvas: #f5f5ef;
   --color-surface: #fcfcf8;
   --color-sidebar: #e9eddf;
+  --color-sidebar-soft: var(--color-brand-50);
+  --color-sidebar-soft-active: color-mix(
+    in srgb,
+    var(--color-brand-500) 30%,
+    var(--color-surface)
+  );
   --color-table-header: var(--color-canvas);
   --color-ink: #203932;
   --color-muted: #5c6c63;

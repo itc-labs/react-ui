@@ -16,6 +16,8 @@ export const uiThemeTokenNames = [
   'color-canvas',
   'color-surface',
   'color-sidebar',
+  'color-sidebar-soft',
+  'color-sidebar-soft-active',
   'color-table-header',
   'color-ink',
   'color-muted',

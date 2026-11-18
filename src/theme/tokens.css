@@ -80,6 +80,13 @@
   --color-canvas: #f5f5ef;
   --color-surface: #fcfcf8;
   --color-sidebar: #e9eddf;
+  /* Sidebar `soft` appearance: tinted panel and its current-page fill. */
+  --color-sidebar-soft: var(--color-brand-50);
+  --color-sidebar-soft-active: color-mix(
+    in srgb,
+    var(--color-brand-500) 30%,
+    var(--color-surface)
+  );
   /* DataTable header row; defaults to the canvas, override when pages sit on the canvas. */
   --color-table-header: var(--color-canvas);
   --color-ink: #203932;

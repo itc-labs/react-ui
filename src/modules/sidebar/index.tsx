@@ -19,7 +19,6 @@ import { KitIconButton } from '../../components/icon-button/kit-icon-button';
 import { useUILocale } from '../../i18n/provider';
 import { filterNavByAccess, resolveActiveNav } from '../navigation';
 import { SidebarContext, SidebarAppearanceContext } from './context';
-import { sidebarToneStyle } from './appearance';
 import { SidebarEntries } from './entries';
 import { SidebarSearchControl, isSidebarSearch } from './search';
 import { useSidebarShortcut } from './use-sidebar-state';
@@ -340,7 +339,8 @@ export function Sidebar<TAccess = unknown>({
           }
           triggerAsChild
           {...(testId ? { 'data-testid': partTestId(testId, 'drawer')! } : {})}
-          contentProps={{ style: sidebarToneStyle(tone) }}
+          // Data attributes are valid on the content element; the props type omits them.
+          contentProps={{ 'data-sidebar-tone': tone } as Record<string, string>}
           className={cn(
             'bg-[var(--sidebar-bg)] text-[var(--sidebar-fg)]',
             classNames?.drawer,
@@ -402,10 +402,11 @@ export function Sidebar<TAccess = unknown>({
         data-variant={variant}
         data-collapsible={collapsible}
         data-tone={tone}
+        data-sidebar-tone={tone}
         data-item-variant={itemVariant}
         inert={offcanvas}
         aria-hidden={offcanvas || undefined}
-        style={{ ...sidebarToneStyle(tone), ...style }}
+        style={style}
         className={cn(
           'group/sidebar sticky top-0 hidden h-dvh min-w-0 flex-col gap-4 overflow-hidden bg-[var(--sidebar-bg)] text-[var(--sidebar-fg)] p-3 lg:flex motion-safe:transition-[width] motion-safe:duration-[var(--motion-duration-normal)]',
           collapsed ? 'w-sidebar-collapsed px-2' : 'w-sidebar',

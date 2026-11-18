@@ -1,0 +1,55 @@
+/*
+ * Sidebar tones as scoped custom properties. The aside and its mobile drawer carry
+ * data-sidebar-tone; classes read --sidebar-* so hosts can retheme a tone in CSS
+ * (or override one variable through the style prop).
+ */
+@layer components {
+  [data-sidebar-tone] {
+    --sidebar-bg: var(--color-sidebar);
+    --sidebar-fg: var(--color-ink);
+    --sidebar-muted: var(--color-muted);
+    /* Ink-based so hover shows on any sidebar colour, including one equal to the surface. */
+    --sidebar-hover: color-mix(in srgb, var(--color-ink) 6%, transparent);
+    --sidebar-active-bg: var(--color-surface);
+    --sidebar-active-fg: var(--color-ink);
+    --sidebar-border: var(--color-line);
+    --sidebar-badge-ring: var(--color-surface);
+    --sidebar-accent: var(--color-accent);
+    --sidebar-tint: color-mix(in srgb, var(--color-accent) 12%, transparent);
+    --sidebar-solid-bg: var(--color-accent);
+    --sidebar-solid-fg: var(--color-on-brand);
+  }
+
+  [data-sidebar-tone='dark'],
+  [data-sidebar-tone='brand'] {
+    --sidebar-muted: color-mix(in srgb, var(--sidebar-fg) 75%, transparent);
+    --sidebar-hover: color-mix(in srgb, var(--sidebar-fg) 12%, transparent);
+    --sidebar-active-bg: color-mix(in srgb, var(--sidebar-fg) 18%, transparent);
+    --sidebar-active-fg: var(--sidebar-fg);
+    --sidebar-border: color-mix(in srgb, var(--sidebar-fg) 25%, transparent);
+    --sidebar-badge-ring: var(--sidebar-bg);
+    --sidebar-accent: var(--sidebar-fg);
+    --sidebar-tint: color-mix(in srgb, var(--sidebar-fg) 18%, transparent);
+  }
+
+  [data-sidebar-tone='dark'] {
+    --sidebar-bg: var(--color-ink);
+    --sidebar-fg: var(--color-surface);
+  }
+
+  [data-sidebar-tone='brand'] {
+    --sidebar-bg: var(--color-accent);
+    --sidebar-fg: var(--color-on-brand);
+    --sidebar-solid-bg: var(--color-on-brand);
+    --sidebar-solid-fg: var(--color-accent);
+  }
+
+  [data-sidebar-tone='soft'] {
+    --sidebar-bg: var(--color-sidebar-soft);
+    --sidebar-muted: color-mix(in srgb, var(--color-ink) 80%, transparent);
+    --sidebar-hover: var(--color-brand-100);
+    --sidebar-border: color-mix(in srgb, var(--color-accent) 14%, var(--color-line));
+    --sidebar-badge-ring: var(--sidebar-bg);
+    --sidebar-tint: var(--color-sidebar-soft-active);
+  }
+}

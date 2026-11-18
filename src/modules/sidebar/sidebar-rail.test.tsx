@@ -322,8 +322,8 @@ it.each(['dark', 'brand'] as const)(
     const flyout = byId('submenu-settings-content');
     expect(flyout.classList.contains('bg-surface')).toBe(true);
     expect(flyout.closest('aside')).toBeNull();
-    expect(flyout.style.getPropertyValue('--sidebar-bg')).toBe('');
-    expect(byId('').style.getPropertyValue('--sidebar-bg')).not.toBe('');
+    expect(flyout.closest('[data-sidebar-tone]')).toBeNull();
+    expect(byId('').dataset.sidebarTone).toBe(tone);
     const current = flyout.querySelector('[aria-current="page"]')!;
     expect(current.className).toContain(
       'var(--sidebar-solid-fg,var(--color-on-brand))',

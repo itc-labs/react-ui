@@ -1,4 +1,6 @@
 // @vitest-environment jsdom
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { act, createRef } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { userEvent } from 'storybook/test';
@@ -174,20 +176,40 @@ it('keeps defaults and forwards floating appearance, refs and custom slots', asy
   ).toBe(true);
 });
 
-it.each(['default', 'dark', 'brand'] as const)(
-  'scopes %s tone variables to the aside',
+it.each(['default', 'dark', 'brand', 'soft'] as const)(
+  'marks the aside and drawer with the %s tone instead of inline colours',
   async (tone) => {
     await act(async () => root.render(<Sidebar tone={tone} items={items} />));
     const aside = host.querySelector('aside')!;
     expect(aside.dataset.tone).toBe(tone);
-    expect(aside.style.getPropertyValue('--sidebar-bg')).toBe(
-      `var(--color-${tone === 'dark' ? 'ink' : tone === 'brand' ? 'accent' : 'sidebar'})`,
-    );
-    for (const name of ['fg', 'muted', 'hover', 'active-bg', 'active-fg', 'border'])
-      expect(aside.style.getPropertyValue(`--sidebar-${name}`)).not.toBe('');
-    expect(host.style.getPropertyValue('--sidebar-fg')).toBe('');
+    expect(aside.dataset.sidebarTone).toBe(tone);
+    expect(aside.getAttribute('style')).toBeNull();
   },
 );
+
+it('defines every tone variable in the sidebar stylesheet', () => {
+  const css = readFileSync(resolve(__dirname, 'sidebar.css'), 'utf8');
+  const base = css.slice(css.indexOf('[data-sidebar-tone] {'), css.indexOf('}'));
+  for (const name of [
+    'bg',
+    'fg',
+    'muted',
+    'hover',
+    'active-bg',
+    'active-fg',
+    'border',
+    'badge-ring',
+    'accent',
+    'tint',
+    'solid-bg',
+    'solid-fg',
+  ])
+    expect(base).toContain(`--sidebar-${name}:`);
+  for (const tone of ['dark', 'brand', 'soft'])
+    expect(css).toContain(`[data-sidebar-tone='${tone}']`);
+  expect(css).toContain('--sidebar-bg: var(--color-sidebar-soft);');
+  expect(css).toContain('--sidebar-tint: var(--color-sidebar-soft-active);');
+});
 
 it.each(['raised', 'subtle', 'bar', 'indicator', 'solid'] as const)(
   'applies %s styles to links, submenu triggers and collapsed rail',
@@ -238,16 +260,6 @@ it.each(['raised', 'subtle', 'bar', 'indicator', 'solid'] as const)(
     expect(rail.classList.contains('before:w-0.5')).toBe(itemVariant === 'indicator');
   },
 );
-
-it('soft tone tints the sidebar from brand tokens and keeps full-ink labels', async () => {
-  await act(async () => root.render(<Sidebar tone="soft" items={items} />));
-  const aside = host.querySelector('aside')!;
-  expect(aside.dataset.tone).toBe('soft');
-  expect(aside.style.getPropertyValue('--sidebar-bg')).toContain('--color-brand-50');
-  expect(aside.style.getPropertyValue('--sidebar-fg')).toBe('var(--color-ink)');
-  for (const name of ['muted', 'hover', 'active-fg', 'border', 'tint'])
-    expect(aside.style.getPropertyValue(`--sidebar-${name}`)).not.toBe('');
-});
 
 it('pill marks only the current page and drops nested guide rules', async () => {
   await act(async () =>
