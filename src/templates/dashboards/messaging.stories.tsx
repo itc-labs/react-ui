@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useState } from 'react';
 import { DashboardShell } from '@itclabs/react-ui/templates';
+import { Breadcrumb } from '../../components/breadcrumb';
 import { Avatar } from '../../components/avatar';
 import { Button } from '../../components/button';
 import { Card } from '../../components/card';
@@ -318,10 +319,15 @@ function Messaging(args: MessagingArgs) {
       accountPlacement="sidebar"
       header={
         args.showHeader ? (
-          <>
-            <h1 className="inline text-ui-sm font-semibold">
-              # Website / v3.0 / UI-kit design
-            </h1>{' '}
+          <div className="flex min-w-0 items-center gap-1">
+            <Breadcrumb
+              aria-label="Channel breadcrumb"
+              items={[
+                { key: 'website', title: '# Website', href: '/messages/website' },
+                { key: 'version', title: 'v3.0', href: '/messages/website/v3' },
+                { key: 'channel', title: 'UI-kit design' },
+              ]}
+            />
             <IconButton
               icon="bookmark"
               label={bookmarked ? 'Remove bookmark' : 'Bookmark channel'}
@@ -330,7 +336,7 @@ function Messaging(args: MessagingArgs) {
               aria-pressed={bookmarked}
               onClick={() => setBookmarked((value) => !value)}
             />
-          </>
+          </div>
         ) : undefined
       }
       headerActions={
@@ -482,14 +488,15 @@ function Messaging(args: MessagingArgs) {
                           {messagingMembers.map((member) => (
                             <li
                               key={member.name}
-                              className="flex min-w-0 flex-wrap items-center gap-2"
+                              className="flex min-w-0 items-center gap-2"
                             >
                               <Avatar alt={member.name} size="sm" />
-                              <span className="min-w-0 flex-1 text-ui-sm">
+                              <span className="min-w-0 flex-1 truncate text-ui-sm">
                                 {member.name}
                               </span>
                               <Tag
                                 size="sm"
+                                className="shrink-0"
                                 tone={member.role === 'Owner' ? 'brand' : 'neutral'}
                               >
                                 {member.role}

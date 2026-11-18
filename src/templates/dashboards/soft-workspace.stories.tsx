@@ -109,19 +109,21 @@ function SoftWorkspace({
                 onValueChange={setDate}
                 defaultMonth="2026-11-01"
                 today="2026-11-18"
+                classNames={{ selects: 'hidden' }}
               />
             </Card>
             <Card
               title="Get started with Northwind"
               description="Two steps to your first paid invoice."
               action={<Button size="sm">Create invoice</Button>}
-              className="min-w-0"
+              className="flex min-w-0 flex-col"
+              contentClassName="flex flex-1"
             >
-              <ol className="grid gap-4 md:grid-cols-2">
+              <ol className="grid flex-1 gap-4 md:grid-cols-2">
                 {steps.map((step, index) => (
                   <li
                     key={step.id}
-                    className="grid content-start gap-2 rounded-panel border border-line bg-surface p-4"
+                    className="flex flex-col items-start gap-2 rounded-panel border border-line bg-surface p-4"
                   >
                     <span className="grid size-8 place-items-center rounded-full bg-brand-50 text-ui-sm font-semibold text-accent">
                       {index + 1}
@@ -131,7 +133,7 @@ function SoftWorkspace({
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="justify-self-start px-0 text-accent"
+                      className="mt-auto px-0 text-accent"
                     >
                       {step.action} →
                     </Button>
@@ -143,7 +145,7 @@ function SoftWorkspace({
         )}
         {showMetrics && <KpiRow />}
         {showCharts && (
-          <div className="grid items-start gap-6 xl:grid-cols-3">
+          <div className="grid gap-6 xl:grid-cols-3">
             <RevenueCard className="xl:col-span-2" />
             <ActivityCard />
           </div>

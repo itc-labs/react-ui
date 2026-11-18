@@ -161,7 +161,7 @@ function ThreeColumnPage({
                 </span>{' '}
                 candidates shortlisted
               </p>
-              <div className="flex -space-x-2" aria-label="Round interviewers">
+              <div className="flex gap-1" aria-label="Round interviewers">
                 {interviewers.slice(0, 3).map((name) => (
                   <Avatar
                     key={name}
@@ -360,17 +360,18 @@ function ThreeColumn(args: ThreeColumnArgs) {
             </Button>
             <Button
               variant="secondary"
+              aria-label="Search"
               className="min-w-0 flex-1 justify-start text-muted sm:max-w-48"
             >
-              <SearchIcon />
-              Search
+              <SearchIcon className="shrink-0" />
+              <span className="hidden sm:inline">Search</span>
             </Button>
             {/* Secondary actions appear from lg; small screens keep search and Create. */}
             <Button variant="ghost" size="sm" className="hidden lg:inline-flex">
               <PlusIcon />
               Add person
             </Button>
-            <DemoNotifications className="hidden lg:inline-flex" />
+            <DemoNotifications />
             <IconButton
               variant="ghost"
               size="sm"
@@ -419,10 +420,10 @@ function ThreeColumn(args: ThreeColumnArgs) {
       }
       headerActions={
         args.showHeader ? (
-          <>
+          <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto">
             <Select
               aria-label="Department"
-              rootClassName="w-44"
+              rootClassName="col-span-2 w-full sm:w-44"
               defaultValue="all"
               options={[
                 { value: 'all', label: 'All departments' },
@@ -439,7 +440,7 @@ function ThreeColumn(args: ThreeColumnArgs) {
               <FilterIcon />
               Filter
             </Button>
-          </>
+          </div>
         ) : undefined
       }
       aside={
@@ -466,7 +467,7 @@ function ThreeColumn(args: ThreeColumnArgs) {
                 description="Your panel for Round 3"
                 className="border-0 p-0 shadow-none"
               >
-                <div className="flex -space-x-2" aria-label="Assigned interviewers">
+                <div className="flex gap-1" aria-label="Assigned interviewers">
                   {interviewers.map((name) => (
                     <Avatar
                       key={name}

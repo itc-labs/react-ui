@@ -106,7 +106,7 @@ const rangeLabels: Record<AnalyticsRange, string[]> = {
   '90D': ['Aug 21', 'Sep 8', 'Sep 26', 'Oct 14', 'Nov 1', 'Nov 18'],
 };
 
-/** A shared index allows unlike units on the kit's single numeric axis. */
+/** Percentage change from each metric's first observation shares a meaningful zero. */
 export function analyticsSeries(range: AnalyticsRange): ChartPoint[] {
   const growth = { '24H': 0.25, '7D': 0.5, '30D': 1, '90D': 1.8 }[range];
 
@@ -114,8 +114,8 @@ export function analyticsSeries(range: AnalyticsRange): ChartPoint[] {
     id: `${range}-${index}`,
     label,
     values: {
-      revenue: 100 + [0, 4, -2, 10, 8, 12.4][index]! * growth,
-      conversion: 100 + [0, -3, 5, 4, 12, 18.8][index]! * growth,
+      revenue: [0, 4, -2, 10, 8, 12.4][index]! * growth,
+      conversion: [0, -3, 5, 4, 12, 18.8][index]! * growth,
     },
   }));
 }

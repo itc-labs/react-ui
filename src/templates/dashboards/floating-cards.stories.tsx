@@ -112,9 +112,9 @@ const sales = weekdays.map((label, index) => ({
   values: { sales: [5210, 6340, 4820, 7680, 8940, 9670, 5630][index]! },
 }));
 const orderStatus = [
-  { id: 'shipped', label: 'Shipped', value: 118 },
-  { id: 'delivered', label: 'Delivered', value: 220 },
-  { id: 'pending', label: 'Pending', value: 12 },
+  { id: 'shipped', label: 'Shipped', value: 118, color: 'var(--color-chart-1)' },
+  { id: 'delivered', label: 'Delivered', value: 220, color: 'var(--color-chart-2)' },
+  { id: 'pending', label: 'Pending', value: 12, color: 'var(--color-chart-3)' },
 ];
 const marketplaces = [
   { name: 'Metrica store', visits: [120, 245, 390, 485, 680, 720, 520] },
@@ -204,11 +204,13 @@ function FloatingCardsPage({
                 type="bar"
                 label="Total sales by weekday, November 9–15, 2026"
                 data={sales}
-                series={[{ id: 'sales', label: 'Sales' }]}
+                series={[
+                  { id: 'sales', label: 'Sales', color: 'var(--color-chart-1)' },
+                ]}
                 height={260}
                 legend={false}
                 valueFormatter={(value) => demoCurrency.format(value)}
-                axisValueFormatter={(value) => `$${Math.round(value / 1000)}k`}
+                axisValueFormatter={(value) => `$${value / 1000}k`}
               />
             </Card>
           )}
@@ -285,6 +287,7 @@ function FloatingCards(args: FloatingCardsArgs) {
   return (
     <DashboardShell
       variant="floating"
+      classNames={{ header: 'lg:px-10' }}
       sidebarToggle={args.showTopbar}
       topbar={
         args.showTopbar ? (

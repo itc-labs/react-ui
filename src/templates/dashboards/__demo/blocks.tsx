@@ -2,23 +2,21 @@
  * Stories only: page blocks shared by the dashboard templates, composed from kit components.
  * Copy and adapt them; they are not part of the package API.
  */
-import { useState, type ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { Avatar } from '../../../components/avatar';
 import { Button } from '../../../components/button';
 import { Card } from '../../../components/card';
 import { Tag } from '../../../components/tag';
 import { Timeline } from '../../../components/timeline';
-import { Chart } from '../../../modules/chart';
+import { Chart } from '@itclabs/react-ui/chart';
 import { DataTable, type ColumnDef } from '../../../modules/data-table';
 import { KpiCard, KpiGrid } from '../../../modules/kpi-card';
-import { NotificationMenu } from '../../../modules/notification-menu';
 import { cn } from '../../../components/common';
 import {
   demoActivity,
   demoChannels,
   demoCurrency,
   demoKpis,
-  demoNotificationItems,
   demoOrders,
   demoRevenue,
   demoStatusTone,
@@ -101,6 +99,8 @@ export function OrdersTable({
             : orderColumns
         }
         rowId={(row) => row.id}
+        verticalAlign="middle"
+        classNames={{ toolbar: 'px-0' }}
         filterable
         selectable
         pagination
@@ -144,8 +144,10 @@ export function RevenueCard({
       { id: 'expenses', label: 'Expenses' },
     ],
     valueFormatter: (value: number) => demoCurrency.format(value),
-    axisValueFormatter: (value: number) => `$${Math.round(value / 1000)}k`,
+    axisValueFormatter: (value: number) => `$${value / 1000}k`,
     height: 260,
+    className: 'flex flex-1 flex-col',
+    classNames: { viewport: 'flex-1' },
   };
 
   return (
@@ -153,7 +155,8 @@ export function RevenueCard({
       title="Cash flow"
       description="Revenue and expenses, 2026"
       action={action}
-      className={cn('min-w-0', className)}
+      className={cn('flex min-w-0 flex-col', className)}
+      contentClassName="flex flex-1 flex-col"
     >
       {type === 'bar' ? (
         <Chart type="bar" {...common} />
@@ -167,19 +170,35 @@ export function RevenueCard({
 }
 
 /** Traffic sources as a donut. */
-export function ChannelsCard({ className }: { className?: string }) {
+export function ChannelsCard({
+  className,
+  distinctColors = false,
+}: {
+  className?: string;
+  distinctColors?: boolean;
+}) {
   return (
     <Card
       title="Traffic sources"
       description="Share of sessions, last 30 days"
-      className={cn('min-w-0', className)}
+      className={cn('flex min-w-0 flex-col', className)}
+      contentClassName="flex flex-1 flex-col"
     >
       <Chart
         type="donut"
         label="Traffic sources"
-        data={demoChannels}
+        data={
+          distinctColors
+            ? demoChannels.map((slice, index) => ({
+                ...slice,
+                color: `var(--color-chart-${index + 1})`,
+              }))
+            : demoChannels
+        }
         valueFormatter={(value) => `${value}%`}
         height={220}
+        className="flex flex-1 flex-col"
+        classNames={{ viewport: 'flex-1' }}
       />
     </Card>
   );
@@ -224,28 +243,4 @@ export function PromoCard({ className }: { className?: string }) {
   );
 }
 
-/**
- * Header bell with its own state: a new or read notification re-renders only this component.
- * In an app, replace the local state with your notifications query or realtime store.
- */
-export function DemoNotifications({ className }: { className?: string }) {
-  const [items, setItems] = useState(demoNotificationItems);
-
-  return (
-    <NotificationMenu
-      items={items}
-      viewAllHref="/notifications"
-      onSelect={(item) =>
-        setItems((current) =>
-          current.map((entry) =>
-            entry.id === item.id ? { ...entry, read: true } : entry,
-          ),
-        )
-      }
-      onMarkAllRead={() =>
-        setItems((current) => current.map((item) => ({ ...item, read: true })))
-      }
-      {...(className ? { className } : {})}
-    />
-  );
-}
+export { DemoNotifications } from './notifications';

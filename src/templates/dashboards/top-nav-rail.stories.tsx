@@ -63,15 +63,15 @@ const balances: Record<string, number> = { USD: 51889, EUR: 47930, GBP: 40260 };
 const income = demoRevenue.slice(0, 11).map((point) => ({
   ...point,
   values: {
-    profit: point.values.revenue! - point.values.expenses!,
-    loss: point.values.expenses!,
+    subscriptions: Math.round(point.values.revenue! * 0.8),
+    services: Math.round(point.values.revenue! * 0.2),
   },
 }));
 const metrics = [
   { label: 'Total earnings', value: '$24,900', trend: 12.4, tone: 'brand' },
-  { label: 'Spending', value: '$3,250', trend: -6.2, tone: 'neutral' },
-  { label: 'Income', value: '$8,420', trend: 8.1, tone: 'neutral' },
-  { label: 'Revenue', value: '$48,290', trend: 12.4, tone: 'neutral' },
+  { label: 'Spending', value: '$3,250', trend: -6.2, tone: 'brand' },
+  { label: 'Income', value: '$8,420', trend: 8.1, tone: 'brand' },
+  { label: 'Revenue', value: '$48,290', trend: 12.4, tone: 'brand' },
 ] as const;
 
 function TopNavRailPage({
@@ -183,27 +183,36 @@ function TopNavRailPage({
           </KpiGrid>
         )}
         {(showIncome || showSpendingLimit || showCards) && (
-          <div className="grid min-w-0 items-start gap-6 xl:grid-cols-3">
+          <div className="grid min-w-0 gap-6 xl:grid-cols-3">
             {showIncome && (
               <Card
                 title="Total income"
-                description="Profit and loss · January–November 2026"
-                className={
-                  showSpendingLimit || showCards ? 'xl:col-span-2' : 'xl:col-span-3'
-                }
+                description="Subscriptions and services · January–November 2026"
+                className={`flex flex-col ${showSpendingLimit || showCards ? 'xl:col-span-2' : 'xl:col-span-3'}`}
+                contentClassName="flex flex-1 flex-col"
               >
                 <Chart
                   type="bar"
                   stacked
-                  label="Monthly profit and loss in 2026"
+                  label="Monthly income from subscriptions and services in 2026"
                   data={income}
                   series={[
-                    { id: 'profit', label: 'Profit' },
-                    { id: 'loss', label: 'Loss' },
+                    {
+                      id: 'subscriptions',
+                      label: 'Subscriptions',
+                      color: 'var(--color-chart-1)',
+                    },
+                    {
+                      id: 'services',
+                      label: 'Services',
+                      color: 'var(--color-chart-2)',
+                    },
                   ]}
                   height={300}
+                  className="flex flex-1 flex-col"
+                  classNames={{ viewport: 'flex-1' }}
                   valueFormatter={(value) => demoCurrency.format(value)}
-                  axisValueFormatter={(value) => `$${Math.round(value / 1000)}k`}
+                  axisValueFormatter={(value) => `$${value / 1000}k`}
                 />
               </Card>
             )}

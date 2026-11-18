@@ -25,7 +25,12 @@ import {
   type DataTableState,
 } from '../../modules/data-table';
 import { KpiCard, KpiGrid } from '../../modules/kpi-card';
-import { Sidebar, type SidebarEntry } from '../../modules/sidebar';
+import {
+  Sidebar,
+  SidebarProvider,
+  SidebarMobileTrigger,
+  type SidebarEntry,
+} from '../../modules/sidebar';
 import { UserMenu } from '../../modules/user-menu';
 import { ChannelsCard, DemoNotifications } from './__demo/blocks';
 import { demoAccount, demoCurrency } from './__demo/data';
@@ -108,13 +113,13 @@ function DarkAnalyticsPage({
   return (
     <div className="grid min-w-0 gap-6">
       {showKpis && (
-        <KpiGrid columns={5} classNames={{ grid: 'xl:grid-cols-5' }}>
+        <KpiGrid columns={5} classNames={{ grid: '@3xl:grid-cols-5 @6xl:grid-cols-5' }}>
           {analyticsKpis.map((kpi) => (
             <KpiCard
               key={kpi.label}
               label={kpi.label}
               value={kpi.value}
-              trend={{ value: kpi.trend, label: 'vs previous period' }}
+              trend={{ value: kpi.trend, label: 'vs last period' }}
             />
           ))}
         </KpiGrid>
@@ -126,7 +131,7 @@ function DarkAnalyticsPage({
           {showRevenue && (
             <Card
               title="Revenue vs conversion"
-              description="Growth index · first observation = 100"
+              description="Change since first observation · each metric starts at 0%"
               className={showTraffic ? 'xl:col-span-2' : ''}
             >
               <Tabs
@@ -142,21 +147,21 @@ function DarkAnalyticsPage({
                   content: (
                     <Chart
                       type="line"
-                      label={`Revenue and conversion growth index, ${range}, ending November 18, 2026`}
+                      label={`Revenue and conversion percentage change, ${range}, ending November 18, 2026`}
                       data={analyticsSeries(range)}
                       series={[
-                        { id: 'revenue', label: 'Revenue index' },
-                        { id: 'conversion', label: 'Conversion index' },
+                        { id: 'revenue', label: 'Revenue change' },
+                        { id: 'conversion', label: 'Conversion change' },
                       ]}
                       height={260}
-                      valueFormatter={(value) => value.toFixed(1)}
+                      valueFormatter={(value) => `${value.toFixed(1)}%`}
                     />
                   ),
                 }))}
               />
             </Card>
           )}
-          {showTraffic && <ChannelsCard />}
+          {showTraffic && <ChannelsCard distinctColors />}
         </div>
       )}
       {showSimulator && (
@@ -240,6 +245,7 @@ function DarkAnalyticsPage({
           <DataTable
             caption="Top performing products"
             className="border-0 shadow-none"
+            classNames={{ toolbar: 'px-0' }}
             rows={analyticsProducts}
             columns={productColumns}
             rowId={(row) => row.id}
@@ -263,7 +269,7 @@ function DarkAnalytics(args: DarkAnalyticsArgs) {
     <WorkspaceShell
       variant="classic"
       stickyHeader
-      classNames={{ topbar: 'flex-wrap gap-3 py-3', header: 'gap-3' }}
+      classNames={{ topbar: 'flex-wrap gap-3 py-3', header: 'justify-start gap-3' }}
       topbar={
         args.showTopbar ? (
           <>
@@ -295,6 +301,7 @@ function DarkAnalytics(args: DarkAnalyticsArgs) {
       sidebar={
         args.showSidebar ? (
           <Sidebar
+            {...(args.showHeader ? { mobileTrigger: false as const } : {})}
             appearance={args.mode === 'dark' ? 'default' : 'dark'}
             currentPath={path}
             navigationLabel="Analytics navigation"
@@ -318,23 +325,28 @@ function DarkAnalytics(args: DarkAnalyticsArgs) {
       header={
         args.showHeader ? (
           <>
-            <h1 className="text-heading font-semibold text-ink">Welcome back, Liam</h1>
-            <Select
-              aria-label="Reporting period"
-              rootClassName="w-full sm:w-44 sm:ms-auto"
-              defaultValue="30"
-              options={[
-                { value: '30', label: 'Last 30 days' },
-                { value: '7', label: 'Last 7 days' },
-                { value: '90', label: 'Last 90 days' },
-              ]}
-            />
-            <Button variant="secondary" onClick={() => navigate('/reports/export')}>
-              Export
-            </Button>
-            <Button variant="secondary" onClick={() => navigate('/reports/share')}>
-              Share
-            </Button>
+            {args.showSidebar && <SidebarMobileTrigger />}
+            <h1 className="min-w-0 flex-1 text-heading font-semibold text-ink">
+              Welcome back, Liam
+            </h1>
+            <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto sm:ms-auto">
+              <Select
+                aria-label="Reporting period"
+                rootClassName="w-full sm:w-44"
+                defaultValue="30"
+                options={[
+                  { value: '30', label: 'Last 30 days' },
+                  { value: '7', label: 'Last 7 days' },
+                  { value: '90', label: 'Last 90 days' },
+                ]}
+              />
+              <Button variant="secondary" onClick={() => navigate('/reports/export')}>
+                Export
+              </Button>
+              <Button variant="secondary" onClick={() => navigate('/reports/share')}>
+                Share
+              </Button>
+            </div>
           </>
         ) : undefined
       }
@@ -351,7 +363,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'An ember-themed growth analytics workspace with a global search bar, workspace switcher, five headline metrics, indexed revenue and conversion trends, traffic sources, an interactive strategy simulator, AI recommendations and a product performance table. Copy the WorkspaceShell frame separately from DarkAnalyticsPage, switch between dark and light, and toggle each region in Controls.',
+          'An ember-themed growth analytics workspace with a global search bar, workspace switcher, five headline metrics, revenue and conversion percentage changes, traffic sources, an interactive strategy simulator, AI recommendations and a product performance table. Copy the WorkspaceShell frame separately from DarkAnalyticsPage, switch between dark and light, and toggle each region in Controls.',
       },
     },
   },
@@ -381,7 +393,9 @@ const meta = {
   },
   render: (args: DarkAnalyticsArgs) => (
     <DemoApp theme={args.mode === 'dark' ? emberTheme.dark : emberTheme.light}>
-      <DarkAnalytics {...args} />
+      <SidebarProvider>
+        <DarkAnalytics {...args} />
+      </SidebarProvider>
     </DemoApp>
   ),
 } satisfies Meta<DarkAnalyticsArgs>;

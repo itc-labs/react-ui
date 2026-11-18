@@ -198,7 +198,7 @@ function SidebarSearchPage({
                   height={240}
                   legend={false}
                   valueFormatter={(value) => demoCurrency.format(value)}
-                  axisValueFormatter={(value) => `$${Math.round(value / 1000)}k`}
+                  axisValueFormatter={(value) => `$${value / 1000}k`}
                 />
               </Card>
             )}
@@ -268,7 +268,7 @@ function SidebarSearchPage({
                         height={250}
                         legend={false}
                         valueFormatter={(value) => demoCurrency.format(value)}
-                        axisValueFormatter={(value) => `$${Math.round(value / 1000)}k`}
+                        axisValueFormatter={(value) => `$${value / 1000}k`}
                       />
                     ),
                   }))}
