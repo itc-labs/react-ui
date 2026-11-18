@@ -15,7 +15,7 @@ import {
   SidebarSubmenuContent,
 } from './submenu';
 import type { SidebarEntry } from './types';
-import type { SidebarProps } from './index';
+import type { SidebarProps } from './types';
 
 export function SidebarEntries({
   items,

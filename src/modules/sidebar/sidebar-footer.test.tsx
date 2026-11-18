@@ -111,3 +111,38 @@ it('disables SidebarMobileTrigger outside a provider', async () => {
     host.querySelector<HTMLButtonElement>('[data-testid="lonely"]')!.disabled,
   ).toBe(true);
 });
+
+it('names static and collapsible groups for assistive technology', async () => {
+  await act(async () =>
+    root.render(
+      <Sidebar
+        data-testid="side"
+        items={[
+          {
+            id: 'main',
+            type: 'group',
+            label: 'Main',
+            items: [{ id: 'home', label: 'Home', href: '/' }],
+          },
+          {
+            id: 'more',
+            type: 'group',
+            label: 'More',
+            collapsible: true,
+            items: [{ id: 'docs', label: 'Docs', href: '/docs' }],
+          },
+        ]}
+      />,
+    ),
+  );
+  const main = byId('group-main')!;
+  expect(main.getAttribute('role')).toBe('group');
+  expect(
+    document.getElementById(main.getAttribute('aria-labelledby')!)!.textContent,
+  ).toBe('Main');
+  const content = byId('group-more-content')!;
+  expect(content.getAttribute('role')).toBe('group');
+  expect(
+    document.getElementById(content.getAttribute('aria-labelledby')!)!.textContent,
+  ).toBe('More');
+});

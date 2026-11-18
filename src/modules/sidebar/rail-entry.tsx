@@ -156,7 +156,16 @@ export function SidebarRailEntry({
 
   const tooltip = (child: ReactElement) => (
     <Tooltip
-      content={item.label}
+      content={
+        item.description != null ? (
+          <span className="grid gap-0.5">
+            <span className="font-semibold">{item.label}</span>
+            <span>{item.description}</span>
+          </span>
+        ) : (
+          item.label
+        )
+      }
       side="right"
       className={cn(classNames?.tooltip)}
       data-testid={partTestId(testId, 'tooltip')}

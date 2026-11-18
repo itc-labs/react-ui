@@ -22,6 +22,7 @@ import { filterNavByAccess, resolveActiveNav } from '../navigation';
 import { SidebarContext, SidebarAppearanceContext } from './context';
 import { resolveSidebarAppearance } from './appearance';
 import { SidebarEntries } from './entries';
+import { SIDEBAR_DESKTOP_QUERY, SidebarNav } from './nav';
 import { SidebarSearchControl, isSidebarSearch } from './search';
 import { useSidebarShortcut } from './use-sidebar-state';
 import { SidebarSections } from './sections';
@@ -149,7 +150,7 @@ export function Sidebar<TAccess = unknown>({
 
   useEffect(() => {
     if (typeof window.matchMedia !== 'function') return;
-    const media = window.matchMedia('(min-width: 64rem)');
+    const media = window.matchMedia(SIDEBAR_DESKTOP_QUERY);
 
     const close = () => {
       if (media.matches) setMobileOpen(false);
@@ -555,47 +556,7 @@ export function Sidebar<TAccess = unknown>({
   );
 }
 
-export function SidebarNav({
-  className,
-  'aria-label': label,
-  ...props
-}: ComponentProps<'nav'>) {
-  const { t } = useUILocale();
-
-  return (
-    <nav
-      {...props}
-      aria-label={label ?? t('sidebar.label')}
-      className={cn('grid gap-1', className)}
-    />
-  );
-}
-
-export function SidebarGroup({
-  label,
-  children,
-  className,
-  labelClassName,
-  ...props
-}: ComponentProps<'div'> & { label?: ReactNode; labelClassName?: string }) {
-  return (
-    <div data-sidebar-group="" {...props} className={cn('min-w-0', className)}>
-      {label != null && (
-        <p
-          data-sidebar-group-label=""
-          className={cn(
-            'mb-1 px-2.5 text-ui-sm font-medium text-[var(--sidebar-muted,var(--color-muted))] break-words',
-            labelClassName,
-          )}
-        >
-          {label}
-        </p>
-      )}
-      {children}
-    </div>
-  );
-}
-
+export { SidebarNav, SidebarGroup } from './nav';
 export { SidebarItem } from './item';
 export * from './submenu';
 
