@@ -239,6 +239,84 @@ it.each(['raised', 'subtle', 'bar', 'indicator', 'solid'] as const)(
   },
 );
 
+it('soft tone tints the sidebar from brand tokens and keeps full-ink labels', async () => {
+  await act(async () => root.render(<Sidebar tone="soft" items={items} />));
+  const aside = host.querySelector('aside')!;
+  expect(aside.dataset.tone).toBe('soft');
+  expect(aside.style.getPropertyValue('--sidebar-bg')).toContain('--color-brand-50');
+  expect(aside.style.getPropertyValue('--sidebar-fg')).toBe('var(--color-ink)');
+  for (const name of ['muted', 'hover', 'active-fg', 'border', 'tint'])
+    expect(aside.style.getPropertyValue(`--sidebar-${name}`)).not.toBe('');
+});
+
+it('pill marks only the current page and drops nested guide rules', async () => {
+  await act(async () =>
+    root.render(
+      <Sidebar
+        itemVariant="pill"
+        data-testid="pill"
+        items={[
+          {
+            id: 'branch',
+            type: 'submenu',
+            label: 'Branch',
+            defaultOpen: true,
+            items: [
+              { id: 'child', label: 'Child', href: '/child', active: true },
+              { id: 'other', label: 'Other', href: '/other' },
+            ],
+          },
+        ]}
+      />,
+    ),
+  );
+  const current = host.querySelector('[aria-current="page"]')!;
+  expect(current.textContent).toBe('Child');
+  expect(current.className).toContain('font-semibold');
+  expect(current.className).toContain('bg-[var(--sidebar-tint');
+  const trigger = host.querySelector('[data-testid="pill-submenu-branch"] button')!;
+  expect(trigger.className).not.toContain('font-semibold');
+  expect(trigger.className).not.toContain('bg-[var(--sidebar-tint');
+  const other = Array.from(host.querySelectorAll('a')).find(
+    (a) => a.textContent === 'Other',
+  )!;
+  expect(other.className).toContain('text-[var(--sidebar-fg');
+  const body = host.querySelector('[data-testid="pill-submenu-branch-content"] > div')!;
+  expect(body.className).toContain('[--sidebar-indent:2.25rem]');
+  expect(current.className).toContain('ps-[calc(0.75rem+var(--sidebar-indent,0rem))]');
+  expect(body.className).not.toContain('border-l');
+});
+
+it('shows item descriptions in a tooltip and renders trailing marks outside the rail', async () => {
+  const entries: SidebarEntry[] = [
+    {
+      id: 'tickets',
+      label: 'Tickets',
+      href: '/tickets',
+      description: 'Lorem ipsum dolor',
+      trailing: <span data-mark="premium">P</span>,
+    },
+    { id: 'plain', label: 'Plain', href: '/plain' },
+  ];
+  await act(async () =>
+    root.render(<Sidebar items={entries} data-testid="described" />),
+  );
+  const link = host.querySelector('[data-testid="described-item-tickets"]')!;
+  expect(link.getAttribute('data-state')).toBe('closed');
+  expect(
+    host
+      .querySelector('[data-testid="described-item-plain"]')!
+      .hasAttribute('data-state'),
+  ).toBe(false);
+  expect(
+    host.querySelector('[data-testid="described-item-tickets-trailing"] [data-mark]'),
+  ).not.toBeNull();
+  await act(async () =>
+    root.render(<Sidebar items={entries} collapsed data-testid="described" />),
+  );
+  expect(host.querySelector('[data-mark]')).toBeNull();
+});
+
 it('ignores collapse state and shortcuts when collapsible is none', async () => {
   const onCollapsedChange = vi.fn();
   await act(async () =>

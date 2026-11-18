@@ -10,7 +10,12 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, userEvent, within } from 'storybook/test';
 import { WorkspaceShell } from './index';
 import { DashboardShell } from '@itclabs/react-ui/templates';
-import { Sidebar, type SidebarEntry, type SidebarProps } from '../../modules/sidebar';
+import {
+  Sidebar,
+  SidebarProvider,
+  type SidebarEntry,
+  type SidebarProps,
+} from '../../modules/sidebar';
 import { Navbar, type NavbarItem } from '../../modules/navbar';
 import { UserMenu } from '../../modules/user-menu';
 import { PageHeader } from '../../modules/page-header';
@@ -28,6 +33,19 @@ import { type UiLinkProps } from '../../components/link-image-provider';
 import { HomeIcon } from '../../components/icon/outline/home';
 import { FolderIcon } from '../../components/icon/outline/folder';
 import { SettingsIcon } from '../../components/icon/outline/settings';
+import { ActivityIcon } from '../../components/icon/outline/activity';
+import { ArrowsRightLeftIcon } from '../../components/icon/outline/arrows-right-left';
+import { ChartPieIcon } from '../../components/icon/outline/chart-pie';
+import { CrownIcon } from '../../components/icon/outline/crown';
+import { MessagesIcon } from '../../components/icon/outline/messages';
+import { SendIcon } from '../../components/icon/outline/send';
+import { ShoppingBagIcon } from '../../components/icon/outline/shopping-bag';
+import { SparklesIcon } from '../../components/icon/outline/sparkles';
+import { UsersIcon } from '../../components/icon/outline/users';
+import { WorkflowIcon } from '../../components/icon/outline/workflow';
+import { IconButton } from '../../components/icon-button';
+import { Input } from '../../components/input';
+import { Tabs } from '../../components/tabs';
 
 const meta = {
   title: 'Templates/ApplicationLayout',
@@ -260,7 +278,7 @@ export const Playground: Story = {
   name: 'ApplicationLayout',
   args: { variant: 'inset' },
   argTypes: {
-    variant: { control: 'select', options: ['inset', 'classic', 'floating'] },
+    variant: { control: 'select', options: ['inset', 'classic', 'floating', 'soft'] },
   },
   render: (args: ComponentProps<typeof WorkspaceShell>) => (
     <ApplicationExample variant={args.variant ?? 'inset'} />
@@ -293,9 +311,15 @@ function DashboardLayout({
   sections,
   variant,
   sidebarAppearance,
+  logo = <HomeIcon />,
+  headerToggle = false,
   children,
 }: {
   title: string;
+  /** Brand mark; keep it distinct from the navigation icons. */
+  logo?: ReactNode;
+  /** Move the collapse toggle from the sidebar header into the page header. */
+  headerToggle?: boolean;
   sections: readonly DashboardSection[];
   variant: NonNullable<ComponentProps<typeof WorkspaceShell>['variant']>;
   sidebarAppearance: Pick<
@@ -316,13 +340,15 @@ function DashboardLayout({
       ?.scrollIntoView({ block: 'start' });
   };
 
-  return (
+  const shell = (
     <DashboardShell
       variant={variant}
+      sidebarToggle={headerToggle}
       sidebar={{
         ...sidebarAppearance,
+        ...(headerToggle ? { collapseToggle: 'none' as const } : {}),
         navigationLabel: `${title} navigation`,
-        header: { title, logo: <HomeIcon /> },
+        header: { title, logo },
         items: sections.map((section) => ({
           ...section,
           active: section.id === activeSection,
@@ -356,6 +382,14 @@ function DashboardLayout({
         {notice}
       </p>
     </DashboardShell>
+  );
+
+  return headerToggle ? (
+    <SidebarProvider defaultCollapsed={sidebarAppearance.defaultCollapsed ?? false}>
+      {shell}
+    </SidebarProvider>
+  ) : (
+    shell
   );
 }
 
@@ -599,6 +633,236 @@ export const OperationsDashboard: Story = {
   ),
 };
 
+const premium = (
+  <span className="inline-flex size-5 items-center justify-center rounded-full bg-warning-50 text-warning-700">
+    <CrownIcon className="size-3.5" />
+  </span>
+);
+const crmItems: SidebarEntry[] = [
+  {
+    id: 'home',
+    label: 'Home',
+    href: '/home',
+    icon: HomeIcon,
+    description: 'Your workspace at a glance.',
+  },
+  {
+    id: 'crm',
+    type: 'submenu',
+    label: 'CRM',
+    icon: UsersIcon,
+    defaultOpen: true,
+    items: [
+      {
+        id: 'contacts',
+        label: 'Contacts',
+        href: '/crm/contacts',
+        description: 'Everyone you work with, in one list.',
+      },
+      {
+        id: 'lists',
+        label: 'Lists',
+        href: '/crm/lists',
+        className: '[--sidebar-indent:3.5rem]',
+      },
+      {
+        id: 'segments',
+        label: 'Segments',
+        href: '/crm/segments',
+        className: '[--sidebar-indent:3.5rem]',
+      },
+      { id: 'companies', label: 'Companies', href: '/crm/companies' },
+      { id: 'deals', label: 'Deals', href: '/crm/deals' },
+      { id: 'tasks', label: 'Tasks', href: '/crm/tasks' },
+      {
+        id: 'tickets',
+        label: 'Tickets',
+        href: '/crm/tickets',
+        trailing: premium,
+        description: 'Manage and track all support tickets.',
+      },
+      {
+        id: 'objects',
+        label: 'Custom objects',
+        href: '/crm/objects',
+        trailing: premium,
+      },
+    ],
+  },
+  { id: 'marketing', label: 'Marketing', href: '/marketing', icon: SendIcon },
+  { id: 'automations', label: 'Automations', href: '/automations', icon: WorkflowIcon },
+  {
+    id: 'transactional',
+    label: 'Transactional',
+    href: '/transactional',
+    icon: ArrowsRightLeftIcon,
+  },
+  {
+    id: 'conversations',
+    label: 'Conversations',
+    href: '/conversations',
+    icon: MessagesIcon,
+    description: 'Inbox, chats, calls and meetings in one place.',
+  },
+  { id: 'commerce', label: 'Commerce', href: '/commerce', icon: ShoppingBagIcon },
+  { id: 'library', label: 'Library', href: '/library', icon: FolderIcon },
+  { id: 'analytics', label: 'Analytics', href: '/analytics', icon: ChartPieIcon },
+  { id: 'settings', label: 'Settings', href: '/settings', icon: SettingsIcon },
+];
+
+type Contact = {
+  id: string;
+  name: string;
+  email: string;
+  channel: string;
+  updated: string;
+};
+const contacts: Contact[] = [
+  {
+    id: '1',
+    name: 'Lorem Ipsum',
+    email: 'lorem@example.com',
+    channel: 'Email',
+    updated: '12/11/2026',
+  },
+  {
+    id: '2',
+    name: 'Dolor Sit',
+    email: 'dolor@example.com',
+    channel: 'SMS',
+    updated: '10/11/2026',
+  },
+  {
+    id: '3',
+    name: 'Amet Consectetur',
+    email: 'amet@example.com',
+    channel: 'Email',
+    updated: '08/11/2026',
+  },
+];
+const contactColumns: ColumnDef<Contact, unknown>[] = [
+  { accessorKey: 'name', header: 'Contact' },
+  {
+    accessorKey: 'channel',
+    header: 'Subscribed',
+    cell: ({ row }) => <Tag tone="success">{row.original.channel}</Tag>,
+  },
+  { accessorKey: 'email', header: 'Email' },
+  { accessorKey: 'updated', header: 'Last changed' },
+];
+
+function SoftWorkspaceExample() {
+  const [currentPath, setCurrentPath] = useState('/crm/contacts');
+  const DemoLink = useCallback(
+    ({ href, onClick, ...props }: UiLinkProps) => (
+      <a
+        {...props}
+        href={href}
+        onClick={(event) => {
+          onClick?.(event);
+          if (
+            event.defaultPrevented ||
+            event.button !== 0 ||
+            event.metaKey ||
+            event.ctrlKey
+          )
+            return;
+          event.preventDefault();
+          setCurrentPath(href);
+        }}
+      />
+    ),
+    [],
+  );
+
+  return (
+    <UIProvider link={DemoLink}>
+      <DashboardShell
+        variant="soft"
+        stickyHeader={false}
+        sidebar={{
+          navigationLabel: 'CRM workspace navigation',
+          header: { title: 'Lorem CRM', logo: <SparklesIcon /> },
+          items: crmItems,
+          currentPath,
+          toggleShortcut: 'mod+b',
+        }}
+        account={{ name: 'Lorem Ipsum', description: 'lorem@example.com', items: [] }}
+        headerActions={
+          <>
+            <Button variant="ghost" size="sm">
+              <SparklesIcon />
+              Ask AI
+            </Button>
+            <IconButton variant="ghost" size="sm" icon="help" label="Help" />
+            <IconButton variant="ghost" size="sm" icon="bell" label="Notifications" />
+          </>
+        }
+      >
+        <PageHeader
+          className="mb-6"
+          classNames={{ title: 'text-heading' }}
+          title="Contacts"
+          action={
+            <div className="flex flex-wrap gap-2">
+              <Button variant="secondary">Create a contact</Button>
+              <Button>Import contacts</Button>
+            </div>
+          }
+        />
+        <Tabs
+          label="Contact views"
+          items={[
+            {
+              value: 'all',
+              label: 'All contacts',
+              content: (
+                <div className="grid gap-4 pt-4">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Button variant="secondary" size="sm">
+                      Load a list or a segment
+                    </Button>
+                    <Button variant="secondary" size="sm">
+                      Add filter
+                    </Button>
+                    <Input
+                      aria-label="Search contacts"
+                      placeholder="Search"
+                      icon="search"
+                      size="sm"
+                      rootClassName="ms-auto w-full sm:w-64"
+                    />
+                  </div>
+                  <DataTable
+                    caption="Contacts"
+                    columns={contactColumns}
+                    rows={contacts}
+                    rowId={(row) => row.id}
+                  />
+                </div>
+              ),
+            },
+            { value: 'unsubscribed', label: 'Unsubscribed', content: null },
+          ]}
+        />
+      </DashboardShell>
+    </UIProvider>
+  );
+}
+
+export const SoftWorkspace: Story = {
+  tags: ['example'],
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Template for a CRM-style workspace: `variant="soft"` gives a full-height tinted sidebar (tone `soft`, item variant `pill`) with nested submenus, item descriptions on hover and premium marks, a borderless header and a flat page.',
+      },
+    },
+  },
+  render: () => <SoftWorkspaceExample />,
+};
+
 const serviceSamples: ChartPoint[] = [
   { id: '09', label: '09:00', values: { rate: 96, errors: 0.3, latency: 125 } },
   { id: '10', label: '10:00', values: { rate: 120, errors: 0.4, latency: 142 } },
@@ -618,6 +882,8 @@ export const ServiceHealthDashboard: Story = {
     <DashboardLayout
       title="Service operations"
       variant="floating"
+      logo={<ActivityIcon />}
+      headerToggle
       sidebarAppearance={{ defaultCollapsed: true, itemVariant: 'subtle' }}
       sections={[
         { id: 'service-overview', label: 'Overview', icon: HomeIcon },

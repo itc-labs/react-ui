@@ -40,7 +40,7 @@ export function DashboardShell<TAccess = unknown>({
           classNames?.body,
         ),
         header: cn(
-          'bg-surface',
+          variant === 'floating' ? 'bg-canvas' : 'bg-surface',
           stickyHeader && 'sticky top-0 z-10',
           classNames?.header,
         ),
@@ -48,6 +48,9 @@ export function DashboardShell<TAccess = unknown>({
       sidebar={
         <Sidebar
           variant={variant === 'floating' ? 'floating' : 'sidebar'}
+          {...(variant === 'soft'
+            ? { tone: 'soft' as const, itemVariant: 'pill' as const }
+            : {})}
           {...sidebar}
         />
       }

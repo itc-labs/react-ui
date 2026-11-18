@@ -1,9 +1,30 @@
 import type { CSSProperties } from 'react';
+import { cn } from '../../components/common';
 import type { SidebarProps } from './types';
 
 export function sidebarToneStyle(
   tone: NonNullable<SidebarProps['tone']>,
 ): CSSProperties {
+  if (tone === 'soft')
+    return {
+      '--sidebar-bg':
+        'var(--color-brand-50, color-mix(in srgb, var(--color-accent) 7%, var(--color-surface)))',
+      '--sidebar-fg': 'var(--color-ink)',
+      '--sidebar-muted': 'color-mix(in srgb, var(--color-ink) 80%, transparent)',
+      '--sidebar-hover':
+        'var(--color-brand-100, color-mix(in srgb, var(--color-accent) 12%, transparent))',
+      '--sidebar-active-bg': 'var(--color-surface)',
+      '--sidebar-active-fg': 'var(--color-ink)',
+      '--sidebar-border':
+        'color-mix(in srgb, var(--color-accent) 14%, var(--color-line))',
+      '--sidebar-badge-ring': 'var(--sidebar-bg)',
+      '--sidebar-accent': 'var(--color-accent)',
+      '--sidebar-tint':
+        'color-mix(in srgb, var(--color-accent) 22%, var(--sidebar-bg))',
+      '--sidebar-solid-bg': 'var(--color-accent)',
+      '--sidebar-solid-fg': 'var(--color-on-brand)',
+    } as CSSProperties;
+
   const contrast = tone !== 'default';
   const foreground = tone === 'dark' ? 'var(--color-surface)' : 'var(--color-on-brand)';
 
@@ -44,6 +65,14 @@ export function sidebarItemClasses(
   variant: NonNullable<SidebarProps['itemVariant']>,
   active: boolean,
 ) {
+  if (variant === 'pill')
+    // Full-width rows; nested rows indent their content through --sidebar-indent.
+    return cn(
+      'min-h-10 rounded-xl ps-[calc(0.75rem+var(--sidebar-indent,0rem))] pe-3',
+      active
+        ? 'bg-[var(--sidebar-tint,color-mix(in_srgb,var(--color-brand-500)_30%,var(--color-surface)))] font-semibold text-[var(--sidebar-active-fg,var(--color-ink))]'
+        : 'text-[var(--sidebar-fg,var(--color-ink))] hover:bg-[var(--sidebar-hover,var(--color-brand-100))]',
+    );
   if (variant === 'indicator')
     return active
       ? 'relative rounded-none bg-[var(--sidebar-tint,color-mix(in_srgb,var(--color-accent)_12%,transparent))] font-medium text-[var(--sidebar-active-fg,var(--color-ink))] before:pointer-events-none before:absolute before:inset-y-0 before:start-0 before:w-0.5 before:bg-[var(--sidebar-accent,var(--color-accent))] [&_svg]:text-[var(--sidebar-accent,var(--color-accent))]'

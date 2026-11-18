@@ -14,7 +14,11 @@ type EntryBase<TAccess> = {
 };
 type NavigationEntry<TAccess> = EntryBase<TAccess> & {
   icon?: IconName | IconGlyph;
+  /** Short help shown in a tooltip beside the expanded item. */
+  description?: ReactNode;
   badge?: number | Omit<BadgeProps, 'children'>;
+  /** Decorative content after the label and badge, e.g. a plan or premium mark. Hidden in the collapsed rail. */
+  trailing?: ReactNode;
   disabled?: boolean;
   actions?: SidebarItemAction[];
   onAdd?: () => void;
@@ -101,6 +105,7 @@ export type SidebarClassNames = SlotClasses<
   | 'icon'
   | 'label'
   | 'badge'
+  | 'trailing'
   | 'toggle'
   | 'tooltip'
   | 'flyout'
@@ -124,8 +129,10 @@ export type SidebarProps<TAccess = unknown> = ComponentProps<'aside'> &
     onSectionChange?: (section: string) => void;
     variant?: 'sidebar' | 'floating';
     collapsible?: 'icon' | 'offcanvas' | 'none';
-    tone?: 'default' | 'dark' | 'brand';
-    itemVariant?: 'raised' | 'subtle' | 'bar' | 'indicator' | 'solid';
+    /** `soft` tints the sidebar with the accent and keeps item text at full ink. */
+    tone?: 'default' | 'dark' | 'brand' | 'soft';
+    /** `pill`: rounded tinted active item with full-ink labels; pairs with `tone="soft"`. */
+    itemVariant?: 'raised' | 'subtle' | 'bar' | 'indicator' | 'solid' | 'pill';
     /** `caps`: small uppercase group labels, so they read as headings rather than items. */
     groupLabel?: 'default' | 'caps';
     /** Draw a hairline between top-level groups. */

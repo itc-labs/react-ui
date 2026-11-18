@@ -291,10 +291,10 @@ export const Playground: Story = {
     groupLabel: { control: 'select', options: ['default', 'caps'] },
     groupDividers: { control: 'boolean' },
     variant: { control: 'select', options: ['sidebar', 'floating'] },
-    tone: { control: 'select', options: ['default', 'dark', 'brand'] },
+    tone: { control: 'select', options: ['default', 'dark', 'brand', 'soft'] },
     itemVariant: {
       control: 'select',
-      options: ['raised', 'subtle', 'bar', 'indicator', 'solid'],
+      options: ['raised', 'subtle', 'bar', 'indicator', 'solid', 'pill'],
     },
     collapsible: { control: 'select', options: ['icon', 'offcanvas', 'none'] },
   },

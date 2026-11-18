@@ -26,8 +26,12 @@ export function WorkspaceShell({
   sidebarToggle?: WorkspaceSidebarToggle;
   content?: ReactNode;
   classNames?: SlotClasses<'root' | 'body' | 'header' | 'main'>;
-  /** `inset` raises the page into a rounded card beside the sidebar; `classic` divides them with a rule; `floating` leaves the page flat beside a floating sidebar. */
-  variant?: 'inset' | 'classic' | 'floating';
+  /**
+   * `inset` raises the page into a rounded card beside the sidebar; `classic` divides them with a rule;
+   * `floating` leaves the page flat beside a floating sidebar; `soft` keeps a full-height sidebar with a
+   * rounded trailing edge and a borderless header over a flat page.
+   */
+  variant?: 'inset' | 'classic' | 'floating' | 'soft';
 }) {
   const inset = sidebar != null && variant === 'inset';
 
@@ -39,9 +43,13 @@ export function WorkspaceShell({
         'group/shell',
         'mx-auto min-h-screen max-w-workspace bg-canvas text-ink',
         inset && 'lg:bg-sidebar',
+        sidebar != null && variant === 'soft' && 'bg-surface',
         sidebar != null &&
           variant === 'classic' &&
           '[&>aside]:border-r [&>aside]:border-line',
+        sidebar != null &&
+          variant === 'soft' &&
+          '[&>aside]:border-e [&>aside]:border-[var(--sidebar-border,var(--color-line))] lg:[&>aside]:rounded-e-2xl',
         sidebar != null &&
           'lg:grid lg:grid-cols-[var(--container-sidebar)_minmax(0,1fr)] lg:has-[>aside[data-collapsed=true]]:grid-cols-[var(--container-sidebar-collapsed)_minmax(0,1fr)] lg:has-[>aside[data-collapsed=true][data-collapsible=offcanvas]]:grid-cols-[0_minmax(0,1fr)] motion-safe:transition-[grid-template-columns] motion-safe:duration-[var(--motion-duration-normal)]',
         sidebar != null &&
@@ -117,6 +125,8 @@ export function WorkspaceHeader({
       {...props}
       className={cn(
         'flex min-h-14 flex-wrap items-center justify-between gap-3 border-b border-line px-5 py-3 text-ui-sm sm:px-8 lg:px-8',
+        // Floating and soft shells keep the header on the page surface instead of a ruled strip.
+        'lg:group-data-[variant=floating]/shell:mt-2 lg:group-data-[variant=floating]/shell:border-b-0 group-data-[variant=soft]/shell:border-b-0 lg:group-data-[variant=soft]/shell:pt-4',
         className,
       )}
     >

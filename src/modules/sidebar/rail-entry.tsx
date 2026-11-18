@@ -99,6 +99,17 @@ export function SidebarEntryLabel({
               className={cn('ml-auto shrink-0', classNames?.badge)}
             />
           )}
+      {item.trailing != null && (
+        <span
+          data-testid={partTestId(testId, 'trailing')}
+          className={cn(
+            'ml-auto inline-flex shrink-0 items-center',
+            classNames?.trailing,
+          )}
+        >
+          {item.trailing}
+        </span>
+      )}
     </span>
   );
 }
