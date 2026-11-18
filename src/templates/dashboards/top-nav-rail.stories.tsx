@@ -14,7 +14,7 @@ import { Navbar } from '../../modules/navbar';
 import { PageHeader } from '../../modules/page-header';
 import { Sidebar } from '../../modules/sidebar';
 import { UserMenu } from '../../modules/user-menu';
-import { OrdersTable } from './__demo/blocks';
+import { DemoNotifications, OrdersTable } from './__demo/blocks';
 import { demoAccount, demoCurrency, demoNavigation, demoRevenue } from './__demo/data';
 import { DemoApp, useDemoPath } from './__demo/demo-app';
 
@@ -322,12 +322,7 @@ function TopNavRail(args: TopNavRailArgs) {
                   className="hidden sm:inline-flex"
                   label="Search"
                 />
-                <IconButton
-                  variant="ghost"
-                  size="sm"
-                  icon="bell"
-                  label="Notifications"
-                />
+                <DemoNotifications />
                 <IconButton
                   variant="ghost"
                   size="sm"

@@ -4,6 +4,7 @@
  */
 import type { ChartPoint, ChartSlice } from '../../../modules/chart/types';
 import type { SidebarEntry, SidebarSection } from '../../../modules/sidebar';
+import type { NotificationItem } from '../../../modules/notification-menu';
 import type { UserMenuProps } from '../../../modules/user-menu';
 import { HomeIcon } from '../../../components/icon/outline/home';
 import { ChartPieIcon } from '../../../components/icon/outline/chart-pie';
@@ -314,3 +315,38 @@ export const demoCurrency = new Intl.NumberFormat('en-US', {
   currency: 'USD',
   maximumFractionDigits: 0,
 });
+
+/** Latest notifications for the header bell; three are unread. */
+export const demoNotificationItems: NotificationItem[] = [
+  {
+    id: 'n-paid',
+    title: 'Olivia Martin paid INV-20481',
+    description: 'Pro plan · monthly · $49',
+    time: '2 min ago',
+    href: '/sales/invoices',
+    avatar: { name: 'Olivia Martin' },
+  },
+  {
+    id: 'n-refund',
+    title: 'Refund requested for INV-20477',
+    description: 'Sofia Rossi · API add-on · $99',
+    time: '38 min ago',
+    href: '/sales/refunds',
+    avatar: { name: 'Sofia Rossi' },
+  },
+  {
+    id: 'n-limit',
+    title: 'Plan limit almost reached',
+    description: '9,200 of 10,000 monthly API calls used.',
+    time: '1 h ago',
+    href: '/billing',
+  },
+  {
+    id: 'n-export',
+    title: 'October revenue export is ready',
+    description: 'CSV · 2.4 MB',
+    time: 'Yesterday',
+    href: '/documents',
+    read: true,
+  },
+];

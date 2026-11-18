@@ -168,28 +168,28 @@ for (const [name, limit] of Object.entries({
   Sidebar: 87_500,
   Icon: 20_000,
   // Includes shared drag-and-drop and workspace-control translations.
-  Rating: 21_300,
+  Rating: 21_500,
   Divider: 10_600,
   Kbd: 19_500,
   Slider: 32_300,
-  Timeline: 22_000,
+  Timeline: 22_200,
   // New collection feedback messages also enter the shared locale catalogs.
-  QuantityInput: 21_300,
+  QuantityInput: 21_500,
   OptionGroup: 52_000,
   // Trend and KPI locale messages add about 60 gzip bytes to every locale consumer.
-  JsonView: 22_200,
+  JsonView: 22_400,
   // About 10% above the measured display subpath fixtures.
   CodeView: 50_000,
   // DOMPurify plus shared class merging, with about 10% headroom.
   RichTextView: 24_000,
   // Typed arrow/dot renderers add about 120 gzip bytes.
-  Carousel: 30_700,
+  Carousel: 30_900,
   VirtualList: 34_000,
   VirtualGrid: 34_000,
   // Fullscreen media adds Dialog focus management and image zoom controls.
-  MediaGallery: 54_800,
+  MediaGallery: 54_900,
   // Shared reorder instructions and disabled reasons are included in locale consumers.
-  Lightbox: 42_300,
+  Lightbox: 42_500,
   Button: 21_000,
   Spinner: 20_000,
   Dialog: 38_000,
@@ -203,7 +203,7 @@ for (const [name, limit] of Object.entries({
   // MonthPicker and its bound MonthField add about 1.7 KB gzip;
   // KpiCard, MetricTrend and KpiGrid with their trend glyphs add about 2.7 KB gzip;
   // FormLayout, FormSection, FormGrid and FormActions add about 1.3 KB gzip.
-  Root: 289_900,
+  Root: 290_900,
   ColorPicker: 54_300,
 })) {
   if (sizes[name].gzip >= limit) {

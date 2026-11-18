@@ -2,7 +2,7 @@
  * Stories only: page blocks shared by the dashboard templates, composed from kit components.
  * Copy and adapt them; they are not part of the package API.
  */
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import { Avatar } from '../../../components/avatar';
 import { Button } from '../../../components/button';
 import { Card } from '../../../components/card';
@@ -11,12 +11,14 @@ import { Timeline } from '../../../components/timeline';
 import { Chart } from '../../../modules/chart';
 import { DataTable, type ColumnDef } from '../../../modules/data-table';
 import { KpiCard, KpiGrid } from '../../../modules/kpi-card';
+import { NotificationMenu } from '../../../modules/notification-menu';
 import { cn } from '../../../components/common';
 import {
   demoActivity,
   demoChannels,
   demoCurrency,
   demoKpis,
+  demoNotificationItems,
   demoOrders,
   demoRevenue,
   demoStatusTone,
@@ -219,5 +221,31 @@ export function PromoCard({ className }: { className?: string }) {
       </p>
       <Button size="sm">Upgrade plan</Button>
     </div>
+  );
+}
+
+/**
+ * Header bell with its own state: a new or read notification re-renders only this component.
+ * In an app, replace the local state with your notifications query or realtime store.
+ */
+export function DemoNotifications({ className }: { className?: string }) {
+  const [items, setItems] = useState(demoNotificationItems);
+
+  return (
+    <NotificationMenu
+      items={items}
+      viewAllHref="/notifications"
+      onSelect={(item) =>
+        setItems((current) =>
+          current.map((entry) =>
+            entry.id === item.id ? { ...entry, read: true } : entry,
+          ),
+        )
+      }
+      onMarkAllRead={() =>
+        setItems((current) => current.map((item) => ({ ...item, read: true })))
+      }
+      {...(className ? { className } : {})}
+    />
   );
 }

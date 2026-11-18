@@ -14,7 +14,7 @@ import { UsersIcon } from '../../components/icon/outline/users';
 import { MetricTrend, KpiGrid } from '../../modules/kpi-card';
 import type { SidebarEntry } from '../../modules/sidebar';
 import { UserMenu } from '../../modules/user-menu';
-import { OrdersTable } from './__demo/blocks';
+import { DemoNotifications, OrdersTable } from './__demo/blocks';
 import { demoAccount, demoCurrency } from './__demo/data';
 import { DemoApp, useDemoPath } from './__demo/demo-app';
 
@@ -285,6 +285,7 @@ function FloatingCards(args: FloatingCardsArgs) {
   return (
     <DashboardShell
       variant="floating"
+      sidebarToggle={args.showTopbar}
       topbar={
         args.showTopbar ? (
           <>
@@ -308,12 +309,7 @@ function FloatingCards(args: FloatingCardsArgs) {
                 variant="ghost"
                 onClick={() => navigate('/messages')}
               />
-              <IconButton
-                icon="bell"
-                label="Notifications"
-                variant="ghost"
-                onClick={() => navigate('/notifications')}
-              />
+              <DemoNotifications />
               <UserMenu {...demoAccount} description="Admin" />
             </div>
           </>
@@ -321,9 +317,9 @@ function FloatingCards(args: FloatingCardsArgs) {
       }
       sidebar={{
         navigationLabel: 'Metrica navigation',
-        // The topbar carries the brand; show it in the sidebar only without one.
+        // The topbar carries the brand; the collapse toggle then moves to the page header.
         ...(args.showTopbar
-          ? {}
+          ? { collapseToggle: 'none' as const }
           : {
               header: {
                 title: 'Metrica',

@@ -13,6 +13,7 @@ export * from './progress-list';
 export * from './segmented-progress';
 export * from './kpi-card';
 export * from './user-menu';
+export * from './notification-menu';
 export * from './calendar/engine';
 export { Calendar as EventCalendar } from './calendar';
 export type {

@@ -16,7 +16,7 @@ import { ReceiptIcon } from '../../components/icon/outline/receipt';
 import { MessagesIcon } from '../../components/icon/outline/messages';
 import { ProgressList } from '../../modules/progress-list';
 import type { SidebarEntry } from '../../modules/sidebar';
-import { OrdersTable, PromoCard } from './__demo/blocks';
+import { DemoNotifications, OrdersTable, PromoCard } from './__demo/blocks';
 import { DemoApp, useDemoPath } from './__demo/demo-app';
 import {
   demoAccount,
@@ -415,13 +415,7 @@ function SidebarSearch(args: SidebarSearchArgs) {
               label="Messages"
               onClick={() => navigate('/messages')}
             />
-            <IconButton
-              variant="ghost"
-              size="sm"
-              icon="bell"
-              label="Notifications"
-              onClick={() => navigate('/notifications')}
-            />
+            <DemoNotifications />
           </>
         ) : undefined
       }

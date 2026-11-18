@@ -9,7 +9,13 @@ import { ActivityIcon } from '../../components/icon/outline/activity';
 import { CrownIcon } from '../../components/icon/outline/crown';
 import { PageHeader } from '../../modules/page-header';
 import { DashboardShell } from '@itclabs/react-ui/templates';
-import { ActivityCard, KpiRow, OrdersTable, RevenueCard } from './__demo/blocks';
+import {
+  ActivityCard,
+  DemoNotifications,
+  KpiRow,
+  OrdersTable,
+  RevenueCard,
+} from './__demo/blocks';
 import { DemoApp, useDemoPath } from './__demo/demo-app';
 import { demoAccount, demoFooterNavigation, demoNavigation } from './__demo/data';
 
@@ -75,7 +81,7 @@ function SoftWorkspace({
             Usage and plan
           </Button>
           <IconButton variant="ghost" size="sm" icon="help" label="Help" />
-          <IconButton variant="ghost" size="sm" icon="bell" label="Notifications" />
+          <DemoNotifications />
         </>
       }
     >

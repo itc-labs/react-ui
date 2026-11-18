@@ -3,10 +3,8 @@ import { useState } from 'react';
 import { Chart } from '@itclabs/react-ui/chart';
 import { WorkspaceShell } from '@itclabs/react-ui/templates';
 import { emberTheme } from '@itclabs/react-ui/theme/presets';
-import { Badge } from '../../components/badge';
 import { Button } from '../../components/button';
 import { Card } from '../../components/card';
-import { IconButton } from '../../components/icon-button';
 import { ActivityIcon } from '../../components/icon/outline/activity';
 import { BellIcon } from '../../components/icon/outline/bell';
 import { ChartIcon } from '../../components/icon/outline/chart';
@@ -29,8 +27,8 @@ import {
 import { KpiCard, KpiGrid } from '../../modules/kpi-card';
 import { Sidebar, type SidebarEntry } from '../../modules/sidebar';
 import { UserMenu } from '../../modules/user-menu';
-import { ChannelsCard } from './__demo/blocks';
-import { demoAccount, demoCurrency, demoNotifications } from './__demo/data';
+import { ChannelsCard, DemoNotifications } from './__demo/blocks';
+import { demoAccount, demoCurrency } from './__demo/data';
 import {
   analyticsKpis,
   analyticsProducts,
@@ -284,14 +282,7 @@ function DarkAnalytics(args: DarkAnalyticsArgs) {
             >
               Add data
             </Button>
-            <Badge count={demoNotifications.length} tone="brand">
-              <IconButton
-                icon="bell"
-                label="Notifications, 3 unread"
-                variant="ghost"
-                onClick={() => navigate('/alerts')}
-              />
-            </Badge>
+            <DemoNotifications />
             <UserMenu
               {...demoAccount}
               name="Liam Nguyen"

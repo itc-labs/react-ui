@@ -24,6 +24,7 @@ import { SearchIcon } from '../../components/icon/outline/search';
 import { SettingsIcon } from '../../components/icon/outline/settings';
 import { UsersIcon } from '../../components/icon/outline/users';
 import type { SidebarEntry } from '../../modules/sidebar';
+import { DemoNotifications } from './__demo/blocks';
 import { demoAccount } from './__demo/data';
 import { DemoApp, useDemoPath } from './__demo/demo-app';
 
@@ -369,10 +370,7 @@ function ThreeColumn(args: ThreeColumnArgs) {
               <PlusIcon />
               Add person
             </Button>
-            <Button variant="ghost" size="sm" className="hidden lg:inline-flex">
-              <BellIcon />
-              Notifications
-            </Button>
+            <DemoNotifications className="hidden lg:inline-flex" />
             <IconButton
               variant="ghost"
               size="sm"
