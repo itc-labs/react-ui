@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.21.0
+
+### Minor Changes
+
+- [#55](https://github.com/itc-labs/react-ui/pull/55) [`7a204ff`](https://github.com/itc-labs/react-ui/commit/7a204ff26fc26ca6e1b504855e64c1bdfcc891bd) Thanks [@vungbt](https://github.com/vungbt)! - Add `DescriptionList` for read-only label/value pairs with native `dl` semantics, responsive columns, stacked or inline layout, and a localized empty value.
+
 ## 0.20.0
 
 ### Minor Changes
