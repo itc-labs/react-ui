@@ -310,7 +310,7 @@ function TopNavRail(args: TopNavRailArgs) {
     <WorkspaceShell
       variant="floating"
       classNames={{
-        topbar: 'm-2 rounded-panel border shadow-panel px-2 sm:px-3',
+        topbar: 'border-0 bg-transparent p-0 sm:p-0',
         main: 'px-4 py-6 sm:px-6 lg:px-8',
       }}
       topbar={
@@ -319,11 +319,10 @@ function TopNavRail(args: TopNavRailArgs) {
             sticky={false}
             brand={{ title: 'Finexo', logo: <WalletIcon />, href: '/dashboard' }}
             items={navigation}
-            activeIndicator="pill"
+            appearance="floating"
             navigationLabel="Finexo navigation"
-            className="rounded-panel border-0"
             classNames={{
-              inner: 'gap-2 px-0 xl:gap-4',
+              inner: 'xl:gap-4',
               actions: 'gap-1',
               nav: 'lg:hidden xl:flex',
               mobileTrigger: 'lg:inline-flex xl:hidden',

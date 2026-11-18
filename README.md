@@ -413,7 +413,7 @@ workspace switching, search launchers, collapsible groups, item actions, hover
 previews and two-tier sections are documented in the
 [Navigation guide](https://react-ui-one-rose.vercel.app/?path=/docs/guides-navigation--docs).
 
-Storybook's **Templates/Dashboards** section has nine dashboard layouts, starting with
+Storybook's **Templates/Dashboards** section has eleven dashboard layouts, starting with
 Default. Copy a template's code as one complete file, install the packages named at the
 top, and replace the sample data with your API.
 

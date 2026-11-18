@@ -85,7 +85,14 @@ export function ChartPlot({ config, model, formatValue, missingLabel }: PlotProp
       <XAxis
         hide={config.xAxis === false}
         type={horizontal ? 'number' : 'category'}
-        {...(!horizontal ? { dataKey: 'label' as const } : {})}
+        {...(!horizontal
+          ? // Many points thin the labels evenly instead of crowding the first ones.
+            {
+              dataKey: 'label' as const,
+              interval: 'preserveStartEnd' as const,
+              minTickGap: 24,
+            }
+          : {})}
         tickLine={false}
         axisLine={false}
         tickMargin={10}

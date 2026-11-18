@@ -172,7 +172,13 @@
     grid-row: 1;
   }
 
+  /* The trigger's own classes decide when it shows, so hosts can keep it past lg. */
+  .navbar-mobile-control {
+    display: contents;
+  }
+
   [data-navbar-align='split'] .navbar-mobile-control {
+    display: block;
     grid-column: 1;
     grid-row: 1;
   }
@@ -181,10 +187,6 @@
     .navbar-inner {
       grid-template-columns: auto minmax(0, 1fr) auto;
       gap: 1rem;
-    }
-
-    .navbar-mobile-control {
-      display: none;
     }
 
     [data-navbar-align='center'] .navbar-inner {
