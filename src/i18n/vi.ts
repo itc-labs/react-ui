@@ -82,6 +82,8 @@ export const viMessages = {
   'timeline.status.warning': 'Cảnh báo',
   'timeline.status.danger': 'Nguy hiểm',
 
+  'descriptionList.empty': 'Chưa có',
+
   'kbd.command': 'Command',
   'kbd.control': 'Control',
   'kbd.controlShort': 'Ctrl',
