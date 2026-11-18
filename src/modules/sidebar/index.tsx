@@ -1,5 +1,6 @@
 'use client';
 import {
+  useCallback,
   useContext,
   useEffect,
   useId,
@@ -96,14 +97,21 @@ export function Sidebar<TAccess = unknown>({
   const sidebarId = props.id ?? context?.id ?? generatedId;
   const asideRef = useRef<HTMLElement>(null);
   const composedRef = useComposedRefs(asideRef, ref);
+  // Precedence: the `collapsed` prop, then a SidebarProvider, then local state.
+  // onCollapsedChange always reports; an uncontrolled sidebar also updates its provider.
+  const sharedCollapsed = controlledCollapsed ?? context?.collapsed;
+  const contextToggle = context?.toggle;
+  const reportCollapsed = useCallback(
+    (next: boolean) => {
+      onCollapsedChange?.(next);
+      if (controlledCollapsed === undefined) contextToggle?.();
+    },
+    [onCollapsedChange, controlledCollapsed, contextToggle],
+  );
   const state = useSidebarState({
-    ...(controlledCollapsed === undefined && !context
-      ? {}
-      : { collapsed: controlledCollapsed ?? context!.collapsed }),
+    ...(sharedCollapsed === undefined ? {} : { collapsed: sharedCollapsed }),
     ...(defaultCollapsed === undefined ? {} : { defaultCollapsed }),
-    ...(onCollapsedChange || context
-      ? { onCollapsedChange: onCollapsedChange ?? (() => context?.toggle()) }
-      : {}),
+    onCollapsedChange: reportCollapsed,
     ...(toggleShortcut && collapsible !== 'none' ? { toggleShortcut } : {}),
   });
   const collapsed = collapsible !== 'none' && state.collapsed;

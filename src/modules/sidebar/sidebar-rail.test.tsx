@@ -3,7 +3,7 @@ import { act, createRef } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { userEvent } from 'storybook/test';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
-import { Sidebar, type SidebarEntry } from './index';
+import { Sidebar, SidebarProvider, type SidebarEntry } from './index';
 import { UILocaleProvider } from '../../i18n/provider';
 import { HomeIcon } from '../../components/icon/outline/home';
 import { IconButton } from '../../components/icon-button';
@@ -332,3 +332,44 @@ it.each(['dark', 'brand'] as const)(
     expect(byId('submenu-settings-content')).toBeNull();
   },
 );
+
+it('reports collapse changes and still toggles a provider-backed sidebar', async () => {
+  const changed = vi.fn();
+  await act(async () =>
+    root.render(
+      <SidebarProvider>
+        <Sidebar items={[]} onCollapsedChange={changed} data-testid="side" />
+      </SidebarProvider>,
+    ),
+  );
+  await act(async () => byId('toggle').click());
+  expect(changed).toHaveBeenLastCalledWith(true);
+  expect(byId('').dataset.collapsed).toBe('true');
+  await act(async () => byId('toggle').click());
+  expect(changed).toHaveBeenLastCalledWith(false);
+  expect(byId('').dataset.collapsed).toBe('false');
+});
+
+it('keeps rail flyouts closed after collapsing even when the branch defaults open', async () => {
+  await act(async () =>
+    root.render(
+      <Sidebar
+        collapsed
+        data-testid="side"
+        items={[
+          {
+            id: 'branch',
+            type: 'submenu',
+            label: 'Branch',
+            defaultOpen: true,
+            items: [{ id: 'child', label: 'Child', href: '#child' }],
+          },
+        ]}
+      />,
+    ),
+  );
+  expect(byId('submenu-branch').getAttribute('aria-expanded')).toBe('false');
+  expect(
+    document.querySelector('[data-testid="side-submenu-branch-content"]'),
+  ).toBeNull();
+});

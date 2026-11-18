@@ -129,9 +129,9 @@ export function SidebarRailEntry({
   const contentRef = useRef<HTMLDivElement>(null);
   // Pointer-opened flyouts focus the panel, so no focus ring flashes on the first link.
   const openedByPointer = useRef(false);
-  const [localOpen, setLocalOpen] = useState(
-    item.type === 'submenu' ? (item.defaultOpen ?? false) : false,
-  );
+  // The flyout always starts closed: defaultOpen describes the inline branch, and opening
+  // a popover when the sidebar collapses would cover the page.
+  const [localOpen, setLocalOpen] = useState(false);
   const open = item.type === 'submenu' ? (item.open ?? localOpen) : false;
 
   const changeOpen = (next: boolean) => {
