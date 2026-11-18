@@ -582,18 +582,17 @@ export const Storefront: Story = {
         }
         actions={
           <>
-            <div className="me-4 hidden w-[30rem] max-w-full items-center rounded-control border border-control-border bg-surface p-1 ps-3 md:flex">
-              <SearchIcon className="size-4 shrink-0 text-muted" />
-              <Input
-                aria-label="Search products"
-                placeholder="Search product, brand or category…"
-                rootClassName="min-w-0 flex-1"
-                className="border-0 shadow-none focus-visible:outline-0"
-              />
-              <Button variant="soft" size="sm" className="bg-canvas text-ink">
-                Search
-              </Button>
-            </div>
+            <Input
+              aria-label="Search products"
+              icon={SearchIcon}
+              placeholder="Search product, brand or category…"
+              rootClassName="me-4 hidden w-[30rem] max-w-full md:grid"
+              endAddon={
+                <Button variant="soft" size="sm" className="bg-canvas text-ink">
+                  Search
+                </Button>
+              }
+            />
             <CaptionAction icon={UserIcon} label="Profile" />
             <CaptionAction icon={HeartIcon} label="Favorites" />
             <CaptionAction icon={CartIcon} label="Cart" badge={2} />

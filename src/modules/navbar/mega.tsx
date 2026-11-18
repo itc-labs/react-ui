@@ -29,33 +29,43 @@ const panelClass =
   'rounded-panel border border-[var(--navbar-panel-border,var(--color-line))] bg-[var(--navbar-panel-bg,var(--color-surface))] text-[var(--navbar-panel-fg,var(--color-ink))] shadow-floating';
 
 /**
- * Keeps a full-width panel under the whole navbar rather than under its trigger.
- * The header can sit anywhere in the page, so its edges are measured while the panel is open.
+ * Keeps a full-width panel under the whole navbar rather than under its trigger. The panel is
+ * absolutely positioned from an anchor in the menu, so it stays correct inside transformed or
+ * scrolling containers, such as a docs preview, where fixed positioning would drift.
  */
 function useHeaderAnchor(enabled: boolean) {
   const ref = useRef<HTMLDivElement>(null);
   const [style, setStyle] = useState<CSSProperties>();
 
   useLayoutEffect(() => {
-    const header = ref.current?.closest('header');
-    if (!enabled || !header) return;
+    const anchor = ref.current;
+    const header = anchor?.closest('header');
+    if (!enabled || !anchor || !header) return;
 
     const update = () => {
+      const origin = anchor.getBoundingClientRect();
       const bounds = header.getBoundingClientRect();
       const inset = 16;
       const left = Math.max(bounds.left, inset);
       const right = Math.min(bounds.right, window.innerWidth - inset);
 
-      setStyle({ top: bounds.bottom + 8, left, width: Math.max(right - left, 0) });
+      setStyle({
+        top: bounds.bottom - origin.top + 8,
+        left: left - origin.left,
+        width: Math.max(right - left, 0),
+      });
     };
 
     update();
+
+    const observer = new ResizeObserver(update);
+
+    observer.observe(header);
     window.addEventListener('resize', update);
-    window.addEventListener('scroll', update, { passive: true });
 
     return () => {
+      observer.disconnect();
       window.removeEventListener('resize', update);
-      window.removeEventListener('scroll', update);
     };
   }, [enabled]);
 
@@ -351,11 +361,11 @@ export function MegaPanel<TAccess>({
     );
 
   return (
-    // The wrapper takes no space in the menu row; the panel is placed against the header.
-    <div ref={anchor.ref} className="absolute size-0">
+    // The anchor takes no space in the menu row; the panel is placed against the header.
+    <div ref={anchor.ref} className="absolute left-0 top-0 size-0">
       <div
         className={cn(
-          'fixed z-popover max-h-[calc(100vh-6rem)] overflow-y-auto',
+          'absolute z-popover max-h-[calc(100vh-6rem)] overflow-y-auto',
           !anchor.style && 'invisible',
           panelClass,
           classNames?.panel,
