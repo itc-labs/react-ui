@@ -1,5 +1,56 @@
 # Changelog
 
+## 0.24.0
+
+### Minor Changes
+
+- [#61](https://github.com/itc-labs/react-ui/pull/61) [`6c257d2`](https://github.com/itc-labs/react-ui/commit/6c257d26f19b06be6fd692c1b0d5600f606fc17e) Thanks [@vungbt](https://github.com/vungbt)! - `Button` and `IconButton` accept `href`, `target` and `rel`. With `href` they render through the `link` adapter, so navigation keeps native link behavior. A disabled or loading action stays a disabled button.
+
+- [#61](https://github.com/itc-labs/react-ui/pull/61) [`6c257d2`](https://github.com/itc-labs/react-ui/commit/6c257d26f19b06be6fd692c1b0d5600f606fc17e) Thanks [@vungbt](https://github.com/vungbt)! - Navbar standardisation, matching Sidebar:
+
+  - `appearance` presets (`default`, `floating`, `dark`, `brand`, `transparent`) set tone, item style and density; `tone`, `itemVariant` (`underline`, `pill`, `solid`, `ghost`) and `density` override them. `activeIndicator` still works as an alias of `itemVariant`.
+  - `align` (`start`, `center`, `split`) and a `topbar` row above the bar.
+  - Multi-level menus: dropdowns nest to any depth and open to the side; mega menus take a featured column, `columns`, a footer row and "Show all" links per section, or `layout="categories"` with categories on the left.
+  - The mobile drawer goes one level deeper at a time with a back button and opens on the current page's branch.
+  - `Button` and `IconButton` expose `data-variant`.
+
+- [#61](https://github.com/itc-labs/react-ui/pull/61) [`6c257d2`](https://github.com/itc-labs/react-ui/commit/6c257d26f19b06be6fd692c1b0d5600f606fc17e) Thanks [@vungbt](https://github.com/vungbt)! - The default theme now uses a common neutral palette: slate greys, a white surface and a blue primary (`brand-700` `#2563eb`), with Tailwind-standard status and chart colours. Projects keep their own branding through tokens; `forestTheme` from `@itclabs/react-ui/theme/presets` reproduces the previous green default, including its neutrals and charts.
+
+- [#61](https://github.com/itc-labs/react-ui/pull/61) [`6c257d2`](https://github.com/itc-labs/react-ui/commit/6c257d26f19b06be6fd692c1b0d5600f606fc17e) Thanks [@vungbt](https://github.com/vungbt)! - Sidebar standardisation:
+
+  - `appearance` presets (`default`, `soft`, `dark`, `brand`) set tone, item style and density in one prop; `tone`, `itemVariant` and the new `density` (`compact`, `default`, `comfortable`) still override them.
+  - New `tone="soft"` and `itemVariant="pill"` (rounded current-page fill with an edge bar; ancestors stay plain).
+  - Tone colours are CSS variables scoped by `data-sidebar-tone`, with theme tokens `--color-sidebar-soft` and `--color-sidebar-soft-active`; the aside no longer carries inline colour styles.
+  - `footerItems` (pinned entries in a secondary nav, sharing active resolution), `account` (UserMenu that adapts to the rail) and `SidebarMobileTrigger` with `mobileTrigger={false}` to open the drawer from the page header.
+  - Items accept `description` (tooltip beside the row and in the rail) and `trailing`.
+  - Fixes: a provider-backed Sidebar with `onCollapsedChange` now toggles; rail flyouts no longer open on collapse because of `defaultOpen`.
+  - Accessibility: labelled groups (`role="group"` with `aria-labelledby`), including collapsible groups.
+  - WorkspaceShell/DashboardShell: `variant="soft"` (DashboardShell uses `appearance="soft"`); floating shells keep the header on the page surface.
+
+- [#61](https://github.com/itc-labs/react-ui/pull/61) [`6c257d2`](https://github.com/itc-labs/react-ui/commit/6c257d26f19b06be6fd692c1b0d5600f606fc17e) Thanks [@vungbt](https://github.com/vungbt)! - `UIProvider` accepts a `router` adapter next to `link` and `image`. It returns the host's current `pathname`, and Sidebar, Navbar and TopLoaderProvider follow it when `currentPath` is omitted.
+
+- [#61](https://github.com/itc-labs/react-ui/pull/61) [`6c257d2`](https://github.com/itc-labs/react-ui/commit/6c257d26f19b06be6fd692c1b0d5600f606fc17e) Thanks [@vungbt](https://github.com/vungbt)! - WorkspaceShell gains optional `topbar` (full-width bar above sidebar and page; the sticky sidebar starts below it) and `aside` (secondary column from xl, `--container-aside` token) slots, plus `WorkspaceAside`. A direct Sidebar now follows the shell variant (`floating` panel, `soft` appearance) unless its props differ. The shell no longer centres itself at `--container-workspace`, so the sidebar stays at the viewport edge on wide screens. DashboardShell: `account` is optional with `accountPlacement` (`header` or `sidebar`), it provides a SidebarProvider when needed and opens the mobile drawer from a header menu button instead of a separate row. Sidebar button items now align their labels to the start.
+
+### Patch Changes
+
+- [#61](https://github.com/itc-labs/react-ui/pull/61) [`6c257d2`](https://github.com/itc-labs/react-ui/commit/6c257d26f19b06be6fd692c1b0d5600f606fc17e) Thanks [@vungbt](https://github.com/vungbt)! - Chart category axes thin long label lists evenly instead of crowding the first labels.
+
+- [#61](https://github.com/itc-labs/react-ui/pull/61) [`6c257d2`](https://github.com/itc-labs/react-ui/commit/6c257d26f19b06be6fd692c1b0d5600f606fc17e) Thanks [@vungbt](https://github.com/vungbt)! - Sidebar `tone="dark"` now uses `--color-sidebar-dark`/`--color-sidebar-dark-ink` instead of ink/surface, so it stays dark in dark themes. Chart contains its screen-reader data table in a clipped box (a table ignores `sr-only` width), so charts no longer widen narrow pages.
+
+- [#61](https://github.com/itc-labs/react-ui/pull/61) [`6c257d2`](https://github.com/itc-labs/react-ui/commit/6c257d26f19b06be6fd692c1b0d5600f606fc17e) Thanks [@vungbt](https://github.com/vungbt)! - `DropdownMenu` items and `EmptyState` now accept an imported glyph for `icon`, like IconButton and Tag, so hosts can use them without registering the full icon catalog.
+
+- [#61](https://github.com/itc-labs/react-ui/pull/61) [`6c257d2`](https://github.com/itc-labs/react-ui/commit/6c257d26f19b06be6fd692c1b0d5600f606fc17e) Thanks [@vungbt](https://github.com/vungbt)! - `InputOTP` keeps `defaultValue` itself instead of forwarding it to the native input next to `value`, which removes React's controlled/uncontrolled warning.
+
+- [#61](https://github.com/itc-labs/react-ui/pull/61) [`6c257d2`](https://github.com/itc-labs/react-ui/commit/6c257d26f19b06be6fd692c1b0d5600f606fc17e) Thanks [@vungbt](https://github.com/vungbt)! - Full-width Navbar mega panels re-render only their frame when their position is measured, instead of every link inside them.
+
+- [#61](https://github.com/itc-labs/react-ui/pull/61) [`6c257d2`](https://github.com/itc-labs/react-ui/commit/6c257d26f19b06be6fd692c1b0d5600f606fc17e) Thanks [@vungbt](https://github.com/vungbt)! - Navbar's mobile menu button follows its own classes, so a host can keep it visible past lg when it hides the menu at that width. Selected ghost items stand out from a grouped menu, and centred menus no longer overlap the brand or actions.
+
+- [#61](https://github.com/itc-labs/react-ui/pull/61) [`6c257d2`](https://github.com/itc-labs/react-ui/commit/6c257d26f19b06be6fd692c1b0d5600f606fc17e) Thanks [@vungbt](https://github.com/vungbt)! - Coalesce chart container resize bursts into a final layout update instead of redrawing on every sidebar animation frame. Keep the SVG fitted to the live container, apply reduced-motion resizes immediately, and cancel pending resize work on unmount.
+
+- [#61](https://github.com/itc-labs/react-ui/pull/61) [`6c257d2`](https://github.com/itc-labs/react-ui/commit/6c257d26f19b06be6fd692c1b0d5600f606fc17e) Thanks [@vungbt](https://github.com/vungbt)! - WorkspaceShell drops its topbar padding, border and background when the topbar holds a Navbar, so a default Navbar sits flush without a double border.
+
+- [#61](https://github.com/itc-labs/react-ui/pull/61) [`6c257d2`](https://github.com/itc-labs/react-ui/commit/6c257d26f19b06be6fd692c1b0d5600f606fc17e) Thanks [@vungbt](https://github.com/vungbt)! - `VirtualList` skips re-rendering when a resize reports unchanged dimensions and no longer scans every item when nothing is focused. Sidebar no longer commits twice on route changes.
+
 ## 0.23.0
 
 ### Minor Changes
