@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.22.0
+
+### Minor Changes
+
+- [#57](https://github.com/itc-labs/react-ui/pull/57) [`cbc148a`](https://github.com/itc-labs/react-ui/commit/cbc148adde20d4f8ef8b620ab570d182ab2392c4) Thanks [@vungbt](https://github.com/vungbt)! - Add `ImagePreview` (`@itclabs/react-ui/media-gallery`): compact thumbnails for one or many images with sizes, rounded or circle shape and a `+N` overflow tile; clicking opens the fullscreen `Lightbox` at that image.
+
 ## 0.21.0
 
 ### Minor Changes
