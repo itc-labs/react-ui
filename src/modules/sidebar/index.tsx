@@ -19,6 +19,7 @@ import { KitIconButton } from '../../components/icon-button/kit-icon-button';
 import { useUILocale } from '../../i18n/provider';
 import { filterNavByAccess, resolveActiveNav } from '../navigation';
 import { SidebarContext, SidebarAppearanceContext } from './context';
+import { resolveSidebarAppearance } from './appearance';
 import { SidebarEntries } from './entries';
 import { SidebarSearchControl, isSidebarSearch } from './search';
 import { useSidebarShortcut } from './use-sidebar-state';
@@ -36,6 +37,7 @@ export type {
   SidebarSearch,
   SidebarWorkspaceSwitcher,
   SidebarItemAction,
+  SidebarAppearance,
 } from './types';
 
 const noop = () => {};
@@ -58,8 +60,10 @@ export function Sidebar<TAccess = unknown>({
   onSectionChange,
   variant = 'sidebar',
   collapsible = 'icon',
-  tone = 'default',
-  itemVariant = 'raised',
+  appearance,
+  tone: toneProp,
+  itemVariant: itemVariantProp,
+  density: densityProp,
   groupLabel = 'default',
   groupDividers = false,
   style,
@@ -89,6 +93,12 @@ export function Sidebar<TAccess = unknown>({
   ...props
 }: SidebarProps<TAccess>) {
   const { t } = useUILocale();
+  const { tone, itemVariant, density } = resolveSidebarAppearance({
+    appearance,
+    tone: toneProp,
+    itemVariant: itemVariantProp,
+    density: densityProp,
+  });
   const searchConfig = isSidebarSearch(search) ? search : undefined;
   useSidebarShortcut(searchConfig?.shortcut, searchConfig?.onOpen ?? noop);
   const context = useContext(SidebarContext);
@@ -340,7 +350,12 @@ export function Sidebar<TAccess = unknown>({
           triggerAsChild
           {...(testId ? { 'data-testid': partTestId(testId, 'drawer')! } : {})}
           // Data attributes are valid on the content element; the props type omits them.
-          contentProps={{ 'data-sidebar-tone': tone } as Record<string, string>}
+          contentProps={
+            {
+              'data-sidebar-tone': tone,
+              'data-sidebar-density': density,
+            } as Record<string, string>
+          }
           className={cn(
             'bg-[var(--sidebar-bg)] text-[var(--sidebar-fg)]',
             classNames?.drawer,
@@ -403,6 +418,8 @@ export function Sidebar<TAccess = unknown>({
         data-collapsible={collapsible}
         data-tone={tone}
         data-sidebar-tone={tone}
+        data-sidebar-density={density}
+        data-appearance={appearance ?? 'default'}
         data-item-variant={itemVariant}
         inert={offcanvas}
         aria-hidden={offcanvas || undefined}

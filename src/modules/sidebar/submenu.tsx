@@ -133,7 +133,7 @@ export function SidebarSubmenuTrigger({
         focusRingClassName,
         iconOnly
           ? 'size-9 shrink-0 justify-center'
-          : 'min-h-9 w-full px-2.5 py-1.5 text-left',
+          : 'min-h-[var(--sidebar-row,2.25rem)] w-full px-2.5 py-1.5 text-left',
         // Pill marks only the current page; ancestors keep plain rows.
         sidebarItemClasses(variant, variant === 'pill' ? false : context.active),
         className,

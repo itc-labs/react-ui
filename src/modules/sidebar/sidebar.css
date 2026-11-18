@@ -4,6 +4,19 @@
  * (or override one variable through the style prop).
  */
 @layer components {
+  /* Row height per density; the rail keeps fixed square tiles. */
+  [data-sidebar-density] {
+    --sidebar-row: 2.25rem;
+  }
+
+  [data-sidebar-density='compact'] {
+    --sidebar-row: 2rem;
+  }
+
+  [data-sidebar-density='comfortable'] {
+    --sidebar-row: 2.5rem;
+  }
+
   [data-sidebar-tone] {
     --sidebar-bg: var(--color-sidebar);
     --sidebar-fg: var(--color-ink);

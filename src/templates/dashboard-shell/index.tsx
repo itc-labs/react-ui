@@ -48,9 +48,7 @@ export function DashboardShell<TAccess = unknown>({
       sidebar={
         <Sidebar
           variant={variant === 'floating' ? 'floating' : 'sidebar'}
-          {...(variant === 'soft'
-            ? { tone: 'soft' as const, itemVariant: 'pill' as const }
-            : {})}
+          {...(variant === 'soft' ? { appearance: 'soft' as const } : {})}
           {...sidebar}
         />
       }

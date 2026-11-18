@@ -77,6 +77,7 @@ export type SidebarBrand = {
   subtitle?: ReactNode;
   href?: string;
 };
+export type SidebarAppearance = 'default' | 'soft' | 'dark' | 'brand';
 export type SidebarClassNames = SlotClasses<
   | 'root'
   | 'overlay'
@@ -128,6 +129,13 @@ export type SidebarProps<TAccess = unknown> = ComponentProps<'aside'> &
     defaultSection?: string;
     onSectionChange?: (section: string) => void;
     variant?: 'sidebar' | 'floating';
+    /**
+     * Visual preset: `default` (raised rows), `soft` (tinted panel, pill rows, comfortable density),
+     * `dark` and `brand` (contrast panels). `tone`, `itemVariant` and `density` override a preset.
+     */
+    appearance?: SidebarAppearance;
+    /** Row height: `compact` 32px, `default` 36px, `comfortable` 40px. */
+    density?: 'compact' | 'default' | 'comfortable';
     collapsible?: 'icon' | 'offcanvas' | 'none';
     /** `soft` tints the sidebar with the accent and keeps item text at full ink. */
     tone?: 'default' | 'dark' | 'brand' | 'soft';

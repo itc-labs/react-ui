@@ -189,7 +189,8 @@ it.each(['default', 'dark', 'brand', 'soft'] as const)(
 
 it('defines every tone variable in the sidebar stylesheet', () => {
   const css = readFileSync(resolve(__dirname, 'sidebar.css'), 'utf8');
-  const base = css.slice(css.indexOf('[data-sidebar-tone] {'), css.indexOf('}'));
+  const start = css.indexOf('[data-sidebar-tone] {');
+  const base = css.slice(start, css.indexOf('}', start));
   for (const name of [
     'bg',
     'fg',
@@ -260,6 +261,49 @@ it.each(['raised', 'subtle', 'bar', 'indicator', 'solid'] as const)(
     expect(rail.classList.contains('before:w-0.5')).toBe(itemVariant === 'indicator');
   },
 );
+
+it.each([
+  ['default', 'default', 'raised', 'default'],
+  ['soft', 'soft', 'pill', 'comfortable'],
+  ['dark', 'dark', 'raised', 'default'],
+  ['brand', 'brand', 'raised', 'default'],
+] as const)(
+  'resolves the %s appearance preset',
+  async (appearance, tone, itemVariant, density) => {
+    await act(async () =>
+      root.render(<Sidebar appearance={appearance} items={items} />),
+    );
+    const aside = host.querySelector('aside')!;
+    expect(aside.dataset.appearance).toBe(appearance);
+    expect(aside.dataset.sidebarTone).toBe(tone);
+    expect(aside.dataset.itemVariant).toBe(itemVariant);
+    expect(aside.dataset.sidebarDensity).toBe(density);
+  },
+);
+
+it('lets explicit tone, item variant and density override a preset', async () => {
+  await act(async () =>
+    root.render(
+      <Sidebar
+        appearance="soft"
+        tone="dark"
+        itemVariant="indicator"
+        density="compact"
+        items={items}
+      />,
+    ),
+  );
+  const aside = host.querySelector('aside')!;
+  expect(aside.dataset.sidebarTone).toBe('dark');
+  expect(aside.dataset.itemVariant).toBe('indicator');
+  expect(aside.dataset.sidebarDensity).toBe('compact');
+  const css = readFileSync(resolve(__dirname, 'sidebar.css'), 'utf8');
+  expect(css).toContain("[data-sidebar-density='compact']");
+  expect(css).toContain("[data-sidebar-density='comfortable']");
+  expect(host.querySelector('a')!.className).toContain(
+    'min-h-[var(--sidebar-row,2.25rem)]',
+  );
+});
 
 it('pill marks only the current page and drops nested guide rules', async () => {
   await act(async () =>
