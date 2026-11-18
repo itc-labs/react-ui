@@ -183,7 +183,12 @@ export function SidebarSubmenuContent({
       ref={composedRef}
       inert={!context.open}
       {...(forceMount && !context.open ? { hidden: true } : {})}
-      className={cn('ui-submenu-motion overflow-hidden', className)}
+      className={cn(
+        'ui-submenu-motion overflow-hidden',
+        // Let the pill's edge bar reach the sidebar edge past this clipping box.
+        variant === 'pill' && '-me-3 pe-3',
+        className,
+      )}
     >
       <div
         className={cn(

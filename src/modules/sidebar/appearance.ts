@@ -68,9 +68,10 @@ export function sidebarItemClasses(
   if (variant === 'pill')
     // Full-width rows; nested rows indent their content through --sidebar-indent.
     return cn(
-      'min-h-10 rounded-xl ps-[calc(0.75rem+var(--sidebar-indent,0rem))] pe-3',
+      'relative min-h-10 rounded-xl ps-[calc(0.75rem+var(--sidebar-indent,0rem))] pe-3',
       active
-        ? 'bg-[var(--sidebar-tint,color-mix(in_srgb,var(--color-brand-500)_30%,var(--color-surface)))] font-semibold text-[var(--sidebar-active-fg,var(--color-ink))]'
+        ? // The trailing bar sits on the sidebar edge; the expanded nav extends into the panel padding for it.
+          'bg-[var(--sidebar-tint,color-mix(in_srgb,var(--color-brand-500)_30%,var(--color-surface)))] font-semibold text-[var(--sidebar-active-fg,var(--color-ink))] after:pointer-events-none after:absolute after:inset-y-1.5 after:-end-3 after:w-1 after:rounded-s-full after:bg-[var(--sidebar-accent,var(--color-accent))]'
         : 'text-[var(--sidebar-fg,var(--color-ink))] hover:bg-[var(--sidebar-hover,var(--color-brand-100))]',
     );
   if (variant === 'indicator')

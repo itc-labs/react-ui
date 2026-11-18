@@ -284,6 +284,11 @@ it('pill marks only the current page and drops nested guide rules', async () => 
   const body = host.querySelector('[data-testid="pill-submenu-branch-content"] > div')!;
   expect(body.className).toContain('[--sidebar-indent:2.25rem]');
   expect(current.className).toContain('ps-[calc(0.75rem+var(--sidebar-indent,0rem))]');
+  expect(current.className).toContain('after:-end-3');
+  expect(trigger.className).not.toContain('after:-end-3');
+  expect(host.querySelector('[data-testid="pill-content"]')!.className).toContain(
+    '-me-3',
+  );
   expect(body.className).not.toContain('border-l');
 });
 
