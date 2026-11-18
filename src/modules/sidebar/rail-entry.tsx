@@ -151,8 +151,12 @@ export function SidebarRailEntry({
     sidebarItemClasses(variant, active),
     variant === 'indicator' && 'w-full focus-visible:-outline-offset-2',
     // Pill keeps a centred icon tile; its edge bar moves out to the rail edge.
+    variant === 'pill' && 'px-2',
+    // Only the current row draws the edge bar; an after: utility on other rows would add an
+    // empty ::after flex item (and its gap) that pushes the icon off centre.
     variant === 'pill' &&
-      'px-2 after:-end-[calc((var(--container-sidebar-collapsed)-2.25rem)/2)]',
+      active &&
+      'after:-end-[calc((var(--container-sidebar-collapsed)-2.25rem)/2)]',
     classNames?.item,
     item.className,
   );

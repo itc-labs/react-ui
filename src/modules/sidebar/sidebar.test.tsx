@@ -355,10 +355,15 @@ it('keeps the pill edge bar at the rail edge when collapsed', async () => {
         itemVariant="pill"
         collapsed
         data-testid="rail"
-        items={[{ id: 'home', label: 'Home', href: '/', active: true }]}
+        items={[
+          { id: 'home', label: 'Home', href: '/', active: true },
+          { id: 'files', label: 'Files', href: '/files' },
+        ]}
       />,
     ),
   );
+  const other = host.querySelector('[data-testid="rail-item-files"]')!;
+  expect(other.className).not.toContain('after:');
   const current = host.querySelector('[aria-current="page"]')!;
   expect(current.className).toContain(
     'after:-end-[calc((var(--container-sidebar-collapsed)-2.25rem)/2)]',
