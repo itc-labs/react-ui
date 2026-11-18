@@ -1,5 +1,11 @@
 import { NavigationMenu } from 'radix-ui';
-import { useLayoutEffect, useRef, useState, type CSSProperties } from 'react';
+import {
+  useLayoutEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+  type ReactNode,
+} from 'react';
 import { cn, partTestId } from '../../components/common';
 import { KitIcon } from '../../components/icon/kit-icon';
 import { ArrowRightIcon } from '../../components/icon/outline/arrow-right';
@@ -49,11 +55,20 @@ function useHeaderAnchor(enabled: boolean) {
       const left = Math.max(bounds.left, inset);
       const right = Math.min(bounds.right, window.innerWidth - inset);
 
-      setStyle({
+      const next = {
         top: bounds.bottom - origin.top + 8,
         left: left - origin.left,
         width: Math.max(right - left, 0),
-      });
+      };
+
+      // Observers fire on open and on unrelated resizes; only a real move re-renders.
+      setStyle((current) =>
+        current?.top === next.top &&
+        current.left === next.left &&
+        current.width === next.width
+          ? current
+          : next,
+      );
     };
 
     update();
@@ -333,13 +348,43 @@ function CategoriesPanel<TAccess>({
   );
 }
 
+/**
+ * Owns the measured position. The panel content arrives as `children`, created by the parent,
+ * so a position update re-renders this frame only and not every link inside it.
+ */
+function AnchoredPanel({
+  className,
+  children,
+}: {
+  className: string | undefined;
+  children: ReactNode;
+}) {
+  const anchor = useHeaderAnchor(true);
+
+  return (
+    // The anchor takes no space in the menu row; the panel is placed against the header.
+    <div ref={anchor.ref} className="absolute left-0 top-0 size-0">
+      <div
+        className={cn(
+          'absolute z-popover max-h-[calc(100vh-6rem)] overflow-y-auto',
+          !anchor.style && 'invisible',
+          panelClass,
+          className,
+        )}
+        style={anchor.style}
+      >
+        {children}
+      </div>
+    </div>
+  );
+}
+
 export function MegaPanel<TAccess>({
   item,
   fullWidth,
   classNames,
   ...props
 }: PanelProps<TAccess>) {
-  const anchor = useHeaderAnchor(fullWidth);
   const content =
     item.layout === 'categories' ? (
       <CategoriesPanel {...props} classNames={classNames} />
@@ -360,20 +405,5 @@ export function MegaPanel<TAccess>({
       </div>
     );
 
-  return (
-    // The anchor takes no space in the menu row; the panel is placed against the header.
-    <div ref={anchor.ref} className="absolute left-0 top-0 size-0">
-      <div
-        className={cn(
-          'absolute z-popover max-h-[calc(100vh-6rem)] overflow-y-auto',
-          !anchor.style && 'invisible',
-          panelClass,
-          classNames?.panel,
-        )}
-        style={anchor.style}
-      >
-        {content}
-      </div>
-    </div>
-  );
+  return <AnchoredPanel className={classNames?.panel}>{content}</AnchoredPanel>;
 }
