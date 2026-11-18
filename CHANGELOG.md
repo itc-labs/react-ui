@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.23.0
+
+### Minor Changes
+
+- [#59](https://github.com/itc-labs/react-ui/pull/59) [`f98c2e6`](https://github.com/itc-labs/react-ui/commit/f98c2e64d991f67d4eb17b41dcb12491d34e2cb3) Thanks [@vungbt](https://github.com/vungbt)! - Add `variant="stack"` to `ImagePreview`: tiles overlap the previous one by about a third with a surface ring, and lift on hover or focus.
+
 ## 0.22.0
 
 ### Minor Changes
