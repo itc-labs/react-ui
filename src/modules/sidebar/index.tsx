@@ -350,7 +350,8 @@ export function Sidebar<TAccess = unknown>({
           'min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden',
           // Extend the navigation to the panel edges while keeping header and footer padding.
           itemVariant === 'indicator' && !mobile && (rail ? '-mx-2' : '-mx-3'),
-          itemVariant === 'pill' && !mobile && !rail && '-me-3 pe-3',
+          // Let the pill's edge bar reach the sidebar edge in both the expanded panel and the rail.
+          itemVariant === 'pill' && !mobile && (rail ? '-me-2 pe-2' : '-me-3 pe-3'),
           classNames?.content,
         )}
       >

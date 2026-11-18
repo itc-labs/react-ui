@@ -348,6 +348,28 @@ it('pill marks only the current page and drops nested guide rules', async () => 
   expect(body.className).not.toContain('border-l');
 });
 
+it('keeps the pill edge bar at the rail edge when collapsed', async () => {
+  await act(async () =>
+    root.render(
+      <Sidebar
+        itemVariant="pill"
+        collapsed
+        data-testid="rail"
+        items={[{ id: 'home', label: 'Home', href: '/', active: true }]}
+      />,
+    ),
+  );
+  const current = host.querySelector('[aria-current="page"]')!;
+  expect(current.className).toContain(
+    'after:-end-[calc((var(--container-sidebar-collapsed)-2.25rem)/2)]',
+  );
+  expect(current.className).not.toContain('after:-end-3');
+  expect(current.className).toContain('px-2');
+  expect(host.querySelector('[data-testid="rail-content"]')!.className).toContain(
+    '-me-2',
+  );
+});
+
 it('shows item descriptions in a tooltip and renders trailing marks outside the rail', async () => {
   const entries: SidebarEntry[] = [
     {
