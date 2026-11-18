@@ -12,6 +12,8 @@ import { Carousel } from '../carousel';
 import { Lightbox, clampMediaIndex } from './lightbox';
 import { VideoPlayer, type RenderVideoPlayButton } from './video-player';
 export { Lightbox } from './lightbox';
+export { ImagePreview } from './image-preview';
+export type { ImagePreviewProps, ImagePreviewClassNames } from './image-preview';
 export type { LightboxProps, LightboxClassNames } from './lightbox';
 export type { RenderVideoPlayButton, VideoPlayButtonState } from './video-player';
 

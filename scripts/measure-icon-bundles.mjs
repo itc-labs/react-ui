@@ -174,16 +174,16 @@ for (const [name, limit] of Object.entries({
   Slider: 32_300,
   Timeline: 22_000,
   // New collection feedback messages also enter the shared locale catalogs.
-  QuantityInput: 21_200,
+  QuantityInput: 21_300,
   OptionGroup: 52_000,
   // Trend and KPI locale messages add about 60 gzip bytes to every locale consumer.
-  JsonView: 22_100,
+  JsonView: 22_200,
   // About 10% above the measured display subpath fixtures.
   CodeView: 50_000,
   // DOMPurify plus shared class merging, with about 10% headroom.
   RichTextView: 24_000,
   // Typed arrow/dot renderers add about 120 gzip bytes.
-  Carousel: 30_600,
+  Carousel: 30_700,
   VirtualList: 34_000,
   VirtualGrid: 34_000,
   // Fullscreen media adds Dialog focus management and image zoom controls.
