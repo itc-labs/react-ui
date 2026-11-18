@@ -192,6 +192,7 @@ export const viMessages = {
   'sidebar.collapse': 'Thu gọn thanh bên',
   'sidebar.expand': 'Mở rộng thanh bên',
   'sidebar.open': 'Mở thanh bên',
+  'sidebar.secondary': 'Điều hướng phụ',
   'sidebar.label': 'Điều hướng chính',
   'stepper.label': 'Các bước',
   'stepper.completed': ' — Đã hoàn tất',

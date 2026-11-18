@@ -2,6 +2,7 @@ import type { ComponentProps, ReactNode } from 'react';
 import type { SlotClasses, TestIdProps } from '../../components/common';
 import type { BadgeProps } from '../../components/badge';
 import type { IconName, IconGlyph } from '../../components/icon';
+import type { UserMenuProps } from '../user-menu';
 
 type EntryBase<TAccess> = {
   id: string;
@@ -99,6 +100,8 @@ export type SidebarClassNames = SlotClasses<
   | 'actionButton'
   | 'content'
   | 'footer'
+  | 'footerNav'
+  | 'account'
   | 'nav'
   | 'group'
   | 'groupLabel'
@@ -148,6 +151,10 @@ export type SidebarProps<TAccess = unknown> = ComponentProps<'aside'> &
     header?: ReactNode | SidebarBrand;
     search?: ReactNode | SidebarSearch;
     footer?: ReactNode;
+    /** Entries pinned above the footer, e.g. Settings; same access and active rules as items. */
+    footerItems?: readonly SidebarEntry<TAccess>[];
+    /** Account menu at the bottom; adapts to the collapsed rail. */
+    account?: UserMenuProps;
     items?: readonly SidebarEntry<TAccess>[];
     /** Absolute host pathname; no router is imported. */
     currentPath?: string;
@@ -167,8 +174,11 @@ export type SidebarProps<TAccess = unknown> = ComponentProps<'aside'> &
     collapseToggle?: 'sidebar' | 'none';
     collapseLabel?: string;
     expandLabel?: string;
-    /** A native button or ref/props-forwarding control, e.g. IconButton. */
-    mobileTrigger?: ReactNode;
+    /**
+     * A native button or ref/props-forwarding control, e.g. IconButton. `false` renders no trigger:
+     * place SidebarMobileTrigger (inside a SidebarProvider) in the page header instead.
+     */
+    mobileTrigger?: ReactNode | false;
     mobileTriggerLabel?: string;
     drawerTitle?: string;
     classNames?: SidebarClassNames;

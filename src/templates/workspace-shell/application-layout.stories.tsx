@@ -707,6 +707,8 @@ const crmItems: SidebarEntry[] = [
   { id: 'commerce', label: 'Commerce', href: '/commerce', icon: ShoppingBagIcon },
   { id: 'library', label: 'Library', href: '/library', icon: FolderIcon },
   { id: 'analytics', label: 'Analytics', href: '/analytics', icon: ChartPieIcon },
+];
+const crmFooterItems: SidebarEntry[] = [
   { id: 'settings', label: 'Settings', href: '/settings', icon: SettingsIcon },
 ];
 
@@ -784,6 +786,7 @@ function SoftWorkspaceExample() {
           navigationLabel: 'CRM workspace navigation',
           header: { title: 'Lorem CRM', logo: <SparklesIcon /> },
           items: crmItems,
+          footerItems: crmFooterItems,
           currentPath,
           toggleShortcut: 'mod+b',
         }}

@@ -200,6 +200,7 @@ export const enMessages = {
   'sidebar.collapse': 'Collapse sidebar',
   'sidebar.expand': 'Expand sidebar',
   'sidebar.open': 'Open sidebar',
+  'sidebar.secondary': 'Secondary navigation',
   'sidebar.label': 'Main navigation',
   'stepper.label': 'Steps',
   'stepper.completed': ' — Completed',

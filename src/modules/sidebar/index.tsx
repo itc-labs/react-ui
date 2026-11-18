@@ -17,6 +17,7 @@ import { PanelLeftIcon } from '../../components/icon/outline/panel-left';
 import { MenuIcon } from '../../components/icon/outline/menu';
 import { KitIconButton } from '../../components/icon-button/kit-icon-button';
 import { useUILocale } from '../../i18n/provider';
+import { UserMenu } from '../user-menu';
 import { filterNavByAccess, resolveActiveNav } from '../navigation';
 import { SidebarContext, SidebarAppearanceContext } from './context';
 import { resolveSidebarAppearance } from './appearance';
@@ -70,6 +71,8 @@ export function Sidebar<TAccess = unknown>({
   ref,
   header,
   footer,
+  footerItems,
+  account,
   search,
   items,
   navigationLabel,
@@ -137,9 +140,12 @@ export function Sidebar<TAccess = unknown>({
     findExternalTrigger(asideRef.current, sidebarId)?.focus();
   }, [offcanvas, sidebarId]);
 
-  const [mobileOpen, setMobileOpen] = useState(false);
+  const [localMobileOpen, setLocalMobileOpen] = useState(false);
+  // A SidebarProvider shares the drawer state with SidebarMobileTrigger in the page header.
+  const mobileOpen = context?.mobileOpen ?? localMobileOpen;
+  const setMobileOpen = context?.setMobileOpen ?? setLocalMobileOpen;
 
-  useEffect(() => setMobileOpen(false), [currentPath]);
+  useEffect(() => setMobileOpen(false), [currentPath, setMobileOpen]);
 
   useEffect(() => {
     if (typeof window.matchMedia !== 'function') return;
@@ -152,7 +158,7 @@ export function Sidebar<TAccess = unknown>({
     media.addEventListener('change', close);
 
     return () => media.removeEventListener('change', close);
-  }, []);
+  }, [setMobileOpen]);
 
   const visibleSections = sections?.map((section) => ({
     ...section,
@@ -198,9 +204,21 @@ export function Sidebar<TAccess = unknown>({
     ? (activeSection?.items ?? [])
     : items &&
       filterNavByAccess(items, (access, item) => !canAccess || canAccess(access, item));
-  const activePath = visibleItems
-    ? resolveActiveNav(visibleItems, currentPath ?? '', isActive)
-    : [];
+  const visibleFooterItems =
+    footerItems &&
+    filterNavByAccess(
+      footerItems,
+      (access, item) => !canAccess || canAccess(access, item),
+    );
+  // Resolve once across both lists so only one row is current.
+  const activePath =
+    visibleItems || visibleFooterItems
+      ? resolveActiveNav(
+          [...(visibleItems ?? []), ...(visibleFooterItems ?? [])],
+          currentPath ?? '',
+          isActive,
+        )
+      : [];
 
   useLayoutEffect(() => {
     if (!sections || !collapsed || hover.expanded) return;
@@ -255,16 +273,53 @@ export function Sidebar<TAccess = unknown>({
     </div>
   );
 
-  const renderFooter = (id: string | undefined) =>
-    footer != null && (
+  const renderFooter = (
+    id: string | undefined,
+    rail = false,
+    onNavigate?: () => void,
+  ) =>
+    (footer != null || visibleFooterItems?.length || account) && (
       <div
         data-testid={partTestId(id, 'footer')}
         className={cn(
-          'grid min-w-0 shrink-0 text-ui-sm text-[var(--sidebar-muted,var(--color-muted))] [&>*]:min-w-0',
+          'grid min-w-0 shrink-0 gap-2 text-ui-sm text-[var(--sidebar-muted,var(--color-muted))] [&>*]:min-w-0',
           classNames?.footer,
         )}
       >
+        {!!visibleFooterItems?.length && (
+          <SidebarNav
+            aria-label={t('sidebar.secondary')}
+            data-testid={partTestId(id, 'footerNav')}
+            className={cn('gap-0.5', classNames?.footerNav)}
+          >
+            <SidebarEntries
+              items={visibleFooterItems}
+              activePath={activePath}
+              testId={id}
+              classNames={classNames}
+              collapsed={rail}
+              {...(onNavigate ? { onNavigate } : {})}
+            />
+          </SidebarNav>
+        )}
         {footer}
+        {account && (
+          <UserMenu
+            collapseOnMobile={false}
+            {...account}
+            data-testid={account['data-testid'] ?? partTestId(id, 'account')}
+            className={cn(
+              'w-full border-transparent bg-transparent text-[var(--sidebar-fg)] hover:bg-[var(--sidebar-hover)]',
+              rail && 'justify-center px-0',
+              account.className,
+            )}
+            classNames={{
+              ...account.classNames,
+              details: cn(rail && 'sr-only', account.classNames?.details),
+              chevron: cn(rail && 'hidden', account.classNames?.chevron),
+            }}
+          />
+        )}
       </div>
     );
 
@@ -326,71 +381,78 @@ export function Sidebar<TAccess = unknown>({
           children
         )}
       </div>
-      {(!sections || mobile) && renderFooter(id)}
+      {(!sections || mobile) &&
+        renderFooter(id, rail, mobile ? () => setMobileOpen(false) : undefined)}
     </>
   );
 
-  return (
-    <SidebarAppearanceContext.Provider value={itemVariant}>
-      <div className="p-3 lg:hidden">
-        <Drawer
-          title={drawerTitle ?? navigationLabel ?? t('sidebar.label')}
-          side="left"
-          open={mobileOpen}
-          onOpenChange={setMobileOpen}
-          trigger={
-            mobileTrigger ?? (
+  const mobileDrawer = (
+    <Drawer
+      title={drawerTitle ?? navigationLabel ?? t('sidebar.label')}
+      side="left"
+      open={mobileOpen}
+      onOpenChange={setMobileOpen}
+      {...(mobileTrigger === false
+        ? {}
+        : {
+            trigger: mobileTrigger ?? (
               <KitIconButton
                 label={mobileTriggerLabel ?? t('sidebar.open')}
                 icon={MenuIcon}
                 variant="ghost"
               />
-            )
-          }
-          triggerAsChild
-          {...(testId ? { 'data-testid': partTestId(testId, 'drawer')! } : {})}
-          // Data attributes are valid on the content element; the props type omits them.
-          contentProps={
-            {
-              'data-sidebar-tone': tone,
-              'data-sidebar-density': density,
-            } as Record<string, string>
-          }
-          className={cn(
-            'bg-[var(--sidebar-bg)] text-[var(--sidebar-fg)]',
-            classNames?.drawer,
-          )}
-          classNames={{
-            trigger: classNames?.mobileTrigger ?? '',
-            body: 'flex min-h-0 flex-1 flex-col overflow-hidden',
-            header: 'shrink-0',
-          }}
+            ),
+            triggerAsChild: true,
+          })}
+      {...(testId ? { 'data-testid': partTestId(testId, 'drawer')! } : {})}
+      // Data attributes are valid on the content element; the props type omits them.
+      contentProps={
+        {
+          'data-sidebar-tone': tone,
+          'data-sidebar-density': density,
+        } as Record<string, string>
+      }
+      className={cn(
+        'bg-[var(--sidebar-bg)] text-[var(--sidebar-fg)]',
+        classNames?.drawer,
+      )}
+      classNames={{
+        trigger: classNames?.mobileTrigger ?? '',
+        body: 'flex min-h-0 flex-1 flex-col overflow-hidden',
+        header: 'shrink-0',
+      }}
+    >
+      <div className="flex min-h-0 flex-1 flex-col gap-4">
+        {visibleSections && (
+          <SidebarSections
+            sections={visibleSections}
+            value={sectionId}
+            onChange={selectSection}
+            panelId={`${sidebarId}-mobile-panel`}
+            testId={partTestId(testId, 'drawer')}
+            classNames={classNames}
+            mobile
+          />
+        )}
+        <div
+          role={sections ? 'region' : undefined}
+          aria-labelledby={sections ? `${sidebarId}-mobile-section-title` : undefined}
+          id={`${sidebarId}-mobile-panel`}
+          className="flex min-h-0 flex-1 flex-col gap-4"
         >
-          <div className="flex min-h-0 flex-1 flex-col gap-4">
-            {visibleSections && (
-              <SidebarSections
-                sections={visibleSections}
-                value={sectionId}
-                onChange={selectSection}
-                panelId={`${sidebarId}-mobile-panel`}
-                testId={partTestId(testId, 'drawer')}
-                classNames={classNames}
-                mobile
-              />
-            )}
-            <div
-              role={sections ? 'region' : undefined}
-              aria-labelledby={
-                sections ? `${sidebarId}-mobile-section-title` : undefined
-              }
-              id={`${sidebarId}-mobile-panel`}
-              className="flex min-h-0 flex-1 flex-col gap-4"
-            >
-              {body(false, partTestId(testId, 'drawer'), true)}
-            </div>
-          </div>
-        </Drawer>
+          {body(false, partTestId(testId, 'drawer'), true)}
+        </div>
       </div>
+    </Drawer>
+  );
+
+  return (
+    <SidebarAppearanceContext.Provider value={itemVariant}>
+      {mobileTrigger === false ? (
+        mobileDrawer
+      ) : (
+        <div className="p-3 lg:hidden">{mobileDrawer}</div>
+      )}
       <aside
         {...props}
         data-testid={testId}
@@ -466,7 +528,7 @@ export function Sidebar<TAccess = unknown>({
                   testId={testId}
                   classNames={classNames}
                 />
-                <div className="mt-auto">{renderFooter(testId)}</div>
+                <div className="mt-auto">{renderFooter(testId, true)}</div>
               </div>
               <div
                 role="region"
@@ -537,5 +599,9 @@ export function SidebarGroup({
 export { SidebarItem } from './item';
 export * from './submenu';
 
-export { SidebarProvider, SidebarTrigger } from './context';
-export type { SidebarProviderProps, SidebarTriggerProps } from './context';
+export { SidebarProvider, SidebarTrigger, SidebarMobileTrigger } from './context';
+export type {
+  SidebarProviderProps,
+  SidebarTriggerProps,
+  SidebarMobileTriggerProps,
+} from './context';
