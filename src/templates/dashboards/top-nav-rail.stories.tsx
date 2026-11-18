@@ -315,14 +315,26 @@ function TopNavRail(args: TopNavRailArgs) {
             }}
             actions={
               <>
-                <IconButton variant="ghost" size="sm" icon="search" label="Search" />
+                <IconButton
+                  variant="ghost"
+                  size="sm"
+                  icon="search"
+                  className="hidden sm:inline-flex"
+                  label="Search"
+                />
                 <IconButton
                   variant="ghost"
                   size="sm"
                   icon="bell"
                   label="Notifications"
                 />
-                <IconButton variant="ghost" size="sm" icon="info" label="Information" />
+                <IconButton
+                  variant="ghost"
+                  size="sm"
+                  icon="info"
+                  className="hidden sm:inline-flex"
+                  label="Information"
+                />
                 <UserMenu {...demoAccount} compact />
               </>
             }

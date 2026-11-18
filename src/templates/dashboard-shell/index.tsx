@@ -60,6 +60,8 @@ export function DashboardShell<TAccess = unknown>({
         ),
         header: cn(
           variant === 'floating' ? 'bg-canvas' : 'bg-surface',
+          // With nothing but the mobile menu button, the header is only needed below lg.
+          header == null && headerActions == null && !accountInHeader && 'lg:hidden',
           stickyHeader && 'sticky top-[var(--workspace-topbar-height,0px)] z-10',
           classNames?.header,
         ),

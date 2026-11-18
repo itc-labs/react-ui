@@ -207,3 +207,18 @@ it('dashboard header opens the drawer on mobile and places the account where ask
   );
   expect(host.textContent).not.toContain('Lorem Ipsum');
 });
+
+it('hides an empty dashboard header on desktop while keeping the mobile menu button', async () => {
+  await act(async () =>
+    root.render(<DashboardShell sidebar={{ items }}>Ipsum</DashboardShell>),
+  );
+  expect(host.querySelector('header')!.className).toContain('lg:hidden');
+  await act(async () =>
+    root.render(
+      <DashboardShell sidebar={{ items }} header="Overview">
+        Ipsum
+      </DashboardShell>,
+    ),
+  );
+  expect(host.querySelector('header')!.className).not.toContain('lg:hidden');
+});
