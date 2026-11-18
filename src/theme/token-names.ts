@@ -80,6 +80,7 @@ export const uiThemeTokenNames = [
   'container-sidebar',
   'container-sidebar-collapsed',
   'container-workspace',
+  'container-aside',
   'container-dialog',
   'container-drawer',
   'container-popover',

@@ -165,7 +165,11 @@ it('keeps defaults and forwards floating appearance, refs and custom slots', asy
   expect(ref.current).toBe(aside);
   expect(aside.dataset.testid).toBe('appearance');
   expect(aside.classList.contains('m-2')).toBe(true);
-  expect(aside.classList.contains('h-[calc(100dvh-1rem)]')).toBe(true);
+  expect(
+    aside.classList.contains(
+      'h-[calc(100dvh-1rem-var(--workspace-topbar-height,0px))]',
+    ),
+  ).toBe(true);
   expect(aside.classList.contains('rounded-none')).toBe(true);
   expect(aside.classList.contains('rounded-panel')).toBe(false);
   expect(aside.classList.contains('custom-root')).toBe(true);

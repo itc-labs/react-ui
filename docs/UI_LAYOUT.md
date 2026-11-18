@@ -103,6 +103,16 @@ In Next, the app may use `<SidebarItem asChild active icon={...}><Link href="/it
 
 `--container-sidebar: 15rem`, `--container-sidebar-collapsed: 4rem` and `--container-workspace: 100rem` define the default layout dimensions. WorkspaceShell consumes them; cn registers the container names for consumer max-width overrides. `WorkspaceMain` fills the workspace column (no max width); constrain readable pages such as forms at the page level. All parts accept className/native props. Header actions and main content are slots, not product-specific props.
 
+### Topbar, aside and variant pairing
+
+WorkspaceShell slots are optional; omit one to hide that region.
+
+- `topbar`: a full-width bar above the sidebar and page (global search, actions, account). The sidebar starts below it; override `--workspace-topbar-height` (4rem) on the shell for a taller bar.
+- `aside`: a secondary column beside the page (details, activity, inspector), shown from `xl` and sized by `--container-aside` (20rem). Below `xl`, offer the same content in a Drawer.
+- A direct `Sidebar` follows the shell `variant`: `floating` makes it a floating panel and `soft` applies `appearance="soft"`. Explicit Sidebar props win.
+
+DashboardShell adds a header with `header` (title, greeting or breadcrumb), `headerActions` and an optional `account` (`accountPlacement="header" | "sidebar"`). It provides a SidebarProvider when none is present and puts SidebarMobileTrigger at the start of the header, so mobile keeps a single header row.
+
 ## Submenus
 
 `SidebarSubmenu`, `SidebarSubmenuTrigger`, `SidebarSubmenuContent` and `SidebarSubmenuRow` support nested disclosures. Use ordinary navigation links, not role=menu/tree: Tab visits visible links; Enter/Space toggles the native trigger button. Closed content is inert during exit and unmounted afterward. `forceMount` instead keeps it hidden/inert when closed. Trigger/content refs compose with consumer refs, including React 19 cleanup.

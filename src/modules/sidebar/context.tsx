@@ -17,6 +17,10 @@ type SidebarState = {
   setMobileOpen: (open: boolean) => void;
 };
 export const SidebarContext = createContext<SidebarState | null>(null);
+/** Set by WorkspaceShell so a direct Sidebar can follow the shell variant. */
+export const WorkspaceLayoutContext = createContext<
+  'inset' | 'classic' | 'floating' | 'soft' | undefined
+>(undefined);
 export const SidebarAppearanceContext =
   createContext<NonNullable<SidebarProps['itemVariant']>>('raised');
 

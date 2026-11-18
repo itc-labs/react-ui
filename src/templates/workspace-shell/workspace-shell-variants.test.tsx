@@ -98,3 +98,112 @@ it('soft dashboard defaults the sidebar to soft tone and pill items, overridable
   expect(aside.dataset.tone).toBe('dark');
   expect(aside.dataset.itemVariant).toBe('raised');
 });
+
+it('puts a full-width topbar above the sidebar and page, offsetting the sticky sidebar', async () => {
+  await act(async () =>
+    root.render(
+      <WorkspaceShell
+        topbar={<span data-testid="topbar-content">Lorem</span>}
+        sidebar={<Sidebar items={items} />}
+        content="Ipsum"
+        classNames={{ topbar: 'custom-topbar', frame: 'custom-frame' }}
+      />,
+    ),
+  );
+  const shell = host.firstElementChild as HTMLElement;
+  expect(shell.dataset.topbar).toBe('true');
+  expect(shell.className).toContain('[--workspace-topbar-height:4rem]');
+  const bar = shell.firstElementChild as HTMLElement;
+  expect(bar.className).toContain('custom-topbar');
+  expect(bar.querySelector('[data-testid="topbar-content"]')).not.toBeNull();
+  const frame = bar.nextElementSibling as HTMLElement;
+  expect(frame.className).toContain('custom-frame');
+  expect(frame.className).toContain('lg:grid');
+  expect(frame.querySelector(':scope > aside')).not.toBeNull();
+  expect(host.querySelector('aside')!.className).toContain(
+    'top-[var(--workspace-topbar-height,0px)]',
+  );
+});
+
+it('keeps the original single-grid markup without a topbar', async () => {
+  await act(async () =>
+    root.render(<WorkspaceShell sidebar={<Sidebar items={items} />} content="Ipsum" />),
+  );
+  const shell = host.firstElementChild as HTMLElement;
+  expect(shell.className).toContain('lg:grid');
+  expect(shell.querySelector(':scope > aside')).not.toBeNull();
+  expect(shell.className).not.toContain('max-w-workspace');
+});
+
+it('renders an aside column beside the page from xl', async () => {
+  await act(async () =>
+    root.render(
+      <WorkspaceShell
+        sidebar={<Sidebar items={items} />}
+        content="Ipsum"
+        aside={<p>Details</p>}
+        classNames={{ aside: 'custom-aside' }}
+      />,
+    ),
+  );
+  const panel = host.querySelector<HTMLElement>('[data-workspace-aside]')!;
+  expect(panel.tagName).toBe('ASIDE');
+  expect(panel.textContent).toBe('Details');
+  expect(panel.className).toContain('xl:block');
+  expect(panel.className).toContain('w-[var(--container-aside)]');
+  expect(panel.className).toContain('custom-aside');
+  expect(panel.previousElementSibling!.tagName).toBe('MAIN');
+});
+
+it('lets a direct Sidebar follow the shell variant unless its props differ', async () => {
+  const render = (variant: 'floating' | 'soft', props = {}) =>
+    root.render(
+      <WorkspaceShell
+        variant={variant}
+        sidebar={<Sidebar items={items} {...props} />}
+        content="x"
+      />,
+    );
+
+  await act(async () => render('floating'));
+  expect(host.querySelector('aside')!.dataset.variant).toBe('floating');
+  await act(async () => render('soft'));
+  expect(host.querySelector('aside')!.dataset.appearance).toBe('soft');
+  await act(async () => render('soft', { appearance: 'dark', variant: 'floating' }));
+  expect(host.querySelector('aside')!.dataset.appearance).toBe('dark');
+  expect(host.querySelector('aside')!.dataset.variant).toBe('floating');
+});
+
+it('dashboard header opens the drawer on mobile and places the account where asked', async () => {
+  const account = { name: 'Lorem Ipsum', items: [] };
+  await act(async () =>
+    root.render(
+      <DashboardShell sidebar={{ items }} account={account} header="Overview">
+        Ipsum
+      </DashboardShell>,
+    ),
+  );
+  const header = host.querySelector('header')!;
+  const trigger = header.querySelector<HTMLButtonElement>(
+    'button[aria-haspopup="dialog"]',
+  )!;
+  expect(trigger.className).toContain('lg:hidden');
+  expect(trigger.disabled).toBe(false);
+  expect(host.querySelector('.p-3.lg\\:hidden')).toBeNull();
+  expect(header.textContent).toContain('Lorem Ipsum');
+
+  await act(async () =>
+    root.render(
+      <DashboardShell sidebar={{ items }} account={account} accountPlacement="sidebar">
+        Ipsum
+      </DashboardShell>,
+    ),
+  );
+  expect(host.querySelector('header')!.textContent).not.toContain('Lorem Ipsum');
+  expect(host.querySelector('aside')!.textContent).toContain('Lorem Ipsum');
+
+  await act(async () =>
+    root.render(<DashboardShell sidebar={{ items }}>Ipsum</DashboardShell>),
+  );
+  expect(host.textContent).not.toContain('Lorem Ipsum');
+});

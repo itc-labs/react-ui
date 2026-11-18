@@ -19,7 +19,11 @@ import { KitIconButton } from '../../components/icon-button/kit-icon-button';
 import { useUILocale } from '../../i18n/provider';
 import { UserMenu } from '../user-menu';
 import { filterNavByAccess, resolveActiveNav } from '../navigation';
-import { SidebarContext, SidebarAppearanceContext } from './context';
+import {
+  SidebarContext,
+  SidebarAppearanceContext,
+  WorkspaceLayoutContext,
+} from './context';
 import { resolveSidebarAppearance } from './appearance';
 import { SidebarEntries } from './entries';
 import { SIDEBAR_DESKTOP_QUERY, SidebarNav } from './nav';
@@ -60,9 +64,9 @@ export function Sidebar<TAccess = unknown>({
   section: controlledSection,
   defaultSection,
   onSectionChange,
-  variant = 'sidebar',
+  variant: variantProp,
   collapsible = 'icon',
-  appearance,
+  appearance: appearanceProp,
   tone: toneProp,
   itemVariant: itemVariantProp,
   density: densityProp,
@@ -97,6 +101,10 @@ export function Sidebar<TAccess = unknown>({
   ...props
 }: SidebarProps<TAccess>) {
   const { t } = useUILocale();
+  const shellVariant = useContext(WorkspaceLayoutContext);
+  // Inside WorkspaceShell the sidebar follows the shell unless its own props say otherwise.
+  const variant = variantProp ?? (shellVariant === 'floating' ? 'floating' : 'sidebar');
+  const appearance = appearanceProp ?? (shellVariant === 'soft' ? 'soft' : undefined);
   const { tone, itemVariant, density } = resolveSidebarAppearance({
     appearance,
     tone: toneProp,
@@ -489,10 +497,10 @@ export function Sidebar<TAccess = unknown>({
         aria-hidden={offcanvas || undefined}
         style={style}
         className={cn(
-          'group/sidebar sticky top-0 hidden h-dvh min-w-0 flex-col gap-4 overflow-hidden bg-[var(--sidebar-bg)] text-[var(--sidebar-fg)] p-3 lg:flex motion-safe:transition-[width] motion-safe:duration-[var(--motion-duration-normal)]',
+          'group/sidebar sticky top-[var(--workspace-topbar-height,0px)] hidden h-[calc(100dvh-var(--workspace-topbar-height,0px))] min-w-0 flex-col gap-4 overflow-hidden bg-[var(--sidebar-bg)] text-[var(--sidebar-fg)] p-3 lg:flex motion-safe:transition-[width] motion-safe:duration-[var(--motion-duration-normal)]',
           collapsed ? 'w-sidebar-collapsed px-2' : 'w-sidebar',
           variant === 'floating' &&
-            'top-2 m-2 h-[calc(100dvh-1rem)] rounded-panel border border-[var(--sidebar-border)] shadow-panel',
+            'top-[calc(var(--workspace-topbar-height,0px)+0.5rem)] m-2 h-[calc(100dvh-1rem-var(--workspace-topbar-height,0px))] rounded-panel border border-[var(--sidebar-border)] shadow-panel',
           hover.expanded && 'z-[var(--z-index-popover)] overflow-visible',
           offcanvas && 'm-0 w-0 border-0 p-0',
           classNames?.root,

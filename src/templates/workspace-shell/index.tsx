@@ -1,6 +1,6 @@
 import type { ComponentProps, ReactNode } from 'react';
 import { type SlotClasses, cn } from '../../components/common';
-import { SidebarTrigger } from '../../modules/sidebar/context';
+import { SidebarTrigger, WorkspaceLayoutContext } from '../../modules/sidebar/context';
 
 /**
  * `true` renders the desktop SidebarTrigger (with a tooltip) before the breadcrumb;
@@ -9,75 +9,140 @@ import { SidebarTrigger } from '../../modules/sidebar/context';
  */
 export type WorkspaceSidebarToggle = boolean | ReactNode;
 
+export type WorkspaceShellVariant = 'inset' | 'classic' | 'floating' | 'soft';
+
+export type WorkspaceShellProps = Omit<ComponentProps<'div'>, 'content'> & {
+  sidebar?: ReactNode;
+  /**
+   * Full-width bar above the sidebar and page (search, global actions, account). The sidebar
+   * then starts below it; set `--workspace-topbar-height` (default 4rem) for a taller bar.
+   */
+  topbar?: ReactNode;
+  header?: ReactNode;
+  /** Render the sidebar collapse toggle at the start of the header; see WorkspaceHeader. */
+  sidebarToggle?: WorkspaceSidebarToggle;
+  content?: ReactNode;
+  /** Secondary column beside the page (details, activity, inspector); shown from xl. */
+  aside?: ReactNode;
+  classNames?: SlotClasses<
+    'root' | 'topbar' | 'frame' | 'body' | 'header' | 'main' | 'aside'
+  >;
+  /**
+   * `inset` raises the page into a rounded card beside the sidebar; `classic` divides them with a rule;
+   * `floating` leaves the page flat beside a floating sidebar; `soft` keeps a full-height sidebar with a
+   * rounded trailing edge and a borderless header over a flat page. A direct Sidebar child follows the
+   * variant (floating panel, soft appearance) unless its own props say otherwise.
+   */
+  variant?: WorkspaceShellVariant;
+};
+
 export function WorkspaceShell({
   sidebar,
+  topbar,
   header,
   content,
+  aside,
   classNames,
   children,
   className,
   variant = 'inset',
   sidebarToggle,
   ...props
-}: Omit<ComponentProps<'div'>, 'content'> & {
-  sidebar?: ReactNode;
-  header?: ReactNode;
-  /** Render the sidebar collapse toggle at the start of the header; see WorkspaceHeader. */
-  sidebarToggle?: WorkspaceSidebarToggle;
-  content?: ReactNode;
-  classNames?: SlotClasses<'root' | 'body' | 'header' | 'main'>;
-  /**
-   * `inset` raises the page into a rounded card beside the sidebar; `classic` divides them with a rule;
-   * `floating` leaves the page flat beside a floating sidebar; `soft` keeps a full-height sidebar with a
-   * rounded trailing edge and a borderless header over a flat page.
-   */
-  variant?: 'inset' | 'classic' | 'floating' | 'soft';
-}) {
-  const inset = sidebar != null && variant === 'inset';
-
-  return (
-    <div
-      {...props}
-      data-variant={sidebar != null ? variant : undefined}
-      className={cn(
-        'group/shell',
-        'mx-auto min-h-screen max-w-workspace bg-canvas text-ink',
-        inset && 'lg:bg-sidebar',
-        sidebar != null && variant === 'soft' && 'bg-surface',
-        sidebar != null &&
-          variant === 'classic' &&
-          '[&>aside]:border-r [&>aside]:border-line',
-        sidebar != null &&
-          variant === 'soft' &&
-          '[&>aside]:border-e [&>aside]:border-[var(--sidebar-border,var(--color-line))] lg:[&>aside]:rounded-e-2xl',
-        sidebar != null &&
-          'lg:grid lg:grid-cols-[var(--container-sidebar)_minmax(0,1fr)] lg:has-[>aside[data-collapsed=true]]:grid-cols-[var(--container-sidebar-collapsed)_minmax(0,1fr)] lg:has-[>aside[data-collapsed=true][data-collapsible=offcanvas]]:grid-cols-[0_minmax(0,1fr)] motion-safe:transition-[grid-template-columns] motion-safe:duration-[var(--motion-duration-normal)]',
-        sidebar != null &&
-          variant === 'floating' &&
-          'lg:grid-cols-[calc(var(--container-sidebar)+1rem)_minmax(0,1fr)] lg:has-[>aside[data-collapsed=true]]:grid-cols-[calc(var(--container-sidebar-collapsed)+1rem)_minmax(0,1fr)] lg:has-[>aside[data-collapsed=true][data-collapsible=offcanvas]]:grid-cols-[0_minmax(0,1fr)]',
-        classNames?.root,
-        className,
-      )}
-    >
-      {sidebar}
-      {content !== undefined || header !== undefined || sidebarToggle ? (
-        <WorkspaceBody className={classNames?.body}>
-          {(header != null || sidebarToggle) && (
-            <WorkspaceHeader
-              className={classNames?.header}
-              sidebarToggle={sidebarToggle}
-            >
-              {header}
-            </WorkspaceHeader>
-          )}
+}: WorkspaceShellProps) {
+  const hasSidebar = sidebar != null;
+  const inset = hasSidebar && variant === 'inset';
+  // Grid that places the sidebar beside the body; on the root, or on the frame below a topbar.
+  const frame = cn(
+    hasSidebar && variant === 'classic' && '[&>aside]:border-r [&>aside]:border-line',
+    hasSidebar &&
+      variant === 'soft' &&
+      '[&>aside]:border-e [&>aside]:border-[var(--sidebar-border,var(--color-line))] lg:[&>aside]:rounded-e-2xl',
+    hasSidebar &&
+      'lg:grid lg:grid-cols-[var(--container-sidebar)_minmax(0,1fr)] lg:has-[>aside[data-collapsed=true]]:grid-cols-[var(--container-sidebar-collapsed)_minmax(0,1fr)] lg:has-[>aside[data-collapsed=true][data-collapsible=offcanvas]]:grid-cols-[0_minmax(0,1fr)] motion-safe:transition-[grid-template-columns] motion-safe:duration-[var(--motion-duration-normal)]',
+    hasSidebar &&
+      variant === 'floating' &&
+      'lg:grid-cols-[calc(var(--container-sidebar)+1rem)_minmax(0,1fr)] lg:has-[>aside[data-collapsed=true]]:grid-cols-[calc(var(--container-sidebar-collapsed)+1rem)_minmax(0,1fr)] lg:has-[>aside[data-collapsed=true][data-collapsible=offcanvas]]:grid-cols-[0_minmax(0,1fr)]',
+  );
+  const body =
+    content !== undefined || header !== undefined || sidebarToggle || aside != null ? (
+      <WorkspaceBody className={classNames?.body}>
+        {(header != null || sidebarToggle) && (
+          <WorkspaceHeader className={classNames?.header} sidebarToggle={sidebarToggle}>
+            {header}
+          </WorkspaceHeader>
+        )}
+        {aside != null ? (
+          <div className="min-w-0 xl:flex">
+            <WorkspaceMain className={cn('xl:flex-1', classNames?.main)}>
+              {content ?? children}
+            </WorkspaceMain>
+            <WorkspaceAside className={classNames?.aside}>{aside}</WorkspaceAside>
+          </div>
+        ) : (
           <WorkspaceMain className={classNames?.main}>
             {content ?? children}
           </WorkspaceMain>
-        </WorkspaceBody>
-      ) : (
-        children
+        )}
+      </WorkspaceBody>
+    ) : (
+      children
+    );
+
+  return (
+    <WorkspaceLayoutContext.Provider value={hasSidebar ? variant : undefined}>
+      <div
+        {...props}
+        data-variant={hasSidebar ? variant : undefined}
+        data-topbar={topbar != null || undefined}
+        className={cn(
+          'group/shell',
+          'min-h-screen bg-canvas text-ink',
+          inset && 'lg:bg-sidebar',
+          hasSidebar && variant === 'soft' && 'bg-surface',
+          topbar != null ? 'flex flex-col [--workspace-topbar-height:4rem]' : frame,
+          classNames?.root,
+          className,
+        )}
+      >
+        {topbar != null ? (
+          <>
+            <div
+              data-workspace-topbar=""
+              className={cn(
+                'sticky top-0 z-20 flex min-h-[var(--workspace-topbar-height)] shrink-0 items-center gap-3 border-b border-line bg-surface px-4 sm:px-6',
+                'group-data-[variant=inset]/shell:border-b-0 lg:group-data-[variant=inset]/shell:bg-sidebar',
+                classNames?.topbar,
+              )}
+            >
+              {topbar}
+            </div>
+            <div className={cn('min-w-0 flex-1', frame, classNames?.frame)}>
+              {sidebar}
+              {body}
+            </div>
+          </>
+        ) : (
+          <>
+            {sidebar}
+            {body}
+          </>
+        )}
+      </div>
+    </WorkspaceLayoutContext.Provider>
+  );
+}
+
+/** Secondary column beside WorkspaceMain; hidden below xl, where hosts can offer it in a Drawer. */
+export function WorkspaceAside({ className, ...props }: ComponentProps<'aside'>) {
+  return (
+    <aside
+      {...props}
+      data-workspace-aside=""
+      className={cn(
+        'hidden w-[var(--container-aside)] shrink-0 border-s border-line px-5 py-8 xl:block',
+        className,
       )}
-    </div>
+    />
   );
 }
 
@@ -88,7 +153,7 @@ export function WorkspaceBody({ className, ...props }: ComponentProps<'div'>) {
       className={cn(
         'min-w-0',
         // Inset shells raise the body into a card, whether it comes from slots or children.
-        'lg:group-data-[variant=inset]/shell:my-2 lg:group-data-[variant=inset]/shell:mr-2 lg:group-data-[variant=inset]/shell:min-h-[calc(100dvh-1rem)] lg:group-data-[variant=inset]/shell:overflow-hidden lg:group-data-[variant=inset]/shell:rounded-panel lg:group-data-[variant=inset]/shell:border lg:group-data-[variant=inset]/shell:border-line lg:group-data-[variant=inset]/shell:bg-canvas lg:group-data-[variant=inset]/shell:shadow-panel',
+        'lg:group-data-[variant=inset]/shell:my-2 lg:group-data-[variant=inset]/shell:mr-2 lg:group-data-[variant=inset]/shell:min-h-[calc(100dvh-1rem-var(--workspace-topbar-height,0px))] lg:group-data-[variant=inset]/shell:overflow-hidden lg:group-data-[variant=inset]/shell:rounded-panel lg:group-data-[variant=inset]/shell:border lg:group-data-[variant=inset]/shell:border-line lg:group-data-[variant=inset]/shell:bg-canvas lg:group-data-[variant=inset]/shell:shadow-panel',
         className,
       )}
     />
