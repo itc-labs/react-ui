@@ -1,5 +1,7 @@
-import type { ComponentProps, ReactNode } from 'react';
+'use client';
+import { useLayoutEffect, useRef, type ComponentProps, type ReactNode } from 'react';
 import { type SlotClasses, cn } from '../../components/common';
+import { useComposedRefs } from '../../components/common/refs';
 import { SidebarTrigger, WorkspaceLayoutContext } from '../../modules/sidebar/context';
 
 /**
@@ -24,6 +26,8 @@ export type WorkspaceShellProps = Omit<ComponentProps<'div'>, 'content'> & {
   content?: ReactNode;
   /** Secondary column beside the page (details, activity, inspector); shown from xl. */
   aside?: ReactNode;
+  /** Keep the header pinned below the topbar (or the viewport top) while the page scrolls. */
+  stickyHeader?: boolean;
   classNames?: SlotClasses<
     'root' | 'topbar' | 'frame' | 'body' | 'header' | 'main' | 'aside'
   >;
@@ -47,8 +51,39 @@ export function WorkspaceShell({
   className,
   variant = 'inset',
   sidebarToggle,
+  stickyHeader = false,
+  ref,
   ...props
 }: WorkspaceShellProps) {
+  const rootRef = useRef<HTMLDivElement>(null);
+  const topbarRef = useRef<HTMLDivElement>(null);
+  const composedRef = useComposedRefs(rootRef, ref);
+  const hasTopbar = topbar != null;
+
+  // The sticky sidebar and header sit below the topbar; track its real height (wrapping actions,
+  // padding, borders) instead of assuming the 4rem default.
+  useLayoutEffect(() => {
+    const root = rootRef.current;
+    const bar = topbarRef.current;
+    if (!hasTopbar || !root || !bar) return;
+
+    const sync = () =>
+      root.style.setProperty(
+        '--workspace-topbar-height',
+        `${bar.getBoundingClientRect().height}px`,
+      );
+
+    sync();
+    if (typeof ResizeObserver !== 'function') return;
+    const observer = new ResizeObserver(sync);
+    observer.observe(bar);
+
+    return () => {
+      observer.disconnect();
+      root.style.removeProperty('--workspace-topbar-height');
+    };
+  }, [hasTopbar]);
+
   const hasSidebar = sidebar != null;
   const inset = hasSidebar && variant === 'inset';
   // Grid that places the sidebar beside the body; on the root, or on the frame below a topbar.
@@ -65,9 +100,22 @@ export function WorkspaceShell({
   );
   const body =
     content !== undefined || header !== undefined || sidebarToggle || aside != null ? (
-      <WorkspaceBody className={classNames?.body}>
+      <WorkspaceBody
+        className={cn(
+          // overflow-hidden on the inset card would stop the header from sticking; clip instead.
+          stickyHeader && 'lg:group-data-[variant=inset]/shell:overflow-clip',
+          classNames?.body,
+        )}
+      >
         {(header != null || sidebarToggle) && (
-          <WorkspaceHeader className={classNames?.header} sidebarToggle={sidebarToggle}>
+          <WorkspaceHeader
+            className={cn(
+              stickyHeader &&
+                'sticky top-[var(--workspace-topbar-height,0px)] z-10 bg-canvas lg:group-data-[variant=floating]/shell:top-[calc(var(--workspace-topbar-height,0px)+0.5rem)] lg:group-data-[variant=inset]/shell:top-[calc(var(--workspace-topbar-height,0px)+0.5rem)]',
+              classNames?.header,
+            )}
+            sidebarToggle={sidebarToggle}
+          >
             {header}
           </WorkspaceHeader>
         )}
@@ -92,6 +140,7 @@ export function WorkspaceShell({
     <WorkspaceLayoutContext.Provider value={hasSidebar ? variant : undefined}>
       <div
         {...props}
+        ref={composedRef}
         data-variant={hasSidebar ? variant : undefined}
         data-topbar={topbar != null || undefined}
         className={cn(
@@ -107,6 +156,7 @@ export function WorkspaceShell({
         {topbar != null ? (
           <>
             <div
+              ref={topbarRef}
               data-workspace-topbar=""
               className={cn(
                 'sticky top-0 z-20 flex min-h-[var(--workspace-topbar-height)] shrink-0 items-center gap-3 border-b border-line bg-surface px-4 sm:px-6',

@@ -222,3 +222,30 @@ it('hides an empty dashboard header on desktop while keeping the mobile menu but
   );
   expect(host.querySelector('header')!.className).not.toContain('lg:hidden');
 });
+
+it('pins the header below the topbar when stickyHeader is set', async () => {
+  await act(async () =>
+    root.render(
+      <WorkspaceShell
+        stickyHeader
+        topbar="Bar"
+        sidebar={<Sidebar items={items} />}
+        header="Overview"
+        content="Ipsum"
+      />,
+    ),
+  );
+  const header = host.querySelector('header')!;
+  expect(header.className).toContain('sticky');
+  expect(header.className).toContain('top-[var(--workspace-topbar-height,0px)]');
+  await act(async () =>
+    root.render(
+      <WorkspaceShell
+        sidebar={<Sidebar items={items} />}
+        header="Overview"
+        content="Ipsum"
+      />,
+    ),
+  );
+  expect(host.querySelector('header')!.className).not.toContain('sticky');
+});

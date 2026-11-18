@@ -51,7 +51,6 @@ function SoftWorkspace({
   return (
     <DashboardShell
       variant="soft"
-      stickyHeader={false}
       sidebar={{
         navigationLabel: 'Workspace navigation',
         header: {

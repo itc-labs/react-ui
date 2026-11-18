@@ -309,7 +309,6 @@ function ThreeColumn(args: ThreeColumnArgs) {
   return (
     <DashboardShell
       variant="classic"
-      stickyHeader={false}
       classNames={{
         topbar: 'flex-wrap gap-2 py-3',
         aside: 'space-y-6 bg-surface',

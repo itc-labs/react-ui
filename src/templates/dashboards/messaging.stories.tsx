@@ -7,6 +7,7 @@ import { Card } from '../../components/card';
 import { DescriptionList } from '../../components/description-list';
 import { IconButton } from '../../components/icon-button';
 import { Input } from '../../components/input';
+import { Dialog } from '../../components/dialog';
 import { Popover } from '../../components/popover';
 import { Tabs } from '../../components/tabs';
 import { Tag } from '../../components/tag';
@@ -299,36 +300,11 @@ function Messaging(args: MessagingArgs) {
       sidebar={{
         navigationLabel: 'Messaging navigation',
         header: { title: 'Northwind', subtitle: 'Team workspace' },
-        search: (
-          <Popover
-            open={searchOpen}
-            onOpenChange={setSearchOpen}
-            trigger={
-              <IconButton
-                icon="search"
-                label="Search workspace"
-                variant="ghost"
-                size="sm"
-              />
-            }
-            label="Search workspace"
-            content={
-              <div className="space-y-3">
-                <Input
-                  aria-label="Search channels"
-                  placeholder="Search channels…"
-                  value={search}
-                  onChange={(event) => setSearch(event.target.value)}
-                />
-                <p className="text-ui-sm text-muted">
-                  {search
-                    ? `Search demo: try UI-kit design in the channel tree.`
-                    : 'Find conversations in the channel tree.'}
-                </p>
-              </div>
-            }
-          />
-        ),
+        search: {
+          placeholder: 'Search channels…',
+          shortcut: 'mod+k',
+          onOpen: () => setSearchOpen(true),
+        },
         ...(args.showRail
           ? { sections: messagingSections, defaultSection: 'northwind' }
           : { items: messagingNavigation }),
@@ -574,6 +550,21 @@ function Messaging(args: MessagingArgs) {
       }
     >
       <MessagingPage {...args} />
+      <Dialog open={searchOpen} onOpenChange={setSearchOpen} title="Search workspace">
+        <div className="grid gap-3">
+          <Input
+            aria-label="Search channels"
+            placeholder="Search channels…"
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+          />
+          <p className="text-ui-sm text-muted">
+            {search
+              ? 'Try “UI-kit design” to jump to the channel in the tree.'
+              : 'Find channels, people and threads in this workspace.'}
+          </p>
+        </div>
+      </Dialog>
     </DashboardShell>
   );
 }

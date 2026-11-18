@@ -264,6 +264,7 @@ function DarkAnalytics(args: DarkAnalyticsArgs) {
   return (
     <WorkspaceShell
       variant="classic"
+      stickyHeader
       classNames={{ topbar: 'flex-wrap gap-3 py-3', header: 'gap-3' }}
       topbar={
         args.showTopbar ? (

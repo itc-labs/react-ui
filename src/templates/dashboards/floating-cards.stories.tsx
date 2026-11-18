@@ -285,7 +285,6 @@ function FloatingCards(args: FloatingCardsArgs) {
   return (
     <DashboardShell
       variant="floating"
-      stickyHeader={false}
       topbar={
         args.showTopbar ? (
           <>

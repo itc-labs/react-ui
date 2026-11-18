@@ -554,7 +554,8 @@ export function Sidebar<TAccess = unknown>({
                 aria-labelledby={`${sidebarId}-section-title`}
                 data-testid={partTestId(testId, 'sectionPanel')}
                 className={cn(
-                  'flex min-h-0 min-w-0 flex-1 flex-col gap-4 border-l border-[var(--sidebar-border)] pl-3',
+                  // ml-2 keeps the active rail tile off the panel's dividing rule.
+                  'ml-2 flex min-h-0 min-w-0 flex-1 flex-col gap-4 border-l border-[var(--sidebar-border)] pl-3',
                   collapsed && !hover.expanded && 'hidden',
                   classNames?.sectionPanel,
                 )}

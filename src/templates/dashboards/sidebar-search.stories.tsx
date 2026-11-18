@@ -369,7 +369,6 @@ function SidebarSearch(args: SidebarSearchArgs) {
   return (
     <DashboardShell
       variant={args.variant}
-      stickyHeader={false}
       sidebar={{
         navigationLabel: 'Ledgerly navigation',
         appearance: 'default',
