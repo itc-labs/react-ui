@@ -74,7 +74,7 @@ export function DashboardShell<TAccess = unknown>({
       header={
         <>
           {headerTrigger && <SidebarMobileTrigger className="-ms-2 shrink-0" />}
-          {header != null && <div className="min-w-0">{header}</div>}
+          {header != null && <div className="min-w-0 flex-[1_1_12rem]">{header}</div>}
           {(headerActions != null || accountInHeader) && (
             <div className="ms-auto flex flex-wrap items-center justify-end gap-2">
               {headerActions}
