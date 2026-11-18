@@ -49,6 +49,7 @@ it('pins footer items in a secondary nav and keeps a single current page', async
   );
   const footerNav = byId('footerNav')!;
   expect(footerNav.tagName).toBe('NAV');
+  expect(footerNav.className).toContain('border-t');
   expect(footerNav.getAttribute('aria-label')).toBe('Điều hướng phụ');
   expect(footerNav.textContent).toContain('Settings');
   expect(footerNav.textContent).not.toContain('Hidden');
@@ -157,4 +158,16 @@ it('starts button item labels at the leading edge like links', async () => {
     ),
   );
   expect(host.querySelector('aside nav button')!.className).toContain('text-start');
+});
+
+it('skips the footer divider when there is no navigation above it', async () => {
+  await act(async () =>
+    root.render(
+      <Sidebar
+        data-testid="side"
+        footerItems={[{ id: 'settings', label: 'Settings', href: '/settings' }]}
+      />,
+    ),
+  );
+  expect(byId('footerNav')!.className).not.toContain('border-t');
 });

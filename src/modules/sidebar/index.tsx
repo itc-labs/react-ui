@@ -299,7 +299,13 @@ export function Sidebar<TAccess = unknown>({
           <SidebarNav
             aria-label={t('sidebar.secondary')}
             data-testid={partTestId(id, 'footerNav')}
-            className={cn('gap-0.5', classNames?.footerNav)}
+            className={cn(
+              'gap-0.5',
+              // A hairline separates pinned entries from the scrolling navigation above.
+              (visibleItems?.length || sections) &&
+                'border-t border-[var(--sidebar-border,var(--color-line))] pt-3',
+              classNames?.footerNav,
+            )}
           >
             <SidebarEntries
               items={visibleFooterItems}
