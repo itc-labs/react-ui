@@ -92,7 +92,10 @@ it('parses examples from every current story without leaking CSF or interaction 
     noEmit: true,
     esModuleInterop: true,
     baseUrl: process.cwd(),
-    paths: { '@itclabs/react-ui': ['./src/index.ts'] },
+    paths: {
+      '@itclabs/react-ui': ['./src/index.ts'],
+      '@/demo/*': ['./src/templates/dashboards/__demo/*'],
+    },
   };
   const host = ts.createCompilerHost(options);
   const read = host.getSourceFile.bind(host);

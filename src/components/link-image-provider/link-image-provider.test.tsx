@@ -152,6 +152,8 @@ it('keeps runtime UI link/image rendering centralized in the native adapter boun
     (file) =>
       file.endsWith('.tsx') &&
       !/\.(stories|test)\.tsx$/.test(file) &&
+      // Story-only demo hosts (`__*` folders) render their own fake router links.
+      !/\/__[^/]+\//.test(file) &&
       !file.endsWith('/link-image-provider/context.tsx'),
   )) {
     const source = ts.createSourceFile(

@@ -9,5 +9,10 @@
     "allowImportingTsExtensions": true
   },
   "include": ["src/**/*.ts", "src/**/*.tsx"],
-  "exclude": ["src/**/*.test.*", "src/**/*.stories.*", "src/overview/**"]
+  "exclude": [
+    "src/**/*.test.*",
+    "src/**/*.stories.*",
+    "src/overview/**",
+    "src/**/__*/**"
+  ]
 }

@@ -184,6 +184,11 @@ export async function storyExamples(
           imports.push(
             `import { ${selected.join(', ')} } from '@itclabs/react-ui/icons/${glyph[1]}/${glyph[2]}';`,
           );
+        // Template demo helpers are part of what hosts copy; show them as their own module.
+        else if (path.startsWith('.') && path.includes('__demo/') && selected.length)
+          imports.push(
+            `import { ${selected.join(', ')} } from '@/demo/${path.split('__demo/')[1]}';`,
+          );
         else if (path.startsWith('.') && isKitStory)
           selected.forEach((item) => uiImports.add(item));
         else if (selected.length) parts.push(`{ ${selected.join(', ')} }`);
