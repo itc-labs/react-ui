@@ -701,7 +701,10 @@ export const Appearances: Story = {
               size="sm"
               className="hidden rounded-full md:inline-flex"
             >
-              <LockIcon /> Endpoint Privilege Management
+              <LockIcon />
+              {/* The full label needs room; narrower bars keep the lock as the cue. */}
+              <span className="hidden 2xl:inline">Endpoint Privilege Management</span>
+              <span className="2xl:hidden">Privileges</span>
             </Button>
             <Avatar alt="Greg Brown" size="sm" />
             <IconButton

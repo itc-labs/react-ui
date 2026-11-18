@@ -81,7 +81,7 @@ export function navbarItemClasses(
       ? variant === 'underline'
         ? 'font-semibold text-[var(--navbar-accent,var(--color-accent))]'
         : variant === 'ghost'
-          ? 'bg-[var(--navbar-hover)] text-[var(--navbar-fg)]'
+          ? 'bg-[var(--navbar-selected)] font-semibold text-[var(--navbar-fg)]'
           : 'bg-[var(--navbar-active-bg)] text-[var(--navbar-active-fg)]'
       : 'text-[var(--navbar-muted)] hover:bg-[var(--navbar-hover)] hover:text-[var(--navbar-fg)] data-[state=open]:bg-[var(--navbar-hover)] data-[state=open]:text-[var(--navbar-fg)]',
   );

@@ -10,6 +10,9 @@
     --navbar-border: var(--color-line);
     --navbar-accent: var(--color-accent);
     --navbar-height: 4rem;
+    /* A selected ghost row must stand out from the grouped menu behind it. */
+    --navbar-group-bg: color-mix(in srgb, var(--navbar-fg) 4%, transparent);
+    --navbar-selected: color-mix(in srgb, var(--navbar-fg) 10%, transparent);
     --navbar-topbar-bg: var(--color-sidebar-dark);
     --navbar-topbar-fg: var(--color-sidebar-dark-ink);
   }
@@ -24,6 +27,8 @@
     --navbar-active-fg: var(--color-sidebar-dark);
     --navbar-border: color-mix(in srgb, var(--navbar-fg) 30%, transparent);
     --navbar-accent: var(--navbar-fg);
+    --navbar-group-bg: color-mix(in srgb, var(--navbar-fg) 10%, transparent);
+    --navbar-selected: color-mix(in srgb, var(--navbar-fg) 24%, transparent);
   }
 
   /* These tones sit on dark backgrounds even when the host theme flips on-brand. */
@@ -183,7 +188,7 @@
     }
 
     [data-navbar-align='center'] .navbar-inner {
-      grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+      grid-template-columns: minmax(max-content, 1fr) auto minmax(max-content, 1fr);
     }
 
     [data-navbar-align='center'] .navbar-nav,
@@ -220,7 +225,7 @@
       align-self: center;
       border: 1px solid var(--navbar-border);
       border-radius: 9999px;
-      background: var(--navbar-hover);
+      background: var(--navbar-group-bg);
       padding: 0.25rem;
     }
   }
