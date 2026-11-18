@@ -146,3 +146,15 @@ it('names static and collapsible groups for assistive technology', async () => {
     document.getElementById(content.getAttribute('aria-labelledby')!)!.textContent,
   ).toBe('More');
 });
+
+it('starts button item labels at the leading edge like links', async () => {
+  await act(async () =>
+    root.render(
+      <Sidebar
+        data-testid="side"
+        items={[{ id: 'go', label: 'Go', onSelect: () => {} }]}
+      />,
+    ),
+  );
+  expect(host.querySelector('aside nav button')!.className).toContain('text-start');
+});

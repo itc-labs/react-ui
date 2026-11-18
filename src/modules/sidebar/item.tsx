@@ -25,7 +25,7 @@ export function SidebarItem({
   const variant = useContext(SidebarAppearanceContext);
   const Component = asChild ? Slot.Root : 'span';
   const classes = cn(
-    'flex min-h-[var(--sidebar-row,2.25rem)] min-w-0 items-center gap-2.5 rounded-control px-2.5 py-1.5 text-control [overflow-wrap:anywhere] motion-safe:transition-colors focus-visible:-outline-offset-2',
+    'flex min-h-[var(--sidebar-row,2.25rem)] min-w-0 items-center text-start gap-2.5 rounded-control px-2.5 py-1.5 text-control [overflow-wrap:anywhere] motion-safe:transition-colors focus-visible:-outline-offset-2',
     focusRingClassName,
     sidebarItemClasses(variant, active),
     className,

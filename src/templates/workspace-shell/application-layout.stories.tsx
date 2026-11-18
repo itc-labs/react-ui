@@ -164,28 +164,19 @@ function ApplicationExample({
     ),
     [],
   );
-  const userMenu = (
-    <UserMenu
-      name="Lorem Ipsum"
-      description="lorem@example.com"
-      collapseOnMobile={false}
-      classNames={{
-        trigger:
-          'w-full border-transparent bg-transparent hover:bg-surface/60 group-data-[collapsed=true]/sidebar:justify-center',
-        details: 'group-data-[collapsed=true]/sidebar:hidden',
-        chevron: 'group-data-[collapsed=true]/sidebar:hidden',
-      }}
-      items={[
-        { id: 'profile', label: 'Profile', href: '/settings/profile' },
-        { id: 'separator', type: 'separator' },
-        {
-          id: 'logout',
-          label: 'Sign out',
-          onSelect: () => setNotice('Sign out selected'),
-        },
-      ]}
-    />
-  );
+  const account = {
+    name: 'Lorem Ipsum',
+    description: 'lorem@example.com',
+    items: [
+      { id: 'profile', label: 'Profile', href: '/settings/profile' },
+      { id: 'separator', type: 'separator' as const },
+      {
+        id: 'logout',
+        label: 'Sign out',
+        onSelect: () => setNotice('Sign out selected'),
+      },
+    ],
+  };
   const title = pageLabels[currentPath] ?? 'Overview';
 
   return (
@@ -207,7 +198,7 @@ function ApplicationExample({
                     logo: <HomeIcon />,
                     href: '/overview',
                   }}
-                  footer={userMenu}
+                  account={account}
                   items={sidebarItems}
                   currentPath={currentPath}
                   data-testid="app-sidebar"
@@ -222,7 +213,7 @@ function ApplicationExample({
               items={navbarItems}
               currentPath={currentPath}
               activeIndicator="underline"
-              actions={userMenu}
+              actions={<UserMenu {...account} />}
             />
           ) : (
             <div className="flex min-h-16 w-full items-center justify-between gap-3 border-b border-line bg-surface px-5">
