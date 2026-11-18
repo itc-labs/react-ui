@@ -559,39 +559,45 @@ export const Variants: Story = {
     docs: {
       description: {
         story:
-          'Start from an appearance preset (default, soft, dark, brand); each sets tone, item style and density. Fine-tune with itemVariant (raised, subtle, bar, indicator, solid, pill) and density (compact, default, comfortable). variant="floating" detaches the panel.',
+          'Two independent axes: variant sets the frame (sidebar attaches to the edge, floating detaches it as a panel) and appearance sets the inside (tone, item style and density); every combination works. Fine-tune with itemVariant (raised, subtle, bar, indicator, solid, pill) and density (compact, default, comfortable).',
       },
     },
   },
   render: () => (
     <div className="grid gap-8 bg-canvas p-4">
-      <div className="flex flex-wrap gap-6">
-        {(['default', 'soft', 'dark', 'brand'] as const).map((appearance) => (
-          <div key={appearance}>
-            <p className="mb-2 text-ui-sm">appearance="{appearance}"</p>
-            <Sidebar
-              appearance={appearance}
-              header={{
-                title: 'Lorem ipsum',
-                subtitle: 'Workspace',
-                logo: <HomeIcon />,
-              }}
-              items={railItems}
-              footerItems={[{ id: 'help', label: 'Help', href: '#help', icon: 'help' }]}
-              className="static h-96"
-            />
+      {(['sidebar', 'floating'] as const).map((variant) => (
+        <section key={variant} className="grid gap-3">
+          <h3 className="text-ui-sm font-semibold text-ink">
+            variant="{variant}"
+            <span className="ms-2 font-normal text-muted">
+              {variant === 'sidebar'
+                ? 'full height, attached to the edge'
+                : 'detached panel with margin, radius, border and shadow'}
+            </span>
+          </h3>
+          <div className="flex flex-wrap gap-6">
+            {(['default', 'soft', 'dark', 'brand'] as const).map((appearance) => (
+              <div key={appearance}>
+                <p className="mb-2 text-ui-sm">appearance="{appearance}"</p>
+                <Sidebar
+                  variant={variant}
+                  appearance={appearance}
+                  header={{
+                    title: 'Lorem ipsum',
+                    subtitle: 'Workspace',
+                    logo: <HomeIcon />,
+                  }}
+                  items={railItems}
+                  footerItems={[
+                    { id: 'help', label: 'Help', href: '#help', icon: 'help' },
+                  ]}
+                  className="static h-96"
+                />
+              </div>
+            ))}
           </div>
-        ))}
-        <div>
-          <p className="mb-2 text-ui-sm">variant="floating"</p>
-          <Sidebar
-            variant="floating"
-            header={{ title: 'Lorem ipsum', subtitle: 'Workspace', logo: <HomeIcon /> }}
-            items={railItems}
-            className="static h-96"
-          />
-        </div>
-      </div>
+        </section>
+      ))}
       <div className="flex flex-wrap gap-6">
         {(['raised', 'subtle', 'bar', 'indicator', 'solid', 'pill'] as const).map(
           (itemVariant) => (
