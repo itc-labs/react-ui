@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.24.1
+
+### Patch Changes
+
+- [#63](https://github.com/itc-labs/react-ui/pull/63) [`2657098`](https://github.com/itc-labs/react-ui/commit/2657098ea06b897d5077c0c264119caa3aa33e1c) Thanks [@vungbt](https://github.com/vungbt)! - Navbar's `secondary` row is transparent again, so it keeps the bar's surface instead of a grey tint.
+
 ## 0.24.0
 
 ### Minor Changes
