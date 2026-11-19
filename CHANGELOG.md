@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.27.1
+
+### Patch Changes
+
+- [#74](https://github.com/itc-labs/react-ui/pull/74) [`e5f5a0d`](https://github.com/itc-labs/react-ui/commit/e5f5a0d13b68e8e306ed2064eca1b4f71ad0bc80) Thanks [@vungbt](https://github.com/vungbt)! - Use kit Progress for dropzone uploads with percentage text, indeterminate loading, and smooth width transitions. Rotate the StatusTag chevron while its menu is open, respecting reduced motion.
+
 ## 0.27.0
 
 ### Minor Changes
