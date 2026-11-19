@@ -1,20 +1,36 @@
+'use client';
+
 import type { TestIdProps } from '../../components/common/testing';
 import type { ComponentProps, ReactNode } from 'react';
 import { type SlotClasses, cn, partTestId } from '../../components/common';
 
+import { KitIconButton } from '../../components/icon-button/kit-icon-button';
+import { ArrowLeftIcon } from '../../components/icon/outline/arrow-left';
+import { ArrowLeftIcon as ArrowLeftBoldIcon } from '../../components/icon/bold/arrow-left';
+import { Tooltip } from '../../components/tooltip';
+
 export type PageHeaderProps = (Omit<ComponentProps<'div'>, 'title'> & {
+  back?: { label: string; onClick?: () => void; href?: string };
   breadcrumb?: ReactNode;
   eyebrow?: ReactNode;
   title: ReactNode;
   description?: ReactNode;
   action?: ReactNode;
   classNames?: SlotClasses<
-    'root' | 'breadcrumb' | 'content' | 'eyebrow' | 'title' | 'description' | 'actions'
+    | 'back'
+    | 'root'
+    | 'breadcrumb'
+    | 'content'
+    | 'eyebrow'
+    | 'title'
+    | 'description'
+    | 'actions'
   >;
 }) &
   TestIdProps;
 
 export function PageHeader({
+  back,
   breadcrumb,
   eyebrow,
   title,
@@ -55,15 +71,42 @@ export function PageHeader({
             {eyebrow}
           </p>
         )}
-        <h1
-          data-testid={partTestId(testId, 'title')}
-          className={cn(
-            'max-w-3xl text-display font-semibold text-ink',
-            classNames?.title,
-          )}
-        >
-          {title}
-        </h1>
+        {back ? (
+          <div className="flex items-center gap-3">
+            <Tooltip content={back.label}>
+              <KitIconButton
+                icon="arrowLeft"
+                builtin={{ outline: ArrowLeftIcon, bold: ArrowLeftBoldIcon }}
+                variant="secondary"
+                size="sm"
+                label={back.label}
+                onClick={back.onClick}
+                {...(back.href !== undefined ? { href: back.href } : {})}
+                data-testid={partTestId(testId, 'back')}
+                className={cn('shrink-0', classNames?.back)}
+              />
+            </Tooltip>
+            <h1
+              data-testid={partTestId(testId, 'title')}
+              className={cn(
+                'max-w-3xl text-display font-semibold text-ink',
+                classNames?.title,
+              )}
+            >
+              {title}
+            </h1>
+          </div>
+        ) : (
+          <h1
+            data-testid={partTestId(testId, 'title')}
+            className={cn(
+              'max-w-3xl text-display font-semibold text-ink',
+              classNames?.title,
+            )}
+          >
+            {title}
+          </h1>
+        )}
         {description != null && (
           <p
             data-testid={partTestId(testId, 'description')}

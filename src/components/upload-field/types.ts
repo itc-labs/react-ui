@@ -1,23 +1,48 @@
 import type { TestIdProps } from '../common/testing';
-import type { Ref } from 'react';
+import type { ReactNode, Ref } from 'react';
 import type { SlotClasses } from '../common';
 import type { FileRules } from './validation';
+export type UploadGalleryItem = {
+  id: string;
+  src: string;
+  alt: string;
+  status?: 'idle' | 'uploading' | 'error';
+  progress?: number;
+  error?: string;
+  badge?: ReactNode;
+};
+
 export type UploadFieldProps = (FileRules & {
   'data-testid'?: string | undefined;
+  /** Gallery uses controlled items and emits only newly picked files. */
+  variant?: 'dropzone' | 'gallery';
+  /** Gallery only. Counts toward maxFiles; status defaults to idle. */
+  items?: readonly UploadGalleryItem[];
+  onItemRemove?: (id: string) => void;
+  onItemRetry?: (id: string) => void;
   id?: string;
   name?: string;
   label?: string;
   hint?: string;
   error?: string;
   required?: boolean;
+  /** Dropzone only; ignored together with defaultValue in gallery mode. */
   value?: readonly File[];
   defaultValue?: readonly File[];
+  /** Gallery emits only the newly selected files; the app uploads and adds items. */
   onValueChange?: (files: File[]) => void;
   onReject?: (message: string) => void;
   onBlur?: () => void;
   disabled?: boolean;
   loading?: boolean;
   classNames?: SlotClasses<
+    | 'grid'
+    | 'addTile'
+    | 'tile'
+    | 'tileImage'
+    | 'tileActions'
+    | 'tileBadge'
+    | 'tileStatus'
     | 'root'
     | 'label'
     | 'required'

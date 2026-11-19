@@ -86,3 +86,51 @@ it('omits absent optional slots and emits no selectors without a base', () => {
   );
   expect(host.querySelector('[data-testid="page-breadcrumb"]')).toBeNull();
 });
+
+it('renders a named secondary back button and invokes its callback', () => {
+  const host = document.createElement('div');
+  const root = createRoot(host);
+  let clicks = 0;
+  try {
+    act(() =>
+      root.render(
+        <PageHeader
+          title="Lorem ipsum"
+          description="Dolor sit amet"
+          action={<button>Save</button>}
+          back={{ label: 'Back to list', onClick: () => clicks++ }}
+          data-testid="page"
+          classNames={{ back: 'rounded-full' }}
+        />,
+      ),
+    );
+
+    const back = host.querySelector<HTMLButtonElement>('[data-testid="page-back"]')!;
+    expect(back.tagName).toBe('BUTTON');
+    expect(back.getAttribute('aria-label')).toBe('Back to list');
+    expect(back.getAttribute('data-variant')).toBe('secondary');
+    expect(back.className).toContain('rounded-full');
+    expect(back.parentElement?.querySelector('h1')?.textContent).toBe('Lorem ipsum');
+
+    act(() => back.click());
+
+    expect(clicks).toBe(1);
+  } finally {
+    act(() => root.unmount());
+  }
+});
+
+it('renders back href through the link path with its accessible label', () => {
+  const host = document.createElement('div');
+  host.innerHTML = renderToStaticMarkup(
+    <PageHeader
+      title="Lorem ipsum"
+      back={{ label: 'Back to list', href: '/items' }}
+      data-testid="page"
+    />,
+  );
+  const back = host.querySelector('[data-testid="page-back"]')!;
+  expect(back.tagName).toBe('A');
+  expect(back.getAttribute('href')).toBe('/items');
+  expect(back.getAttribute('aria-label')).toBe('Back to list');
+});
