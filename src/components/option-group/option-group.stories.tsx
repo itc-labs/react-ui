@@ -21,7 +21,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'Choose a single variant using pill chips or color and image swatches. Supports keyboard navigation, unavailable options and native form values. maxVisible keeps the first options inline and lists the rest in a "+N" dropdown menu.',
+          'Choose one or several variants using pill chips or color and image swatches. Supports keyboard navigation, unavailable options and native form values. maxVisible keeps the first options inline and lists the rest in a "+N" dropdown menu.',
       },
     },
   },
@@ -128,4 +128,38 @@ export const CustomClasses: Story = {
       optionLabel: 'font-semibold',
     },
   },
+};
+
+export const MultipleChips: Story = {
+  tags: ['example'],
+  render: () => (
+    <OptionGroup
+      multiple
+      label="Sizes"
+      options={sizes}
+      defaultValue={['S', 'M']}
+      max={3}
+      maxVisible={3}
+      required
+      showSelectedLabel
+      hint="Choose up to three sizes."
+    />
+  ),
+};
+export const MultipleSwatches: Story = {
+  tags: ['example'],
+  render: () => (
+    <OptionGroup
+      multiple
+      label="Màu"
+      variant="swatch"
+      options={[
+        { value: 'black', label: 'Đen', color: '#000000' },
+        { value: 'white', label: 'Trắng', color: '#ffffff' },
+        { value: 'blue', label: 'Xanh', color: '#9abbd7' },
+      ]}
+      defaultValue={['black', 'white']}
+      showSelectedLabel
+    />
+  ),
 };

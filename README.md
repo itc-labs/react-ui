@@ -306,6 +306,31 @@ Browse every component, prop and state in the [Storybook](https://react-ui-one-r
 
 Slider, OptionGroup, QuantityInput, and ColorPicker are core controls with automatic FormField binding. Divider, Kbd, and Timeline are also core exports. TreeSelect, Transfer, and RichTextView use dedicated subpaths and stay outside the root, components, and modules barrels. MediaGallery, Lightbox and ImagePreview use the dedicated media-gallery subpath. See [Forms](https://react-ui-one-rose.vercel.app/?path=/docs/guides-forms--docs) for a variant selector form and [Data display](https://react-ui-one-rose.vercel.app/?path=/docs/guides-data-display--docs) for gallery and fullscreen viewer examples.
 
+`OptionGroup` defaults to single selection (`value` / `defaultValue`: `string`,
+`onValueChange: (value: string) => void`). Set `multiple` for `string[]` values and
+`onValueChange: (value: string[]) => void`, with either `variant="chip"` or
+`variant="swatch"`. `max` limits new selections in multiple mode; selected options
+remain removable. `required` requires at least one selection for native form
+validation. Empty selections are allowed while editing. Validate array length in
+FormField validators for application validation; automatic value binding preserves
+arrays without adapters. There is no dedicated OptionGroup field component.
+
+```tsx
+<FormField name="sizes" label="Sizes">
+  <OptionGroup multiple options={sizes} max={3} showSelectedLabel />
+</FormField>
+```
+
+Initialize the form field with `[]`. Multiple mode uses `role="group"` and
+`aria-pressed` toggle buttons: Tab reaches each available option, arrows/Home/End
+move focus, and Space/Enter toggle. Single mode keeps radio semantics and arrow
+selection. `showSelectedLabel` joins selected labels with commas in option order.
+`maxVisible` keeps the first N options and all selected options inline. Named
+multiple controls submit one native form entry per selected value (read with
+`FormData.getAll(name)`); an empty selection submits no entries. Disabled groups
+submit no values. Controlled values remain owned by the caller, including values
+above `max`; the limit prevents additions and still allows removal.
+
 | Import                                                      | Contents                                                                                                                                                                                                                                                 |
 | ----------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `@itclabs/react-ui`                                         | Everything in the core kit: components, modules, templates, providers and helpers                                                                                                                                                                        |
