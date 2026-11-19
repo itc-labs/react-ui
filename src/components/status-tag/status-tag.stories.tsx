@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useState } from 'react';
+import { expect, userEvent, within } from 'storybook/test';
 import { StatusTag, type StatusOption, type StatusTagProps } from './index';
 import { SendIcon } from '../icon/outline/send';
 import { DeleteIcon } from '../icon/outline/delete';
@@ -210,5 +211,19 @@ export const ActionTones: Story = {
         onValueChange={setValue}
       />
     );
+  },
+};
+
+export const Open: Story = {
+  tags: ['states'],
+  args: { onValueChange: () => {}, 'data-testid': 'status' },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(canvas.getByRole('button'));
+    await expect(canvas.getByRole('button')).toHaveAttribute('aria-expanded', 'true');
+    await expect(canvas.getByTestId('status-chevron')).toHaveClass(
+      'motion-safe:rotate-180',
+    );
+    await expect(within(document.body).getByRole('menu')).toBeVisible();
   },
 };

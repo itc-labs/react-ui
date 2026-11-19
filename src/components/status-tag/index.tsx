@@ -156,6 +156,11 @@ export function StatusTag<V extends string>({
               name="chevronDown"
               builtin={{ outline: ChevronDownIcon, bold: ChevronDownBoldIcon }}
               size={size === 'sm' ? 12 : 16}
+              data-testid={partTestId(testId, 'chevron')}
+              className={cn(
+                'motion-safe:transition-transform duration-[var(--motion-duration-normal)] ease-[var(--motion-ease-standard)]',
+                menuOpen && !blocked && 'motion-safe:rotate-180',
+              )}
             />
           </>
         )}
