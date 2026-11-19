@@ -28,3 +28,11 @@ export {
   type StandardSchemaResult,
   type StandardSchemaV1,
 } from './validation';
+
+export {
+  setErrors,
+  clearErrors,
+  type FormErrors,
+  type SetErrorsOptions,
+} from './errors';
+export { useLinkedField, type LinkedFieldOptions } from './use-linked-field';

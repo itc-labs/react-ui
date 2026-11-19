@@ -3,6 +3,7 @@ import { gzipSync } from 'node:zlib';
 const require = createRequire(import.meta.url);
 const { build } = createRequire(require.resolve('vite/package.json'))('esbuild');
 const fixtures = {
+  Slugify: "export { slugify } from './src/format/index.ts'",
   NumberOnly: "export { formatNumber } from './src/format/index.ts'",
   Format:
     "export { formatDate, formatCurrency, formatNumber } from './src/format/index.ts'",

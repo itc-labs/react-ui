@@ -1,11 +1,14 @@
 'use client';
 import {
+  useCallback,
   useMemo,
   useState,
   type ComponentProps,
   type ComponentType,
   type ReactNode,
 } from 'react';
+import { useComposedRefs } from '../../components/common/refs';
+import { registerFormElement } from './errors';
 import { FormStatusContext } from '../../components/common/form-status';
 
 import {
@@ -20,6 +23,7 @@ export function Form({
   children,
   schema,
   validators,
+  ref,
   ...props
 }: Omit<ComponentProps<'form'>, 'onSubmit' | 'action'> & {
   schema?: FormSchema;
@@ -29,6 +33,13 @@ export function Form({
     handleSubmit(): Promise<unknown>;
   };
 }) {
+  const register = useCallback(
+    (element: HTMLFormElement | null) => {
+      registerFormElement(form, element);
+    },
+    [form],
+  );
+  const composedRef = useComposedRefs(ref, register);
   const [submitting, setSubmitting] = useState(false);
   const status = useMemo(() => ({ submitting }), [submitting]);
 
@@ -41,6 +52,7 @@ export function Form({
       <form.AppForm>
         <form
           {...props}
+          ref={composedRef}
           noValidate
           onSubmit={(event) => {
             event.preventDefault();

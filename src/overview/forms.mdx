@@ -627,3 +627,88 @@ export function RateForm({ save }: { save: (rate: number | null) => Promise<void
   );
 }
 ```
+
+## API errors and linked fields
+
+`setErrors(form, errors, { focus: true })` accepts a record of field names to strings,
+readonly string arrays, or `undefined`. It joins messages with spaces, marks matched
+fields touched so errors display immediately, and focuses the first matched errored
+control inside `Form`. Pass `{ focus: false }` to keep focus where it is. The returned
+`{ unmatched }` contains keys without registered field metadata; use them to show
+form-level feedback in an `Alert`. Mount fields before applying errors.
+
+Errors clear automatically when that field's value changes, including element
+children, render-function `field.handleChange`, and `useAppForm` field components.
+`clearErrors(form, names?)` clears API errors for selected fields, or all fields when
+names are omitted, while preserving validation errors and touched state. An empty
+message or `undefined` clears that field's API error. Programmatic value changes also
+clear the corresponding error.
+
+`useLinkedField(form, { source, target, transform, enabled?, initiallyLinked? })`
+returns `{ linked, relink }`. Source changes regenerate the target while linked.
+Editing the target unlinks it; clearing the target to an empty string, `null`, or
+`undefined` re-links and immediately regenerates it. `relink()` also regenerates
+immediately. An existing non-empty target starts unlinked if it differs from the
+transformed source; `initiallyLinked` overrides this decision. `enabled: false`
+suspends automatic updates; explicit `relink()` still recomputes. Initial values
+are preserved until a source change or explicit relink. Mount the hook once per
+source/target pair, and remount it for a different record when reusing an editor.
+
+```tsx
+import { useState } from 'react';
+import {
+  Alert,
+  Button,
+  Form,
+  FormField,
+  Input,
+  setErrors,
+  useAppForm,
+  useLinkedField,
+} from '@itclabs/react-ui';
+import { slugify } from '@itclabs/react-ui/format';
+
+export function ItemForm() {
+  const [unmatched, setUnmatched] = useState<string[]>([]);
+  const form = useAppForm({ defaultValues: { name: '', slug: '' } });
+  const { linked, relink } = useLinkedField(form, {
+    source: 'name',
+    target: 'slug',
+    transform: (name) => slugify(name, { maxLength: 160 }),
+  });
+
+  return (
+    <Form form={form}>
+      <FormField name="name" label="Name">
+        <Input />
+      </FormField>
+      <FormField name="slug" label="Slug">
+        <Input />
+      </FormField>
+      <p>{linked ? 'Slug follows name.' : 'Slug was edited manually.'}</p>
+      <Button type="button" onClick={relink}>
+        Regenerate slug
+      </Button>
+      <Button
+        type="button"
+        onClick={() => {
+          const { unmatched } = setErrors(form, {
+            slug: ['This slug is already in use.'],
+            general: 'Unable to save this item.',
+          });
+          setUnmatched(unmatched);
+        }}
+      >
+        Simulate API error
+      </Button>
+      {unmatched.length > 0 && <Alert tone="danger">Unable to save this item.</Alert>}
+    </Form>
+  );
+}
+```
+
+`slugify(text, { maxLength?, separator? })` is also exported from the package root
+and the lightweight, server-safe `@itclabs/react-ui/format` entry. It strips Unicode
+NFD diacritics, converts Vietnamese `đ/Đ` to `d`, lowercases, joins ASCII letters
+and digits with `separator` (default `'-'`), and truncates without a trailing
+separator. For example, `slugify('Áo thun Đỏ  mới!')` returns `ao-thun-do-moi`.

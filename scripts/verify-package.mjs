@@ -457,6 +457,7 @@ assert.match(
 const formattingPath = resolve(root, packed.exports['./format'].import);
 const formatting = await import(pathToFileURL(formattingPath).href);
 assert.equal(formatting.formatNumber(0), '0');
+assert.equal(formatting.slugify('Áo thun Đỏ  mới!'), 'ao-thun-do-moi');
 assert.equal(formatting.formatCurrency(1, 'USD', { locale: 'en-US' }), '$1.00');
 assert.equal(formatting.formatDate('2026-02-30'), '—');
 assert.doesNotMatch(

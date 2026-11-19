@@ -256,9 +256,10 @@ for (const [name, limit] of Object.entries({
   // Semantic tones, workspace controls and pagination add about 2.7 KB gzip;
   // MonthPicker and its bound MonthField add about 1.7 KB gzip;
   // KpiCard, MetricTrend and KpiGrid with their trend glyphs add about 2.7 KB gzip;
-  // FormLayout, FormSection, FormGrid and FormActions add about 1.3 KB gzip.
-  // Gallery tile UI and back navigation add about 2.8 KB gzip eagerly.
-  Root: 297_500,
+  // FormLayout, FormSection, FormGrid and FormActions add about 1.3 KB gzip;
+  // gallery tile UI and back navigation add about 2.8 KB gzip eagerly;
+  // API error helpers, linked fields and slugify add about 2.5 KB gzip.
+  Root: 300_000,
   ColorPicker: 54_300,
 })) {
   if (sizes[name].gzip >= limit) {
