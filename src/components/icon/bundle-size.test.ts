@@ -11,6 +11,7 @@ it('keeps ordinary imports free of heavy modules and within gzip budgets', () =>
     execFileSync(process.execPath, [script], { encoding: 'utf8' }),
   ) as Record<string, { minified: number; gzip: number }>;
   expect(Object.keys(sizes).sort()).toEqual([
+    'AlertDialog',
     'Button',
     'Calendar',
     'Carousel',

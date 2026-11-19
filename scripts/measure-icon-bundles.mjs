@@ -31,6 +31,7 @@ const entries = {
   Button: 'components/button/index.tsx',
   Spinner: 'components/spinner/index.tsx',
   Dialog: 'components/dialog/index.tsx',
+  AlertDialog: 'components/alert-dialog/index.tsx',
   Select: 'components/select/index.tsx',
   TreeSelect: 'modules/tree-select/index.tsx',
   Transfer: 'modules/transfer/index.tsx',
@@ -268,6 +269,8 @@ for (const [name, limit] of Object.entries({
   Button: 21_200,
   Spinner: 20_000,
   Dialog: 38_000,
+  // Built-in actions accept user icons through the lightweight semantic registry.
+  AlertDialog: 50_500,
   Select: 58_000,
   TreeSelect: 65_800,
   Transfer: 43_500,

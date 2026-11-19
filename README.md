@@ -219,6 +219,34 @@ import { Dialog, DropdownMenu, IconButton } from '@itclabs/react-ui';
 </Dialog>;
 ```
 
+Built-in AlertDialog actions support icons and rich labels while keeping Cancel's
+initial focus and close behavior:
+
+```tsx
+import { AlertDialog } from '@itclabs/react-ui';
+import { DeleteIcon } from '@itclabs/react-ui/icons/outline/delete';
+
+<AlertDialog
+  trigger="Delete item"
+  title="Delete this item?"
+  description="This action cannot be undone."
+  tone="danger"
+  confirmIcon={DeleteIcon}
+  cancelIcon="close"
+  confirmLabel={
+    <span>
+      Delete <strong>item</strong>
+    </span>
+  }
+  cancelLabel="Keep item"
+  onConfirm={onDelete}
+/>;
+```
+
+`confirmVariant` overrides the tone's default variant. For async work, control
+`open` and `confirmLoading` with `closeOnConfirm={false}`; see the
+[AlertDialog contract and async example](docs/UI_COMPOSITION_API.md#alertdialog).
+
 ### Event calendar
 
 Use `Calendar` from the calendar subpath (`EventCalendar` from the root/modules).

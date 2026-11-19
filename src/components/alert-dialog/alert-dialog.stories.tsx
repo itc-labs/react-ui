@@ -1,16 +1,8 @@
 import { expect, userEvent, waitFor, within } from 'storybook/test';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useState } from 'react';
-import {
-  AlertDialog,
-  AlertDialogTrigger,
-  AlertDialogContent,
-  AlertDialogTitle,
-  AlertDialogDescription,
-  AlertDialogCancel,
-  AlertDialogAction,
-} from './index';
-import { Button } from '../button';
+import { AlertDialog } from './index';
+import { DeleteIcon } from '../icon/outline/delete';
 
 function Demo() {
   const [done, setDone] = useState(false);
@@ -35,9 +27,13 @@ function AsyncConfirmDemo() {
 
   return (
     <AlertDialog
-      trigger="Open confirmation"
-      title="Lorem ipsum"
-      description="Dolor sit amet."
+      trigger="Delete demo item"
+      title="Delete this demo item?"
+      description="This simulates deletion without changing any data."
+      confirmLabel={<span>Delete item</span>}
+      confirmIcon={DeleteIcon}
+      cancelIcon="close"
+      tone="danger"
       open={open}
       onOpenChange={setOpen}
       closeOnConfirm={false}
@@ -77,6 +73,33 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Playground: Story = { tags: ['usage'] };
+
+export const WithIcons: Story = {
+  tags: ['example'],
+  args: {
+    confirmIcon: 'check',
+    cancelIcon: 'close',
+    confirmLabel: (
+      <span>
+        Continue <strong>now</strong>
+      </span>
+    ),
+    cancelLabel: <span>Go back</span>,
+  },
+  play: async ({ canvasElement }) => {
+    await userEvent.click(
+      within(canvasElement).getByRole('button', { name: 'Confirm demo action' }),
+    );
+    const body = within(document.body);
+    await expect(body.getByRole('button', { name: 'Continue now' })).toBeVisible();
+    const cancel = body.getByRole('button', { name: 'Go back' });
+    await expect(cancel).toHaveFocus();
+    await userEvent.click(cancel);
+    await waitFor(() =>
+      expect(body.queryByRole('alertdialog')).not.toBeInTheDocument(),
+    );
+  },
+};
 
 export const MotionLifecycle: Story = {
   tags: ['!dev', '!autodocs', 'regression'],
