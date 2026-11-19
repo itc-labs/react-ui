@@ -5,6 +5,7 @@ import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { AvatarUpload, AvatarField } from './index';
 import { Form, useAppForm } from '../form';
+import { createAvatarCrop } from './crop';
 import { cropAvatarImage } from './crop-image';
 
 vi.mock('./crop-image', () => ({ cropAvatarImage: vi.fn() }));
@@ -82,7 +83,7 @@ it('binds the optional AvatarField inside AppField and resets its file value', a
     return (
       <Form form={form}>
         <form.AppField name="avatar">
-          {() => <AvatarField alt="Avatar" crop={false} data-testid="avatar" />}
+          {() => <AvatarField alt="Avatar" data-testid="avatar" />}
         </form.AppField>
         <button type="submit">Save</button>
         <button type="button" onClick={() => form.reset()}>
@@ -105,13 +106,46 @@ it('binds the optional AvatarField inside AppField and resets its file value', a
   expect(saved).toHaveBeenLastCalledWith(null);
 });
 
-it('shows no filename, removes through a corner icon and skips crop only when requested', async () => {
+it('forwards the crop plugin through AvatarField and submits the cropped file', async () => {
+  const saved = vi.fn();
+  const result = new File(['crop'], 'avatar-cropped.png', { type: 'image/png' });
+  vi.mocked(cropAvatarImage).mockResolvedValue(result);
+
+  function Example() {
+    const form = useAppForm({
+      defaultValues: { avatar: null as File | null },
+      onSubmit: ({ value }) => saved(value.avatar),
+    });
+
+    return (
+      <Form form={form}>
+        <form.AppField name="avatar">
+          {() => <AvatarField alt="Avatar" crop={createAvatarCrop()} />}
+        </form.AppField>
+        <button type="submit">Save</button>
+      </Form>
+    );
+  }
+
+  await act(async () => root.render(<Example />));
+  await upload();
+  expect(document.querySelector('[role="dialog"]')).not.toBeNull();
+  await act(async () => button('Dùng ảnh').click());
+  await act(async () => button('Save').click());
+  expect(saved).toHaveBeenCalledExactlyOnceWith(result);
+});
+
+it('shows no filename, removes through a corner icon and skips crop by default', async () => {
   const change = vi.fn();
   await act(async () =>
-    root.render(<AvatarUpload alt="Example" crop={false} onValueChange={change} />),
+    root.render(<AvatarUpload alt="Example" onValueChange={change} />),
   );
   await upload();
   expect(host.textContent).not.toContain('original.png');
+  expect(change).toHaveBeenCalledExactlyOnceWith(
+    expect.objectContaining({ name: 'original.png' }),
+  );
+  expect(document.querySelector('[role="dialog"]')).toBeNull();
   const remove = button('Bỏ ảnh đã chọn');
   expect(remove.className).toContain('absolute');
   expect(remove.textContent).toBe('');
@@ -130,6 +164,7 @@ it('keeps the old value on cancel and commits only the cropped File on apply', a
       <AvatarUpload
         data-testid="avatar"
         alt="Example"
+        crop={createAvatarCrop()}
         shape="square"
         onValueChange={change}
       />,
@@ -161,7 +196,9 @@ it('ignores a crop result arriving after cancellation', async () => {
     }),
   );
   await act(async () =>
-    root.render(<AvatarUpload alt="Example" onValueChange={change} />),
+    root.render(
+      <AvatarUpload alt="Example" crop={createAvatarCrop()} onValueChange={change} />,
+    ),
   );
   await upload();
 

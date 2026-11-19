@@ -15,7 +15,7 @@ import { cn } from '../../components/common';
 import { useUILocale } from '../../i18n/provider';
 import { getFileIssue } from '../../components/upload-field/validation';
 import { cropAvatarImage, type CropArea } from './crop-image';
-import type { AvatarUploadProps } from './types';
+import type { AvatarCropDialogProps } from './types';
 
 export function AvatarCropDialog({
   'data-testid': testId,
@@ -26,15 +26,7 @@ export function AvatarCropDialog({
   onCancel,
   onApply,
   classNames,
-}: {
-  file: File;
-  shape: AvatarUploadProps['shape'];
-  maxBytes: number;
-  disabled: boolean;
-  onCancel: () => void;
-  onApply: (file: File) => void;
-  classNames: AvatarUploadProps['classNames'];
-} & { 'data-testid'?: string | undefined }) {
+}: AvatarCropDialogProps) {
   const { t } = useUILocale();
   const source = useObjectUrl(file);
   const [crop, setCrop] = useState({ x: 0, y: 0 });

@@ -24,11 +24,11 @@ Supported peer versions: date-fns 4, `@date-fns/tz` ^1.2.0, TanStack Form 1, and
 
 Install optional peers only for the features you use:
 
-| Feature entry point               | Optional peers                                                            |
-| --------------------------------- | ------------------------------------------------------------------------- |
-| `@itclabs/react-ui/editor`        | `@tiptap/react` ^3.0.0, `@tiptap/pm` ^3.0.0, `@tiptap/starter-kit` ^3.0.0 |
-| `@itclabs/react-ui/chart`         | `recharts` ^3.0.0, `react-is` ^19.0.0                                     |
-| `@itclabs/react-ui/avatar-upload` | `react-easy-crop` ^6.0.0                                                  |
+| Feature entry point                    | Optional peers                                                            |
+| -------------------------------------- | ------------------------------------------------------------------------- |
+| `@itclabs/react-ui/editor`             | `@tiptap/react` ^3.0.0, `@tiptap/pm` ^3.0.0, `@tiptap/starter-kit` ^3.0.0 |
+| `@itclabs/react-ui/chart`              | `recharts` ^3.0.0, `react-is` ^19.0.0                                     |
+| `@itclabs/react-ui/avatar-upload/crop` | `react-easy-crop` ^6.0.0                                                  |
 
 ## 2. Load CSS once
 
@@ -130,3 +130,5 @@ export function FirstScreen() {
 - Configure [Providers & adapters](?path=/docs/guides-providers-adapters--docs), [Theming](?path=/docs/guides-theming--docs), and [Localization](?path=/docs/guides-localization--docs).
 - Explore [Forms](?path=/docs/guides-forms--docs) and [Overlays & feedback](?path=/docs/guides-overlays-feedback--docs).
 - Browse the [Catalog](?path=/docs/reference-catalog--docs) and choose [Entry points & bundle size](?path=/docs/reference-entry-points-bundle-size--docs) for your imports.
+
+AvatarUpload and AvatarField no longer crop by default. To migrate, pass `crop={createAvatarCrop()}` from `@itclabs/react-ui/avatar-upload/crop` and install `react-easy-crop` (`pnpm add react-easy-crop@^6`). Remove `crop={false}` for uncropped uploads.

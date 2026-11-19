@@ -19,8 +19,11 @@ import {
   getFileIssue,
   type FileValidationIssue,
 } from '../../components/upload-field/validation';
-import { AvatarCropDialog } from './crop-dialog';
-export type { AvatarUploadProps } from './types';
+export type {
+  AvatarUploadProps,
+  AvatarCropPlugin,
+  AvatarCropDialogProps,
+} from './types';
 import type { AvatarUploadProps } from './types';
 
 export function AvatarUpload({
@@ -29,7 +32,7 @@ export function AvatarUpload({
   defaultValue = null,
   onValueChange,
   uploadable = true,
-  crop = true,
+  crop,
   disabled,
   required,
   label,
@@ -58,6 +61,8 @@ export function AvatarUpload({
     composedRef = useComposedRefs(button, ref);
   const issue = error || (rejected ? t(rejected.key, rejected.values) : undefined),
     blocked = Boolean(disabled || avatar.loading);
+
+  const CropDialog = crop?.Dialog;
 
   function change(next: File | null) {
     setRejected(undefined);
@@ -190,8 +195,8 @@ export function AvatarUpload({
           />
         )}
       </div>
-      {pending && uploadable && (
-        <AvatarCropDialog
+      {pending && uploadable && CropDialog && (
+        <CropDialog
           data-testid={partTestId(testId, 'crop')}
           file={pending}
           shape={avatar.shape}

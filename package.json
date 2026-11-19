@@ -65,7 +65,8 @@
     "./virtual-list": "./src/modules/virtual-list/index.tsx",
     "./format": "./src/format/index.ts",
     "./theme/presets": "./src/theme/presets/index.ts",
-    "./status-tag": "./src/components/status-tag/index.tsx"
+    "./status-tag": "./src/components/status-tag/index.tsx",
+    "./avatar-upload/crop": "./src/modules/avatar-upload/crop.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
@@ -338,6 +339,10 @@
       "./status-tag": {
         "types": "./dist/components/status-tag/index.d.ts",
         "import": "./dist/components/status-tag/index.js"
+      },
+      "./avatar-upload/crop": {
+        "types": "./dist/modules/avatar-upload/crop.d.ts",
+        "import": "./dist/modules/avatar-upload/crop.js"
       }
     },
     "access": "public"
