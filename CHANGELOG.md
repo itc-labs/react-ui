@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.29.0
+
+### Minor Changes
+
+- [#80](https://github.com/itc-labs/react-ui/pull/80) [`59c62c0`](https://github.com/itc-labs/react-ui/commit/59c62c063abf9ab70720cb99999e63852ca8a0d5) Thanks [@vungbt](https://github.com/vungbt)! - Add per-item actions and a selected accent ring to UploadField gallery tiles, with accessible action labels and a controlled thumbnail example.
+
 ## 0.28.0
 
 ### Minor Changes
