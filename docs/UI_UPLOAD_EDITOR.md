@@ -69,3 +69,28 @@ References: [Tiptap React installation](https://tiptap.dev/docs/editor/getting-s
 28/10 follow-up: Avatar selection/removal, image and TXT preview, focus overlay and full form submit/reset browser-checked after moving upload onto the avatar. Object URLs are revoked on replacement/unmount; text reads ignore stale completions.
 
 Avatar shape/alignment follow-up: Avatar and AvatarUpload accept shape="circle" (default) or shape="square" (rounded-control corners). Image/fallback/loading and the overlay share the same shape. AvatarUpload centers the image, label, hint/error and selected-file controls as a group; long text wraps. Stories cover square image/fallback/loading, square without upload, and centered multiline copy. Browser confirmed matching 8px avatar/overlay corners at 80×80 and centered text.
+
+### Reordering uploads
+
+Import `createUploadReorder` from `@itclabs/react-ui/dnd` and pass `reorder={createUploadReorder()}` to either UploadField variant to enable the kit's drag handles, pointer sensor, and keyboard reordering. Focus a handle, press Space or Enter to pick up, use arrow keys to move, then Space or Enter to drop; Escape cancels. Instructions and announcements follow the en/vi UI locale. Disabled/loading fields cannot reorder. Core UploadField does not import the drag runtime; the plugin supplies it from the opt-in `/dnd` entry.
+
+For `variant="gallery"`, `onItemsReorder(ids: string[])` returns the full new ID order, including uploading/error items. The app must reorder its controlled `items`; the component never mutates them. Only idle tiles can be dragged. Other tiles can be passed over, and the add tile stays first outside the sortable targets. The grid retains 3/4/6 responsive columns and supports `classNames.grid`. Preview, remove, and custom actions remain separate from the drag handle.
+
+```tsx
+import { createUploadReorder } from '@itclabs/react-ui/dnd';
+
+const uploadReorder = createUploadReorder();
+
+<UploadField
+  variant="gallery"
+  reorder={uploadReorder}
+  items={items}
+  onItemsReorder={(ids) =>
+    setItems(ids.map((id) => items.find((item) => item.id === id)!))
+  }
+/>;
+```
+
+For the default dropzone, `reorder={uploadReorder}` reorders the vertical file list through the existing `onValueChange(reorderedFiles)` callback. It also updates `defaultValue`-backed local state; when `value` is controlled, the app updates it as usual. Gallery `onValueChange` continues to emit only newly picked files. `onItemsReorder` applies only to the gallery. Without `reorder`, both variants keep their existing behavior.
+
+See **Gallery sortable** (the Thumbnail badge follows the first item) and **Sortable file list** in Storybook.

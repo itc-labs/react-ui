@@ -173,13 +173,17 @@ Tag and Badge contracts, localization and migration are documented in [Tag and B
 
 ## Optional drag integrations
 
-Import `createTransferDnd` and `createRowReorder` from `@itclabs/react-ui/dnd`.
+Import `createTransferDnd`, `createRowReorder`, and `createUploadReorder` from `@itclabs/react-ui/dnd`.
 Pass `dnd={createTransferDnd()}` to Transfer to enable cross-panel moves and target
 reordering. This implies `order="selection"`: target order is value order. Dragging
 a checked row moves the checked, enabled rows of that side together. `disabled`,
 item `disabled`, `maxSelected` and `oneWay` still constrain moves. Search does not
 change the underlying value order. Virtual lists retain an inert DragOverlay;
 keyboard navigation can reach rows outside the mounted range.
+
+Pass `reorder={createUploadReorder()}` to either UploadField variant. Gallery
+`onItemsReorder(ids)` returns the full controlled ID order; dropzone reordering
+uses `onValueChange(files)`. Without a plugin, UploadField does not load DnD.
 
 Pass `rowReorder={{ plugin: createRowReorder(), onReorder }}` to DataTable.
 `onReorder(orderedIds, { id, from, to })` returns all supplied row IDs and zero-based

@@ -191,6 +191,10 @@ async function checkLeanGraph(path) {
 }
 
 await checkLeanGraph(`${root}/dist/index.js`);
+assert.ok(
+  ![...visited].some((path) => relative(root, path).startsWith('dist/modules/dnd/')),
+  'Core must not reach DnD modules, including through lazy imports',
+);
 
 for (const subpath of [
   '.',
@@ -446,6 +450,7 @@ for (const name of [
   'useSortableItem',
   'createTransferDnd',
   'createRowReorder',
+  'createUploadReorder',
 ])
   assert.equal(typeof dnd[name], 'function', `Missing dnd API: ${name}`);
 assert.match(

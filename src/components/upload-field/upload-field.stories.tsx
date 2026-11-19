@@ -1,8 +1,11 @@
+import { createUploadReorder } from '@itclabs/react-ui/dnd';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, userEvent, within, waitFor } from 'storybook/test';
-import { UploadField } from './index';
+import { UploadField, type UploadGalleryItem } from './index';
 import { useState } from 'react';
 import { StarIcon } from '../icon/outline/star';
+const uploadReorder = createUploadReorder();
+
 const meta = {
   title: 'Components/UploadField',
   component: UploadField,
@@ -44,7 +47,7 @@ export const States: Story = {
 };
 
 export const Loading: Story = {
-  tags: ['states'],
+  tags: ['states', '!dev'],
   render: () => (
     <div className="grid max-w-3xl gap-5 sm:grid-cols-2">
       {[0, 45, 100].map((progress) => (
@@ -287,5 +290,79 @@ export const ImagePreview: Story = {
     await userEvent.click(canvas.getByRole('button', { name: 'Preview example.png' }));
     const preview = await body.findByRole('img', { name: 'example.png' });
     await waitFor(() => expect(preview).toBeVisible());
+  },
+};
+
+export const GallerySortable: Story = {
+  name: 'Gallery sortable',
+  tags: ['example'],
+  render: function GallerySortableExample() {
+    const [items, setItems] = useState<UploadGalleryItem[]>([
+      {
+        id: 'front',
+        src: 'https://picsum.photos/seed/front/300',
+        alt: 'Product front',
+      },
+      {
+        id: 'busy',
+        src: 'https://picsum.photos/seed/busy/300',
+        alt: 'Uploading image',
+        status: 'uploading',
+        progress: 45,
+      },
+      { id: 'back', src: 'https://picsum.photos/seed/back/300', alt: 'Product back' },
+      {
+        id: 'detail',
+        src: 'https://picsum.photos/seed/detail/300',
+        alt: 'Product detail',
+      },
+    ]);
+
+    return (
+      <UploadField
+        variant="gallery"
+        label="Product images"
+        hint="Drag a handle, or press Space, an arrow key, then Space to reorder. The first image is the thumbnail."
+        accept="image/*"
+        reorder={uploadReorder}
+        maxFiles={8}
+        items={items.map((item, index) => ({
+          ...item,
+          badge:
+            index === 0 ? (
+              <span className="rounded-control bg-surface px-2 text-ui-sm">
+                Thumbnail
+              </span>
+            ) : null,
+        }))}
+        onItemsReorder={(ids) =>
+          setItems(ids.map((id) => items.find((item) => item.id === id)!))
+        }
+        onItemRemove={(id) => setItems(items.filter((item) => item.id !== id))}
+      />
+    );
+  },
+};
+
+export const SortableFileList: Story = {
+  name: 'Sortable file list',
+  tags: ['example'],
+  render: function SortableFileListExample() {
+    const [files, setFiles] = useState(() => [
+      new File(['First attachment'], 'first.txt', { type: 'text/plain' }),
+      new File(['Second attachment'], 'second.txt', { type: 'text/plain' }),
+      new File(['Third attachment'], 'third.txt', { type: 'text/plain' }),
+    ]);
+
+    return (
+      <UploadField
+        label="Attachments"
+        hint="Drag a handle, or press Space, an arrow key, then Space to reorder."
+        multiple
+        reorder={uploadReorder}
+        value={files}
+        onValueChange={setFiles}
+      />
+    );
   },
 };

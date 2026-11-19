@@ -38,3 +38,16 @@ export interface DndIntegrationPlugin {
 }
 export interface TransferDndPlugin extends DndIntegrationPlugin {}
 export interface DataTableRowReorderPlugin extends DndIntegrationPlugin {}
+
+/** Upload list/grid contract; the runtime is supplied only by the dnd entry. */
+export interface UploadReorderProps {
+  blocked: boolean;
+  orientation: 'grid' | 'vertical';
+  items: readonly { id: string; label: string; disabled?: boolean }[];
+  leading?: number;
+  onReorder: (ids: string[]) => void;
+  children: ReactElement<{ children?: ReactNode; className?: string }>;
+}
+export interface UploadReorderPlugin {
+  Sort: ComponentType<UploadReorderProps>;
+}

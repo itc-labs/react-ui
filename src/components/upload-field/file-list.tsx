@@ -1,5 +1,7 @@
 'use client';
 
+import { useRef } from 'react';
+import { UploadSort } from './upload-sort';
 import { KitIconButton } from '../icon-button/kit-icon-button';
 import { CloseIcon } from '../icon/outline/close';
 import { CloseIcon as CloseBoldIcon } from '../icon/bold/close';
@@ -13,12 +15,16 @@ import type { UploadFieldProps } from './types';
 export function UploadFileList({
   'data-testid': testId,
   files,
+  reorder,
+  onReorder,
   blocked,
   onRemove,
   classNames,
   className,
 }: {
   files: readonly File[];
+  reorder: UploadFieldProps['reorder'];
+  onReorder: (files: File[]) => void;
   blocked: boolean;
   onRemove: (index: number) => void;
   classNames: UploadFieldProps['classNames'];
@@ -26,78 +32,115 @@ export function UploadFileList({
 } & { 'data-testid'?: string | undefined }) {
   const { t, locale } = useUILocale();
 
+  const identities = useRef(new WeakMap<File, string>());
+  const nextId = useRef(0);
+  const occurrences = new Map<File, number>();
+  const entries = files.map((file) => {
+    let id = identities.current.get(file);
+    if (!id) {
+      id = `file-${nextId.current++}`;
+      identities.current.set(file, id);
+    }
+
+    const occurrence = occurrences.get(file) ?? 0;
+    occurrences.set(file, occurrence + 1);
+
+    return { id: occurrence ? `${id}-${occurrence}` : id, label: file.name };
+  });
+
   return (
-    <ul
-      data-testid={partTestId(testId, 'list')}
-      className={cn('grid gap-2', classNames?.list, className)}
+    <UploadSort
+      reorder={reorder}
+      blocked={blocked}
+      orientation="vertical"
+      items={entries}
+      onReorder={(ids) =>
+        onReorder(
+          ids.map((id) => files[entries.findIndex((entry) => entry.id === id)]!),
+        )
+      }
     >
-      {files.map((file, index) => (
-        <li
-          data-testid={partTestId(testId, 'file', file.name, file.lastModified, index)}
-          key={`${file.name}-${index}`}
-          className={cn('flex min-w-0 items-center gap-2 text-ui-sm', classNames?.file)}
-        >
-          <FilePreview
+      <ul
+        data-testid={partTestId(testId, 'list')}
+        className={cn('grid gap-2', classNames?.list, className)}
+      >
+        {files.map((file, index) => (
+          <li
             data-testid={partTestId(
               testId,
-              'preview',
+              'file',
               file.name,
               file.lastModified,
               index,
             )}
-            {...(classNames ? { classNames } : {})}
-            file={file}
-            disabled={Boolean(blocked)}
-          />
-          <span
-            data-testid={partTestId(
-              testId,
-              'fileName',
-              file.name,
-              file.lastModified,
-              index,
+            key={entries[index]!.id}
+            className={cn(
+              'flex min-w-0 items-center gap-2 text-ui-sm',
+              classNames?.file,
             )}
-            className={cn('min-w-0 flex-1 break-all', classNames?.fileName)}
           >
-            {file.name}{' '}
-            <span
+            <FilePreview
               data-testid={partTestId(
                 testId,
-                'fileSize',
+                'preview',
                 file.name,
                 file.lastModified,
                 index,
               )}
-              className={cn('text-muted', classNames?.fileSize)}
+              {...(classNames ? { classNames } : {})}
+              file={file}
+              disabled={Boolean(blocked)}
+            />
+            <span
+              data-testid={partTestId(
+                testId,
+                'fileName',
+                file.name,
+                file.lastModified,
+                index,
+              )}
+              className={cn('min-w-0 flex-1 break-all', classNames?.fileName)}
             >
-              (
-              {new Intl.NumberFormat(locale.code).format(
-                Math.max(1, Math.round(file.size / 1024)),
-              )}{' '}
-              KB)
+              {file.name}{' '}
+              <span
+                data-testid={partTestId(
+                  testId,
+                  'fileSize',
+                  file.name,
+                  file.lastModified,
+                  index,
+                )}
+                className={cn('text-muted', classNames?.fileSize)}
+              >
+                (
+                {new Intl.NumberFormat(locale.code).format(
+                  Math.max(1, Math.round(file.size / 1024)),
+                )}{' '}
+                KB)
+              </span>
             </span>
-          </span>
-          <KitIconButton
-            data-testid={partTestId(
-              testId,
-              'remove',
-              file.name,
-              file.lastModified,
-              index,
-            )}
-            className={classNames?.remove}
-            label={t('upload.remove', { name: file.name })}
-            icon="close"
-            builtin={{ outline: CloseIcon, bold: CloseBoldIcon }}
-            size="sm"
-            variant="ghost"
-            disabled={blocked}
-            onClick={() => {
-              onRemove(index);
-            }}
-          />
-        </li>
-      ))}
-    </ul>
+            <KitIconButton
+              data-testid={partTestId(
+                testId,
+                'remove',
+                file.name,
+                file.lastModified,
+                index,
+              )}
+              className={classNames?.remove}
+              label={t('upload.remove', { name: file.name })}
+              icon="close"
+              builtin={{ outline: CloseIcon, bold: CloseBoldIcon }}
+              size="sm"
+              variant="ghost"
+              disabled={blocked}
+              onClick={() => {
+                onRemove(index);
+              }}
+            />
+          </li>
+        ))}
+      </ul>
+    </UploadSort>
   );
 }

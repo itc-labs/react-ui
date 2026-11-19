@@ -733,6 +733,8 @@ function SortableContainer({
   });
   // Children are rendered in preview order so a dragged item appears in its target container.
   const byId = new Map<string, ReactNode>();
+  // Keep leading fixed content (for example an upload picker) ahead of sorted items.
+  const before: ReactNode[] = [];
   const rest: ReactNode[] = [];
   // With asChild the items live inside the caller's element, such as a ul.
   const shell =
@@ -741,6 +743,7 @@ function SortableContainer({
   Children.forEach(shell ? shell.props.children : children, (child) => {
     if (isValidElement<{ id?: unknown }>(child) && typeof child.props.id === 'string')
       byId.set(child.props.id, child);
+    else if (!byId.size) before.push(child);
     else rest.push(child);
   });
 
@@ -753,6 +756,7 @@ function SortableContainer({
 
   const content = (
     <SortableContext items={[...ids]} strategy={strategies[orientation]} disabled={off}>
+      {before}
       {ids.map(
         (itemId) => byId.get(itemId) ?? lookup(engine, itemId) ?? external(itemId),
       )}
@@ -1001,5 +1005,13 @@ export function SortableOverlay({ children }: { children: (id: string) => ReactN
   return null;
 }
 
-export { createTransferDnd, createRowReorder } from './integrations';
-export type { TransferDndPlugin, DataTableRowReorderPlugin } from './integration-types';
+export {
+  createTransferDnd,
+  createRowReorder,
+  createUploadReorder,
+} from './integrations';
+export type {
+  TransferDndPlugin,
+  DataTableRowReorderPlugin,
+  UploadReorderPlugin,
+} from './integration-types';

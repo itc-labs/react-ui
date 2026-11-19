@@ -22,6 +22,7 @@ import {
 import { SortableContext, useSortable } from '@dnd-kit/sortable';
 import { snapCenterToCursor } from '@dnd-kit/modifiers';
 import { DndProvider, DragHandle } from './index';
+import { SortableUpload } from './upload-reorder';
 import { OverlayPortal } from './overlay-portal';
 import { KitIcon } from '../../components/icon/kit-icon';
 import { GripVerticalIcon } from '../../components/icon/outline/grip-vertical';
@@ -37,6 +38,7 @@ import type {
   DndIntegrationProviderProps,
   DndIntegrationRowProps,
   TransferDndPlugin,
+  UploadReorderPlugin,
 } from './integration-types';
 
 type Destination = { container: string; index: number };
@@ -465,4 +467,9 @@ export function createTransferDnd(): TransferDndPlugin {
 /** Inject into DataTable.rowReorder.plugin; the host persists the returned ID order. */
 export function createRowReorder(): DataTableRowReorderPlugin {
   return { Provider, Row, Zone, Handle };
+}
+
+/** Inject into UploadField.reorder; the host persists gallery ID or dropzone file order. */
+export function createUploadReorder(): UploadReorderPlugin {
+  return { Sort: SortableUpload };
 }
