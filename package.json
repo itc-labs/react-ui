@@ -64,7 +64,8 @@
     "./dnd": "./src/modules/dnd/index.tsx",
     "./virtual-list": "./src/modules/virtual-list/index.tsx",
     "./format": "./src/format/index.ts",
-    "./theme/presets": "./src/theme/presets/index.ts"
+    "./theme/presets": "./src/theme/presets/index.ts",
+    "./status-tag": "./src/components/status-tag/index.tsx"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
@@ -333,6 +334,10 @@
       "./theme/presets": {
         "types": "./dist/theme/presets/index.d.ts",
         "import": "./dist/theme/presets/index.js"
+      },
+      "./status-tag": {
+        "types": "./dist/components/status-tag/index.d.ts",
+        "import": "./dist/components/status-tag/index.js"
       }
     },
     "access": "public"

@@ -1,4 +1,5 @@
 export const enMessages = {
+  'statusTag.changeStatus': 'Change status',
   'language.label': 'Language',
   'language.switchTo': 'Switch to {language}',
   'theme.light': 'Light mode',

@@ -37,6 +37,8 @@ it('keeps ordinary imports free of heavy modules and within gzip budgets', () =>
     'Sidebar',
     'Slider',
     'Spinner',
+    'StatusTag',
+    'Tag',
     'Timeline',
     'Transfer',
     'TransferDnd',
