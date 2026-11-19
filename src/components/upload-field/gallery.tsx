@@ -5,6 +5,7 @@ import { cn, partTestId } from '../common';
 import { focusRingClassName } from '../common/focus-ring';
 import { KitIcon } from '../icon/kit-icon';
 import { KitIconButton } from '../icon-button/kit-icon-button';
+import { IconButton } from '../icon-button';
 import { PlusIcon } from '../icon/outline/plus';
 import { PlusIcon as PlusBoldIcon } from '../icon/bold/plus';
 import { ViewIcon } from '../icon/outline/view';
@@ -137,8 +138,10 @@ export function UploadGallery({
             <li
               key={item.id}
               data-testid={partTestId(testId, 'tile', item.id)}
+              aria-current={item.selected ? 'true' : undefined}
               className={cn(
                 'group relative aspect-square min-w-0 overflow-hidden rounded-control border border-line bg-surface',
+                item.selected && 'ring-2 ring-accent ring-offset-2',
                 classNames?.tile,
               )}
             >
@@ -211,6 +214,21 @@ export function UploadGallery({
                   classNames?.tileActions,
                 )}
               >
+                {!uploading &&
+                  !failed &&
+                  item.actions?.map((action) => (
+                    <Tooltip key={action.id} content={action.label}>
+                      <IconButton
+                        icon={action.icon}
+                        variant="secondary"
+                        {...(action.tone === 'danger' ? { tone: 'danger' } : {})}
+                        size="sm"
+                        label={`${action.label} ${item.alt}`}
+                        disabled={blocked || action.disabled}
+                        onClick={() => action.onSelect()}
+                      />
+                    </Tooltip>
+                  ))}
                 {!uploading && !failed && (
                   <KitIconButton
                     icon="view"

@@ -1,6 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, userEvent, within, waitFor } from 'storybook/test';
 import { UploadField } from './index';
+import { useState } from 'react';
+import { StarIcon } from '../icon/outline/star';
 const meta = {
   title: 'Components/UploadField',
   component: UploadField,
@@ -145,6 +147,63 @@ export const Gallery: Story = {
           'items là danh sách ảnh do ứng dụng quản lý. onValueChange chỉ trả về file mới; value và defaultValue không dùng trong gallery. maxFiles tính cả items và file mới. multiple mặc định là true cho gallery.',
       },
     },
+  },
+};
+
+export const GalleryThumbnail: Story = {
+  tags: ['example'],
+  render: function GalleryThumbnailExample() {
+    const [thumbnailId, setThumbnailId] = useState('front');
+
+    return (
+      <UploadField
+        variant="gallery"
+        label="Product images"
+        accept="image/*"
+        items={['front', 'back', 'detail'].map((id) => ({
+          id,
+          src: `https://picsum.photos/seed/product-${id}/300`,
+          alt: `Product ${id}`,
+          selected: id === thumbnailId,
+          badge:
+            id === thumbnailId ? (
+              <span className="rounded-control bg-surface px-2 text-ui-sm">
+                Thumbnail
+              </span>
+            ) : null,
+          actions: [
+            {
+              id: 'thumbnail',
+              label: 'Set as thumbnail',
+              icon: StarIcon,
+              disabled: id === thumbnailId,
+              onSelect: () => setThumbnailId(id),
+            },
+          ],
+        }))}
+      />
+    );
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Per-item actions appear before preview/remove on idle tiles and use label tooltips plus accessible names that include the image alt. The app controls selected and badge independently; selecting a thumbnail here moves both.',
+      },
+    },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const action = await canvas.findByRole('button', {
+      name: 'Set as thumbnail Product back',
+    });
+    action.focus();
+    await userEvent.keyboard('{Enter}');
+    await expect(action).toBeDisabled();
+    await expect(action.closest('li')).toHaveAttribute('aria-current', 'true');
+    await expect(
+      canvas.getByRole('button', { name: 'Set as thumbnail Product front' }),
+    ).toBeEnabled();
   },
 };
 

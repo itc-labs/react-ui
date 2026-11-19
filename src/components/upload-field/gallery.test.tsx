@@ -3,6 +3,7 @@ import { act, createRef } from 'react';
 import { createRoot } from 'react-dom/client';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { UploadField, type UploadFieldProps } from './index';
+import { StarIcon } from '../icon/outline/star';
 import { UILocaleProvider } from '../../i18n/provider';
 import { createTranslator, enUS, viVN, type UILocale } from '../../i18n';
 
@@ -64,6 +65,136 @@ async function render(props: UploadFieldProps = {}, locale: UILocale = enUS) {
 
 const saved = { id: 'saved', src: '/saved.png', alt: 'Saved image' };
 const file = new File(['image'], 'new.png', { type: 'image/png' });
+
+it('renders named custom actions before built-ins, shows tooltips, and calls onSelect', async () => {
+  const select = vi.fn();
+  const { host } = await render({
+    items: [
+      {
+        ...saved,
+        actions: [
+          {
+            id: 'thumbnail',
+            label: 'Set as thumbnail',
+            icon: StarIcon,
+            onSelect: select,
+          },
+          {
+            id: 'archive',
+            label: 'Archive',
+            icon: 'close',
+            tone: 'danger',
+            onSelect: select,
+          },
+        ],
+      },
+    ],
+    onItemRemove: vi.fn(),
+  });
+  const cluster = host.querySelector('[data-testid="gallery-tileActions-saved"]')!;
+  const buttons = Array.from(cluster.querySelectorAll('button'));
+  expect(buttons.map((button) => button.getAttribute('aria-label'))).toEqual([
+    'Set as thumbnail Saved image',
+    'Archive Saved image',
+    'Preview Saved image',
+    'Remove Saved image',
+  ]);
+  expect(buttons[1]?.className).toContain('text-danger-700');
+  expect(cluster.className).toContain('sm:group-focus-within:opacity-100');
+  expect(cluster.className).toContain('[@media(hover:none)]:opacity-100');
+
+  act(() => buttons[0]!.click());
+
+  expect(select).toHaveBeenCalledExactlyOnceWith();
+  await act(async () => {
+    buttons[0]!.focus();
+  });
+  expect(document.querySelector('[role="tooltip"]')?.textContent).toBe(
+    'Set as thumbnail',
+  );
+});
+
+it('hides custom actions on uploading and error tiles', async () => {
+  const action = {
+    id: 'thumbnail',
+    label: 'Set as thumbnail',
+    icon: StarIcon,
+    onSelect: vi.fn(),
+  };
+  const { host } = await render({
+    items: [
+      { ...saved, id: 'idle', status: 'idle', actions: [action] },
+      { ...saved, id: 'busy', status: 'uploading', actions: [action] },
+      { ...saved, id: 'failed', status: 'error', actions: [action] },
+    ],
+  });
+  expect(
+    host.querySelectorAll('[aria-label="Set as thumbnail Saved image"]'),
+  ).toHaveLength(1);
+  for (const id of ['busy', 'failed']) {
+    expect(
+      host.querySelector(
+        `[data-testid="gallery-tileActions-${id}"] [aria-label="Set as thumbnail Saved image"]`,
+      ),
+    ).toBeNull();
+  }
+});
+
+it.each(['disabled', 'loading', 'action'] as const)(
+  'blocks custom actions when %s is disabled',
+  async (state) => {
+    const select = vi.fn();
+    const { host } = await render({
+      disabled: state === 'disabled',
+      loading: state === 'loading',
+      items: [
+        {
+          ...saved,
+          actions: [
+            {
+              id: 'thumbnail',
+              label: 'Set as thumbnail',
+              icon: StarIcon,
+              disabled: state === 'action',
+              onSelect: select,
+            },
+          ],
+        },
+      ],
+    });
+    const button = host.querySelector<HTMLButtonElement>(
+      '[aria-label="Set as thumbnail Saved image"]',
+    )!;
+    expect(button.disabled).toBe(true);
+
+    act(() => button.click());
+
+    expect(select).not.toHaveBeenCalled();
+  },
+);
+
+it('marks selected tiles independently of badges and follows controlled selection changes', async () => {
+  const { host, update } = await render({
+    items: [
+      { ...saved, selected: true },
+      { ...saved, id: 'other', badge: <span>Cover</span> },
+    ],
+    classNames: { tile: 'custom-tile' },
+  });
+  const tile = host.querySelector('[data-testid="gallery-tile-saved"]')!;
+  const other = host.querySelector('[data-testid="gallery-tile-other"]')!;
+  expect(tile.getAttribute('aria-current')).toBe('true');
+  expect(tile.className).toContain('ring-2 ring-accent ring-offset-2');
+  expect(tile.className).toContain('custom-tile');
+  expect(tile.querySelector('[data-testid="gallery-tileBadge-saved"]')).toBeNull();
+  expect(other.hasAttribute('aria-current')).toBe(false);
+  expect(other.className).not.toContain('ring-accent');
+  expect(other.textContent).toContain('Cover');
+  update({ items: [{ ...saved }, { ...saved, id: 'other', selected: true }] });
+  expect(tile.hasAttribute('aria-current')).toBe(false);
+  expect(tile.className).not.toContain('ring-accent');
+  expect(other.getAttribute('aria-current')).toBe('true');
+});
 
 function drop(host: HTMLElement, files: File[]) {
   const event = new Event('drop', { bubbles: true, cancelable: true });
