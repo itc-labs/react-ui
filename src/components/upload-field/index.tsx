@@ -13,7 +13,11 @@ import { useComposedRefs } from '../common/refs';
 import { Button } from '../button';
 import { Progress } from '../progress';
 import { getFileIssue, type FileValidationIssue } from './validation';
-export type { UploadFieldProps, UploadGalleryItem } from './types';
+export type {
+  UploadFieldProps,
+  UploadGalleryItem,
+  UploadGalleryItemAction,
+} from './types';
 import type { UploadFieldProps } from './types';
 import { UploadFileList } from './file-list';
 

@@ -2,6 +2,18 @@ import type { TestIdProps } from '../common/testing';
 import type { ReactNode, Ref } from 'react';
 import type { SlotClasses } from '../common';
 import type { FileRules } from './validation';
+import type { IconGlyph, IconName } from '../icon/types';
+
+export type UploadGalleryItemAction = {
+  id: string;
+  /** Used in the tooltip and combined with the item alt for the accessible name. */
+  label: string;
+  icon: IconName | IconGlyph;
+  onSelect: () => void;
+  disabled?: boolean;
+  tone?: 'default' | 'danger';
+};
+
 export type UploadGalleryItem = {
   id: string;
   src: string;
@@ -10,6 +22,10 @@ export type UploadGalleryItem = {
   progress?: number;
   error?: string;
   badge?: ReactNode;
+  /** Marks the current item with an accent ring and aria-current, independently of badge. */
+  selected?: boolean;
+  /** Shown before built-in actions on idle items only. */
+  actions?: readonly UploadGalleryItemAction[];
 };
 
 export type UploadFieldProps = (FileRules & {

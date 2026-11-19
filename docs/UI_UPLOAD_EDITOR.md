@@ -27,6 +27,39 @@ import { FormField } from '@itclabs/react-ui';
 </FormField>
 ```
 
+Gallery mode accepts controlled `UploadGalleryItem[]`; `onValueChange` emits only new files. Item `actions` appear before preview/remove on idle tiles, with label tooltips and accessible names including `alt`. They are hidden on uploading/error tiles and disabled when the field is disabled/loading. Each action supports `disabled` and `tone: 'default' | 'danger'`. `selected` adds an accent ring and `aria-current="true"` independently of `badge`. The app controls which tile is current.
+
+```tsx
+import { useState } from 'react';
+import { UploadField, type UploadGalleryItem } from '@itclabs/react-ui';
+import { StarIcon } from '@itclabs/react-ui/icons/outline/star';
+
+function ProductImages({ images }: { images: readonly UploadGalleryItem[] }) {
+  const [thumbnailId, setThumbnailId] = useState(images[0]?.id);
+
+  return (
+    <UploadField
+      variant="gallery"
+      label="Product images"
+      items={images.map((image) => ({
+        ...image,
+        selected: image.id === thumbnailId,
+        badge: image.id === thumbnailId ? <span>Thumbnail</span> : null,
+        actions: [
+          {
+            id: 'thumbnail',
+            label: 'Set as thumbnail',
+            icon: StarIcon, // A semantic IconName such as 'star' also works.
+            disabled: image.id === thumbnailId,
+            onSelect: () => setThumbnailId(image.id),
+          },
+        ],
+      }))}
+    />
+  );
+}
+```
+
 Form/RequiredValidation checks the empty form and first error focus. Form/CompleteSubmit selects synthetic files, fills all controls, submits and resets. Shared controls remain optional unless the host supplies required validation.
 
 Client file checks are UX checks; host/server must validate content, permissions and storage constraints again. HTML returned by the editor must be validated and sanitized on the server according to the host's rendering policy. Do not render untrusted HTML through `dangerouslySetInnerHTML` on the assumption that an editor is a sanitizer.
