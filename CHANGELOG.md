@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.25.0
+
+### Minor Changes
+
+- [#66](https://github.com/itc-labs/react-ui/pull/66) [`c27d493`](https://github.com/itc-labs/react-ui/commit/c27d493c4572404fac9e9cdae427356772adc288) Thanks [@vungbt](https://github.com/vungbt)! - Add UploadField gallery tiles with controlled remote items, upload progress, retry actions and lazy image previews. Add PageHeader back navigation with button and host-adapted link support.
+
+- [#68](https://github.com/itc-labs/react-ui/pull/68) [`4517b2a`](https://github.com/itc-labs/react-ui/commit/4517b2a66e5a96cfa8f2f750a2f57429574979a7) Thanks [@vungbt](https://github.com/vungbt)! - Add setErrors and clearErrors for API field feedback with automatic clearing and scoped focus, useLinkedField for derived values with manual override and relinking, and the server-safe slugify helper at the root and format entry. Include form recipes and a linked slug/API error story.
+
+- [#65](https://github.com/itc-labs/react-ui/pull/65) [`7068fc2`](https://github.com/itc-labs/react-ui/commit/7068fc24475cb9ed7e0975a30dc623c532fa8735) Thanks [@vungbt](https://github.com/vungbt)! - Load any catalog icon name on demand without registration. Share glyph requests and cached results, preserve synchronous registered icons, and reserve space with an accessible loading placeholder. Registration remains available to preload glyphs and avoid the placeholder flash.
+
 ## 0.24.1
 
 ### Patch Changes
