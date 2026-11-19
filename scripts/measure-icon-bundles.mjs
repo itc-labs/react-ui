@@ -26,6 +26,8 @@ const entries = {
   JsonView: 'components/json-view/index.tsx',
   CodeView: 'modules/code-view/index.tsx',
   RichTextView: 'modules/rich-text-view/index.tsx',
+  Tag: 'components/tag/index.tsx',
+  StatusTag: 'components/status-tag/index.tsx',
   Button: 'components/button/index.tsx',
   Spinner: 'components/spinner/index.tsx',
   Dialog: 'components/dialog/index.tsx',
@@ -147,6 +149,14 @@ for (const [name, file] of Object.entries(entries)) {
     if (forbidden.length)
       throw new Error(`${name} imports dnd-kit without a plugin: ${forbidden}`);
   }
+  if (name === 'Tag') {
+    const forbidden = inputs.filter((input) =>
+      /components\/(?:dropdown-menu|alert-dialog)\/|@radix-ui\/react-(?:dropdown-menu|alert-dialog)/.test(
+        input,
+      ),
+    );
+    if (forbidden.length) throw new Error(`Tag imports status overlays: ${forbidden}`);
+  }
   if (name === 'Calendar') {
     const forbidden = inputs.filter((input) =>
       /(?:modules\/(?:editor|chart|avatar-upload)\/|node_modules\/.*(?:tiptap|recharts|react-easy-crop))/.test(
@@ -222,7 +232,8 @@ for (const [name, limit] of Object.entries({
   Sidebar: 87_500,
   Icon: 20_000,
   // Includes shared drag-and-drop and workspace-control translations.
-  Rating: 21_500,
+  // Shared locale strings (gallery tiles, StatusTag) add a few bytes.
+  Rating: 21_700,
   Divider: 10_600,
   Kbd: 19_500,
   Slider: 32_300,
@@ -231,7 +242,8 @@ for (const [name, limit] of Object.entries({
   Timeline: 22_200,
   // New collection feedback messages also enter the shared locale catalogs.
   QuantityInput: 21_500,
-  OptionGroup: 52_000,
+  // Shared locale strings (gallery tiles, StatusTag) add a few bytes.
+  OptionGroup: 52_200,
   // Trend and KPI locale messages add about 60 gzip bytes to every locale consumer.
   JsonView: 22_400,
   // About 10% above the measured display subpath fixtures.
@@ -239,15 +251,21 @@ for (const [name, limit] of Object.entries({
   // DOMPurify plus shared class merging, with about 10% headroom.
   RichTextView: 24_000,
   // Typed arrow/dot renderers add about 120 gzip bytes.
-  Carousel: 30_900,
+  // Shared locale strings (gallery tiles, StatusTag) add a few bytes.
+  Carousel: 31_100,
   VirtualList: 34_000,
   VirtualGrid: 34_000,
   // Fullscreen media adds Dialog focus management and image zoom controls.
-  MediaGallery: 55_100,
+  // StatusTag's shared localized action label adds about 40 gzip bytes.
+  MediaGallery: 55_200,
   // Shared reorder instructions and disabled reasons are included in locale consumers.
   // Includes the shared i18n strings (gallery upload labels added).
   Lightbox: 43_000,
-  Button: 21_000,
+  // Plain Tag has no menu/dialog graph; StatusTag includes both overlay runtimes.
+  Tag: 32_100,
+  StatusTag: 75_200,
+  // Shared locale strings (gallery tiles, StatusTag) add a few bytes.
+  Button: 21_200,
   Spinner: 20_000,
   Dialog: 38_000,
   Select: 58_000,

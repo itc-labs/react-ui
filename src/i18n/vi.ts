@@ -1,5 +1,6 @@
 import type { UIMessages } from './types';
 export const viMessages = {
+  'statusTag.changeStatus': 'Thay đổi trạng thái',
   'language.label': 'Ngôn ngữ',
   'language.switchTo': 'Chuyển sang {language}',
   'theme.light': 'Giao diện sáng',
