@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.28.0
+
+### Minor Changes
+
+- [#78](https://github.com/itc-labs/react-ui/pull/78) [`d3f1f56`](https://github.com/itc-labs/react-ui/commit/d3f1f565eabf425aec2420313c8adb8d87d71676) Thanks [@vungbt](https://github.com/vungbt)! - Add AlertDialog confirmIcon/cancelIcon props, ReactNode action labels, icon class slots, and an optional danger tone with confirmVariant precedence. Preserve Radix cancel focus/dismissal and caller-controlled async confirmation behavior.
+
 ## 0.27.2
 
 ### Patch Changes
