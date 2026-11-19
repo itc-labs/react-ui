@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.27.0
+
+### Minor Changes
+
+- [#72](https://github.com/itc-labs/react-ui/pull/72) [`119af3d`](https://github.com/itc-labs/react-ui/commit/119af3d830f143f2e1b4154fc3fc6f36da094c3d) Thanks [@vungbt](https://github.com/vungbt)! - Add semantic DropdownMenu item and submenu tones, plus a per-option StatusTag `actionTone` that colours the menu item for moving to that status (menu items stay plain without it).
+
 ## 0.26.0
 
 ### Minor Changes
