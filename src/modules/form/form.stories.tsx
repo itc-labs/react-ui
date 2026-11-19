@@ -16,7 +16,10 @@ import { Rating } from '../../components/rating';
 import { Slider } from '../../components/slider';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, userEvent, waitFor, within } from 'storybook/test';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { UploadField, type UploadGalleryItem } from '../../components/upload-field';
+import { Switch } from '../../components/switch';
+import { Tag } from '../../components/tag';
 import * as v from 'valibot';
 import { Form, FormField, useAppForm, setErrors, useLinkedField } from './index';
 import { Alert } from '../../components/alert';
@@ -923,7 +926,7 @@ export const LinkedFields: Story = {
 };
 
 export const ComposedCustomClasses: Story = {
-  tags: ['customization'],
+  tags: ['!dev', 'customization'],
   name: 'CustomClasses',
   render: () => <ComposedCustomDemo />,
 };
@@ -1055,4 +1058,197 @@ export const CompleteSubmit: Story = {
 export const CustomClasses: Story = {
   tags: ['!dev', '!autodocs', 'regression'],
   render: () => <CustomFormExample />,
+};
+
+type GalleryImage = { id: string; src: string; alt: string };
+type DemoUpload = GalleryImage & {
+  status: 'uploading' | 'error';
+  progress: number;
+  error?: string;
+};
+const galleryFormSchema = v.object({
+  name: v.pipe(v.string(), v.trim(), v.minLength(1, 'Enter a name.')),
+  images: v.pipe(
+    v.array(v.object({ id: v.string(), src: v.string(), alt: v.string() })),
+    v.minLength(1, 'Add at least one image'),
+    v.maxLength(6, 'Use at most 6 images'),
+  ),
+});
+
+function GalleryUploadDemo() {
+  const [uploads, setUploads] = useState<DemoUpload[]>([]);
+  const [failNext, setFailNext] = useState(false);
+  const [submitted, setSubmitted] = useState('');
+  const active = useRef(new Map<string, DemoUpload>());
+  const timers = useRef(new Map<string, ReturnType<typeof setInterval>>());
+  const previews = useRef(new Set<string>());
+  const uploading = uploads.some((item) => item.status === 'uploading');
+  const form = useAppForm({
+    defaultValues: { name: '', images: [] as GalleryImage[] },
+    validators: { onChange: galleryFormSchema },
+    onSubmit: async ({ value }) => {
+      if ([...active.current.values()].some((item) => item.status === 'uploading'))
+        return;
+      setSubmitted(JSON.stringify(v.parse(galleryFormSchema, value), null, 2));
+    },
+  });
+
+  useEffect(() => {
+    const running = timers.current;
+    const urls = previews.current;
+
+    return () => {
+      running.forEach((timer) => clearInterval(timer));
+
+      urls.forEach((url) => URL.revokeObjectURL(url));
+    };
+  }, []);
+
+  function syncUploads() {
+    setUploads([...active.current.values()]);
+  }
+
+  function start(image: GalleryImage, fail: boolean) {
+    const previous = timers.current.get(image.id);
+    if (previous) clearInterval(previous);
+    active.current.set(image.id, { ...image, status: 'uploading', progress: 0 });
+    syncUploads();
+    const timer = setInterval(() => {
+      const current = active.current.get(image.id);
+      if (!current) return;
+      const progress = current.progress + 10;
+      if (progress < 100) {
+        active.current.set(image.id, { ...current, progress });
+      } else {
+        clearInterval(timer);
+        timers.current.delete(image.id);
+        if (fail) {
+          active.current.set(image.id, {
+            ...image,
+            status: 'error',
+            progress: 0,
+            error: 'The upload failed. Retry this image to continue.',
+          });
+        } else {
+          active.current.delete(image.id);
+
+          form.setFieldValue('images', (images) => [...images, image]);
+        }
+      }
+      syncUploads();
+    }, 150);
+    timers.current.set(image.id, timer);
+  }
+
+  function pick(files: File[]) {
+    files.forEach((file, index) => {
+      const src = URL.createObjectURL(file);
+      previews.current.add(src);
+      start({ id: crypto.randomUUID(), src, alt: file.name }, failNext && index === 0);
+    });
+
+    if (files.length) setFailNext(false);
+  }
+
+  function remove(id: string) {
+    const image =
+      active.current.get(id) ?? form.state.values.images.find((item) => item.id === id);
+    const timer = timers.current.get(id);
+    if (timer) clearInterval(timer);
+    timers.current.delete(id);
+    active.current.delete(id);
+
+    form.setFieldValue('images', (images) => images.filter((item) => item.id !== id));
+
+    syncUploads();
+    if (image) {
+      URL.revokeObjectURL(image.src);
+      previews.current.delete(image.src);
+    }
+  }
+
+  return (
+    <div className="grid max-w-3xl gap-6">
+      <Form form={form} className="grid gap-4" aria-label="Gallery upload form">
+        <form.AppField name="name">
+          {(field) => <field.TextField label="Name" required />}
+        </form.AppField>
+        <Switch
+          label="Fail next upload"
+          checked={failNext}
+          onCheckedChange={setFailNext}
+        />
+        <form.Field name="images">
+          {(field) => {
+            const items: UploadGalleryItem[] = [...field.state.value, ...uploads].map(
+              (item, index) => ({
+                ...item,
+                ...(index === 0
+                  ? {
+                      badge: (
+                        <Tag tone="brand" size="sm">
+                          Cover
+                        </Tag>
+                      ),
+                    }
+                  : {}),
+              }),
+            );
+
+            return (
+              <FormField
+                field={field}
+                mapValue={() => []}
+                // Gallery emits new files; only completed uploads enter the form value.
+                mapOnChange={() => field.state.value}
+              >
+                <UploadField
+                  variant="gallery"
+                  label="Images"
+                  required
+                  accept="image/*"
+                  maxFiles={6}
+                  items={items}
+                  hint="Add up to 6 images. Uploads take about 1.5 seconds."
+                  onValueChange={pick}
+                  onItemRemove={remove}
+                  onItemRetry={(id) => {
+                    const image = active.current.get(id);
+                    if (image) {
+                      start({ id: image.id, src: image.src, alt: image.alt }, failNext);
+                      setFailNext(false);
+                    }
+                  }}
+                />
+              </FormField>
+            );
+          }}
+        </form.Field>
+        <Button type="submit" disabled={uploading}>
+          Submit gallery
+        </Button>
+      </Form>
+      {submitted && (
+        <pre
+          role="status"
+          className="overflow-auto rounded-control bg-canvas p-4 text-ui-sm"
+        >
+          {submitted}
+        </pre>
+      )}
+    </div>
+  );
+}
+
+export const GalleryUpload: Story = {
+  tags: ['example'],
+  render: () => <GalleryUploadDemo />,
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'The form value contains uploaded images ({ id, src, alt }[]). Uploads are app-controlled items: pending progress and failures stay in local state, then successful uploads enter the form value. Object URLs provide temporary previews for this simulated uploader.',
+      },
+    },
+  },
 };
