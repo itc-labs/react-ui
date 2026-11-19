@@ -15,6 +15,7 @@ import type { DropdownMenuProps } from './types';
 export type {
   DropdownMenuProps,
   DropdownMenuEntry,
+  DropdownMenuItemTone,
   DropdownMenuClassNames,
 } from './types';
 

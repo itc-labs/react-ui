@@ -5,7 +5,7 @@ import { useUILocale } from '../../i18n/provider';
 import { AlertDialog, AlertDialogCancel } from '../alert-dialog';
 import { Button } from '../button';
 import { cn, partTestId, type SlotClasses, type TestIdProps } from '../common';
-import { DropdownMenu } from '../dropdown-menu';
+import { DropdownMenu, type DropdownMenuItemTone } from '../dropdown-menu';
 import { Icon, type IconGlyph, type IconName } from '../icon';
 import { KitIcon } from '../icon/kit-icon';
 import { ChevronDownIcon } from '../icon/outline/chevron-down';
@@ -23,6 +23,7 @@ export type StatusOption<V extends string> = {
   tone: TagTone;
   icon?: IconName | IconGlyph;
   actionLabel?: ReactNode;
+  actionTone?: DropdownMenuItemTone;
   danger?: boolean;
   confirm?: {
     title: NonNullable<ReactNode>;
@@ -122,6 +123,13 @@ export function StatusTag<V extends string>({
     }
   }
 
+  function resolveMenuTone(option: StatusOption<V>): DropdownMenuItemTone {
+    return (
+      // Menu items stay plain unless the option opts in with actionTone.
+      option.actionTone ?? (option.danger ? 'danger' : 'default')
+    );
+  }
+
   const tag = (
     <Tag
       ref={trigger}
@@ -181,7 +189,7 @@ export function StatusTag<V extends string>({
             id: option.value,
             label: option.actionLabel ?? option.label,
             ...(option.icon ? { icon: option.icon } : {}),
-            tone: option.danger ? 'danger' : 'default',
+            tone: resolveMenuTone(option),
             disabled: blocked,
             onSelect: () => {
               if (blocked || inFlight.current) return;
@@ -225,7 +233,12 @@ export function StatusTag<V extends string>({
               </Button>
             </AlertDialogCancel>
             <Button
-              variant={confirmation?.danger ? 'danger' : 'primary'}
+              variant={
+                confirmation &&
+                (confirmation.danger || resolveMenuTone(confirmation) === 'danger')
+                  ? 'danger'
+                  : 'primary'
+              }
               loading={busy}
               disabled={disabled}
               data-testid={partTestId(testId, 'dialog', 'confirm')}

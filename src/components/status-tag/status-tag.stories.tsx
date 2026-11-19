@@ -8,12 +8,19 @@ import { RotateLeftIcon } from '../icon/outline/rotate-left';
 
 type Status = 'draft' | 'active' | 'inactive' | 'archived';
 const options: readonly StatusOption<Status>[] = [
-  { value: 'draft', label: 'Draft', tone: 'info', icon: RotateLeftIcon },
+  {
+    value: 'draft',
+    label: 'Draft',
+    tone: 'info',
+    actionTone: 'info',
+    icon: RotateLeftIcon,
+  },
   {
     value: 'active',
     label: 'Active',
     actionLabel: 'Publish',
     tone: 'success',
+    actionTone: 'success',
     icon: SendIcon,
   },
   {
@@ -21,6 +28,7 @@ const options: readonly StatusOption<Status>[] = [
     label: 'Inactive',
     actionLabel: 'Unpublish',
     tone: 'warning',
+    actionTone: 'warning',
     icon: EyeOffIcon,
   },
   {
@@ -183,5 +191,24 @@ export const CustomClasses: Story = {
       item: 'font-medium',
       dialog: 'max-w-md',
     },
+  },
+};
+
+export const ActionTones: Story = {
+  tags: ['example'],
+  render: () => {
+    const [value, setValue] = useState<Status>('draft');
+
+    return (
+      <StatusTag
+        value={value}
+        options={options.map((option) => ({
+          ...option,
+          actionTone: option.value === 'active' ? 'brand' : 'default',
+        }))}
+        transitions={transitions}
+        onValueChange={setValue}
+      />
+    );
   },
 };

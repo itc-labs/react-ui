@@ -27,6 +27,8 @@ const pairs = [
   ['on-brand', 'brand-700', 4.5],
   ['on-brand', 'brand-800', 4.5],
   ['brand-800', 'brand-100', 4.5],
+  ['brand-700', 'brand-50', 4.5],
+  ['info-700', 'info-50', 4.5],
   ['success-700', 'success-50', 4.5],
   ['warning-700', 'warning-50', 4.5],
   ['danger-700', 'danger-50', 4.5],

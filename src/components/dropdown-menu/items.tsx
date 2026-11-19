@@ -15,7 +15,7 @@ import {
   DropdownMenuSeparator,
 } from './index';
 import {
-  dangerMenuItemClass,
+  menuItemToneClasses,
   menuContentClass,
   menuItemClass,
   dashedMenuItemClass,
@@ -94,7 +94,7 @@ export function MenuEntries({
           item.tone === 'danger' &&
           item.variant === 'dashed' &&
           'border-danger-700 bg-danger-50',
-        item.type !== 'checkbox' && item.tone === 'danger' && dangerMenuItemClass,
+        item.type !== 'checkbox' && menuItemToneClasses[item.tone ?? 'default'],
         classNames?.item,
         item.className,
       ),
