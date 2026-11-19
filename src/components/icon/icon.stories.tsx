@@ -28,7 +28,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'Register outlineCatalog/boldCatalog through UIProvider to look up all icon names, or import glyphs directly when using only a few icons. Outline and Bold share 651 icon names from Heroicons (MIT) and Lucide (ISC). Icons available only in Outline use the same strokes in both variants; spinner and sort icons keep neutral strokes.',
+          'All catalog names load their selected glyph on demand, showing a fixed-size placeholder while loading. Registration through UIProvider or direct glyph imports is optional preloading to avoid the placeholder flash. Outline and Bold share 651 icon names from Heroicons (MIT) and Lucide (ISC). Icons available only in Outline use the same strokes in both variants; spinner and sort icons keep neutral strokes.',
       },
     },
   },
