@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.27.2
+
+### Patch Changes
+
+- [#76](https://github.com/itc-labs/react-ui/pull/76) [`610b74d`](https://github.com/itc-labs/react-ui/commit/610b74d530e8e4a36cf2a56dec151f3d9f7091eb) Thanks [@vungbt](https://github.com/vungbt)! - Mark the gallery add tile in danger (border and text) when UploadField has a field or file rejection error.
+
 ## 0.27.1
 
 ### Patch Changes
