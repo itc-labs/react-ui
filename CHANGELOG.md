@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.31.0
+
+### Minor Changes
+
+- [#85](https://github.com/itc-labs/react-ui/pull/85) [`86557db`](https://github.com/itc-labs/react-ui/commit/86557db4b170669b5f242a001835590dd562ecba) Thanks [@vungbt](https://github.com/vungbt)! - Add discriminated multiple selection to OptionGroup chips and swatches with array form binding, accessible toggle buttons, selection limits, selected labels, and required native form validation.
+
+- [#84](https://github.com/itc-labs/react-ui/pull/84) [`0332ce0`](https://github.com/itc-labs/react-ui/commit/0332ce0257ff4dc1c404e19ff6c6e0c50eebc5b0) Thanks [@vungbt](https://github.com/vungbt)! - AvatarUpload and AvatarField now select the original file without cropping by default. The boolean crop prop is replaced by an opt-in AvatarCropPlugin. To migrate, pass `crop={createAvatarCrop()}` and install `react-easy-crop` (`pnpm add react-easy-crop@^6`), importing createAvatarCrop from `@itclabs/react-ui/avatar-upload/crop`. Remove `crop={false}` to retain uncropped uploads. The core avatar-upload entry no longer imports the optional crop runtime.
+
 ## 0.30.0
 
 ### Minor Changes
