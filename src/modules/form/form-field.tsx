@@ -51,6 +51,7 @@ function FormFieldContent({
     return (
       <div
         data-testid={partTestId(testId, 'field')}
+        data-form-field={field.name}
         className={cn('grid gap-1.5', classNames?.root, className)}
       >
         {label && (
@@ -134,6 +135,7 @@ function FormFieldContent({
   return (
     <div
       data-testid={partTestId(testId, 'field')}
+      data-form-field={field.name}
       className={cn('min-w-0 self-start', classNames?.root, className)}
     >
       {native && label && (

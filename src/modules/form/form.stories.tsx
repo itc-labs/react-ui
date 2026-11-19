@@ -18,7 +18,10 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, userEvent, waitFor, within } from 'storybook/test';
 import { useState } from 'react';
 import * as v from 'valibot';
-import { Form, FormField, useAppForm } from './index';
+import { Form, FormField, useAppForm, setErrors, useLinkedField } from './index';
+import { Alert } from '../../components/alert';
+import { RefreshIcon } from '../../components/icon/outline/refresh';
+import { slugify } from '../../format';
 import { Button } from '../../components/button';
 import { validateFiles } from '../../components/upload-field/validation';
 import type { DateRangeValue } from '../../components/date-range-picker';
@@ -838,6 +841,85 @@ export const FieldAlignment: Story = {
   tags: ['example'],
   name: 'Field alignment',
   render: () => <FieldAlignmentDemo />,
+};
+
+function LinkedFieldsDemo() {
+  const [unmatched, setUnmatched] = useState<string[]>([]);
+  const form = useAppForm({ defaultValues: { name: '', slug: '' } });
+  const { linked, relink } = useLinkedField(form, {
+    source: 'name',
+    target: 'slug',
+    transform: slugify,
+  });
+
+  return (
+    <Form form={form} className="grid max-w-lg gap-4">
+      <FormField name="name" label="Name">
+        <Input />
+      </FormField>
+      <FormField name="slug" label="Slug">
+        <Input />
+      </FormField>
+      <p>{linked ? 'Slug follows name.' : 'Slug was edited manually.'}</p>
+      <div className="flex flex-wrap gap-3">
+        <Button type="button" variant="secondary" onClick={relink}>
+          <RefreshIcon className="size-4" aria-hidden="true" />
+          Regenerate slug
+        </Button>
+        <Button
+          type="button"
+          onClick={() => {
+            const result = setErrors(form, {
+              name: ['This name is already in use.'],
+              slug: 'Choose another slug.',
+              general: 'The API could not save this item.',
+            });
+            setUnmatched(result.unmatched);
+          }}
+        >
+          Simulate API error
+        </Button>
+      </div>
+      {unmatched.length > 0 && (
+        <Alert tone="danger">
+          The API could not save this item. Unmatched fields: {unmatched.join(', ')}.
+        </Alert>
+      )}
+    </Form>
+  );
+}
+
+export const LinkedFields: Story = {
+  tags: ['example'],
+  name: 'Linked fields and API errors',
+  render: () => <LinkedFieldsDemo />,
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Slug tự cập nhật theo Name cho đến khi chỉnh sửa trực tiếp. Xóa Slug hoặc chọn Regenerate slug để liên kết lại. Simulate API error hiển thị lỗi tại trường và lỗi chưa khớp trong Alert; chỉnh sửa trường sẽ xóa lỗi API của trường đó.',
+      },
+    },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const name = canvas.getByRole('textbox', { name: 'Name' });
+    const slug = canvas.getByRole('textbox', { name: 'Slug' });
+    await userEvent.type(name, 'Lorem ipsum');
+    await expect(slug).toHaveValue('lorem-ipsum');
+    await userEvent.clear(slug);
+    await userEvent.type(slug, 'custom');
+    await userEvent.click(canvas.getByRole('button', { name: 'Regenerate slug' }));
+    await expect(slug).toHaveValue('lorem-ipsum');
+    await userEvent.click(canvas.getByRole('button', { name: 'Simulate API error' }));
+    await expect(canvas.getByText('This name is already in use.')).toBeVisible();
+    await expect(canvas.getByText(/Unmatched fields: general/)).toBeVisible();
+    await userEvent.type(name, ' next');
+    await expect(
+      canvas.queryByText('This name is already in use.'),
+    ).not.toBeInTheDocument();
+    await expect(slug).toHaveValue('lorem-ipsum-next');
+  },
 };
 
 export const ComposedCustomClasses: Story = {
