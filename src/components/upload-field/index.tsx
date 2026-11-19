@@ -32,6 +32,8 @@ export function UploadField({
   items = [],
   onItemRemove,
   onItemRetry,
+  sortable = false,
+  onItemsReorder,
   id,
   name,
   label,
@@ -154,6 +156,8 @@ export function UploadField({
               describedBy={fieldDescription(controlId, Boolean(issue), Boolean(hint))}
               invalid={Boolean(issue)}
               items={items}
+              sortable={sortable}
+              onItemsReorder={onItemsReorder}
               blocked={blocked}
               maxFiles={maxFiles}
               classNames={classNames}
@@ -229,6 +233,8 @@ export function UploadField({
             <UploadFileList
               data-testid={partTestId(testId, 'files')}
               files={files}
+              sortable={sortable}
+              onReorder={change}
               blocked={blocked}
               classNames={classNames}
               onRemove={(index) => {
