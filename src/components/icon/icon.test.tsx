@@ -1,6 +1,12 @@
-import { expect, it } from 'vitest';
+// @vitest-environment jsdom
+import { act } from 'react';
+import { createRoot, hydrateRoot } from 'react-dom/client';
+import { expect, it, vi } from 'vitest';
+import { iconLoaders } from './loaders';
+
+(globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 import { renderToStaticMarkup } from 'react-dom/server';
-import { Icon, defineIconPack, type IconGlyph } from './index';
+import { Icon, iconNames, defineIconPack, type IconGlyph } from './index';
 import { outlineIcons } from './outline/pack';
 import { boldIcons } from './bold/pack';
 import { IconButton } from '../icon-button';
@@ -168,7 +174,7 @@ it('uses the curated outline/bold variants by default and supports scoped theme 
   expect(bold).not.toContain('variant=');
 });
 
-it('requires opt-in catalogs outside kit names and keeps registrations scoped', async () => {
+it('keeps optional catalog registrations synchronous and scoped', async () => {
   const { outlineCatalog, boldCatalog } = await import('./catalog');
 
   const render = (variant: 'outline' | 'bold') =>
@@ -182,8 +188,8 @@ it('requires opt-in catalogs outside kit names and keeps registrations scoped', 
       </UIProvider>,
     );
 
-  expect(() => renderToStaticMarkup(<Icon name="airplane" />)).toThrow(
-    'packs: { outline: outlineCatalog, bold: boldCatalog }',
+  expect(renderToStaticMarkup(<Icon name="airplane" />)).toContain(
+    'aria-hidden="true"',
   );
   expect(render('outline')).toBe(
     renderToStaticMarkup(<Icon name="airplane" pack={outlineCatalog} />),
@@ -191,9 +197,7 @@ it('requires opt-in catalogs outside kit names and keeps registrations scoped', 
   expect(render('bold')).toBe(
     renderToStaticMarkup(<Icon name="airplane" pack={boldCatalog} />),
   );
-  expect(() => renderToStaticMarkup(<Icon name="airplane" />)).toThrow(
-    'Unregistered icon',
-  );
+  expect(renderToStaticMarkup(<Icon name="airplane" />)).not.toContain('<path');
   expect(renderToStaticMarkup(<Icon glyph={outlineCatalog.icons.airplane} />)).toBe(
     render('outline'),
   );
@@ -260,5 +264,177 @@ it('preserves scoped spinner overrides on the narrow Button loading path', () =>
     );
     expect(html.match(/data-custom="true"/g)).toHaveLength(1);
     expect(html.match(/role="status"/g)).toHaveLength(1);
+  }
+});
+
+it('renders an SSR-safe placeholder, shares one glyph request, and caches the result', async () => {
+  let resolve!: (glyph: Awaited<ReturnType<typeof iconLoaders.outline.save>>) => void;
+  const pending = new Promise<Awaited<ReturnType<typeof iconLoaders.outline.save>>>(
+    (done) => {
+      resolve = done;
+    },
+  );
+  const load = vi.spyOn(iconLoaders.outline, 'save').mockReturnValue(pending);
+  const host = document.createElement('div');
+  let root = createRoot(host);
+  try {
+    expect(renderToStaticMarkup(<Icon name="save" size={28} label="Save" />)).toContain(
+      'width="28" height="28"',
+    );
+    expect(load).not.toHaveBeenCalled();
+
+    act(() =>
+      root.render(
+        <>
+          <Icon
+            name="save"
+            size={28}
+            label="Save"
+            className="save-icon"
+            data-testid="save"
+          />
+          <Icon name="save" />
+        </>,
+      ),
+    );
+
+    const placeholder = host.querySelector('[data-testid="save"]')!;
+    expect(placeholder.children).toHaveLength(0);
+    expect(placeholder.getAttribute('width')).toBe('28');
+    expect(placeholder.getAttribute('height')).toBe('28');
+    expect(placeholder.getAttribute('aria-hidden')).toBe('true');
+    expect(placeholder.hasAttribute('aria-label')).toBe(false);
+    await act(async () => {
+      await vi.waitFor(() => expect(load).toHaveBeenCalledTimes(1));
+      resolve((await import('./outline/save')).SaveIcon);
+      await pending;
+    });
+    const svg = host.querySelector('[data-testid="save"]')!;
+    expect(svg.children.length).toBeGreaterThan(0);
+    expect(svg.getAttribute('width')).toBe('28');
+    expect(svg.getAttribute('aria-label')).toBe('Save');
+    expect(svg.getAttribute('class')).toContain('save-icon');
+    expect(host.querySelectorAll('svg path')).toHaveLength(2);
+
+    act(() => root.render(<Icon name="save" />));
+
+    expect(host.querySelector('path')?.getAttribute('d')).toBe(
+      new DOMParser()
+        .parseFromString(
+          renderToStaticMarkup(<Icon glyph={outlineIcons.icons.save} />),
+          'text/html',
+        )
+        .querySelector('path')
+        ?.getAttribute('d'),
+    );
+    expect(load).toHaveBeenCalledTimes(1);
+
+    act(() => root.unmount());
+
+    host.innerHTML = renderToStaticMarkup(<Icon name="save" label="Save" />);
+    expect(host.querySelector('svg')?.children).toHaveLength(0);
+    const onRecoverableError = vi.fn();
+    await act(async () => {
+      root = hydrateRoot(host, <Icon name="save" label="Save" />, {
+        onRecoverableError,
+      });
+    });
+    expect(host.querySelector('path')).not.toBeNull();
+    expect(host.querySelector('svg')?.getAttribute('aria-label')).toBe('Save');
+    expect(onRecoverableError).not.toHaveBeenCalled();
+    expect(load).toHaveBeenCalledTimes(1);
+  } finally {
+    act(() => root.unmount());
+
+    load.mockRestore();
+  }
+});
+
+it('loads actual catalog leaves on demand in the resolved outline and bold variants', async () => {
+  const host = document.createElement('div');
+  const root = createRoot(host);
+  try {
+    act(() => root.render(<Icon name="arrowLeft" />));
+
+    expect(host.querySelector('svg')?.children).toHaveLength(0);
+    await act(async () => {
+      await vi.waitFor(() => expect(host.querySelector('path')).not.toBeNull());
+    });
+    expect(host.innerHTML).toBe(
+      renderToStaticMarkup(<Icon glyph={outlineIcons.icons.arrowLeft} />),
+    );
+
+    act(() =>
+      root.render(
+        <UIProvider theme={defineTheme({ icons: { defaultPack: 'bold' } })}>
+          <Icon name="arrowLeft" />
+        </UIProvider>,
+      ),
+    );
+
+    expect(host.querySelector('svg')?.children).toHaveLength(0);
+    await act(async () => {
+      await vi.waitFor(() => expect(host.querySelector('path')).not.toBeNull());
+    });
+    expect(host.innerHTML).toBe(
+      renderToStaticMarkup(<Icon glyph={boldIcons.icons.arrowLeft} />),
+    );
+  } finally {
+    act(() => root.unmount());
+  }
+});
+
+it('ignores stale loads after changing names or unmounting', async () => {
+  let resolve!: (glyph: Awaited<ReturnType<typeof iconLoaders.outline.send>>) => void;
+  const pending = new Promise<Awaited<ReturnType<typeof iconLoaders.outline.send>>>(
+    (done) => {
+      resolve = done;
+    },
+  );
+  const load = vi.spyOn(iconLoaders.outline, 'send').mockReturnValue(pending);
+  const host = document.createElement('div');
+  const root = createRoot(host);
+  let mounted = true;
+  try {
+    act(() =>
+      root.render(
+        <>
+          <Icon name="send" />
+          <Icon name="send" />
+        </>,
+      ),
+    );
+
+    await act(async () => {
+      await vi.waitFor(() => expect(load).toHaveBeenCalledTimes(1));
+    });
+
+    act(() => root.render(<Icon name="search" />));
+
+    expect(host.innerHTML).toBe(renderToStaticMarkup(<Icon name="search" />));
+
+    act(() => root.unmount());
+
+    mounted = false;
+    await act(async () => {
+      resolve((await import('./outline/send')).SendIcon);
+      await pending;
+    });
+    expect(host.innerHTML).toBe('');
+  } finally {
+    if (mounted) act(() => root.unmount());
+    load.mockRestore();
+  }
+});
+
+it('keeps every generated loader aligned with the catalog names and variants', async () => {
+  for (const variant of ['outline', 'bold'] as const) {
+    expect(Object.keys(iconLoaders[variant])).toEqual([...iconNames]);
+    const pack = variant === 'outline' ? outlineIcons : boldIcons;
+    await Promise.all(
+      iconNames.map(async (name) => {
+        expect(await iconLoaders[variant][name]()).toBe(pack.icons[name]);
+      }),
+    );
   }
 });

@@ -295,7 +295,7 @@ Slider, OptionGroup, QuantityInput, and ColorPicker are core controls with autom
 | `@itclabs/react-ui/toast`                              | Hook-free `toast.success/error/info/warning`                                                                                                                                                                                                  |
 | `@itclabs/react-ui/modal`                              | Hook-free `modal.confirm/alert/open`                                                                                                                                                                                                          |
 | `@itclabs/react-ui/icons/outline/*`, `/icons/bold/*`   | Single icon glyphs, e.g. `@itclabs/react-ui/icons/outline/search` (lightest)                                                                                                                                                                  |
-| `@itclabs/react-ui/icons/catalog`                      | Full icon catalog for `<Icon name="…">` beyond the kit's own icons                                                                                                                                                                            |
+| `@itclabs/react-ui/icons/catalog`                      | Optional full icon packs for preloading all names                                                                                                                                                                                             |
 | `@itclabs/react-ui/tree-select`                        | TreeSelect with multiple/cascade selection, lazy children, paging, remote search, and virtualization; no optional peers.                                                                                                                      |
 | `@itclabs/react-ui/dnd`                                | Sortable, SortableItem, SortableHandle, SortableGroup, SortableOverlay, DragHandle, DndProvider, useSortableItem, createTransferDnd and createRowReorder; isolated from all barrels.                                                          |
 | `@itclabs/react-ui/virtual-list`                       | VirtualList and responsive VirtualGrid with measured rows, incremental loading and scroll restoration; isolated from all barrels.                                                                                                             |
@@ -365,7 +365,9 @@ import { SearchIcon } from '@itclabs/react-ui/icons/outline/search';
 <Icon glyph={SearchIcon} />;
 ```
 
-To use `<Icon name="…">` with any of the 651 catalog names, register the catalog once:
+All 651 catalog names work directly with `<Icon name="…">`, `<IconButton icon="…">` and other icon props. Names outside the built-in kit set load only their selected Outline/Bold glyph on demand. A fixed-size, aria-hidden placeholder reserves space while loading; requests and loaded glyphs are shared across Icons.
+
+Existing glyph props, overrides, packs and built-ins still render synchronously. Registration is optional: preload a few leaf glyphs through theme overrides or small Outline/Bold packs to avoid the initial placeholder flash. Register both full catalogs only when you want to preload all names:
 
 ```tsx
 import { outlineCatalog, boldCatalog } from '@itclabs/react-ui/icons/catalog';

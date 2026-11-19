@@ -131,6 +131,11 @@ for (const [dir, entries] of groups) {
     `import { defineIconPack } from '../registry';\n${entries.map(({ symbol, file }) => `import { ${symbol} } from './${file}';`).join('\n')}\n\nexport const ${packName} = /* @__PURE__ */ defineIconPack('${id}', {\n${entries.map(({ name, symbol }) => `  ${name}: ${symbol},`).join('\n')}\n});\n`,
   );
 }
+// Keep the loader manifest separate so ordinary entries do not download it until needed.
+await writeFile(
+  path.join(iconRoot, 'loaders.ts'),
+  `/** Generated glyph loaders; edit sources.json and regenerate. */\nexport const iconLoaders = {\n${[...groups].map(([variant, entries]) => `  ${variant}: {\n${entries.map(({ name, symbol, file }) => `    ${name}: () => import('./${variant}/${file}').then((module) => module.${symbol}),`).join('\n')}\n  },`).join('\n')}\n};\n`,
+);
 const metadata = Object.fromEntries(
   sources
     .filter(({ variant }) => variant === 'outline')

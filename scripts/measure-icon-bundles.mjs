@@ -1,6 +1,7 @@
 import { createRequire } from 'node:module';
 import { gzipSync } from 'node:zlib';
 import { fileURLToPath } from 'node:url';
+import path from 'node:path';
 
 // Resolve the existing Vite toolchain's esbuild without adding a dependency.
 const require = createRequire(import.meta.url);
@@ -58,6 +59,8 @@ for (const [name, file] of Object.entries(entries)) {
       loader: 'tsx',
     },
     bundle: true,
+    splitting: true,
+    outdir: path.join(root, '.cache/icon-bundles'),
     minify: true,
     format: 'esm',
     platform: 'browser',
@@ -148,7 +151,36 @@ for (const [name, file] of Object.entries(entries)) {
     );
     if (prism.length) throw new Error(`Root imports Prism: ${prism}`);
   }
-  const bytes = outputFiles[0].contents;
+  // Measure the entry and its static dependencies, excluding on-demand chunks.
+  const initial = new Set();
+
+  const collect = (file) => {
+    if (initial.has(file)) return;
+    initial.add(file);
+    for (const dependency of metafile.outputs[file].imports) {
+      if (!dependency.external && dependency.kind !== 'dynamic-import')
+        collect(dependency.path);
+    }
+  };
+
+  const entry = Object.keys(metafile.outputs).find(
+    (file) => metafile.outputs[file].entryPoint === '<stdin>',
+  );
+  if (!entry) throw new Error(`Missing entry output: ${name}`);
+  collect(entry);
+  const initialGlyphs = [...initial].flatMap((file) =>
+    Object.keys(metafile.outputs[file].inputs),
+  );
+  if (
+    name === 'Icon' &&
+    initialGlyphs.some((file) => /icon\/(?:loaders|catalog)\.ts$/.test(file))
+  )
+    throw new Error('Icon eagerly imports the catalog or loader manifest');
+  const bytes = Buffer.concat(
+    outputFiles
+      .filter((file) => initial.has(path.relative(root, file.path)))
+      .map((file) => file.contents),
+  );
   const gzip = gzipSync(bytes).length;
   sizes[name] = { minified: bytes.length, gzip };
   // Ordinary kit imports must never reach either full runtime catalog.

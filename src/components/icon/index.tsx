@@ -1,6 +1,7 @@
 'use client';
 import { kitOutlineIcons, kitBoldIcons } from './kit-icons';
 import { IconRenderer } from './renderer';
+import { resolveCatalogGlyph } from './catalog-glyph';
 import type { IconName } from './types';
 import type { IconProps } from './props';
 export { defineIconPack } from './registry';
@@ -12,5 +13,5 @@ const builtins = { outline: kitOutlineIcons, bold: kitBoldIcons };
 
 /** Semantic names follow the active theme. An explicit glyph/pack overrides the theme. */
 export function Icon<Name extends string = IconName>(props: IconProps<Name>) {
-  return <IconRenderer {...props} builtins={builtins} />;
+  return <IconRenderer {...props} builtins={builtins} getGlyph={resolveCatalogGlyph} />;
 }

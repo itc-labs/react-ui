@@ -6,11 +6,7 @@ The curated icon vocabulary has Outline and Bold styles.
 
 ```tsx
 import { Icon, IconButton, UIProvider, defineTheme } from '@itclabs/react-ui';
-import { outlineCatalog, boldCatalog } from '@itclabs/react-ui/icons/catalog';
-
-const theme = defineTheme({
-  icons: { packs: { outline: outlineCatalog, bold: boldCatalog } },
-});
+const theme = defineTheme({ icons: { variant: 'outline' } });
 
 export function Example() {
   return (
@@ -23,7 +19,7 @@ export function Example() {
 }
 ```
 
-There are 651 canonical names in each style, with exactly the same keys. Outline is the default for the UI kit, including its internal controls. Theme configuration accepts defineTheme({ icons: { variant: 'bold' } }) once at the UIProvider root. Explicit glyph/pack/variant wins over theme overrides; theme overrides win over the configured default. Existing optional defaultPack and project registrations remain supported. A missing semantic name in a custom pack falls back to the registered catalog for the active variant, then the small built-in kit map. Unknown pack/name errors remain explicit. The theme is scoped, not a mutable global registry.
+There are 651 canonical names in each style, with exactly the same keys. Outline is the default for the UI kit, including its internal controls. Theme configuration accepts defineTheme({ icons: { variant: 'bold' } }) once at the UIProvider root. Explicit glyph/pack/variant wins over theme overrides; theme overrides win over the configured default. Existing optional defaultPack and project registrations remain supported. A missing semantic name in a custom pack falls back to the registered catalog for the active variant, then the small built-in kit map, and finally the on-demand catalog glyph. Unknown pack/name errors remain explicit. The theme is scoped, not a mutable global registry.
 
 ```tsx
 import { SearchIcon } from '@itclabs/react-ui/icons/outline/search';
@@ -76,15 +72,17 @@ Selection preserves existing names; removes known deprecated/small/decorative al
 
 If a pair is unavailable, use the existing Outline component in both modes. Never inflate stroke width or manufacture a solid form. Shared outline-only files live in icon/shared; outline/bold leaves re-export them. The catalog labels these entries "Chỉ có Outline" and distinguishes neutral spinner/sort glyphs. Exported @itclabs/react-ui/icons/catalog metadata exposes category/source/aliases/outlineOnly/neutral so consumers can inspect this explicitly.
 
-The full catalogs are opt-in. `Icon` includes only the 35 semantic names used by kit controls (including `more`, the conventional action-menu trigger), in Outline/Bold variants. Names outside that map require scoped `packs: { outline: outlineCatalog, bold: boldCatalog }` registration as above, a small custom pack, an override, or a direct `glyph` prop. The `IconName` union and `iconNames` list still contain all 651 names without importing their artwork. Missing names throw a setup error; no global registry or automatic catalog loading exists.
+All 651 catalog names work without registration. `Icon` includes the 35 semantic names used by kit controls (including `more`, the conventional action-menu trigger) synchronously in Outline/Bold variants. Other names load only their selected glyph module through a generated dynamic-import manifest, itself fetched on first use. A fixed-size, aria-hidden empty SVG reserves the icon's width and height until it loads. Requests and glyphs are cached module-wide by name and variant; concurrent Icons share a request. Server rendering produces the placeholder and loading begins on the client after subscription. Unknown names still throw the existing setup error immediately in development; production validates names when the deferred manifest arrives.
+
+Registration is now an optimisation: direct glyph props, theme overrides and small scoped packs preload important glyphs to avoid the initial placeholder flash. Full `outlineCatalog`/`boldCatalog` registrations remain optional when preloading all artwork is appropriate. The `IconName` union and `iconNames` list contain all 651 names without importing their artwork.
 
 Prefer direct leaf imports when a host needs only a few extra icons: `<Icon glyph={SearchIcon} />` preserves SVG props and theme size/strokeWidth, while `<SearchIcon />` is provider-free. Direct glyphs intentionally fix their artwork; use a semantic project pack with Outline/Bold registrations when theme switching is required. Existing `iconCatalog` metadata remains exported alongside `outlineCatalog`/`boldCatalog` from `@itclabs/react-ui/icons/catalog`. Importing runtime packs retains their full artwork; importing metadata alone can tree-shake the pack exports.
 
-Resolution preserves the existing explicit precedence: `glyph` first; explicit `pack` or `variant` bypasses semantic overrides; otherwise theme overrides win, followed by the selected/default registered pack, the active variant catalog, and the kit map. An explicit `variant` also takes precedence over `defaultPack`. Unknown explicit packs still throw. Nested providers inherit registrations and sibling roots remain isolated. Spinner uses the same resolver with a single neutral fallback, so Button loading retains overrides/defaultPack/variant behavior without importing the kit map.
+Resolution preserves the existing explicit precedence: `glyph` first; explicit `pack` or `variant` bypasses semantic overrides; otherwise theme overrides win, followed by the selected/default registered pack, the active variant catalog, the kit map, and finally the on-demand catalog glyph. An explicit `variant` also takes precedence over `defaultPack`. Unknown explicit packs still throw. Nested providers inherit registrations and sibling roots remain isolated. Spinner uses the same resolver with a single neutral fallback, so Button loading retains overrides/defaultPack/variant behavior without importing the kit map.
 
 ### Bundle regression
 
-Run `node scripts/measure-icon-bundles.mjs` from the repository root. `pnpm test` includes the Icon/Button budget regression; the standalone script additionally reports Dialog, Select, DataTable and Root. It uses the installed Vite/esbuild toolchain, minified browser ESM, production NODE_ENV, React/ReactDOM external (including subpaths), and CSS ignored. Each component is imported by name; Root exports the whole barrel. It rejects full pack imports in all six graphs and enforces Icon <20,000 and Button <30,000 gzip bytes. No dependency/store changes are required.
+Run `node scripts/measure-icon-bundles.mjs` from the repository root. `pnpm test` includes the Icon/Button budget regression; the standalone script additionally reports Dialog, Select, DataTable and Root. It uses the installed Vite/esbuild toolchain, minified browser ESM, production NODE_ENV, React/ReactDOM external (including subpaths), and CSS ignored. Each component is imported by name; Root exports the whole barrel. Code splitting is enabled; measurements include the entry and all its static dependencies, excluding deferred loader/glyph chunks. The initial Icon graph must not contain the loader manifest or catalog. It rejects full pack imports in all six graphs and enforces Icon <20,000 and Button <30,000 gzip bytes. No dependency/store changes are required.
 
 Measured on this checkout before/after T11 (decimal KB, minified / gzip):
 
@@ -101,7 +99,7 @@ The root entry includes other controls and dependencies. Storybook registers bot
 
 ## Runtime cleanup
 
-Removed the obsolete per-vendor adapters and their package exports. The implicit lucide built-in pack was removed; built-ins are outline and bold. Apps use canonical names/variants, or explicitly register a custom project pack. Vendor packages are dev dependencies, not runtime dependencies. Keep registry/types/svg/catalog/sources/licenses: these implement registration, public contracts, rendering, discovery and provenance rather than duplicate icon sets.
+Removed the obsolete per-vendor adapters and their package exports. The implicit lucide built-in pack was removed; built-ins are outline and bold. Apps use canonical names/variants on demand, or explicitly register a custom project pack. Vendor packages are dev dependencies, not runtime dependencies. Keep registry/types/svg/catalog/sources/licenses: these implement registration, public contracts, rendering, discovery and provenance rather than duplicate icon sets.
 
 ## Replacement fallbacks
 
