@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.30.0
+
+### Minor Changes
+
+- [#82](https://github.com/itc-labs/react-ui/pull/82) [`05449e7`](https://github.com/itc-labs/react-ui/commit/05449e7827ed598ae7540482e2e3cee6f92f150f) Thanks [@vungbt](https://github.com/vungbt)! - Add optional pointer and keyboard reordering to UploadField galleries and dropzone file lists, via reorder={createUploadReorder()} from @itclabs/react-ui/dnd. Core UploadField has no DnD runtime imports. Gallery onItemsReorder emits the full controlled ID order; dropzone reordering uses onValueChange.
+
 ## 0.29.0
 
 ### Minor Changes
