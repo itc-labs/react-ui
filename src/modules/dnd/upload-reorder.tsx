@@ -9,6 +9,7 @@ export function SortableUpload({
   orientation,
   items,
   leading = 0,
+  handleClassName,
   onReorder,
   children,
 }: UploadReorderProps) {
@@ -44,7 +45,7 @@ export function SortableUpload({
                     <SortableHandle
                       className={
                         orientation === 'grid'
-                          ? 'absolute start-1 top-1 z-10 bg-surface'
+                          ? `absolute start-1 top-1 z-10 bg-surface ${handleClassName ?? ''}`
                           : undefined
                       }
                     />

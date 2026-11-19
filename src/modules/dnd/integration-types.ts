@@ -45,6 +45,8 @@ export interface UploadReorderProps {
   orientation: 'grid' | 'vertical';
   items: readonly { id: string; label: string; disabled?: boolean }[];
   leading?: number;
+  /** Optional sizing for injected upload drag handles. */
+  handleClassName?: string;
   onReorder: (ids: string[]) => void;
   children: ReactElement<{ children?: ReactNode; className?: string }>;
 }

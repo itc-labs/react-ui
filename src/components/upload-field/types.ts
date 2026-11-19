@@ -33,6 +33,8 @@ export type UploadFieldProps = (FileRules & {
   'data-testid'?: string | undefined;
   /** Gallery uses controlled items and emits only newly picked files. */
   variant?: 'dropzone' | 'gallery';
+  /** Gallery only. Token-based tile size; defaults to md. */
+  size?: 'sm' | 'md' | 'lg';
   /** Gallery only. Counts toward maxFiles; status defaults to idle. */
   items?: readonly UploadGalleryItem[];
   /** Opt in to pointer and keyboard reordering with createUploadReorder() from /dnd. */
