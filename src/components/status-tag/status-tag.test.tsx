@@ -432,3 +432,22 @@ it.each([
     option.danger === true || expected === 'danger',
   );
 });
+
+it('rotates the chevron only while the menu is open and gates motion on motion-safe', async () => {
+  await render({ onValueChange: vi.fn() });
+
+  const chevron = () => byId('chevron');
+
+  expect(chevron().classList.contains('motion-safe:transition-transform')).toBe(true);
+  expect(chevron().classList.contains('motion-safe:rotate-180')).toBe(false);
+  await open();
+  expect(chip().getAttribute('aria-expanded')).toBe('true');
+  expect(chevron().classList.contains('motion-safe:rotate-180')).toBe(true);
+  await act(async () => {
+    document.activeElement!.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }),
+    );
+  });
+  expect(chip().getAttribute('aria-expanded')).toBe('false');
+  expect(chevron().classList.contains('motion-safe:rotate-180')).toBe(false);
+});

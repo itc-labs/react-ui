@@ -29,11 +29,31 @@ export const States: Story = {
     <div className="grid max-w-3xl gap-5 sm:grid-cols-2">
       <UploadField label="Ready" />
       <UploadField label="Disabled" disabled />
+      <UploadField label="Starting upload" loading progress={0} />
       <UploadField label="Loading" loading progress={45} />
+      <UploadField label="Upload complete" loading progress={100} />
+      <UploadField label="Indeterminate" loading />
       <UploadField
         label="Error"
         error="Could not upload the file. Try again to continue."
       />
+    </div>
+  ),
+};
+
+export const Loading: Story = {
+  tags: ['states'],
+  render: () => (
+    <div className="grid max-w-3xl gap-5 sm:grid-cols-2">
+      {[0, 45, 100].map((progress) => (
+        <UploadField
+          key={progress}
+          label={`Uploading (${progress}%)`}
+          loading
+          progress={progress}
+        />
+      ))}
+      <UploadField label="Indeterminate" loading />
     </div>
   ),
 };

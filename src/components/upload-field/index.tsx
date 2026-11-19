@@ -11,6 +11,7 @@ import { lazy, Suspense, useId, useRef, useState } from 'react';
 import { cn, fieldDescription } from '../common';
 import { useComposedRefs } from '../common/refs';
 import { Button } from '../button';
+import { Progress } from '../progress';
 import { getFileIssue, type FileValidationIssue } from './validation';
 export type { UploadFieldProps, UploadGalleryItem } from './types';
 import type { UploadFieldProps } from './types';
@@ -232,13 +233,22 @@ export function UploadField({
               }}
             />
           )}
-          {loading && progress != null && (
-            <progress
+          {loading && (
+            <Progress
               data-testid={partTestId(testId, 'progress')}
               aria-label={t('upload.progress')}
               max={100}
-              value={Math.max(0, Math.min(100, progress))}
-              className={cn('w-full accent-brand-700', classNames?.progress)}
+              value={progress ?? null}
+              showValue
+              className={cn('w-full', classNames?.progress)}
+              classNames={{
+                label: 'sr-only',
+                header: 'justify-end',
+                value: 'text-ui-sm text-muted tabular-nums',
+                track: 'h-1.5',
+                indicator:
+                  'motion-safe:transition-[width] duration-[var(--motion-duration-normal)] ease-[var(--motion-ease-standard)]',
+              }}
             />
           )}
         </div>
