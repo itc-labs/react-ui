@@ -1,8 +1,8 @@
 // @vitest-environment jsdom
 import { act, createRef } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
-import { afterEach, beforeEach, expect, it, vi } from 'vitest';
-import { OptionGroup } from './index';
+import { afterEach, beforeEach, expect, expectTypeOf, it, vi } from 'vitest';
+import { OptionGroup, type OptionGroupProps } from './index';
 import { Form, FormField, useAppForm } from '../../modules/form';
 import { UILocaleProvider } from '../../i18n/provider';
 
@@ -383,4 +383,278 @@ it('automatically binds FormField values, validation and submission', async () =
   });
   expect(saved).toHaveBeenCalledWith({ fit: 'c' });
   expect(host.textContent).not.toContain('Choose another fit');
+});
+
+const toggles = () =>
+  Array.from(host.querySelectorAll<HTMLButtonElement>('button[aria-pressed]'));
+
+it.each(['chip', 'swatch'] as const)(
+  'toggles multiple %s values, labels and native form entries',
+  (variant) => {
+    const changed = vi.fn();
+
+    act(() =>
+      root.render(
+        <form>
+          <OptionGroup
+            multiple
+            variant={variant}
+            label="Màu"
+            showSelectedLabel
+            options={[
+              { value: 'black', label: 'Đen', color: '#000' },
+              { value: 'white', label: 'Trắng', color: '#fff' },
+            ]}
+            name="colors"
+            defaultValue={['black']}
+            onValueChange={changed}
+          />
+        </form>,
+      ),
+    );
+
+    expect(host.querySelector('[role="group"]')).not.toBeNull();
+    expect(radios()).toHaveLength(0);
+
+    act(() => toggles()[1]!.click());
+
+    expect(changed).toHaveBeenLastCalledWith(['black', 'white']);
+    expect(host.textContent).toContain('Màu: Đen, Trắng');
+    expect(new FormData(host.querySelector('form')!).getAll('colors')).toEqual([
+      'black',
+      'white',
+    ]);
+
+    act(() => toggles()[0]!.click());
+
+    act(() => toggles()[1]!.click());
+
+    expect(changed).toHaveBeenLastCalledWith([]);
+    expect(new FormData(host.querySelector('form')!).getAll('colors')).toEqual([]);
+  },
+);
+
+it('moves multiple focus without selection and toggles with Space and Enter', () => {
+  const changed = vi.fn();
+
+  act(() =>
+    root.render(<OptionGroup multiple options={options} onValueChange={changed} />),
+  );
+
+  expect(toggles().map((button) => button.tabIndex)).toEqual([0, -1, 0, 0, 0]);
+
+  act(() => toggles()[0]!.focus());
+
+  press(toggles()[0]!, 'ArrowRight');
+  expect(document.activeElement).toBe(toggles()[2]);
+  expect(changed).not.toHaveBeenCalled();
+  press(toggles()[2]!, ' ');
+  expect(changed).toHaveBeenLastCalledWith(['c']);
+  press(toggles()[2]!, 'End');
+  expect(document.activeElement).toBe(toggles()[4]);
+  press(toggles()[4]!, 'Home');
+  expect(document.activeElement).toBe(toggles()[0]);
+  press(toggles()[0]!, 'Enter');
+  expect(changed).toHaveBeenLastCalledWith(['c', 'a']);
+  press(toggles()[2]!, ' ');
+  expect(changed).toHaveBeenLastCalledWith(['a']);
+});
+
+it('requires at least one multiple selection, while disabled groups neither validate nor submit', () => {
+  const render = (disabled = false) =>
+    act(() =>
+      root.render(
+        <form>
+          <OptionGroup
+            multiple
+            required
+            disabled={disabled}
+            name="sizes"
+            options={options}
+          />
+        </form>,
+      ),
+    );
+
+  render();
+  const form = host.querySelector('form')!;
+  expect(form.checkValidity()).toBe(false);
+  expect(document.activeElement).toBe(toggles()[0]);
+
+  act(() => toggles()[0]!.click());
+
+  expect(form.checkValidity()).toBe(true);
+
+  act(() => toggles()[0]!.click());
+
+  expect(form.checkValidity()).toBe(false);
+  render(true);
+  expect(form.checkValidity()).toBe(true);
+  expect(toggles().every((button) => button.disabled && button.tabIndex === -1)).toBe(
+    true,
+  );
+  expect(new FormData(form).getAll('sizes')).toEqual([]);
+});
+
+it('limits additions with max, including overflow, and always permits removal', () => {
+  const changed = vi.fn();
+
+  act(() =>
+    root.render(
+      <OptionGroup
+        multiple
+        options={options}
+        max={1}
+        maxVisible={1}
+        defaultValue={['a']}
+        onValueChange={changed}
+        data-testid="sizes"
+      />,
+    ),
+  );
+
+  act(() =>
+    host.querySelector<HTMLButtonElement>('[data-testid="sizes-expand"]')!.click(),
+  );
+
+  const item = document.querySelector<HTMLButtonElement>(
+    '[data-testid="sizes-menuItem-c"]',
+  )!;
+  expect(item.getAttribute('aria-disabled')).toBe('true');
+
+  act(() => item.click());
+
+  expect(changed).not.toHaveBeenCalled();
+
+  act(() => toggles()[0]!.click());
+
+  expect(changed).toHaveBeenLastCalledWith([]);
+
+  act(() => item.click());
+
+  expect(changed).toHaveBeenLastCalledWith(['c']);
+  expect(toggles().map((button) => button.getAttribute('aria-label'))).toEqual([
+    'Alpha',
+    'Gamma',
+  ]);
+  expect(toggles()[0]!.disabled).toBe(true);
+
+  act(() => toggles()[1]!.click());
+
+  expect(changed).toHaveBeenLastCalledWith([]);
+});
+
+it('preserves caller ownership and displays every controlled selection beyond maxVisible', () => {
+  const changed = vi.fn();
+
+  const render = (value: string[]) =>
+    act(() =>
+      root.render(
+        <OptionGroup
+          multiple
+          options={options}
+          value={value}
+          maxVisible={1}
+          max={1}
+          onValueChange={changed}
+        />,
+      ),
+    );
+
+  render(['c', 'e']);
+  expect(toggles().map((button) => button.getAttribute('aria-label'))).toEqual([
+    'Alpha',
+    'Gamma',
+    'Epsilon',
+  ]);
+
+  act(() => toggles()[1]!.click());
+
+  expect(changed).toHaveBeenLastCalledWith(['e']);
+  expect(toggles()[1]!.getAttribute('aria-pressed')).toBe('true');
+  render([]);
+  expect(toggles()).toHaveLength(1);
+  expect(toggles()[0]!.getAttribute('aria-pressed')).toBe('false');
+});
+
+it('binds arrays through FormField with validation, callbacks and submission', async () => {
+  const saved = vi.fn();
+  const changed = vi.fn();
+
+  function Demo() {
+    const form = useAppForm({
+      defaultValues: { sizes: [] as string[] },
+      onSubmit: ({ value }) => {
+        saved(value);
+      },
+    });
+
+    return (
+      <Form form={form}>
+        <FormField
+          name="sizes"
+          label="Sizes"
+          validators={{
+            onChange: ({ value }: { value: unknown }) =>
+              Array.isArray(value) && value.length > 0
+                ? undefined
+                : 'Choose at least one size',
+          }}
+        >
+          <OptionGroup multiple options={options} onValueChange={changed} />
+        </FormField>
+      </Form>
+    );
+  }
+
+  await act(async () => root.render(<Demo />));
+  await act(async () => toggles()[0]!.click());
+  await act(async () => toggles()[0]!.click());
+  await act(async () =>
+    toggles()[0]!.dispatchEvent(new FocusEvent('focusout', { bubbles: true })),
+  );
+  expect(host.textContent).toContain('Choose at least one size');
+  await act(async () => toggles()[0]!.click());
+  await act(async () => toggles()[2]!.click());
+  expect(changed).toHaveBeenLastCalledWith(['a', 'c']);
+  expect(toggles()[0]!.getAttribute('aria-pressed')).toBe('true');
+  expect(toggles()[2]!.getAttribute('aria-pressed')).toBe('true');
+  await act(async () =>
+    host
+      .querySelector('form')!
+      .dispatchEvent(new Event('submit', { bubbles: true, cancelable: true })),
+  );
+  expect(saved).toHaveBeenCalledWith({ sizes: ['a', 'c'] });
+  expect(host.textContent).not.toContain('Choose at least one size');
+});
+
+it('keeps single and multiple value contracts distinct', () => {
+  type Single = Extract<OptionGroupProps, { multiple?: false }>;
+  type Multiple = Extract<OptionGroupProps, { multiple: true }>;
+  expectTypeOf<Single['value']>().toEqualTypeOf<string | undefined>();
+  expectTypeOf<Single['defaultValue']>().toEqualTypeOf<string | undefined>();
+  expectTypeOf<NonNullable<Single['onValueChange']>>().toEqualTypeOf<
+    (value: string) => void
+  >();
+  expectTypeOf<Multiple['value']>().toEqualTypeOf<string[] | undefined>();
+  expectTypeOf<Multiple['defaultValue']>().toEqualTypeOf<string[] | undefined>();
+  expectTypeOf<NonNullable<Multiple['onValueChange']>>().toEqualTypeOf<
+    (value: string[]) => void
+  >();
+});
+
+it('allows no additions when max is zero', () => {
+  const changed = vi.fn();
+
+  act(() =>
+    root.render(
+      <OptionGroup multiple options={options} max={0} onValueChange={changed} />,
+    ),
+  );
+
+  expect(toggles().every((button) => button.disabled)).toBe(true);
+
+  act(() => toggles()[0]!.click());
+
+  expect(changed).not.toHaveBeenCalled();
 });

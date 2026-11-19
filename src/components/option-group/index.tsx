@@ -53,9 +53,6 @@ export type OptionGroupProps = Omit<
 > &
   TestIdProps & {
     options: readonly OptionGroupOption[];
-    value?: string;
-    defaultValue?: string;
-    onValueChange?: (value: string) => void;
     name?: string;
     disabled?: boolean;
     required?: boolean;
@@ -67,10 +64,26 @@ export type OptionGroupProps = Omit<
     layout?: 'inline' | 'stacked';
     size?: 'sm' | 'md' | 'lg';
     variant?: 'chip' | 'swatch';
-    /** First N options stay inline, plus the selected one; the rest open from a "+N" menu. */
+    /** First N options stay inline, plus selected options; the rest open from a "+N" menu. */
     maxVisible?: number;
     classNames?: OptionGroupClassNames;
-  };
+  } & (
+    | {
+        multiple?: false;
+        value?: string;
+        defaultValue?: string;
+        onValueChange?: (value: string) => void;
+        max?: never;
+      }
+    | {
+        multiple: true;
+        value?: string[];
+        defaultValue?: string[];
+        onValueChange?: (value: string[]) => void;
+        /** Maximum selections. Existing selections can always be removed. */
+        max?: number;
+      }
+  );
 const helpBuiltin = { outline: HelpIcon, bold: HelpBoldIcon };
 const swatchSizes = {
   sm: 'size-control-sm',
@@ -78,30 +91,33 @@ const swatchSizes = {
   lg: 'size-control-lg',
 };
 
-export function OptionGroup({
-  options,
-  value,
-  defaultValue,
-  onValueChange,
-  name,
-  disabled = false,
-  required = false,
-  error,
-  hint,
-  label,
-  labelHint,
-  showSelectedLabel = false,
-  layout = 'stacked',
-  size = 'md',
-  variant = 'chip',
-  maxVisible,
-  className,
-  classNames,
-  'data-testid': testId,
-  'aria-describedby': describedBy,
-  'aria-labelledby': labelledBy,
-  ...props
-}: OptionGroupProps) {
+export function OptionGroup(allProps: OptionGroupProps) {
+  const {
+    multiple = false,
+    max,
+    options,
+    value,
+    defaultValue,
+    onValueChange,
+    name,
+    disabled = false,
+    required = false,
+    error,
+    hint,
+    label,
+    labelHint,
+    showSelectedLabel = false,
+    layout = 'stacked',
+    size = 'md',
+    variant = 'chip',
+    maxVisible,
+    className,
+    classNames,
+    'data-testid': testId,
+    'aria-describedby': describedBy,
+    'aria-labelledby': labelledBy,
+    ...props
+  } = allProps;
   const id = useId();
   const { t } = useUILocale();
   const [internalValue, setInternalValue] = useState(defaultValue);
@@ -109,24 +125,52 @@ export function OptionGroup({
   const picked = useRef<string | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const selected = value !== undefined ? value : internalValue;
-  const selectedOption = options.find((option) => option.value === selected);
+  const selectedValues = Array.isArray(selected)
+    ? selected
+    : typeof selected === 'string'
+      ? [selected]
+      : [];
+
+  const isSelected = (option: OptionGroupOption) =>
+    selectedValues.includes(option.value);
+
+  const selectedLabels = options
+    .filter(isSelected)
+    .map((option) => option.label)
+    .join(', ');
+  const atMax =
+    multiple &&
+    max !== undefined &&
+    selectedValues.length >= Math.max(0, Math.floor(max));
+
+  const isUnavailable = (option: OptionGroupOption) =>
+    disabled || option.disabled || (atMax && !isSelected(option));
+
   const limit =
     maxVisible !== undefined && Number.isFinite(maxVisible)
       ? Math.max(1, Math.floor(maxVisible))
       : options.length;
   const visible = options.filter(
-    (option, index) => index < limit || option.value === selected,
+    (option, index) => index < limit || isSelected(option),
   );
   const hidden = options.filter((option) => !visible.includes(option));
   const hiddenCount = hidden.length;
-  const enabled = visible.filter((option) => !option.disabled && !disabled);
-  const tabValue =
-    enabled.find((option) => option.value === selected)?.value ?? enabled[0]?.value;
+  const enabled = visible.filter((option) => !isUnavailable(option));
+  const tabValue = enabled.find(isSelected)?.value ?? enabled[0]?.value;
 
   const choose = (option: OptionGroupOption) => {
-    if (disabled || option.disabled || option.value === selected) return;
-    if (value === undefined) setInternalValue(option.value);
-    onValueChange?.(option.value);
+    if (isUnavailable(option)) return;
+    if (allProps.multiple) {
+      const next = isSelected(option)
+        ? selectedValues.filter((item) => item !== option.value)
+        : [...selectedValues, option.value];
+      if (value === undefined) setInternalValue(next);
+      allProps.onValueChange?.(next);
+    } else {
+      if (isSelected(option)) return;
+      if (value === undefined) setInternalValue(option.value);
+      allProps.onValueChange?.(option.value);
+    }
   };
 
   return (
@@ -145,10 +189,10 @@ export function OptionGroup({
             data-testid={partTestId(testId, 'label')}
             className={cn('text-ui-sm font-medium text-ink', classNames?.label)}
           >
-            {showSelectedLabel && selectedOption
+            {showSelectedLabel && selectedLabels
               ? t('optionGroup.selectedLabel', {
                   label,
-                  selected: selectedOption.label,
+                  selected: selectedLabels,
                 })
               : label}
             {required && (
@@ -181,7 +225,7 @@ export function OptionGroup({
       )}
       <div
         {...props}
-        role="radiogroup"
+        role={multiple ? 'group' : 'radiogroup'}
         aria-labelledby={labelledBy ?? (label ? `${id}-label` : undefined)}
         aria-describedby={fieldDescription(
           id,
@@ -190,7 +234,7 @@ export function OptionGroup({
           describedBy,
         )}
         aria-invalid={Boolean(error)}
-        aria-required={required}
+        aria-required={multiple ? undefined : required}
         aria-disabled={disabled}
         data-testid={testId}
         className={cn(
@@ -200,22 +244,25 @@ export function OptionGroup({
         )}
       >
         {visible.map((option) => {
-          const unavailable = disabled || option.disabled;
-          const checked = option.value === selected;
+          const unavailable = isUnavailable(option);
+          const checked = isSelected(option);
           const control = (
             <button
               key={option.value}
               type="button"
-              role="radio"
+              role={multiple ? undefined : 'radio'}
               aria-label={option.label}
-              aria-checked={checked}
+              aria-checked={multiple ? undefined : checked}
+              aria-pressed={multiple ? checked : undefined}
               aria-describedby={
                 option.description != null
                   ? `${id}-description-${option.value}`
                   : undefined
               }
               disabled={unavailable}
-              tabIndex={tabValue === option.value ? 0 : -1}
+              tabIndex={
+                !unavailable && (multiple || tabValue === option.value) ? 0 : -1
+              }
               ref={(node) => {
                 if (node) controls.current.set(option.value, node);
                 else controls.current.delete(option.value);
@@ -241,7 +288,8 @@ export function OptionGroup({
                 if (next) {
                   event.preventDefault();
                   controls.current.get(next.value)?.focus();
-                  choose(next);
+                  if (!multiple || event.key === ' ' || event.key === 'Enter')
+                    choose(next);
                 }
               }}
               className={cn(
@@ -329,7 +377,7 @@ export function OptionGroup({
             <PopoverTrigger asChild disabled={disabled}>
               <button
                 type="button"
-                aria-haspopup="listbox"
+                aria-haspopup={multiple ? 'dialog' : 'listbox'}
                 aria-label={t('optionGroup.expand', { count: hiddenCount })}
                 data-testid={partTestId(testId, 'expand')}
                 className={cn(
@@ -347,9 +395,7 @@ export function OptionGroup({
               onOpenAutoFocus={(event) => {
                 event.preventDefault();
                 (event.currentTarget as HTMLElement)
-                  .querySelector<HTMLElement>(
-                    '[role="option"]:not([aria-disabled="true"])',
-                  )
+                  .querySelector<HTMLElement>('button:not([aria-disabled="true"])')
                   ?.focus();
               }}
               onCloseAutoFocus={(event) => {
@@ -364,14 +410,14 @@ export function OptionGroup({
               className={cn('w-auto min-w-40 p-1', classNames?.menu)}
             >
               <div
-                role="listbox"
+                role={multiple ? 'group' : 'listbox'}
                 aria-label={t('optionGroup.expand', { count: hiddenCount })}
                 data-testid={partTestId(testId, 'menu')}
                 className="grid max-h-72 overflow-y-auto"
                 onKeyDown={(event) => {
                   const items = Array.from(
                     event.currentTarget.querySelectorAll<HTMLElement>(
-                      '[role="option"]:not([aria-disabled="true"])',
+                      'button:not([aria-disabled="true"])',
                     ),
                   );
                   const index = items.indexOf(document.activeElement as HTMLElement);
@@ -394,9 +440,10 @@ export function OptionGroup({
                   <button
                     key={option.value}
                     type="button"
-                    role="option"
-                    aria-selected={false}
-                    aria-disabled={option.disabled || undefined}
+                    role={multiple ? undefined : 'option'}
+                    aria-selected={multiple ? undefined : false}
+                    aria-pressed={multiple ? false : undefined}
+                    aria-disabled={isUnavailable(option) || undefined}
                     tabIndex={-1}
                     data-testid={partTestId(testId, 'menuItem', option.value)}
                     className={cn(
@@ -405,7 +452,7 @@ export function OptionGroup({
                       classNames?.menuItem,
                     )}
                     onClick={() => {
-                      if (option.disabled) return;
+                      if (isUnavailable(option)) return;
                       picked.current = option.value;
                       choose(option);
                       setMenuOpen(false);
@@ -436,8 +483,31 @@ export function OptionGroup({
           </Popover>
         )}
       </div>
-      {name && (
-        <input type="hidden" name={name} value={selected ?? ''} disabled={disabled} />
+      {name &&
+        (multiple
+          ? selectedValues
+          : [typeof selected === 'string' ? selected : '']
+        ).map((item) => (
+          <input
+            key={item}
+            type="hidden"
+            name={name}
+            value={item}
+            disabled={disabled}
+          />
+        ))}
+      {multiple && required && (
+        <input
+          type="checkbox"
+          className="sr-only"
+          tabIndex={-1}
+          aria-hidden="true"
+          required
+          disabled={disabled}
+          checked={selectedValues.length > 0}
+          onChange={() => {}}
+          onInvalid={() => controls.current.get(enabled[0]?.value ?? '')?.focus()}
+        />
       )}
       {(error || hint) && (
         <p

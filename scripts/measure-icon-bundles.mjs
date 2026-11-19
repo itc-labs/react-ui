@@ -249,7 +249,8 @@ for (const [name, limit] of Object.entries({
   // New collection feedback messages also enter the shared locale catalogs.
   QuantityInput: 21_500,
   // Shared locale strings (gallery tiles, StatusTag) add a few bytes.
-  OptionGroup: 52_200,
+  // Multiple toggles, array submission and required validation measure about 52.4 KB gzip.
+  OptionGroup: 52_500,
   // Trend and KPI locale messages add about 60 gzip bytes to every locale consumer.
   JsonView: 22_400,
   // About 10% above the measured display subpath fixtures.
