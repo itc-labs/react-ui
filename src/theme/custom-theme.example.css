@@ -35,6 +35,9 @@
     var(--color-surface)
   );
   --color-table-header: var(--color-canvas);
+  --color-media-scrim: #0f172a;
+  --color-media-scrim-danger: #991b1b;
+  --color-on-media: #ffffff;
   --color-ink: #0f172a;
   --color-muted: #475569;
   --color-line: #e2e8f0;

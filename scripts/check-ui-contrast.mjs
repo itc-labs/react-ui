@@ -55,7 +55,32 @@ for (const [foreground, background, minimum] of pairs) {
     `| ${foreground} / ${background} | ${ratio.toFixed(2)}:1 | ${minimum}:1 | ${pass ? 'PASS' : 'FAIL'} |`,
   );
 }
+// White is the brightest possible image backdrop for these dark scrims.
+for (const [background, opacity] of [
+  ['media-scrim', 0.6],
+  ['media-scrim-danger', 0.75],
+]) {
+  const composite =
+    '#' +
+    [1, 3, 5]
+      .map((offset) =>
+        Math.round(
+          parseInt(colors[background].slice(offset, offset + 2), 16) * opacity +
+            255 * (1 - opacity),
+        )
+          .toString(16)
+          .padStart(2, '0'),
+      )
+      .join('');
+  const ratio = (luminance(colors['on-media']) + 0.05) / (luminance(composite) + 0.05);
+  const pass = ratio >= 4.5;
+  failed ||= !pass;
+  console.log(
+    `| on-media / ${background} ${opacity * 100}% over white | ${ratio.toFixed(2)}:1 | 4.5:1 | ${pass ? 'PASS' : 'FAIL'} |`,
+  );
+}
+
 console.log(
-  '\nOpaque token-pair checks only; not a full accessibility audit. Decorative line token and disabled controls excluded.',
+  '\nToken pairs and media scrims over the brightest image backdrop; not a full accessibility audit. Decorative line token and disabled controls excluded.',
 );
 if (failed) process.exitCode = 1;

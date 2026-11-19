@@ -13,6 +13,10 @@ import { CloseIcon } from '../icon/outline/close';
 import { CloseIcon as CloseBoldIcon } from '../icon/bold/close';
 import { RefreshIcon } from '../icon/outline/refresh';
 import { RefreshIcon as RefreshBoldIcon } from '../icon/bold/refresh';
+import { WarningIcon } from '../icon/outline/warning';
+import { WarningIcon as WarningBoldIcon } from '../icon/bold/warning';
+import { Progress } from '../progress';
+import { Tooltip } from '../tooltip';
 import { UiImage } from '../link-image-provider';
 import { useUILocale } from '../../i18n/provider';
 import type { UploadFieldProps, UploadGalleryItem } from './types';
@@ -141,14 +145,53 @@ export function UploadGallery({
                 src={item.src}
                 alt={item.alt}
                 data-testid={partTestId(testId, 'tileImage', item.id)}
-                className={cn(
-                  'size-full object-cover',
-                  (uploading || failed) && 'opacity-40',
-                  classNames?.tileImage,
-                )}
+                className={cn('size-full object-cover', classNames?.tileImage)}
               />
-              {failed && (
-                <div aria-hidden="true" className="absolute inset-0 bg-danger-50/80" />
+              {(uploading || failed) && (
+                <div
+                  aria-hidden="true"
+                  data-testid={partTestId(testId, 'tileOverlay', item.id)}
+                  className={cn(
+                    // Top padding keeps the ring and icon clear of the action buttons on small tiles.
+                    'pointer-events-none absolute inset-0 flex flex-col items-center justify-center gap-2 px-2 pt-9 pb-2 text-on-media',
+                    failed ? 'bg-media-scrim-danger/75' : 'bg-media-scrim/60',
+                    classNames?.tileOverlay,
+                  )}
+                >
+                  {uploading ? (
+                    <Progress
+                      variant="circular"
+                      size={52}
+                      thickness={3}
+                      value={percent}
+                      indeterminate={percent === 0}
+                      data-testid={partTestId(testId, 'tileProgress', item.id)}
+                      className={classNames?.tileProgress}
+                      classNames={{
+                        track: 'text-on-media/25',
+                        indicator: 'text-on-media',
+                        center: 'p-0 text-ui-sm font-medium text-on-media tabular-nums',
+                      }}
+                    >
+                      {percent > 0 ? `${percent}%` : null}
+                    </Progress>
+                  ) : (
+                    <KitIcon
+                      name="warning"
+                      builtin={{ outline: WarningIcon, bold: WarningBoldIcon }}
+                      size={32}
+                    />
+                  )}
+                  <span
+                    data-testid={partTestId(testId, 'tileCaption', item.id)}
+                    className={cn(
+                      'text-center text-ui-sm max-sm:sr-only',
+                      classNames?.tileCaption,
+                    )}
+                  >
+                    {t(failed ? 'upload.failedCaption' : 'upload.uploadingCaption')}
+                  </span>
+                </div>
               )}
               {item.badge != null && (
                 <div
@@ -181,15 +224,17 @@ export function UploadGallery({
                   />
                 )}
                 {failed && onItemRetry && (
-                  <KitIconButton
-                    icon="refresh"
-                    builtin={{ outline: RefreshIcon, bold: RefreshBoldIcon }}
-                    variant="secondary"
-                    size="sm"
-                    label={t('upload.retry', { name: item.alt })}
-                    disabled={blocked}
-                    onClick={() => onItemRetry(item.id)}
-                  />
+                  <Tooltip content={item.error || t('upload.imageError')}>
+                    <KitIconButton
+                      icon="refresh"
+                      builtin={{ outline: RefreshIcon, bold: RefreshBoldIcon }}
+                      variant="secondary"
+                      size="sm"
+                      label={t('upload.retry', { name: item.alt })}
+                      disabled={blocked}
+                      onClick={() => onItemRetry(item.id)}
+                    />
+                  </Tooltip>
                 )}
                 {onItemRemove && (
                   <KitIconButton
@@ -206,24 +251,13 @@ export function UploadGallery({
               {(uploading || failed) && (
                 <div
                   role="status"
+                  aria-live="polite"
                   data-testid={partTestId(testId, 'tileStatus', item.id)}
-                  className={cn(
-                    'absolute inset-x-0 bottom-0 grid gap-1 bg-surface/90 p-2 text-ui-sm',
-                    failed ? 'text-danger-700' : 'text-ink',
-                    classNames?.tileStatus,
-                  )}
+                  className={cn('sr-only', classNames?.tileStatus)}
                 >
                   {failed
                     ? item.error || t('upload.imageError')
                     : t('upload.uploading', { percent })}
-                  {uploading && (
-                    <progress
-                      max={100}
-                      value={percent}
-                      aria-label={t('upload.progress')}
-                      className="w-full accent-brand-700"
-                    />
-                  )}
                 </div>
               )}
             </li>
