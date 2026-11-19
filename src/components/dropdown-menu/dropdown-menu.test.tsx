@@ -2,7 +2,8 @@
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
-import { DropdownMenu } from './index';
+import { DropdownMenu, type DropdownMenuItemTone } from './index';
+import { SendIcon } from '../icon/outline/send';
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 let host: HTMLDivElement;
@@ -174,3 +175,67 @@ it('supports dashed actions and submenu triggers without changing keyboard selec
   });
   expect(selected).toHaveBeenCalledOnce();
 });
+
+const tones: DropdownMenuItemTone[] = [
+  'default',
+  'brand',
+  'info',
+  'success',
+  'warning',
+  'danger',
+];
+
+it.each(tones)(
+  'applies %s tone to actions, links and submenu triggers',
+  async (tone) => {
+    await act(async () =>
+      root.render(
+        <DropdownMenu
+          trigger="Actions"
+          defaultOpen
+          data-testid="tones"
+          items={[
+            { id: 'action', label: 'Action', icon: SendIcon, tone },
+            { id: 'link', label: 'Link', href: '#target', icon: SendIcon, tone },
+            {
+              id: 'sub',
+              type: 'submenu',
+              label: 'More',
+              icon: SendIcon,
+              tone,
+              items: [],
+            },
+            {
+              id: 'check',
+              type: 'checkbox',
+              label: 'Checked',
+              checked: true,
+              onCheckedChange: () => {},
+            },
+          ]}
+        />,
+      ),
+    );
+    for (const id of ['tones-item-action', 'tones-item-link', 'tones-submenu-sub']) {
+      const item = byId(id);
+      expect(
+        item.classList.contains(
+          tone === 'default'
+            ? 'data-[highlighted]:bg-hover'
+            : `data-[highlighted]:bg-${tone}-50`,
+        ),
+      ).toBe(true);
+      if (tone !== 'default')
+        expect(item.classList.contains(`text-${tone}-700`)).toBe(true);
+      expect(item.querySelector('svg')!.className.baseVal).not.toMatch(/text-/);
+      expect(item.hasAttribute('tone')).toBe(false);
+    }
+    expect(byId('tones-item-link').tagName).toBe('A');
+    expect(
+      byId('tones-checkbox-check').classList.contains('data-[highlighted]:bg-hover'),
+    ).toBe(true);
+    expect(byId('tones-checkbox-check').className).not.toMatch(
+      /text-(brand|info|success|warning|danger)-700/,
+    );
+  },
+);

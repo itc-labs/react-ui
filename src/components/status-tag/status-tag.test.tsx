@@ -372,3 +372,63 @@ it('honors a controlled update to a final status and focuses the resulting chip'
   expect(chip().textContent).toBe('Archived');
   expect(document.activeElement).toBe(chip());
 });
+
+it.each([
+  { name: 'no actionTone', tone: 'success', expected: 'default' },
+  { name: 'neutral target', tone: 'neutral', expected: 'default' },
+  { name: 'danger target without actionTone', tone: 'danger', expected: 'default' },
+  { name: 'danger flag', tone: 'success', danger: true, expected: 'danger' },
+  { name: 'explicit action', tone: 'success', actionTone: 'info', expected: 'info' },
+  {
+    name: 'action overrides danger',
+    tone: 'success',
+    actionTone: 'warning',
+    danger: true,
+    expected: 'warning',
+  },
+  {
+    name: 'explicit default overrides danger',
+    tone: 'danger',
+    actionTone: 'default',
+    danger: true,
+    expected: 'default',
+  },
+  { name: 'action danger', tone: 'success', actionTone: 'danger', expected: 'danger' },
+] satisfies {
+  name: string;
+  tone: StatusOption<string>['tone'];
+  actionTone?: StatusOption<string>['actionTone'];
+  danger?: boolean;
+  expected: string;
+}[])('resolves menu and confirmation tones: $name', async (testCase) => {
+  const { name, expected, ...option } = testCase;
+  await render({
+    onValueChange: vi.fn(),
+    options: [
+      options[0]!,
+      {
+        ...option,
+        value: 'active',
+        label: name,
+        confirm: { title: 'Change status?' },
+      },
+    ],
+  });
+  await open();
+  const item = byId('menu-item-active');
+  expect(
+    item.classList.contains(
+      expected === 'default'
+        ? 'data-[highlighted]:bg-hover'
+        : `data-[highlighted]:bg-${expected}-50`,
+    ),
+  ).toBe(true);
+  if (expected !== 'default')
+    expect(item.classList.contains(`text-${expected}-700`)).toBe(true);
+  else
+    expect(item.className).not.toMatch(/text-(brand|info|success|warning|danger)-700/);
+  await click('menu-item-active');
+  expect(byId('dialog-confirm').className.includes('bg-danger')).toBe(
+    option.danger === true || expected === 'danger',
+  );
+});

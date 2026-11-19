@@ -6,7 +6,12 @@ import { DataTable, type ColumnDef } from '../../modules/data-table';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useState } from 'react';
 import { expect, userEvent, within, waitFor } from 'storybook/test';
-import { DropdownMenu, type DropdownMenuEntry } from './index';
+import {
+  DropdownMenu,
+  type DropdownMenuEntry,
+  type DropdownMenuItemTone,
+} from './index';
+import { SendIcon } from '../icon/outline/send';
 
 const actions: DropdownMenuEntry[] = [
   { id: 'edit', label: 'Edit', icon: 'edit' },
@@ -22,7 +27,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'Build an action menu with trigger and items. Entries support callbacks or href, tone="danger" for destructive actions, checkboxes, labels, groups and submenus. Radix manages focus and keyboard navigation; consumers manage checkbox state. Supply items for the built-in composition, or omit it to compose primitives. items may be an empty array.',
+          'Build an action menu with trigger and items. Entries support callbacks or href, semantic item tones (default, brand, info, success, warning, danger), checkboxes, labels, groups and submenus. Radix manages focus and keyboard navigation; consumers manage checkbox state. Supply items for the built-in composition, or omit it to compose primitives. items may be an empty array.',
       },
     },
   },
@@ -249,4 +254,26 @@ export const Dashed: Story = {
       ]}
     />
   ),
+};
+
+export const Tones: Story = {
+  tags: ['variants'],
+  args: {
+    trigger: 'Semantic tones',
+    items: (
+      [
+        'default',
+        'brand',
+        'info',
+        'success',
+        'warning',
+        'danger',
+      ] satisfies DropdownMenuItemTone[]
+    ).map((tone) => ({
+      id: tone,
+      label: tone,
+      tone,
+      icon: SendIcon,
+    })),
+  },
 };

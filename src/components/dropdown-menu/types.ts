@@ -3,6 +3,9 @@ import type { DropdownMenu as Primitive } from 'radix-ui';
 import type { SlotClasses, TestIdProps } from '../common';
 import type { IconGlyph, IconName } from '../icon';
 
+export type DropdownMenuItemTone =
+  'default' | 'brand' | 'info' | 'success' | 'warning' | 'danger';
+
 interface MenuEntryBase {
   id: string;
   className?: string;
@@ -18,7 +21,7 @@ interface MenuSelectable extends MenuEntryBase {
 export type DropdownMenuEntry =
   | (MenuSelectable & {
       type?: 'item';
-      tone?: 'default' | 'danger';
+      tone?: DropdownMenuItemTone;
       href?: string;
       onSelect?: ComponentProps<typeof Primitive.Item>['onSelect'];
     })
@@ -37,7 +40,7 @@ export type DropdownMenuEntry =
     })
   | (MenuSelectable & {
       type: 'submenu';
-      tone?: 'default' | 'danger';
+      tone?: DropdownMenuItemTone;
       items: readonly DropdownMenuEntry[];
     });
 
