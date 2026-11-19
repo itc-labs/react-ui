@@ -1,9 +1,12 @@
 // @vitest-environment jsdom
+import { createUploadReorder } from '../../modules/dnd';
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { UploadField, type UploadFieldProps, type UploadGalleryItem } from './index';
 import { UILocaleProvider } from '../../i18n/provider';
+
+const uploadReorder = createUploadReorder();
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 let host: HTMLDivElement;
@@ -69,9 +72,8 @@ async function render(props: UploadFieldProps, locale = 'en-US') {
       </UILocaleProvider>,
     );
     await import('./gallery');
-    await import('./sortable-upload');
   });
-  if (props.sortable)
+  if (props.reorder)
     await vi.waitFor(() =>
       expect(host.querySelector('[data-dnd-item]')).not.toBeNull(),
     );
@@ -116,7 +118,7 @@ it.each(['en-US', 'vi-VN'])(
     await render(
       {
         variant: 'gallery',
-        sortable: true,
+        reorder: uploadReorder,
         items,
         onItemsReorder: reorder,
         onItemRemove: remove,
@@ -169,7 +171,7 @@ it.each(['en-US', 'vi-VN'])(
     expect(remove).toHaveBeenCalledWith('first');
     await render({
       variant: 'gallery',
-      sortable: true,
+      reorder: uploadReorder,
       items: [items[2]!, items[1]!, items[0]!, items[3]!],
     });
     expect(order()).toEqual(['second', 'busy', 'first', 'failed']);
@@ -183,7 +185,7 @@ it('leaves non-sortable galleries unchanged and supports custom grid columns whe
   expect(host.querySelectorAll('[data-testid^="upload-tile-"]')).toHaveLength(4);
   await render({
     variant: 'gallery',
-    sortable: true,
+    reorder: uploadReorder,
     items,
     classNames: { grid: 'grid-cols-5' },
   });
@@ -198,7 +200,7 @@ it.each(['disabled', 'loading'] as const)(
     const reorder = vi.fn();
     await render({
       variant: 'gallery',
-      sortable: true,
+      reorder: uploadReorder,
       items,
       [state]: true,
       onItemsReorder: reorder,
@@ -221,7 +223,7 @@ it.each([false, true])(
     ];
     const change = vi.fn();
     await render({
-      sortable: true,
+      reorder: uploadReorder,
       multiple: true,
       ...(controlled ? { value: files } : { defaultValue: files }),
       onValueChange: change,
@@ -243,7 +245,12 @@ it.each([false, true])(
 
 it('reorders gallery tiles with the pointer sensor', async () => {
   const reorder = vi.fn();
-  await render({ variant: 'gallery', sortable: true, items, onItemsReorder: reorder });
+  await render({
+    variant: 'gallery',
+    reorder: uploadReorder,
+    items,
+    onItemsReorder: reorder,
+  });
 
   const pointer = async (target: EventTarget, type: string, x: number, y: number) => {
     await act(async () => {
@@ -273,4 +280,14 @@ it('reorders gallery tiles with the pointer sensor', async () => {
     'first',
     'failed',
   ]);
+});
+
+it('keeps the default dropzone free of drag handles without a plugin', async () => {
+  const files = [new File(['a'], 'first.pdf'), new File(['b'], 'second.pdf')];
+  const change = vi.fn();
+  await render({ defaultValue: files, multiple: true, onValueChange: change });
+  expect(host.querySelector('[data-dnd-item]')).toBeNull();
+  expect(host.querySelector('[data-dnd-activator]')).toBeNull();
+  expect(host.querySelectorAll('[data-testid^="upload-files-file-"]')).toHaveLength(2);
+  expect(change).not.toHaveBeenCalled();
 });

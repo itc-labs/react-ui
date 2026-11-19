@@ -15,7 +15,7 @@ import type { UploadFieldProps } from './types';
 export function UploadFileList({
   'data-testid': testId,
   files,
-  sortable,
+  reorder,
   onReorder,
   blocked,
   onRemove,
@@ -23,7 +23,7 @@ export function UploadFileList({
   className,
 }: {
   files: readonly File[];
-  sortable: boolean;
+  reorder: UploadFieldProps['reorder'];
   onReorder: (files: File[]) => void;
   blocked: boolean;
   onRemove: (index: number) => void;
@@ -50,7 +50,7 @@ export function UploadFileList({
 
   return (
     <UploadSort
-      enabled={sortable}
+      reorder={reorder}
       blocked={blocked}
       orientation="vertical"
       items={entries}

@@ -1005,5 +1005,13 @@ export function SortableOverlay({ children }: { children: (id: string) => ReactN
   return null;
 }
 
-export { createTransferDnd, createRowReorder } from './integrations';
-export type { TransferDndPlugin, DataTableRowReorderPlugin } from './integration-types';
+export {
+  createTransferDnd,
+  createRowReorder,
+  createUploadReorder,
+} from './integrations';
+export type {
+  TransferDndPlugin,
+  DataTableRowReorderPlugin,
+  UploadReorderPlugin,
+} from './integration-types';

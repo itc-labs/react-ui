@@ -36,7 +36,7 @@ export function UploadGallery({
   describedBy,
   invalid,
   items,
-  sortable,
+  reorder,
   onItemsReorder,
   blocked,
   maxFiles,
@@ -54,7 +54,7 @@ export function UploadGallery({
   describedBy: string | undefined;
   invalid: boolean;
   items: readonly UploadGalleryItem[];
-  sortable: boolean;
+  reorder: UploadFieldProps['reorder'];
   onItemsReorder: UploadFieldProps['onItemsReorder'];
   blocked: boolean;
   maxFiles: number;
@@ -77,7 +77,7 @@ export function UploadGallery({
   return (
     <>
       <UploadSort
-        enabled={sortable}
+        reorder={reorder}
         blocked={blocked}
         orientation="grid"
         items={items.map((item) => ({

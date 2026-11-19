@@ -1,8 +1,11 @@
+import { createUploadReorder } from '@itclabs/react-ui/dnd';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, userEvent, within, waitFor } from 'storybook/test';
 import { UploadField, type UploadGalleryItem } from './index';
 import { useState } from 'react';
 import { StarIcon } from '../icon/outline/star';
+const uploadReorder = createUploadReorder();
+
 const meta = {
   title: 'Components/UploadField',
   component: UploadField,
@@ -321,7 +324,7 @@ export const GallerySortable: Story = {
         label="Product images"
         hint="Drag a handle, or press Space, an arrow key, then Space to reorder. The first image is the thumbnail."
         accept="image/*"
-        sortable
+        reorder={uploadReorder}
         maxFiles={8}
         items={items.map((item, index) => ({
           ...item,
@@ -356,7 +359,7 @@ export const SortableFileList: Story = {
         label="Attachments"
         hint="Drag a handle, or press Space, an arrow key, then Space to reorder."
         multiple
-        sortable
+        reorder={uploadReorder}
         value={files}
         onValueChange={setFiles}
       />

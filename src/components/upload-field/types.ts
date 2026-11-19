@@ -1,3 +1,4 @@
+import type { UploadReorderPlugin } from '../../modules/dnd/integration-types';
 import type { TestIdProps } from '../common/testing';
 import type { ReactNode, Ref } from 'react';
 import type { SlotClasses } from '../common';
@@ -34,8 +35,8 @@ export type UploadFieldProps = (FileRules & {
   variant?: 'dropzone' | 'gallery';
   /** Gallery only. Counts toward maxFiles; status defaults to idle. */
   items?: readonly UploadGalleryItem[];
-  /** Enable pointer and keyboard reordering in either variant. */
-  sortable?: boolean;
+  /** Opt in to pointer and keyboard reordering with createUploadReorder() from /dnd. */
+  reorder?: UploadReorderPlugin;
   /** Gallery only: full new ID order; the app must reorder its controlled items. */
   onItemsReorder?: (ids: string[]) => void;
   onItemRemove?: (id: string) => void;

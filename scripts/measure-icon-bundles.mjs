@@ -198,6 +198,11 @@ for (const [name, file] of Object.entries(entries)) {
   )
     throw new Error('Icon eagerly imports the catalog or loader manifest');
   if (name === 'UploadField') {
+    const dnd = Object.keys(metafile.inputs).filter((input) =>
+      /modules\/dnd\/|@dnd-kit\//.test(input),
+    );
+    if (dnd.length)
+      throw new Error(`UploadField imports DnD, including lazy chunks: ${dnd}`);
     if (
       !Object.keys(metafile.outputs).some((path) =>
         metafile.outputs[path].entryPoint?.endsWith('/media-gallery/lightbox.tsx'),

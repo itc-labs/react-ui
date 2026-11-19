@@ -1,8 +1,8 @@
 'use client';
 
 import { Children, cloneElement, type ReactElement, type ReactNode } from 'react';
-import { Sortable, SortableHandle, SortableItem } from '../../modules/dnd';
-import type { UploadSortProps } from './upload-sort';
+import { Sortable, SortableHandle, SortableItem } from './index';
+import type { UploadReorderProps } from './integration-types';
 
 export function SortableUpload({
   blocked,
@@ -11,7 +11,7 @@ export function SortableUpload({
   leading = 0,
   onReorder,
   children,
-}: UploadSortProps) {
+}: UploadReorderProps) {
   const nodes = Children.toArray(children.props.children);
 
   return (
