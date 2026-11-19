@@ -44,6 +44,14 @@ export const WithBreadcrumb: Story = {
   },
 };
 
+export const WithBack: Story = {
+  tags: ['example'],
+  args: {
+    back: { label: 'Back to list', href: '/items' },
+    action: <Button>Save</Button>,
+  },
+};
+
 export const CustomClasses: Story = {
   tags: ['customization'],
   render: () => (

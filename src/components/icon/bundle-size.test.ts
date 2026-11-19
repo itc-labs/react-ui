@@ -28,6 +28,7 @@ it('keeps ordinary imports free of heavy modules and within gzip budgets', () =>
     'Lightbox',
     'MediaGallery',
     'OptionGroup',
+    'PageHeader',
     'QuantityInput',
     'Rating',
     'RichTextView',
@@ -40,6 +41,7 @@ it('keeps ordinary imports free of heavy modules and within gzip budgets', () =>
     'Transfer',
     'TransferDnd',
     'TreeSelect',
+    'UploadField',
     'VirtualGrid',
     'VirtualList',
   ]);

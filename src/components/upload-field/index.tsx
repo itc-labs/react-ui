@@ -7,17 +7,26 @@ import { valueControl } from '../common/form-control';
 import { partTestId } from '../common/testing';
 
 import { useUILocale } from '../../i18n/provider';
-import { useId, useRef, useState } from 'react';
+import { lazy, Suspense, useId, useRef, useState } from 'react';
 import { cn, fieldDescription } from '../common';
 import { useComposedRefs } from '../common/refs';
 import { Button } from '../button';
 import { getFileIssue, type FileValidationIssue } from './validation';
-export type { UploadFieldProps } from './types';
+export type { UploadFieldProps, UploadGalleryItem } from './types';
 import type { UploadFieldProps } from './types';
 import { UploadFileList } from './file-list';
 
+// Gallery tiles, icon buttons and the Lightbox load only for variant="gallery".
+const UploadGallery = /* @__PURE__ */ lazy(() =>
+  import('./gallery').then((module) => ({ default: module.UploadGallery })),
+);
+
 export function UploadField({
   'data-testid': testId,
+  variant = 'dropzone',
+  items = [],
+  onItemRemove,
+  onItemRetry,
   id,
   name,
   label,
@@ -32,7 +41,7 @@ export function UploadField({
   disabled = false,
   loading = false,
   progress,
-  multiple = false,
+  multiple = variant === 'gallery',
   accept,
   maxBytes = 10 * 1024 * 1024,
   maxFiles = multiple ? 5 : 1,
@@ -55,7 +64,7 @@ export function UploadField({
 
   function change(next: File[]) {
     setRejected(undefined);
-    setLocal(next);
+    if (variant === 'dropzone') setLocal(next);
     onValueChange?.(next);
     onBlur?.();
   }
@@ -65,7 +74,12 @@ export function UploadField({
     const problem = getFileIssue(next, {
       accept: accept ?? '',
       maxBytes,
-      maxFiles: multiple ? maxFiles : 1,
+      maxFiles:
+        variant === 'gallery'
+          ? Math.max(0, maxFiles - items.length)
+          : multiple
+            ? maxFiles
+            : 1,
     });
     if (problem) {
       setRejected(problem);
@@ -76,6 +90,25 @@ export function UploadField({
     }
     change(next);
   }
+
+  const fileInput = (
+    <input
+      data-testid={partTestId(testId, 'input')}
+      ref={input}
+      type="file"
+      name={name}
+      accept={accept}
+      multiple={multiple}
+      disabled={blocked || (variant === 'gallery' && items.length >= maxFiles)}
+      tabIndex={-1}
+      className="hidden"
+      aria-label={label}
+      onChange={(event) => {
+        pick(Array.from(event.currentTarget.files ?? []));
+        event.currentTarget.value = '';
+      }}
+    />
+  );
 
   return (
     <div
@@ -98,101 +131,118 @@ export function UploadField({
           </span>
         )}
       </label>
-      <div
-        data-testid={partTestId(testId, 'dropzone')}
-        onDragOver={(event) => {
-          event.preventDefault();
-          if (!blocked) setDragging(true);
-        }}
-        onDragLeave={(event) => {
-          if (!event.currentTarget.contains(event.relatedTarget as Node | null))
-            setDragging(false);
-        }}
-        onDrop={(event) => {
-          event.preventDefault();
-          setDragging(false);
-          pick(Array.from(event.dataTransfer.files));
-        }}
-        className={cn(
-          'grid gap-3 rounded-control border border-dashed border-control-border bg-surface p-4',
-          dragging && 'border-accent bg-hover',
-          blocked && 'cursor-not-allowed opacity-60',
-          issue && 'border-danger-700',
-          classNames?.dropzone,
-        )}
-      >
-        <div
-          data-testid={partTestId(testId, 'actions')}
-          className={cn('flex flex-wrap items-center gap-3', classNames?.actions)}
-        >
-          <Button
-            data-testid={partTestId(testId, 'trigger')}
-            className={classNames?.trigger}
-            ref={composedRef}
-            id={controlId}
-            variant="secondary"
-            loading={loading}
-            disabled={disabled}
-            aria-invalid={Boolean(issue)}
-            aria-describedby={fieldDescription(
-              controlId,
-              Boolean(issue),
-              Boolean(hint),
-            )}
-            onBlur={onBlur}
-            onClick={() => input.current?.click()}
+      {variant === 'gallery' ? (
+        <>
+          {fileInput}
+          <Suspense
+            fallback={
+              <div
+                aria-busy="true"
+                className="aspect-square w-1/3 animate-pulse rounded-control border border-dashed border-line sm:w-1/4 lg:w-1/6"
+              />
+            }
           >
-            <KitIcon
-              name="upload"
-              builtin={{ outline: UploadIcon, bold: UploadBoldIcon }}
+            <UploadGallery
+              testId={testId}
+              controlId={controlId}
+              label={label ?? t('upload.label')}
+              describedBy={fieldDescription(controlId, Boolean(issue), Boolean(hint))}
+              invalid={Boolean(issue)}
+              items={items}
+              blocked={blocked}
+              maxFiles={maxFiles}
+              classNames={classNames}
+              triggerRef={composedRef}
+              onPick={pick}
+              onOpenPicker={() => input.current?.click()}
+              onBlur={onBlur}
+              onItemRemove={onItemRemove}
+              onItemRetry={onItemRetry}
             />
-            {t('upload.choose')}
-          </Button>
-          <span
-            data-testid={partTestId(testId, 'dropHint')}
-            className={cn('text-ui-sm text-muted', classNames?.dropHint)}
-          >
-            {t('upload.drop')}
-          </span>
-        </div>
-        <input
-          data-testid={partTestId(testId, 'input')}
-          ref={input}
-          type="file"
-          name={name}
-          accept={accept}
-          multiple={multiple}
-          disabled={blocked}
-          tabIndex={-1}
-          className="hidden"
-          aria-label={label}
-          onChange={(event) => {
-            pick(Array.from(event.currentTarget.files ?? []));
-            event.currentTarget.value = '';
+          </Suspense>
+        </>
+      ) : (
+        <div
+          data-testid={partTestId(testId, 'dropzone')}
+          onDragOver={(event) => {
+            event.preventDefault();
+            if (!blocked) setDragging(true);
           }}
-        />
-        {files.length > 0 && (
-          <UploadFileList
-            data-testid={partTestId(testId, 'files')}
-            files={files}
-            blocked={blocked}
-            classNames={classNames}
-            onRemove={(index) => {
-              change(files.filter((_, i) => i !== index));
-              trigger.current?.focus();
-            }}
-          />
-        )}
-        {loading && progress != null && (
-          <progress
-            data-testid={partTestId(testId, 'progress')}
-            aria-label={t('upload.progress')}
-            max={100}
-            value={Math.max(0, Math.min(100, progress))}
-            className={cn('w-full accent-brand-700', classNames?.progress)}
-          />
-        )}
-      </div>
+          onDragLeave={(event) => {
+            if (!event.currentTarget.contains(event.relatedTarget as Node | null))
+              setDragging(false);
+          }}
+          onDrop={(event) => {
+            event.preventDefault();
+            setDragging(false);
+            pick(Array.from(event.dataTransfer.files));
+          }}
+          className={cn(
+            'grid gap-3 rounded-control border border-dashed border-control-border bg-surface p-4',
+            dragging && 'border-accent bg-hover',
+            blocked && 'cursor-not-allowed opacity-60',
+            issue && 'border-danger-700',
+            classNames?.dropzone,
+          )}
+        >
+          <div
+            data-testid={partTestId(testId, 'actions')}
+            className={cn('flex flex-wrap items-center gap-3', classNames?.actions)}
+          >
+            <Button
+              data-testid={partTestId(testId, 'trigger')}
+              className={classNames?.trigger}
+              ref={composedRef}
+              id={controlId}
+              variant="secondary"
+              loading={loading}
+              disabled={disabled}
+              aria-invalid={Boolean(issue)}
+              aria-describedby={fieldDescription(
+                controlId,
+                Boolean(issue),
+                Boolean(hint),
+              )}
+              onBlur={onBlur}
+              onClick={() => input.current?.click()}
+            >
+              <KitIcon
+                name="upload"
+                builtin={{ outline: UploadIcon, bold: UploadBoldIcon }}
+              />
+              {t('upload.choose')}
+            </Button>
+            <span
+              data-testid={partTestId(testId, 'dropHint')}
+              className={cn('text-ui-sm text-muted', classNames?.dropHint)}
+            >
+              {t('upload.drop')}
+            </span>
+          </div>
+          {fileInput}
+          {files.length > 0 && (
+            <UploadFileList
+              data-testid={partTestId(testId, 'files')}
+              files={files}
+              blocked={blocked}
+              classNames={classNames}
+              onRemove={(index) => {
+                change(files.filter((_, i) => i !== index));
+                trigger.current?.focus();
+              }}
+            />
+          )}
+          {loading && progress != null && (
+            <progress
+              data-testid={partTestId(testId, 'progress')}
+              aria-label={t('upload.progress')}
+              max={100}
+              value={Math.max(0, Math.min(100, progress))}
+              className={cn('w-full accent-brand-700', classNames?.progress)}
+            />
+          )}
+        </div>
+      )}
       {issue ? (
         <p
           data-testid={partTestId(testId, 'error')}

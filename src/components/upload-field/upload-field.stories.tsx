@@ -51,6 +51,68 @@ export const Preview: Story = {
   },
 };
 
+/** items are controlled; onValueChange emits new files, without saved items. */
+export const Gallery: Story = {
+  tags: ['example'],
+  render: () => (
+    <div className="grid gap-6">
+      <UploadField variant="gallery" label="Empty gallery" accept="image/*" />
+      <UploadField
+        variant="gallery"
+        label="Images"
+        accept="image/*"
+        items={[
+          {
+            id: 'first',
+            src: 'https://picsum.photos/seed/gallery/300',
+            alt: 'Lorem ipsum',
+            badge: (
+              <span className="rounded-control bg-surface px-2 text-ui-sm">Cover</span>
+            ),
+          },
+          {
+            id: 'uploading',
+            src: 'https://picsum.photos/seed/upload/300',
+            alt: 'Dolor sit amet',
+            status: 'uploading',
+            progress: 45,
+          },
+          {
+            id: 'error',
+            src: 'https://picsum.photos/seed/error/300',
+            alt: 'Consectetur',
+            status: 'error',
+            error: 'Could not upload image. Try again.',
+          },
+        ]}
+        onItemRemove={() => {}}
+        onItemRetry={() => {}}
+      />
+      <UploadField
+        variant="gallery"
+        label="Maximum reached"
+        maxFiles={1}
+        items={[
+          {
+            id: 'saved',
+            src: 'https://picsum.photos/seed/saved/300',
+            alt: 'Lorem ipsum',
+          },
+        ]}
+        onItemRemove={() => {}}
+      />
+    </div>
+  ),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'items là danh sách ảnh do ứng dụng quản lý. onValueChange chỉ trả về file mới; value và defaultValue không dùng trong gallery. maxFiles tính cả items và file mới. multiple mặc định là true cho gallery.',
+      },
+    },
+  },
+};
+
 export const CustomClasses: Story = {
   tags: ['customization'],
   render: () => (
