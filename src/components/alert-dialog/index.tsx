@@ -3,13 +3,14 @@
 import { partTestId } from '../common/testing';
 import { useUILocale } from '../../i18n/provider';
 import { Button } from '../button';
+import { Icon, type IconName, type IconGlyph } from '../icon';
 import {
   hasCompositionProp,
   OverlayLayout,
   overlayTrigger,
   type OverlayComposition,
 } from '../common/overlay-composition';
-import type { ComponentProps } from 'react';
+import type { ComponentProps, ReactNode } from 'react';
 import { AlertDialog as Primitive } from 'radix-ui';
 import { type SlotClasses, cn } from '../common';
 import {
@@ -26,14 +27,17 @@ export type AlertDialogProps =
   | (Omit<AlertDialogRootProps, 'children'> &
       Omit<OverlayComposition, 'actions'> & {
         onConfirm?: ComponentProps<typeof Button>['onClick'];
-        confirmLabel?: string;
-        cancelLabel?: string;
+        confirmLabel?: ReactNode;
+        cancelLabel?: ReactNode;
+        confirmIcon?: IconName | IconGlyph;
+        cancelIcon?: IconName | IconGlyph;
+        tone?: 'default' | 'danger';
         closeOnConfirm?: boolean;
         confirmLoading?: boolean;
         confirmDisabled?: boolean;
         confirmVariant?: ComponentProps<typeof Button>['variant'];
         classNames?: OverlayComposition['classNames'] &
-          SlotClasses<'confirm' | 'cancel'>;
+          SlotClasses<'confirm' | 'cancel' | 'confirmIcon' | 'cancelIcon'>;
         contentProps?: Omit<
           ComponentProps<typeof AlertDialogContent>,
           'children' | 'className' | 'classNames'
@@ -59,10 +63,13 @@ export function AlertDialog(props: AlertDialogProps) {
     onConfirm,
     confirmLabel,
     cancelLabel,
+    confirmIcon,
+    cancelIcon,
+    tone,
     closeOnConfirm = true,
     confirmLoading,
     confirmDisabled,
-    confirmVariant = 'primary',
+    confirmVariant = tone === 'danger' ? 'danger' : 'primary',
     onOpenChange,
     ...rootProps
   } = props;
@@ -75,6 +82,16 @@ export function AlertDialog(props: AlertDialogProps) {
           data-testid={partTestId(testId, 'cancel')}
           className={classNames?.cancel}
         >
+          {cancelIcon && (
+            <Icon
+              {...(typeof cancelIcon === 'string'
+                ? { name: cancelIcon }
+                : { glyph: cancelIcon })}
+              size={16}
+              className={cn('size-4 shrink-0', classNames?.cancelIcon)}
+              data-testid={partTestId(testId, 'cancelIcon')}
+            />
+          )}
           {cancelLabel ?? t('alertDialog.cancel')}
         </Button>
       </Primitive.Cancel>
@@ -90,6 +107,16 @@ export function AlertDialog(props: AlertDialogProps) {
           data-testid={partTestId(testId, 'confirm')}
           className={classNames?.confirm}
         >
+          {confirmIcon && (
+            <Icon
+              {...(typeof confirmIcon === 'string'
+                ? { name: confirmIcon }
+                : { glyph: confirmIcon })}
+              size={16}
+              className={cn('size-4 shrink-0', classNames?.confirmIcon)}
+              data-testid={partTestId(testId, 'confirmIcon')}
+            />
+          )}
           {confirmLabel ?? t('alertDialog.confirm')}
         </Button>
       </Primitive.Action>
