@@ -323,6 +323,8 @@ export const viMessages = {
   'upload.addImages': 'Thêm ảnh',
   'upload.retry': 'Thử lại {name}',
   'upload.uploading': 'Đang tải lên · {percent}%',
+  'upload.uploadingCaption': 'Đang tải…',
+  'upload.failedCaption': 'Tải lên thất bại',
   'upload.imageError': 'Không thể tải ảnh lên.',
   'upload.file': 'Tệp',
   'upload.label': 'Tệp đính kèm',

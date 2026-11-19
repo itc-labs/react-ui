@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { act, createRef } from 'react';
 import { createRoot } from 'react-dom/client';
-import { afterEach, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { UploadField, type UploadFieldProps } from './index';
 import { UILocaleProvider } from '../../i18n/provider';
 import { enUS, viVN, type UILocale } from '../../i18n';
@@ -10,7 +10,21 @@ import { enUS, viVN, type UILocale } from '../../i18n';
 
 let cleanup = () => {};
 
-afterEach(() => cleanup());
+beforeEach(() => {
+  vi.stubGlobal(
+    'ResizeObserver',
+    class {
+      observe() {}
+      unobserve() {}
+      disconnect() {}
+    },
+  );
+});
+
+afterEach(() => {
+  cleanup();
+  vi.unstubAllGlobals();
+});
 
 /** UploadField loads the gallery lazily; wait for Suspense before asserting. */
 async function render(props: UploadFieldProps = {}, locale: UILocale = enUS) {
@@ -154,20 +168,45 @@ it('renders upload progress, errors, badges and named remove/retry actions', asy
         src: '/error.png',
         alt: 'Failed image',
         status: 'error',
-        error: 'Network failed',
+        error:
+          'Network failed while uploading. Check your connection and retry this image.',
         badge: <span>Cover</span>,
       },
     ],
     onItemRemove: remove,
     onItemRetry: retry,
   });
-  expect(host.querySelector('progress')?.value).toBe(100);
+  const progress = host.querySelector('[role="progressbar"]')!;
+  expect(progress.getAttribute('aria-valuenow')).toBe('100');
+  expect(progress.querySelector('svg circle')).not.toBeNull();
+  expect(progress.textContent).toBe('100%');
+  expect(
+    host
+      .querySelector('[data-testid="gallery-tileStatus-busy"]')
+      ?.getAttribute('aria-live'),
+  ).toBe('polite');
+  expect(
+    host.querySelector('[data-testid="gallery-tileCaption-busy"]')?.textContent,
+  ).toBe('Uploading…');
+  expect(
+    host.querySelector('[data-testid="gallery-tileCaption-error"]')?.textContent,
+  ).toBe('Upload failed');
+  expect(
+    host.querySelector('[data-testid="gallery-tileStatus-error"]')?.className,
+  ).toContain('sr-only');
+  expect(
+    host.querySelector('[data-testid="gallery-tileActions-error"]')?.className,
+  ).not.toContain('opacity-0');
+  expect(host.querySelector('[aria-label="Remove Failed image"]')).not.toBeNull();
+  expect(
+    host.querySelector('[data-testid="gallery-tileImage-busy"]')?.className,
+  ).not.toContain('opacity-40');
   expect(
     host.querySelector('[data-testid="gallery-tileStatus-busy"]')?.textContent,
   ).toContain('100%');
   expect(
     host.querySelector('[data-testid="gallery-tileStatus-error"]')?.textContent,
-  ).toBe('Network failed');
+  ).toBe('Network failed while uploading. Check your connection and retry this image.');
   expect(
     host.querySelector('[data-testid="gallery-tileBadge-error"]')?.textContent,
   ).toBe('Cover');
@@ -249,6 +288,12 @@ it('localizes gallery actions and status in Vietnamese', async () => {
   expect(
     host.querySelector('[data-testid="gallery-tileStatus-failed"]')?.textContent,
   ).toBe('Không thể tải ảnh lên.');
+  expect(
+    host.querySelector('[data-testid="gallery-tileCaption-saved"]')?.textContent,
+  ).toBe('Đang tải…');
+  expect(
+    host.querySelector('[data-testid="gallery-tileCaption-failed"]')?.textContent,
+  ).toBe('Tải lên thất bại');
   expect(host.querySelector('[aria-label="Thử lại Ảnh lỗi"]')).not.toBeNull();
 });
 
@@ -273,4 +318,58 @@ it('preserves the dropzone picker location and file replacement behavior', async
   expect(change.mock.calls).toEqual([[[first]], [[second]]]);
   expect(host.textContent).toContain('second.pdf');
   expect(host.textContent).not.toContain('first.pdf');
+});
+
+it('renders partial and indeterminate progress and forwards state slots', async () => {
+  const { host } = await render({
+    items: [
+      { ...saved, id: 'half', status: 'uploading', progress: 45 },
+      { ...saved, id: 'zero', status: 'uploading', progress: 0 },
+      { ...saved, id: 'unknown', status: 'uploading' },
+    ],
+    classNames: {
+      tileOverlay: 'custom-overlay',
+      tileProgress: 'custom-progress',
+      tileCaption: 'custom-caption',
+      tileStatus: 'custom-status',
+    },
+  });
+  expect(
+    host.querySelector('[data-testid="gallery-tileProgress-half"]')?.textContent,
+  ).toBe('45%');
+  expect(
+    host.querySelector('[data-testid="gallery-tileStatus-half"]')?.textContent,
+  ).toBe('Uploading 45%');
+  for (const id of ['zero', 'unknown']) {
+    const progress = host.querySelector(`[data-testid="gallery-tileProgress-${id}"]`)!;
+    expect(progress.getAttribute('data-state')).toBe('indeterminate');
+    expect(progress.hasAttribute('aria-valuenow')).toBe(false);
+  }
+  for (const [part, custom] of [
+    ['tileOverlay', 'overlay'],
+    ['tileProgress', 'progress'],
+    ['tileCaption', 'caption'],
+    ['tileStatus', 'status'],
+  ]) {
+    expect(
+      host.querySelector(`[data-testid="gallery-${part}-half"]`)?.className,
+    ).toContain(`custom-${custom}`);
+  }
+});
+
+it('shows the full error in the retry tooltip on keyboard focus', async () => {
+  const error =
+    'The connection was interrupted while uploading. Check your network connection and retry this image.';
+  const { host } = await render({
+    items: [{ ...saved, status: 'error', error }],
+    onItemRetry: () => {},
+  });
+
+  act(() =>
+    host.querySelector<HTMLButtonElement>('[aria-label="Retry Saved image"]')!.focus(),
+  );
+
+  await vi.waitFor(() =>
+    expect(document.querySelector('[role="tooltip"]')?.textContent).toBe(error),
+  );
 });

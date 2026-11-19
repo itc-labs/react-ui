@@ -71,6 +71,20 @@ export const Gallery: Story = {
             ),
           },
           {
+            id: 'starting',
+            src: 'https://picsum.photos/seed/starting/300',
+            alt: 'Starting upload',
+            status: 'uploading',
+            progress: 0,
+          },
+          {
+            id: 'complete',
+            src: 'https://picsum.photos/seed/complete/300',
+            alt: 'Finishing upload',
+            status: 'uploading',
+            progress: 100,
+          },
+          {
             id: 'uploading',
             src: 'https://picsum.photos/seed/upload/300',
             alt: 'Dolor sit amet',
@@ -82,7 +96,8 @@ export const Gallery: Story = {
             src: 'https://picsum.photos/seed/error/300',
             alt: 'Consectetur',
             status: 'error',
-            error: 'Could not upload image. Try again.',
+            error:
+              'The connection was interrupted while uploading this image. Check your network connection and retry. Your other images have been saved.',
           },
         ]}
         onItemRemove={() => {}}

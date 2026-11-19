@@ -212,7 +212,9 @@ console.log(JSON.stringify(sizes, null, 2));
 // Gzip budgets with a little headroom; raise them only for an intentional feature.
 for (const [name, limit] of Object.entries({
   // New feature fixtures have approximately 10% headroom.
-  UploadField: 45_000,
+  // Retry now uses the kit Tooltip. Esbuild splitting hoists its shared Radix
+  // runtime into the eager graph alongside the dropzone preview's Dialog.
+  UploadField: 58_000,
   PageHeader: 47_800,
   Dnd: 67_900,
   TransferDnd: 81_900,
@@ -225,12 +227,13 @@ for (const [name, limit] of Object.entries({
   Kbd: 19_500,
   Slider: 32_300,
   // Gallery strings add about 75 gzip bytes to shared locale consumers.
-  Timeline: 22_100,
+  // Two localized gallery captions are included in each locale consumer.
+  Timeline: 22_200,
   // New collection feedback messages also enter the shared locale catalogs.
-  QuantityInput: 21_400,
+  QuantityInput: 21_500,
   OptionGroup: 52_000,
   // Trend and KPI locale messages add about 60 gzip bytes to every locale consumer.
-  JsonView: 22_300,
+  JsonView: 22_400,
   // About 10% above the measured display subpath fixtures.
   CodeView: 50_000,
   // DOMPurify plus shared class merging, with about 10% headroom.
@@ -240,7 +243,7 @@ for (const [name, limit] of Object.entries({
   VirtualList: 34_000,
   VirtualGrid: 34_000,
   // Fullscreen media adds Dialog focus management and image zoom controls.
-  MediaGallery: 54_900,
+  MediaGallery: 55_100,
   // Shared reorder instructions and disabled reasons are included in locale consumers.
   // Includes the shared i18n strings (gallery upload labels added).
   Lightbox: 43_000,
