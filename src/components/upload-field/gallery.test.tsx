@@ -1,8 +1,11 @@
 // @vitest-environment jsdom
+import { readFileSync } from 'node:fs';
+import { compile } from 'tailwindcss';
 import { act, createRef } from 'react';
 import { createRoot } from 'react-dom/client';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { UploadField, type UploadFieldProps } from './index';
+import { gallerySizes } from './gallery-size';
 import { StarIcon } from '../icon/outline/star';
 import { UILocaleProvider } from '../../i18n/provider';
 import { createTranslator, enUS, viVN, type UILocale } from '../../i18n';
@@ -626,4 +629,168 @@ it('removes an error item and blocks pick, drop, remove and retry when disabled'
   expect(open).not.toHaveBeenCalled();
   for (const callback of [remove, retry, change, reject])
     expect(callback).not.toHaveBeenCalled();
+});
+
+it.each([
+  ['sm', 32, 'size-5'],
+  ['md', 40, 'size-7'],
+  ['lg', 52, 'size-8'],
+] as const)(
+  'uses fixed token columns and scales overlays for %s',
+  async (size, ring, control) => {
+    const { host } = await render({
+      size,
+      items: [
+        { ...saved, badge: <span>Cover</span> },
+        { ...saved, id: 'busy', status: 'uploading', progress: 45 },
+      ],
+      onItemRemove: vi.fn(),
+    });
+    const grid = host.querySelector('[data-testid="gallery-grid"]')!;
+    expect(grid.className).toContain(
+      `grid-cols-[repeat(auto-fill,var(--size-upload-tile-${size}))]`,
+    );
+    expect(grid.className).not.toMatch(/(?:sm|lg):grid-cols/);
+    const progress = host.querySelector<HTMLElement>(
+      '[data-testid="gallery-tileProgress-busy"]',
+    )!;
+    expect(progress.style.width).toBe(`${ring}px`);
+    expect(progress.style.height).toBe(`${ring}px`);
+    expect(
+      host.querySelector('[aria-label="Remove Saved image"]')?.className,
+    ).toContain(control);
+    const caption = host.querySelector('[data-testid="gallery-tileCaption-busy"]')!;
+    expect(caption.classList.contains('sr-only')).toBe(size === 'sm');
+    const add = host.querySelector('[data-testid="gallery-addTile"]')!;
+    expect(add.getAttribute('aria-label')).toBe('Add images');
+    const label = add.querySelector('span')!;
+    expect(label.textContent).toBe('Add images');
+    expect(label.classList.contains('sr-only')).toBe(size === 'sm');
+    if (size !== 'sm') expect(label.className).toContain('whitespace-nowrap');
+  },
+);
+
+it('defaults to md and lets custom grid columns replace auto-fill', async () => {
+  const { host, update } = await render();
+  const grid = host.querySelector('[data-testid="gallery-grid"]')!;
+  expect(grid.className).toContain('var(--size-upload-tile-md)');
+  update({ size: 'sm', classNames: { grid: 'grid-cols-2' } });
+  expect(grid.className).toContain('grid-cols-2');
+  expect(grid.className).not.toContain('auto-fill');
+});
+
+it('keeps the sm add tile label localized and accessible', async () => {
+  const { host } = await render({ size: 'sm' }, viVN);
+  const add = host.querySelector('[data-testid="gallery-addTile"]')!;
+  expect(add.getAttribute('aria-label')).toBe('Thêm ảnh');
+  expect(add.querySelector('.sr-only')?.textContent).toBe('Thêm ảnh');
+});
+
+it.each(['sm', 'md', 'lg'] as const)(
+  'computes fixed %s grid tracks without flexible fractions',
+  async (size) => {
+    const { host } = await render({ size, items: [saved] });
+    const grid = host.querySelector<HTMLElement>('[data-testid="gallery-grid"]')!;
+    const compiler = await compile('@tailwind utilities;');
+    const style = document.createElement('style');
+    const css = compiler.build(grid.className.split(' '));
+    expect(css).toContain(
+      `grid-template-columns: repeat(auto-fill,var(--size-upload-tile-${size}));`,
+    );
+    expect(css).not.toContain('1fr');
+    const token = readFileSync('src/theme/tokens.css', 'utf8').match(
+      new RegExp(`--size-upload-tile-${size}: ([^;]+);`),
+    )![1]!;
+    // jsdom cannot compute repeat() with var(); resolve the theme token first.
+    style.textContent = css
+      .replaceAll(`var(--size-upload-tile-${size})`, token)
+      .replace(/\/\*[\s\S]*?\*\//g, '')
+      .replace(/\.[^{}]+(?=\s*\{)/g, '[data-testid="gallery-grid"]');
+    document.head.append(style);
+    try {
+      expect(getComputedStyle(grid).gridTemplateColumns).toBe(
+        `repeat(auto-fill,${token})`,
+      );
+      expect(getComputedStyle(grid).gridTemplateColumns).not.toContain('1fr');
+      for (const tile of Array.from(grid.children)) {
+        expect(tile.className).toContain(`w-[var(--size-upload-tile-${size})]`);
+        expect(tile.className).toContain('aspect-square');
+      }
+    } finally {
+      style.remove();
+    }
+  },
+);
+
+it('keeps every gallery size value monotonic in the compiled CSS', async () => {
+  const theme = readFileSync('src/theme/tokens.css', 'utf8');
+  const keys = [
+    'addTypography',
+    'control',
+    'handle',
+    'badge',
+    'caption',
+    'progressText',
+  ] as const;
+  const values: Record<string, number[]> = {};
+  for (const sizing of Object.values(gallerySizes)) {
+    for (const key of keys) {
+      if (sizing[key] === 'sr-only') {
+        (values[key] ??= []).push(0);
+        continue;
+      }
+      if (key === 'control' || key === 'handle') {
+        (values[key] ??= []).push(Number(sizing[key].match(/size-([\d.]+)/)![1]));
+        continue;
+      }
+      const compiler = await compile(
+        `${theme.slice(theme.indexOf('@theme static'))}\n@tailwind utilities;`,
+      );
+      const css = compiler.build(sizing[key].split(' '));
+      const declaration = 'font-size';
+      const value = css.match(new RegExp(`${declaration}: ([^;]+);`))![1]!;
+      const resolved = value.startsWith('var(')
+        ? theme.match(new RegExp(`${value.slice(4, -1)}: ([^;]+);`))![1]!
+        : value;
+      (values[key] ??= []).push(parseFloat(resolved));
+    }
+  }
+  for (const key of ['addIcon', 'progress', 'warning'] as const)
+    values[key] = Object.values(gallerySizes).map((sizing) => sizing[key]);
+  for (const numbers of Object.values(values)) {
+    expect(numbers[0]).toBeLessThanOrEqual(numbers[1]!);
+    expect(numbers[1]).toBeLessThanOrEqual(numbers[2]!);
+  }
+});
+
+it('opens the sm tile preview and restores focus without a separate view control', async () => {
+  const { host } = await render({ size: 'sm', items: [saved], onItemRemove: vi.fn() });
+  expect(
+    host
+      .querySelector('[data-testid="gallery-tileActions-saved"]')
+      ?.querySelector('[aria-label="Preview Saved image"]'),
+  ).toBeNull();
+  const trigger = host.querySelector<HTMLButtonElement>(
+    '[aria-label="Preview Saved image"]',
+  )!;
+  expect(trigger.tagName).toBe('BUTTON'); // Native Enter and Space activation.
+  await act(async () => {
+    trigger.focus();
+    trigger.click();
+  });
+  await vi.waitFor(() =>
+    expect(
+      document
+        .querySelector('[data-testid="gallery-lightbox-media"]')
+        ?.getAttribute('src'),
+    ).toBe(saved.src),
+  );
+
+  act(() =>
+    document
+      .querySelector<HTMLButtonElement>('[data-testid="gallery-lightbox-close"]')!
+      .click(),
+  );
+
+  await vi.waitFor(() => expect(document.activeElement).toBe(trigger));
 });

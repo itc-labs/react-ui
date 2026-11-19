@@ -27,6 +27,10 @@ import { FormField } from '@itclabs/react-ui';
 </FormField>
 ```
 
+Gallery `size="sm" | "md" | "lg"` defaults to `md` and is ignored by the dropzone. Theme tokens `--size-upload-tile-sm: 5rem` (80px), `--size-upload-tile-md: 7rem` (112px), and `--size-upload-tile-lg: 10rem` (160px) set the exact tile width. Fixed auto-fill tracks follow the container, including narrow dialogs, with an 8px gap and start alignment. Add and image tiles stay square and never stretch. Override these CSS variables in your theme to tune the sizes. `classNames.grid`, for example `grid-cols-2`, still replaces the default columns, including when `reorder` is enabled.
+
+At `sm`, preview opens by clicking the tile or focusing it and pressing Enter; the view control is hidden to leave room for the top-left drag handle and top-right remove control. The add tile shows only a plus with a localized accessible label; `md` and `lg` show the plus and a single-line label (truncated if space is insufficient). Action buttons and drag handles use 20/28/32px controls; progress rings use 32/40/52px diameters. Badges inherit size-specific text and truncate to the tile width. Upload/error captions are visually hidden at `sm`; live status announcements remain available at every size. See **Gallery sizes** and **Gallery in dialog** in Storybook.
+
 Gallery mode accepts controlled `UploadGalleryItem[]`; `onValueChange` emits only new files. Item `actions` appear before preview/remove on idle tiles, with label tooltips and accessible names including `alt`. They are hidden on uploading/error tiles and disabled when the field is disabled/loading. Each action supports `disabled` and `tone: 'default' | 'danger'`. `selected` adds an accent ring and `aria-current="true"` independently of `badge`. The app controls which tile is current.
 
 ```tsx
@@ -74,7 +78,7 @@ Avatar shape/alignment follow-up: Avatar and AvatarUpload accept shape="circle" 
 
 Import `createUploadReorder` from `@itclabs/react-ui/dnd` and pass `reorder={createUploadReorder()}` to either UploadField variant to enable the kit's drag handles, pointer sensor, and keyboard reordering. Focus a handle, press Space or Enter to pick up, use arrow keys to move, then Space or Enter to drop; Escape cancels. Instructions and announcements follow the en/vi UI locale. Disabled/loading fields cannot reorder. Core UploadField does not import the drag runtime; the plugin supplies it from the opt-in `/dnd` entry.
 
-For `variant="gallery"`, `onItemsReorder(ids: string[])` returns the full new ID order, including uploading/error items. The app must reorder its controlled `items`; the component never mutates them. Only idle tiles can be dragged. Other tiles can be passed over, and the add tile stays first outside the sortable targets. The grid retains 3/4/6 responsive columns and supports `classNames.grid`. Preview, remove, and custom actions remain separate from the drag handle.
+For `variant="gallery"`, `onItemsReorder(ids: string[])` returns the full new ID order, including uploading/error items. The app must reorder its controlled `items`; the component never mutates them. Only idle tiles can be dragged. Other tiles can be passed over, and the add tile stays first outside the sortable targets. The grid follows its container width and supports `classNames.grid`. Preview, remove, and custom actions remain separate from the drag handle.
 
 ```tsx
 import { createUploadReorder } from '@itclabs/react-ui/dnd';

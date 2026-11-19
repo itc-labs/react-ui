@@ -19,6 +19,7 @@ export type {
   UploadGalleryItemAction,
 } from './types';
 import type { UploadFieldProps } from './types';
+import { gallerySizes } from './gallery-size';
 import { UploadFileList } from './file-list';
 
 // Gallery tiles, icon buttons and the Lightbox load only for variant="gallery".
@@ -29,6 +30,7 @@ const UploadGallery = /* @__PURE__ */ lazy(() =>
 export function UploadField({
   'data-testid': testId,
   variant = 'dropzone',
+  size = 'md',
   items = [],
   onItemRemove,
   onItemRetry,
@@ -145,11 +147,15 @@ export function UploadField({
             fallback={
               <div
                 aria-busy="true"
-                className="aspect-square w-1/3 animate-pulse rounded-control border border-dashed border-line sm:w-1/4 lg:w-1/6"
+                className={cn(
+                  'aspect-square max-w-full animate-pulse rounded-control border border-dashed border-line',
+                  gallerySizes[size].tile,
+                )}
               />
             }
           >
             <UploadGallery
+              size={size}
               testId={testId}
               controlId={controlId}
               label={label ?? t('upload.label')}

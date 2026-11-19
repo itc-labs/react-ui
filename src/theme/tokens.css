@@ -43,6 +43,9 @@
   --animate-pulse: pulse var(--motion-duration-pulse) var(--motion-ease-loop) infinite;
   --animate-table-loading: table-loading var(--motion-duration-loading)
     var(--motion-ease-loop) infinite;
+  --size-upload-tile-sm: 5rem;
+  --size-upload-tile-md: 7rem;
+  --size-upload-tile-lg: 10rem;
   --spacing-control-sm: 2rem;
   --spacing-control-md: 2.5rem;
   --spacing-control-lg: 3rem;

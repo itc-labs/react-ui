@@ -3,6 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, userEvent, within, waitFor } from 'storybook/test';
 import { UploadField, type UploadGalleryItem } from './index';
 import { useState } from 'react';
+import { Dialog } from '../dialog';
 import { StarIcon } from '../icon/outline/star';
 const uploadReorder = createUploadReorder();
 
@@ -365,4 +366,77 @@ export const SortableFileList: Story = {
       />
     );
   },
+};
+
+const sizeDemoItems: UploadGalleryItem[] = [
+  {
+    id: 'saved',
+    src: 'https://picsum.photos/seed/size/300',
+    alt: 'Saved image',
+    badge: <span className="rounded-control bg-surface px-1">Cover</span>,
+  },
+  {
+    id: 'busy',
+    src: 'https://picsum.photos/seed/upload/300',
+    alt: 'Uploading image',
+    status: 'uploading',
+    progress: 45,
+  },
+  {
+    id: 'failed',
+    src: 'https://picsum.photos/seed/error/300',
+    alt: 'Failed image',
+    status: 'error',
+  },
+];
+
+export const GallerySizes: Story = {
+  tags: ['example', '!dev'],
+  render: () => (
+    <div className="grid gap-6 md:grid-cols-3">
+      {(['sm', 'md', 'lg'] as const).map((size) => (
+        <UploadField
+          key={size}
+          variant="gallery"
+          size={size}
+          label={`Gallery ${size}`}
+          accept="image/*"
+          items={sizeDemoItems}
+          reorder={uploadReorder}
+          onItemRemove={() => {}}
+          onItemRetry={() => {}}
+        />
+      ))}
+    </div>
+  ),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Container-based columns with sm (80px), md (112px, default), and lg (160px) fixed square tiles. Actions, handles, badges, and progress scale with size; sm uses an accessible icon-only add tile.',
+      },
+    },
+  },
+};
+
+export const GalleryInDialog: Story = {
+  tags: ['example', '!dev'],
+  render: () => (
+    <Dialog
+      title="Product images"
+      description="Columns follow this narrow dialog, even on a wide screen."
+      trigger="Open narrow gallery"
+      classNames={{ content: 'max-w-sm' }}
+    >
+      <UploadField
+        variant="gallery"
+        label="Images"
+        accept="image/*"
+        items={sizeDemoItems}
+        reorder={uploadReorder}
+        onItemRemove={() => {}}
+        onItemRetry={() => {}}
+      />
+    </Dialog>
+  ),
 };

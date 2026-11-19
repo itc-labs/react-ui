@@ -33,7 +33,7 @@ beforeEach(() => {
   ) {
     const row = this.closest<HTMLElement>('[data-dnd-item]');
     const index = row ? Array.from(row.parentElement!.children).indexOf(row) : 0;
-    const grid = row?.parentElement?.classList.contains('grid-cols-3');
+    const grid = row?.parentElement?.getAttribute('data-testid') === 'upload-grid';
     const left = grid ? (index % 3) * 220 : 0;
     const top = grid ? Math.floor(index / 3) * 220 : index * 60;
     const height = grid ? 200 : 50;
@@ -130,9 +130,8 @@ it.each(['en-US', 'vi-VN'])(
       grid.firstElementChild?.querySelector('[data-testid="upload-addTile"]'),
     ).not.toBeNull();
     expect(grid.firstElementChild?.hasAttribute('data-dnd-item')).toBe(false);
-    expect(grid.className).toContain('grid-cols-3');
-    expect(grid.className).toContain('sm:grid-cols-4');
-    expect(grid.className).toContain('lg:grid-cols-6');
+    expect(grid.className).toContain('repeat(auto-fill,');
+    expect(grid.className).toContain('var(--size-upload-tile-md)');
     expect(grid.className).not.toContain('grid-cols-2');
     for (const id of ['busy', 'failed']) {
       expect(handle(id)).toBeNull();
@@ -290,4 +289,16 @@ it('keeps the default dropzone free of drag handles without a plugin', async () 
   expect(host.querySelector('[data-dnd-activator]')).toBeNull();
   expect(host.querySelectorAll('[data-testid^="upload-files-file-"]')).toHaveLength(2);
   expect(change).not.toHaveBeenCalled();
+});
+
+it.each([
+  ['sm', 'size-5'],
+  ['md', 'size-7'],
+  ['lg', 'size-8'],
+] as const)('scales sortable handles with gallery size %s', async (size, control) => {
+  await render({ variant: 'gallery', size, reorder: uploadReorder, items });
+  expect(handle('first').className).toContain(control);
+  expect(host.querySelector('[data-testid="upload-grid"]')?.className).toContain(
+    `var(--size-upload-tile-${size})`,
+  );
 });
