@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.26.0
+
+### Minor Changes
+
+- [#70](https://github.com/itc-labs/react-ui/pull/70) [`3bc3197`](https://github.com/itc-labs/react-ui/commit/3bc3197751cf26a8dbad9ec30951fa763f30ce71) Thanks [@vungbt](https://github.com/vungbt)! - Add StatusTag, a controlled status chip with allowed transitions, confirmation dialogs, async saving, localized defaults and a dedicated status-tag entry point.
+
+### Patch Changes
+
+- [#69](https://github.com/itc-labs/react-ui/pull/69) [`2beee97`](https://github.com/itc-labs/react-ui/commit/2beee97403a49a65be96bdaef60a758177cb8950) Thanks [@vungbt](https://github.com/vungbt)! - Redesign gallery upload and error tiles with accessible circular progress, contrasting media scrims, localized captions, and retry error tooltips. Add tileOverlay, tileProgress, and tileCaption slots while preserving existing slots.
+
 ## 0.25.0
 
 ### Minor Changes
