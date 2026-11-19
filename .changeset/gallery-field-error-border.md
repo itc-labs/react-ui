@@ -2,4 +2,4 @@
 '@itclabs/react-ui': patch
 ---
 
-Show danger styling on the gallery grid and add tile when UploadField has a field or file rejection error.
+Mark the gallery add tile in danger (border and text) when UploadField has a field or file rejection error.
