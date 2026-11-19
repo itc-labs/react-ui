@@ -43,7 +43,8 @@ Append each subpath to `@itclabs/react-ui`; `.` means the package root. Wildcard
 | `./rich-text-view`                 | `RichTextView` for sanitized HTML with shared Editor typography; no optional peers.                                                                                                                                                                   |
 | `./editor`                         | Optional Tiptap `Editor` and `EditorField` integration.                                                                                                                                                                                               |
 | `./chart`                          | Optional Recharts `Chart`, data types, and styling types.                                                                                                                                                                                             |
-| `./avatar-upload`                  | Optional `AvatarUpload` and `AvatarField` integration with cropping.                                                                                                                                                                                  |
+| `./avatar-upload/crop`             | `createAvatarCrop()` enables cropping with the optional `react-easy-crop` peer.                                                                                                                                                                       |
+| `./avatar-upload`                  | `AvatarUpload` and `AvatarField`; original file by default. Use `createAvatarCrop()` from `./avatar-upload/crop` for opt-in cropping.                                                                                                                 |
 | `./ui.css`                         | Compiled CSS for consumers without a Tailwind build.                                                                                                                                                                                                  |
 | `./navigation`                     | Router-independent `matchPath`, `resolveActiveNav`, `filterNavByAccess`, and navigation types.                                                                                                                                                        |
 | `./dnd`                            | `Sortable`, `SortableItem`, `SortableHandle`, `SortableGroup`, `SortableOverlay`, `DragHandle`, `DndProvider`, `useSortableItem`, `createTransferDnd`, `createRowReorder`, and types; isolated from all barrels.                                      |
@@ -68,7 +69,7 @@ Required peers must be supplied by the consuming application. Optional peers are
 | Required | `date-fns`: `^4.0.0`; `@date-fns/tz`: `^1.2.0`                 | Date and calendar utilities.                                                  |
 | Optional | `@tiptap/react`, `@tiptap/pm`, `@tiptap/starter-kit`: `^3.0.0` | `/editor`.                                                                    |
 | Optional | `recharts`: `^3.0.0`; `react-is`: `^19.0.0`                    | `/chart`.                                                                     |
-| Optional | `react-easy-crop`: `^6.0.0`                                    | `/avatar-upload`.                                                             |
+| Optional | `react-easy-crop`: `^6.0.0`                                    | `/avatar-upload/crop` via `createAvatarCrop()`.                               |
 | Optional | `valibot`: `^1.0.0`                                            | Not imported by the kit; any Standard Schema library works for `Form schema`. |
 
 ## Measured bundle size
@@ -145,7 +146,7 @@ Root measures 277,010 bytes against its existing 278,000-byte budget, leaving 99
 - Import individual glyphs, such as `@itclabs/react-ui/icons/outline/search`, for explicit icon dependencies. Avoid importing `/icons/outline/pack` or `/icons/bold/pack` unless you need every icon in that runtime pack.
 - Import `TreeSelect` from `/tree-select`, `Transfer` from `/transfer`, and `RichTextView` from `/rich-text-view`; these are isolated from the root and both component/module barrels. Divider, Kbd, Timeline, and Slider are core exports.
 - Import `CodeView` from `/code-view`, `Carousel` from `/carousel`, and `MediaGallery`/`Lightbox` from `/media-gallery`; these are excluded from the root, `/components`, and `/modules` barrels. OptionGroup, QuantityInput, ColorPicker, Rating, and JsonView are available from the root and `/components`. See [Data display](?path=/docs/guides-data-display--docs) for examples.
-- Import optional features from `/editor`, `/chart`, or `/avatar-upload` only where needed. They are excluded from the root and `/modules` barrels.
+- Import optional peers through `/editor`, `/chart`, or `/avatar-upload/crop` only where needed. They are excluded from the root and `/modules` barrels.
 - Use `/modal` and `/toast` for imperative calls outside React components; mount their providers in the React tree.
 - Load `/icons/catalog` only for icon discovery or tooling. Import individual `/illustrations/*` modules when a single illustration is enough.
 
@@ -162,3 +163,5 @@ Set `handle` and spread `renderItem` state’s `handleProps` onto `DragHandle` f
 See [Drag & drop](?path=/docs/guides-drag-drop--docs) for list, board, Transfer and DataTable recipes, and [Data display](?path=/docs/guides-data-display--docs) for virtualized collections. Transfer + its dnd plugin measures 74,389 bytes gzip; DataTable + its reorder plugin measures 106,823 bytes. These combined fixtures include shared code once.
 
 `@itclabs/react-ui/theme/presets` exports `forestTheme`, `oceanTheme`, `violetTheme`, `slateTheme`, `emberTheme` and the opt-in `themePresets` map. See [Theming](?path=/docs/guides-theming--docs) for light/dark usage and size measurements.
+
+AvatarUpload and AvatarField no longer crop by default. To migrate, pass `crop={createAvatarCrop()}` from `@itclabs/react-ui/avatar-upload/crop` and install `react-easy-crop` (`pnpm add react-easy-crop@^6`). Remove `crop={false}` for uncropped uploads.

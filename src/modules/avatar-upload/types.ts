@@ -1,5 +1,5 @@
 import type { TestIdProps } from '../../components/common/testing';
-import type { Ref } from 'react';
+import type { ComponentType, Ref } from 'react';
 import type { AvatarProps } from '../../components/avatar';
 import type { SlotClasses } from '../../components/common';
 export type AvatarUploadProps = (Omit<AvatarProps, 'src' | 'classNames'> & {
@@ -38,7 +38,8 @@ export type AvatarUploadProps = (Omit<AvatarProps, 'src' | 'classNames'> & {
   defaultValue?: File | null;
   onValueChange?: (file: File | null) => void;
   uploadable?: boolean;
-  crop?: boolean;
+  /** Supply createAvatarCrop() from the avatar-upload/crop entry to enable cropping. */
+  crop?: AvatarCropPlugin;
   disabled?: boolean;
   required?: boolean;
   label?: string;
@@ -50,3 +51,19 @@ export type AvatarUploadProps = (Omit<AvatarProps, 'src' | 'classNames'> & {
   ref?: Ref<HTMLButtonElement>;
 }) &
   TestIdProps;
+
+/** Peer-free contract shared by AvatarUpload and its opt-in crop entry. */
+export interface AvatarCropDialogProps {
+  file: File;
+  shape: AvatarUploadProps['shape'];
+  maxBytes: number;
+  disabled: boolean;
+  onCancel: () => void;
+  onApply: (file: File) => void;
+  classNames: AvatarUploadProps['classNames'];
+  'data-testid'?: string | undefined;
+}
+
+export interface AvatarCropPlugin {
+  Dialog: ComponentType<AvatarCropDialogProps>;
+}

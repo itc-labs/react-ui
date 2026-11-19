@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { AvatarUpload, type AvatarUploadProps } from '@itclabs/react-ui/avatar-upload';
+import { createAvatarCrop } from '@itclabs/react-ui/avatar-upload/crop';
 import { expect, userEvent, within, waitFor } from 'storybook/test';
 const meta = {
   title: 'Modules/AvatarUpload',
@@ -9,7 +10,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'Hover over or focus the avatar to select an image. Crop the image before confirming; the X button removes it. Supports circular and square avatars and returns a File through onValueChange for the application to upload.',
+          'Hover over or focus the avatar to select an image. Cropping is opt-in through createAvatarCrop(); the X button removes it. Supports circular and square avatars and returns a File through onValueChange for the application to upload.',
       },
     },
   },
@@ -55,7 +56,10 @@ export const States: Story = {
   ),
 };
 
-export const WithoutCrop: Story = { tags: ['example'], args: { crop: false } };
+export const WithCrop: Story = {
+  tags: ['example'],
+  args: { crop: createAvatarCrop() },
+};
 
 export const NarrowContainer: Story = {
   tags: ['example'],
@@ -79,6 +83,7 @@ export const CustomClasses: Story = {
     <AvatarUpload
       alt="Lorem Ipsum"
       size="lg"
+      crop={createAvatarCrop()}
       hint="Choose an image to crop and upload."
       classNames={{
         root: 'max-w-xs rounded-panel border border-line bg-surface p-5',
@@ -99,7 +104,6 @@ export const CustomClasses: Story = {
 
 export const SelectAndRemove: Story = {
   tags: ['!dev', '!autodocs', 'regression'],
-  args: { crop: false },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement),
       input = canvasElement.querySelector<HTMLInputElement>('input[type="file"]')!;

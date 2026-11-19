@@ -169,32 +169,85 @@ assert.doesNotMatch(
   /^['"]use client['"]/,
 );
 
-// Follow actual built imports, even when the optional packages exist in this workspace.
-const visited = new Set();
-
-async function checkLeanGraph(path) {
-  if (visited.has(path)) return;
-  visited.add(path);
-  const code = await readFile(path, 'utf8');
-  const imports = [
-    ...code.matchAll(/(?:from\s*|import\s*(?:\(\s*)?)["']([^"']+)["']/g),
-  ];
-  for (const [, specifier] of imports) {
+// Follow static imports, re-exports and lazy imports for EVERY public JS entry.
+// Newly declared optional peers must be audited and given explicit allowed entries.
+const dependencyEntries = {
+  valibot: [],
+  '@tiptap/react': ['./editor'],
+  '@tiptap/pm': ['./editor'],
+  '@tiptap/starter-kit': ['./editor'],
+  recharts: ['./chart'],
+  'react-is': ['./chart'], // Recharts' transitive peer; no direct kit import.
+  'react-easy-crop': ['./avatar-upload/crop'],
+  '@dnd-kit': ['./dnd'],
+  'embla-carousel-react': ['./carousel', './media-gallery'],
+  'embla-carousel-autoplay': ['./carousel', './media-gallery'],
+  'prism-react-renderer': ['./code-view'],
+  dompurify: ['./rich-text-view'],
+};
+for (const [peer, meta] of Object.entries(manifest.peerDependenciesMeta)) {
+  if (meta.optional)
     assert.ok(
-      !/^(?:valibot(?:\/|$)|@dnd-kit\/|@tiptap\/|recharts(?:\/|$)|react-easy-crop(?:\/|$)|react-is(?:\/|$)|prism-react-renderer(?:\/|$)|embla-carousel(?:-react|-autoplay)?(?:\/|$)|dompurify(?:\/|$))/.test(
-        specifier,
-      ),
-      `Optional dependency in core: ${specifier} (${relative(root, path)})`,
+      Object.hasOwn(dependencyEntries, peer),
+      `Unaudited optional peer: ${peer}`,
     );
-    if (specifier.startsWith('.')) await checkLeanGraph(resolve(path, '..', specifier));
+}
+const graphCache = new Map();
+
+async function readImports(path) {
+  if (!graphCache.has(path)) {
+    const code = await readFile(path, 'utf8');
+    graphCache.set(
+      path,
+      [...code.matchAll(/(?:from\s*|import\s*(?:\(\s*)?)["']([^"']+)["']/g)].map(
+        (match) => match[1],
+      ),
+    );
   }
+
+  return graphCache.get(path);
 }
 
-await checkLeanGraph(`${root}/dist/index.js`);
-assert.ok(
-  ![...visited].some((path) => relative(root, path).startsWith('dist/modules/dnd/')),
-  'Core must not reach DnD modules, including through lazy imports',
-);
+async function checkEntryGraph(path, subpath, visited = new Set()) {
+  if (visited.has(path)) return visited;
+  visited.add(path);
+  assert.ok(
+    subpath === './dnd' || !relative(root, path).startsWith('dist/modules/dnd/'),
+    `DnD runtime reached from ${subpath}: ${relative(root, path)}`,
+  );
+  for (const specifier of await readImports(path)) {
+    for (const [dependency, allowed] of Object.entries(dependencyEntries)) {
+      if (specifier === dependency || specifier.startsWith(`${dependency}/`))
+        assert.ok(
+          allowed.includes(subpath),
+          `Dependency ${specifier} reached from ${subpath} (${relative(root, path)}); allowed: ${allowed.join(', ') || 'none'}`,
+        );
+    }
+    if (specifier.startsWith('.'))
+      await checkEntryGraph(resolve(path, '..', specifier), subpath, visited);
+  }
+
+  return visited;
+}
+
+for (const [subpath, entry] of Object.entries(packed.exports)) {
+  const target = typeof entry === 'string' ? entry : entry.import;
+  if (!target?.endsWith('.js')) continue;
+  const pattern = target.slice(2);
+  const targets = pattern.includes('*')
+    ? [...files].filter(
+        (file) =>
+          file.startsWith(pattern.split('*')[0]) &&
+          file.endsWith(pattern.split('*')[1]),
+      )
+    : [pattern];
+  for (const file of targets) await checkEntryGraph(resolve(root, file), subpath);
+}
+const visited = await checkEntryGraph(`${root}/dist/index.js`, '.');
+
+async function checkLeanGraph(path) {
+  await checkEntryGraph(path, '.');
+}
 
 for (const subpath of [
   '.',
@@ -226,6 +279,7 @@ for (const subpath of [
   './editor',
   './chart',
   './avatar-upload',
+  './avatar-upload/crop',
 ]) {
   const api = await import(
     pathToFileURL(resolve(root, packed.exports[subpath].import)).href
@@ -483,3 +537,13 @@ assert.equal(presets.emberTheme.light.tokens['color-brand-700'], '#9a3412');
 
 assert.equal(formatting.formatDate('2026-11-06'), '06/11/2026');
 assert.equal(formatting.formatDate('2026-11-06', 'yyyy-MM-dd'), '2026-11-06');
+
+const avatarCrop = await import(
+  pathToFileURL(resolve(root, packed.exports['./avatar-upload/crop'].import)).href
+);
+assert.equal(typeof avatarCrop.createAvatarCrop, 'function');
+assert.equal(typeof avatarCrop.createAvatarCrop().Dialog, 'function');
+const avatar = await import(
+  pathToFileURL(resolve(root, packed.exports['./avatar-upload'].import)).href
+);
+assert.ok(!('createAvatarCrop' in avatar), 'Crop factory must remain isolated');
