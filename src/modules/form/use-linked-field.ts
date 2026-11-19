@@ -9,19 +9,23 @@ export interface LinkedFieldOptions<
 > {
   source: TSource;
   target: TTarget;
-  transform: (value: DeepValue<TValues, TSource>) => DeepValue<TValues, TTarget>;
+  // NoInfer: source and target pick the keys; transform must not widen them.
+  transform: (
+    value: DeepValue<TValues, NoInfer<TSource>>,
+  ) => DeepValue<TValues, NoInfer<TTarget>>;
   enabled?: boolean;
   initiallyLinked?: boolean;
 }
 
 /** Emptying the target resumes linking; relink also regenerates it immediately. */
 export function useLinkedField<
-  TForm extends AnyFormApi,
-  TSource extends DeepKeys<TForm['state']['values']>,
-  TTarget extends DeepKeys<TForm['state']['values']>,
+  TValues,
+  const TSource extends DeepKeys<TValues>,
+  const TTarget extends DeepKeys<TValues>,
 >(
-  form: TForm,
-  options: LinkedFieldOptions<TForm['state']['values'], TSource, TTarget>,
+  // Infer the values from the form so source/target narrow to the given keys.
+  form: AnyFormApi & { state: { values: TValues } },
+  options: LinkedFieldOptions<TValues, TSource, TTarget>,
 ): { linked: boolean; relink(): void } {
   const latest = useRef(options);
   latest.current = options;
