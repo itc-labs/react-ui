@@ -4,7 +4,7 @@ import { createRoot } from 'react-dom/client';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { UploadField, type UploadFieldProps } from './index';
 import { UILocaleProvider } from '../../i18n/provider';
-import { enUS, viVN, type UILocale } from '../../i18n';
+import { createTranslator, enUS, viVN, type UILocale } from '../../i18n';
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -372,4 +372,127 @@ it('shows the full error in the retry tooltip on keyboard focus', async () => {
   await vi.waitFor(() =>
     expect(document.querySelector('[role="tooltip"]')?.textContent).toBe(error),
   );
+});
+
+it('wires the field error below the grid and styles both the grid and add tile', async () => {
+  const { host, update } = await render({
+    id: 'images',
+    error: 'Add at least one image',
+  });
+  const grid = host.querySelector('[data-testid="gallery-grid"]')!;
+  const trigger = host.querySelector('[data-testid="gallery-addTile"]')!;
+  const error = host.querySelector('[role="alert"]')!;
+  expect(error.textContent).toBe('Add at least one image');
+  expect(error.id).toBe('images-error');
+  expect(
+    grid.compareDocumentPosition(error) & Node.DOCUMENT_POSITION_FOLLOWING,
+  ).toBeTruthy();
+  expect(grid.getAttribute('aria-describedby')).toBe(error.id);
+  expect(trigger.getAttribute('aria-describedby')).toBe(error.id);
+  expect(trigger.getAttribute('aria-invalid')).toBe('true');
+  expect(trigger.classList.contains('border-danger-700')).toBe(true);
+  // Only the add tile turns red; the grid stays unframed.
+  expect(grid.classList.contains('ring-danger-700')).toBe(false);
+  update({ id: 'images' });
+  expect(host.querySelector('[role="alert"]')).toBeNull();
+  expect(trigger.getAttribute('aria-invalid')).toBe('false');
+  expect(trigger.classList.contains('border-danger-700')).toBe(false);
+  expect(grid.classList.contains('ring-danger-700')).toBe(false);
+});
+
+for (const locale of [enUS, viVN]) {
+  for (const method of ['pick', 'drop'] as const) {
+    it.each([
+      {
+        rules: { accept: 'image/jpeg' },
+        key: 'upload.unsupported' as const,
+        values: { name: file.name },
+      },
+      {
+        rules: { maxBytes: 1 },
+        key: 'upload.maxBytes' as const,
+        values: { name: file.name, size: 0 },
+      },
+      { rules: { maxFiles: 2 }, key: 'upload.maxFiles' as const, values: { count: 1 } },
+    ])(
+      `rejects $key on ${method} in ${locale.code} and clears it after a valid pick`,
+      async ({ rules, key, values }) => {
+        const reject = vi.fn(),
+          change = vi.fn();
+        const { host } = await render(
+          { items: [saved], ...rules, onReject: reject, onValueChange: change },
+          locale,
+        );
+        const input = host.querySelector('input')!;
+        const picks = key === 'upload.maxFiles' ? [file, file] : [file];
+
+        function pick(files: File[]) {
+          Object.defineProperty(input, 'files', { configurable: true, value: files });
+
+          act(() => input.dispatchEvent(new Event('change', { bubbles: true })));
+        }
+
+        if (method === 'drop') drop(host, picks);
+        else pick(picks);
+        const message = createTranslator(locale)(key, values);
+        expect(reject).toHaveBeenCalledExactlyOnceWith(message);
+        expect(host.querySelector('[role="alert"]')?.textContent).toBe(message);
+        expect(change).not.toHaveBeenCalled();
+        const valid = new File(['x'], 'valid.jpg', { type: 'image/jpeg' });
+        pick([valid]);
+        expect(change).toHaveBeenCalledExactlyOnceWith([valid]);
+        expect(host.querySelector('[role="alert"]')).toBeNull();
+        expect(
+          host
+            .querySelector('[data-testid="gallery-addTile"]')
+            ?.getAttribute('aria-invalid'),
+        ).toBe('false');
+      },
+    );
+  }
+}
+
+it('removes an error item and blocks pick, drop, remove and retry when disabled', async () => {
+  const remove = vi.fn(),
+    retry = vi.fn(),
+    change = vi.fn(),
+    reject = vi.fn();
+  const props: UploadFieldProps = {
+    items: [{ ...saved, status: 'error', error: 'Upload interrupted.' }],
+    onItemRemove: remove,
+    onItemRetry: retry,
+    onValueChange: change,
+    onReject: reject,
+  };
+  const { host, update } = await render(props);
+  const removeButton = host.querySelector<HTMLButtonElement>(
+    '[aria-label="Remove Saved image"]',
+  )!;
+
+  act(() => removeButton.click());
+
+  expect(remove).toHaveBeenCalledExactlyOnceWith('saved');
+  remove.mockClear();
+  update({ ...props, disabled: true });
+  const input = host.querySelector('input')!;
+  const open = vi.spyOn(input, 'click');
+  for (const selector of [
+    '[data-testid="gallery-addTile"]',
+    '[aria-label="Remove Saved image"]',
+    '[aria-label="Retry Saved image"]',
+  ]) {
+    const button = host.querySelector<HTMLButtonElement>(selector)!;
+    expect(button.disabled).toBe(true);
+
+    act(() => button.click());
+  }
+  expect(input.disabled).toBe(true);
+  Object.defineProperty(input, 'files', { configurable: true, value: [file] });
+
+  act(() => input.dispatchEvent(new Event('change', { bubbles: true })));
+
+  drop(host, [file]);
+  expect(open).not.toHaveBeenCalled();
+  for (const callback of [remove, retry, change, reject])
+    expect(callback).not.toHaveBeenCalled();
 });

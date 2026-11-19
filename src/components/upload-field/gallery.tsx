@@ -114,6 +114,7 @@ export function UploadGallery({
               className={cn(
                 'flex size-full flex-col items-center justify-center gap-1 rounded-control border border-dashed border-control-border bg-surface p-2 text-ui-sm text-muted hover:bg-hover disabled:cursor-not-allowed disabled:opacity-60',
                 focusRingClassName,
+                invalid && 'border-danger-700 text-danger-700',
                 classNames?.addTile,
               )}
             >
